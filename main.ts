@@ -1,56 +1,47 @@
-import { App, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
-interface MyPluginSettings {
-	mySetting: string;
+let exec = require("child_process").exec;
+
+interface ShellCommandsPluginSettings {
+	commands: string[];
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
-	mySetting: 'default'
+const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+	commands: []
 }
 
-export default class MyPlugin extends Plugin {
-	settings: MyPluginSettings;
+export default class ShellCommandsPlugin extends Plugin {
+	settings: ShellCommandsPluginSettings;
 
 	async onload() {
 		console.log('loading plugin');
 
 		await this.loadSettings();
 
-		this.addRibbonIcon('dice', 'Sample Plugin', () => {
-			new Notice('This is a notice!');
-		});
+		// Make all defined shell commands to appear in the Obsidian command list
+		for (let command_id in this.settings.commands) {
+			let command = this.settings.commands[command_id];
+			this.registerShellCommand(parseInt(command_id), command);
+		}
 
-		this.addStatusBarItem().setText('Status Bar Text');
+		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
+	}
 
+	registerShellCommand(command_id: number, command: string) {
 		this.addCommand({
-			id: 'open-sample-modal',
-			name: 'Open Sample Modal',
-			// callback: () => {
-			// 	console.log('Simple Callback');
-			// },
-			checkCallback: (checking: boolean) => {
-				let leaf = this.app.workspace.activeLeaf;
-				if (leaf) {
-					if (!checking) {
-						new SampleModal(this.app).open();
-					}
-					return true;
-				}
-				return false;
+			id: "shell-command-" + command_id,
+			name: "Execute: " + command,
+			callback: () => {
+				this.executeShellCommand(command);
 			}
+		})
+	}
+
+	executeShellCommand(command: string) {
+		let vault_absolute_directory = ""; // FIXME: Find out the vault path!!!!!!
+		exec(command, {
+			// "cwd": vault_absolute_directory
 		});
-
-		this.addSettingTab(new SampleSettingTab(this.app, this));
-
-		this.registerCodeMirror((cm: CodeMirror.Editor) => {
-			console.log('codemirror', cm);
-		});
-
-		this.registerDomEvent(document, 'click', (evt: MouseEvent) => {
-			console.log('click', evt);
-		});
-
-		this.registerInterval(window.setInterval(() => console.log('setInterval'), 5 * 60 * 1000));
 	}
 
 	onunload() {
@@ -66,26 +57,10 @@ export default class MyPlugin extends Plugin {
 	}
 }
 
-class SampleModal extends Modal {
-	constructor(app: App) {
-		super(app);
-	}
+class ShellCommandsSettingsTab extends PluginSettingTab {
+	plugin: ShellCommandsPlugin;
 
-	onOpen() {
-		let {contentEl} = this;
-		contentEl.setText('Woah!');
-	}
-
-	onClose() {
-		let {contentEl} = this;
-		contentEl.empty();
-	}
-}
-
-class SampleSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
-
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: ShellCommandsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -95,18 +70,69 @@ class SampleSettingTab extends PluginSettingTab {
 
 		containerEl.empty();
 
-		containerEl.createEl('h2', {text: 'Settings for my awesome plugin.'});
+		containerEl.createEl('h2', {text: "Shell commands"});
 
+		// Fields for modifying existing commands
+		let commands = this.plugin.settings.commands;
+		if (commands.length > 0) {
+			containerEl.createEl('p', {text: "To remove a command, clear its text field. Note that if you remove commands, other shell commands can switch place and hotkeys might change! Always check your shell commands' hotkey configurations after removing or making changes to shell commands!"});
+			for (let command_id in commands) {
+				let command = commands[command_id];
+				new Setting(containerEl)
+					.setName("Command #" + command_id)
+					.addText(text => text
+						.setPlaceholder("Enter your command")
+						.setValue(command)
+						.onChange(async (value) => {
+							commands[command_id] = value;
+						})
+					)
+				;
+			}
+
+			// "Apply changes" button
+			new Setting(containerEl)
+				.addButton(button => button
+					.setButtonText("APPLY CHANGES")
+					.onClick(async () => {
+						console.log("Updating shell command settings...")
+						for (let command_id in commands) {
+							let command = commands[command_id];
+							if (command.length > 0) {
+								// Define/change a command
+								console.log("Command " + command_id + " gonna change to: " + command);
+								this.plugin.settings.commands[command_id] = command;
+								this.plugin.registerShellCommand(parseInt(command_id), command);
+								// TODO: How to remove the old command from Obsidian commands list?
+								console.log("Command changed.");
+							} else {
+								// Remove a command
+								console.log("Command " + command_id + " gonna be removed.");
+								this.plugin.settings.commands.splice(parseInt(command_id),1); // Why .remove() does not work? :( :( :(
+
+								// TODO: How to remove a command from Obsidian commands list?
+								console.log("Command removed.");
+							}
+						}
+						await this.plugin.saveSettings();
+						console.log("Shell command settings updated.");
+					})
+				)
+			;
+		}
+
+		// "New command" button
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue('')
-				.onChange(async (value) => {
-					console.log('Secret: ' + value);
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
+			.addButton(button => button
+				.setButtonText("New command")
+				.onClick(async () => {
+					this.plugin.settings.commands.push(""); // The command is just an empty string at this point.
+					// await this.plugin.saveSettings();
+					// TODO: Reload the settings tab somehow.
+					new Notice("Go to some other settings tab and come back here to see your new command field! Sorry for this inconvenience, I'm a noob with plugin development!");
+					console.log("New empty command created.");
+				})
+			)
+		;
 	}
 }
