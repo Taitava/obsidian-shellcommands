@@ -3,10 +3,12 @@ import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 let exec = require("child_process").exec;
 
 interface ShellCommandsPluginSettings {
+	working_directory: string;
 	commands: string[];
 }
 
 const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+	working_directory: "",
 	commands: []
 }
 
@@ -38,10 +40,14 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	executeShellCommand(command: string) {
-		let vault_absolute_directory = ""; // FIXME: Find out the vault path!!!!!!
-		exec(command, {
-			// "cwd": vault_absolute_directory
-		});
+		let working_directory = this.settings.working_directory; // TODO: Find a way to get the vault path automatically, so that the user does not need to enter the path manually in the settings.
+		if (working_directory.length == 0) {
+			new Notice("You must define a working directory in Shell commands settings before you can execute shell commands.")
+		} else {
+			exec(command, {
+				"cwd": working_directory
+			});
+		}
 	}
 
 	onunload() {
@@ -72,6 +78,20 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 
 		containerEl.createEl('h2', {text: "Shell commands"});
 
+		// "Working directory" field
+		new Setting(containerEl)
+			.setName("Working directory")
+			.setDesc("You need to insert your vault's absolute path here manually, because the plugin does not (yet) know how to retrieve the vault's directory automatically. If you want, you can enter some other directory instead, where you want your executed commands to be run in.")
+			.addText(text => text
+				.setPlaceholder("Insert your vault's directory or something else.")
+				.setValue(this.plugin.settings.working_directory)
+				.onChange(async (value) => {
+					console.log("Changing working_directory to " + value);
+					this.plugin.settings.working_directory = value;
+					await this.plugin.saveSettings();
+				})
+			)
+
 		// Fields for modifying existing commands
 		let commands = this.plugin.settings.commands;
 		if (commands.length > 0) {
@@ -92,6 +112,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 
 			// "Apply changes" button
 			new Setting(containerEl)
+				.setDesc("Click this when you make changes to commands. Other settings are applied automatically.")
 				.addButton(button => button
 					.setButtonText("APPLY CHANGES")
 					.onClick(async () => {

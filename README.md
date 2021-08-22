@@ -12,6 +12,6 @@ This plugin lets you define shell/terminal commands. You can then run these pred
     Linux: will be tested at some point.
     Mac: I don't have a Mac, so I can't test this for Mac. Help wanted! :)
     Android and iPhone: Will try at some point, won't promise anything.
-- Commands are not run in the vault directory :(. I need to find out a way to do this.
+- You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
 - Detect and display errors the executed command might yield. Currently, the result of a command is just ignored.
