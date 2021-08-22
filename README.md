@@ -12,7 +12,6 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 
 - Only tested on Windows and Linux at the moment. I don't have a Mac, so I can't test this on Mac. [Help wanted!](https://github.com/Taitava/obsidian-shellcommands/issues/1) :)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
-- You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
 
 ## Would be nice to have features (these are not so important):
@@ -24,7 +23,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 1. Search for this plugin in Obsidian's community plugins settings panel.
 2. Click Install, and after that **remember to click Enable**!
 3. Head to *Shell commands* settings tab.
-4. Input your vault's absolute path into the *Working directory* field. This can be for example *C:\users\YourUser\Desktop\ObsidianVaults\YourAwesomeVault\\* if you are on Windows. All commands will be run in this directory.
+4. All commands will be run in a certain directory. By default, it's your vault's base directory. If you want to run the commands in some other directory, you can type it in the *Working directory* field.
 5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*.
 6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 

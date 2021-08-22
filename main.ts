@@ -41,24 +41,34 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	executeShellCommand(command: string) {
-		let working_directory = this.settings.working_directory; // TODO: Find a way to get the vault path automatically, so that the user does not need to enter the path manually in the settings.
+		console.log("Executing command "+command+" in "+this.getWorkingDirectory() + "...")
+		exec(command, {
+			"cwd": this.getWorkingDirectory()
+		}, (error: (ExecException|null)) => {
+			if (null !== error) {
+				// Some error occurred
+				console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+				new Notice("[" + error.code + "]: " + error.message);
+			} else {
+				// No errors
+				console.log("Command executed without errors.")
+			}
+		});
+	}
+
+	getWorkingDirectory() {
+		// Returns either a user defined working directory, or an automatically detected one.
+		let working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
-			new Notice("You must define a working directory in Shell commands settings before you can execute shell commands.")
-		} else {
-			console.log("Executing command "+command+" in "+working_directory + "...")
-			exec(command, {
-				"cwd": working_directory
-			}, (error: (ExecException|null)) => {
-				if (null !== error) {
-					// Some error occurred
-					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-					new Notice("[" + error.code + "]: " + error.message);
-				} else {
-					// No errors
-					console.log("Command executed without errors.")
-				}
-			});
+			return this.getVaultAbsolutePath();
 		}
+		return working_directory;
+	}
+
+	getVaultAbsolutePath() {
+		// The below two lines were copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
+		// @ts-ignore
+		return this.app.vault.adapter.basePath;
 	}
 
 	onunload() {
@@ -95,9 +105,9 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		// "Working directory" field
 		new Setting(containerEl)
 			.setName("Working directory")
-			.setDesc("You need to insert your vault's absolute path here manually, because the plugin does not (yet) know how to retrieve the vault's directory automatically. If you want, you can enter some other directory instead, where you want your executed commands to be run in.")
+			.setDesc("Enter a directory where your commands will be run. If empty, defaults to your vault's location.")
 			.addText(text => text
-				.setPlaceholder("Insert your vault's directory or something else.")
+				.setPlaceholder(this.plugin.getVaultAbsolutePath())
 				.setValue(this.plugin.settings.working_directory)
 				.onChange(async (value) => {
 					console.log("Changing working_directory to " + value);
