@@ -6,5 +6,5 @@
 	"description": "You can predefine system commands that you want to run frequently, and assign hotkeys for them. For example open external applications.",
 	"author": "Jarkko Linnanvirta",
 	"authorUrl": "",
-	"isDesktopOnly": false
+	"isDesktopOnly": true
 }

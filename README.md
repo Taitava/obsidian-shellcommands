@@ -11,7 +11,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 - Only tested on Windows at the moment. Might work on other platforms too.
     Linux: will be tested at some point.
     Mac: I don't have a Mac, so I can't test this for Mac. Help wanted! :)
-    Android and iPhone: Will try at some point, won't promise anything.
+- Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 - You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
 - Detect and display errors the executed command might yield. Currently, the result of a command is just ignored.
