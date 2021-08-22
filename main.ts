@@ -66,9 +66,12 @@ export default class ShellCommandsPlugin extends Plugin {
 class ShellCommandsSettingsTab extends PluginSettingTab {
 	plugin: ShellCommandsPlugin;
 
+	commands: string[]; // This holds all commands temporarily: every time an command field fires its onchange event (every time user types a character), the change will be recorded here. Only when the user hits the apply changes button, will this array's content be copied over to this.plugin.settings.commands .
+
 	constructor(app: App, plugin: ShellCommandsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
+		this.commands = this.plugin.settings.commands;
 	}
 
 	display(): void {
@@ -93,21 +96,10 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			)
 
 		// Fields for modifying existing commands
-		let commands = this.plugin.settings.commands;
-		if (commands.length > 0) {
+		if (this.commands.length > 0) {
 			containerEl.createEl('p', {text: "To remove a command, clear its text field. Note that if you remove commands, other shell commands can switch place and hotkeys might change! Always check your shell commands' hotkey configurations after removing or making changes to shell commands!"});
-			for (let command_id in commands) {
-				let command = commands[command_id];
-				new Setting(containerEl)
-					.setName("Command #" + command_id)
-					.addText(text => text
-						.setPlaceholder("Enter your command")
-						.setValue(command)
-						.onChange(async (value) => {
-							commands[command_id] = value;
-						})
-					)
-				;
+			for (let command_id in this.commands) {
+				this.createCommandField(containerEl, parseInt(command_id));
 			}
 
 			// "Apply changes" button
@@ -117,8 +109,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					.setButtonText("APPLY CHANGES")
 					.onClick(async () => {
 						console.log("Updating shell command settings...")
-						for (let command_id in commands) {
-							let command = commands[command_id];
+						for (let command_id in this.commands) {
+							let command = this.commands[command_id];
 							if (command.length > 0) {
 								// Define/change a command
 								console.log("Command " + command_id + " gonna change to: " + command);
@@ -147,13 +139,26 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			.addButton(button => button
 				.setButtonText("New command")
 				.onClick(async () => {
-					this.plugin.settings.commands.push(""); // The command is just an empty string at this point.
-					// await this.plugin.saveSettings();
-					// TODO: Reload the settings tab somehow.
-					new Notice("Go to some other settings tab and come back here to see your new command field! Sorry for this inconvenience, I'm a noob with plugin development!");
+					this.commands.push(""); // The command is just an empty string at this point.
+					this.createCommandField(containerEl, this.commands.length-1);
 					console.log("New empty command created.");
 				})
 			)
 		;
+	}
+
+	createCommandField(container_element: HTMLElement, command_id: number) {
+		let command = this.commands[command_id];
+		new Setting(container_element)
+			.setName("Command #" + command_id)
+			.addText(text => text
+				.setPlaceholder("Enter your command")
+				.setValue(command)
+				.onChange(async (value) => {
+					this.commands[command_id] = value;
+				})
+			)
+		;
+
 	}
 }
