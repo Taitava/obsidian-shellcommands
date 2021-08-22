@@ -1,4 +1,5 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {ExecException} from "child_process";
 
 let exec = require("child_process").exec;
 
@@ -44,8 +45,18 @@ export default class ShellCommandsPlugin extends Plugin {
 		if (working_directory.length == 0) {
 			new Notice("You must define a working directory in Shell commands settings before you can execute shell commands.")
 		} else {
+			console.log("Executing command "+command+" in "+working_directory + "...")
 			exec(command, {
 				"cwd": working_directory
+			}, (error: (ExecException|null)) => {
+				if (null !== error) {
+					// Some error occurred
+					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+					new Notice("[" + error.code + "]: " + error.message);
+				} else {
+					// No errors
+					console.log("Command executed without errors.")
+				}
 			});
 		}
 	}
@@ -98,6 +109,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		// Fields for modifying existing commands
 		if (this.commands.length > 0) {
 			containerEl.createEl('p', {text: "To remove a command, clear its text field. Note that if you remove commands, other shell commands can switch place and hotkeys might change! Always check your shell commands' hotkey configurations after removing or making changes to shell commands!"});
+			if (isWindows()) containerEl.createEl('p', {text: "Tip for Windows: If you get an error starting with \"[259]: Command failed:\" even though the execution works ok, you can try to prefix your command with \"start \". E.g. \"start git-gui\"."});
+
 			for (let command_id in this.commands) {
 				this.createCommandField(containerEl, parseInt(command_id));
 			}
@@ -161,4 +174,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		;
 
 	}
+}
+
+function isWindows() {
+	return process.platform === "win32";
 }

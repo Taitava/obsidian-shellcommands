@@ -14,7 +14,6 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 - You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
-- Detect and display errors the executed command might yield. Currently, the result of a command is just ignored.
 
 ## Would be nice to have features (these are not so important):
 - Add configurable environment variables, that will be passed to the executed processes. This way you could for example indicate tell your own made script/program that you initiated it from Obsidian, in case it happens to have practical benefit.
