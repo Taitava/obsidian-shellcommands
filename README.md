@@ -28,6 +28,20 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*.
 6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 
+## Usage examples
+
+These examples are written for Windows, but you can invent similar ones in Linux and Mac too.
+
+| Purpose | Command | Hotkey |
+| ------- | ------- | ------ |
+| Open a graphical [Git](https://git-scm.com/) client for committing changes in your vault to a repository. | `start git-gui` | Ctrl + Shift + G |
+| Open a Git command line client for advanced management of a repository. | `start "" "%PROGRAMFILES%\Git\bin\sh.exe" --login` | Ctrl + Alt + G | <!-- Command copied 2021-08-22 from https://stackoverflow.com/a/17306604/2754026  -->
+| A quick way to run other commands that you have not defined in the settings. | `start cmd` | Ctrl + Shift + C |
+| In case you feel creative... | `mspaint` | Ctrl + Shift + P |
+| The quickest way to write bug reports regarding this plugin. | `start https://github.com/Taitava/obsidian-shellcommands/issues/new` | Ctrl + Shift + B |
+
+These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
+
 ## Tested platforms
 
 Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
