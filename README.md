@@ -12,7 +12,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 
 - Only tested on Windows and Linux at the moment. I don't have a Mac, so I can't test this on Mac. [Help wanted!](https://github.com/Taitava/obsidian-shellcommands/issues/1) :)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
-- Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
+- Add support for some variables (like current file path, current vault path, current file's parent folder path, current date/time). Currently, only static commands are supported.
 
 ## Would be nice to have features (these are not so important):
 - Add configurable environment variables, that will be passed to the executed processes. This way you could for example indicate tell your own made script/program that you initiated it from Obsidian, in case it happens to have practical benefit.
