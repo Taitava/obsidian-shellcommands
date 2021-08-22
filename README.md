@@ -15,3 +15,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 - You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
 - Detect and display errors the executed command might yield. Currently, the result of a command is just ignored.
+
+### Would be nice to have features (these are not so important):
+- Add configurable environment variables, that will be passed to the executed processes. This way you could for example indicate tell your own made script/program that you initiated it from Obsidian, in case it happens to have practical benefit.
+- A configurable timeout (milliseconds). If the command execution takes longer than the timeout, a kill signal would be sent (`SIGTERM`). Timeout could be defined in the settings, and it would be turned off by default. Currently, there is no timeout.
