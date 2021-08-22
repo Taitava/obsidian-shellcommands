@@ -10,9 +10,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 
 ## Main issues
 
-- Only tested on Windows at the moment. Might work on other platforms too.
-    Linux: will be tested at some point.
-    Mac: I don't have a Mac, so I can't test this for Mac. Help wanted! :)
+- Only tested on Windows and Linux at the moment. I don't have a Mac, so I can't test this on Mac. [Help wanted!](https://github.com/Taitava/obsidian-shellcommands/issues/1) :)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 - You need to define your vault's directory manually in the settings. I'll try to find a way to retrieve the path automatically.
 - Add support for some variables (like current file path, current vault path). Currently, only static commands are supported.
@@ -30,6 +28,14 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 4. Input your vault's absolute path into the *Working directory* field. This can be for example *C:\users\YourUser\Desktop\ObsidianVaults\YourAwesomeVault\\* if you are on Windows. All commands will be run in this directory.
 5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*.
 6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
+
+## Tested platforms
+
+Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
+
+| Windows 10 | Linux (Xubuntu 20.04)
+| ---------- | ------
+| Obsidian 0.12.12<br>SC 0.0.0<br>Works | Obsidian 0.12.12<br>SC 0.0.0<br>Works
 
 ## Contributing
 Ideas, issues, feedback, pull requests etc. are all welcome! :)
