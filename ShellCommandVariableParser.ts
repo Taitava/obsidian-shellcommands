@@ -5,6 +5,7 @@ let shell_command_variable_instructions: Object[] = [];
 
 export function parseShellCommandVariables(app: App, command: string, enable_notifications: boolean) {
     let shell_variables: ShellCommandVariable[] = [
+        new ShellCommandVariable_Clipboard(app, enable_notifications),
         new ShellCommandVariable_Date(app, enable_notifications),
         new ShellCommandVariable_FileName(app, enable_notifications),
         new ShellCommandVariable_FilePath(app, enable_notifications),
@@ -80,6 +81,19 @@ abstract class ShellCommandVariable {
 
 // DEFINE VARIABLE CLASSES BELOW
 // (Keep them in alphabetical order so that the instructions will be displayed in a nice order.)
+
+class ShellCommandVariable_Clipboard extends ShellCommandVariable {
+    name = "clipboard";
+
+    getValue(): string {
+        let clipboard = require("electron").clipboard;
+        return clipboard.readText();
+    }
+}
+shell_command_variable_instructions.push({
+    variable_name: "{{clipboard}}",
+    instructions: "Gives the content you last copied to your clipboard.",
+});
 
 class ShellCommandVariable_Date extends ShellCommandVariable {
     name = "date";

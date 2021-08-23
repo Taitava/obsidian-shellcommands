@@ -41,6 +41,7 @@ These examples are written for Windows, but you can invent similar ones in Linux
 | In case you feel creative... | `mspaint` | Ctrl + Shift + P |
 | The quickest way to write bug reports regarding this plugin. | `start https://github.com/Taitava/obsidian-shellcommands/issues/new` | Ctrl + Shift + B |
 | Create a monthly folder like 2021-08. | `mkdir {{date:YYYY-MM}}` | Ctrl + Shift + M |
+| Create a new file and paste content there from clipboard. | `echo {{clipboard}} >> NewNote.md` | Ctrl + Shift + N |
 
 These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
 
