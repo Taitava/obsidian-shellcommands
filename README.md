@@ -1,6 +1,8 @@
 # Shell commands plugin for Obsidian
 
-This plugin lets you define shell/terminal commands. You can then run these predefined commands via Obsidian's command palette, or you can assign hotkeys for your commands.
+This plugin lets you define shell/terminal commands in settings and run them quickly when needed via Obsidian's command palette, or via hotkeys that you can assign in Obsidian's hotkey settings.
+
+You can customise your commands with built-in variables that can provide the current file title/name/path, current file's parent folder name/path, and date/time stamp with a custom format.
 
 **Note:** This plugin is still under development and will be improved some da... some ye... some decade!
 
@@ -12,7 +14,6 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 
 - Only tested on Windows and Linux at the moment. I don't have a Mac, so I can't test this on Mac. [Help wanted!](https://github.com/Taitava/obsidian-shellcommands/issues/1) :)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
-- Add support for some variables (like current file path, current vault path, current file's parent folder path, current date/time). Currently, only static commands are supported.
 
 ## Would be nice to have features (these are not so important):
 - Add configurable environment variables, that will be passed to the executed processes. This way you could for example indicate tell your own made script/program that you initiated it from Obsidian, in case it happens to have practical benefit.
@@ -24,7 +25,7 @@ This plugin lets you define shell/terminal commands. You can then run these pred
 2. Click Install, and after that **remember to click Enable**!
 3. Head to *Shell commands* settings tab.
 4. All commands will be run in a certain directory. By default, it's your vault's base directory. If you want to run the commands in some other directory, you can type it in the *Working directory* field.
-5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*.
+5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*. Read variable usage instructions in the settings panel if you need them.
 6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 
 ## Usage examples

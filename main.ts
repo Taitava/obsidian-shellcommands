@@ -1,5 +1,10 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import {ExecException} from "child_process";
+import {getVaultAbsolutePath, isWindows} from "./Common";
+import {
+	getShellCommandVariableInstructions,
+	parseShellCommandVariables
+} from "./ShellCommandVariableParser";
 
 let exec = require("child_process").exec;
 
@@ -41,34 +46,36 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	executeShellCommand(command: string) {
-		console.log("Executing command "+command+" in "+this.getWorkingDirectory() + "...")
-		exec(command, {
-			"cwd": this.getWorkingDirectory()
-		}, (error: (ExecException|null)) => {
-			if (null !== error) {
-				// Some error occurred
-				console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-				new Notice("[" + error.code + "]: " + error.message);
-			} else {
-				// No errors
-				console.log("Command executed without errors.")
-			}
-		});
+		let parsed_command = parseShellCommandVariables(this.app, command, true);
+		if (null === parsed_command) {
+			// The command could not be parsed correctly.
+			console.log("Parsing command " + command + " failed.");
+			// No need to create a notice here, because the parsing process creates notices every time something goes wrong.
+		} else {
+			// The command was parsed correctly.
+			console.log("Executing command "+parsed_command+" in "+this.getWorkingDirectory() + "...");
+			exec(parsed_command, {
+				"cwd": this.getWorkingDirectory()
+			}, (error: (ExecException|null)) => {
+				if (null !== error) {
+					// Some error occurred
+					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+					new Notice("[" + error.code + "]: " + error.message);
+				} else {
+					// No errors
+					console.log("Command executed without errors.")
+				}
+			});
+		}
 	}
 
 	getWorkingDirectory() {
 		// Returns either a user defined working directory, or an automatically detected one.
 		let working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
-			return this.getVaultAbsolutePath();
+			return getVaultAbsolutePath(this.app);
 		}
 		return working_directory;
-	}
-
-	getVaultAbsolutePath() {
-		// The below two lines were copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
-		// @ts-ignore
-		return this.app.vault.adapter.basePath;
 	}
 
 	onunload() {
@@ -107,7 +114,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			.setName("Working directory")
 			.setDesc("Enter a directory where your commands will be run. If empty, defaults to your vault's location.")
 			.addText(text => text
-				.setPlaceholder(this.plugin.getVaultAbsolutePath())
+				.setPlaceholder(getVaultAbsolutePath(this.app))
 				.setValue(this.plugin.settings.working_directory)
 				.onChange(async (value) => {
 					console.log("Changing working_directory to " + value);
@@ -168,24 +175,42 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				})
 			)
 		;
+
+		// Variable instructions
+		containerEl.createEl("h2", {text: "Variables"});
+		getShellCommandVariableInstructions().forEach((instructions) => {
+			let paragraph = containerEl.createEl("p");
+			// @ts-ignore
+			paragraph.createEl("strong", {text: instructions.variable_name + " "});
+			// @ts-ignore
+			paragraph.createEl("span", {text: instructions.instructions});
+		});
+		containerEl.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
+		containerEl.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
+		containerEl.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
 	}
 
 	createCommandField(container_element: HTMLElement, command_id: number) {
 		let command = this.commands[command_id];
-		new Setting(container_element)
+		let setting = new Setting(container_element)
 			.setName("Command #" + command_id)
+			.setDesc(this.getCommandPreview(command))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
 				.setValue(command)
 				.onChange(async (value) => {
 					this.commands[command_id] = value;
+					setting.setDesc(this.getCommandPreview(value));
 				})
 			)
 		;
-
 	}
-}
 
-function isWindows() {
-	return process.platform === "win32";
+	getCommandPreview(command: string) {
+		let parsed_command = parseShellCommandVariables(this.app, command, false); // false: disables notifications if variables have syntax errors.
+		if (null === parsed_command) {
+			return "[Error while parsing variables.]";
+		}
+		return parsed_command;
+	}
 }
