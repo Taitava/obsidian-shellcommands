@@ -1,5 +1,5 @@
 import {App, moment, normalizePath, Notice} from "obsidian";
-import {getVaultAbsolutePath} from "./Common";
+import {getEditor, getVaultAbsolutePath} from "./Common";
 
 let shell_command_variable_instructions: Object[] = [];
 
@@ -11,6 +11,7 @@ export function parseShellCommandVariables(app: App, command: string, enable_not
         new ShellCommandVariable_FilePath(app, enable_notifications),
         new ShellCommandVariable_FolderName(app, enable_notifications),
         new ShellCommandVariable_FolderPath(app, enable_notifications),
+        new ShellCommandVariable_Selection(app, enable_notifications),
         new ShellCommandVariable_Title(app, enable_notifications),
         new ShellCommandVariable_VaultPath(app, enable_notifications),
     ];
@@ -200,6 +201,27 @@ class ShellCommandVariable_FolderPath extends ShellCommandVariable{
 shell_command_variable_instructions.push({
     variable_name: "{{folder_path:relative}} or {{folder_path:absolute}}",
     instructions: "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.",
+});
+
+class ShellCommandVariable_Selection extends ShellCommandVariable{
+    name = "selection";
+    getValue(): string {
+        let editor = getEditor(this.app);
+        if (null === editor) {
+            // Probably the leaf is in preview mode or some other problem happened.
+            // FIXME: Make it possible to use this feature also in preview mode.
+            this.notify("You need to turn editing mode on, as I'm not able to get selected text when in preview mode. Blame the one who developed this plugin! This should be fixed in the future.");
+            return null;
+        }
+        if (editor.somethingSelected()) {
+            return editor.getSelection();
+        }
+        return "";
+    }
+}
+shell_command_variable_instructions.push({
+    variable_name: "{{selection}}",
+    instructions: "Gives the currently selected text. Atm only works in editing mode, not in preview mode!",
 });
 
 class ShellCommandVariable_Title extends ShellCommandVariable{
