@@ -1,12 +1,10 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-import {ExecException} from "child_process";
+import {exec, ExecException} from "child_process";
 import {getVaultAbsolutePath, isWindows} from "./Common";
 import {
 	getShellCommandVariableInstructions,
 	parseShellCommandVariables
 } from "./ShellCommandVariableParser";
-
-let exec = require("child_process").exec;
 
 interface ShellCommandsPluginSettings {
 	working_directory: string;
