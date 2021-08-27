@@ -227,7 +227,12 @@ shell_command_variable_instructions.push({
 class ShellCommandVariable_Title extends ShellCommandVariable{
     name = "title";
     getValue(): string {
-        return this.app.workspace.getActiveFile().basename;
+        let active_file = this.app.workspace.getActiveFile();
+        if (active_file) {
+            return active_file.basename;
+        }
+        this.notify("title: No file is active at the moment. Open a file or click a pane that has a file open.")
+        return null;
     }
 }
 shell_command_variable_instructions.push({
