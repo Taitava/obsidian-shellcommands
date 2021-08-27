@@ -1,9 +1,13 @@
-import {App, Editor} from "obsidian";
+import {App, Editor, FileSystemAdapter} from "obsidian";
 
 export function getVaultAbsolutePath(app: App) {
-    // The below two lines were copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
-    // @ts-ignore
-    return app.vault.adapter.basePath;
+    // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
+    // But the code has been rewritten 2021-08-27 as per https://github.com/obsidianmd/obsidian-releases/pull/433#issuecomment-906087095
+    let adapter = app.vault.adapter;
+    if (adapter instanceof FileSystemAdapter) {
+        return adapter.getBasePath();
+    }
+    return null;
 }
 
 export function isWindows() {
