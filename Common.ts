@@ -1,4 +1,4 @@
-import {App, Editor, FileSystemAdapter} from "obsidian";
+import {App, Editor, FileSystemAdapter, MarkdownView} from "obsidian";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -15,9 +15,8 @@ export function isWindows() {
 }
 
 export function getEditor(app: App): Editor {
-    let active_leaf = app.workspace.activeLeaf;
-    let view = active_leaf.view;
-    let view_mode = active_leaf.getViewState().state.mode; // "preview" or "source"
+    let view = app.workspace.getActiveViewOfType(MarkdownView);
+    let view_mode = view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
     switch (view_mode) {
         case "preview":
             // The leaf is in preview mode, which makes things difficult.
