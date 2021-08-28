@@ -27,7 +27,7 @@ export function getEditor(app: App): Editor {
             // We could still return view.editor, but it does not work at least for getting selected text, maybe for other things, but currently this function is only used for getting selected text.
             // At this moment, just return null to indicate that we were not able to offer an editor instance which could work reliably on text selections.
             // FIXME: Find a way to work in preview mode, too!
-            console.log("getEditor(): active_leaf is in preview mode, and the poor guy who wrote this code, does not know how to return an editor instance that could be used for getting text selection.")
+            console.log("getEditor(): 'view' is in preview mode, and the poor guy who wrote this code, does not know how to return an editor instance that could be used for getting text selection.");
             return null;
         case "source":
             // Ensure that view.editor exists! It exists at least if this is a MarkDownView.
@@ -36,7 +36,7 @@ export function getEditor(app: App): Editor {
                 // @ts-ignore We already know that view.editor exists.
                 return view.editor;
             }
-            console.log("getEditor(): active_leaf.view does not have a property named 'editor'. Will return null.")
+            console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
             return null;
         default:
             Error("getEditor(): Unrecognised view mode: "+view_mode);
