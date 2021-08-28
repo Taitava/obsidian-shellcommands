@@ -121,13 +121,19 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				})
 			)
 
-		// Fields for modifying existing commands
+		// Tips when the user has already defined some commands
 		if (this.commands.length > 0) {
 			containerEl.createEl('p', {text: "To remove a command, clear its text field. Note that if you remove commands, other shell commands can switch place and hotkeys might change! Always check your shell commands' hotkey configurations after removing or making changes to shell commands!"});
 			if (isWindows()) containerEl.createEl('p', {text: "Tip for Windows: If you get an error starting with \"[259]: Command failed:\" even though the execution works ok, you can try to prefix your command with \"start \". E.g. \"start git-gui\"."});
+		}
 
+		// A <div> element for all command input fields. New command fields can be created at the bottom of this element.
+		let command_fields_container = containerEl.createEl("div");
+
+		// Fields for modifying existing commands
+		if (this.commands.length > 0) {
 			for (let command_id in this.commands) {
-				this.createCommandField(containerEl, parseInt(command_id));
+				this.createCommandField(command_fields_container, parseInt(command_id));
 			}
 
 			// "Apply changes" button
@@ -168,7 +174,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				.setButtonText("New command")
 				.onClick(async () => {
 					this.commands.push(""); // The command is just an empty string at this point.
-					this.createCommandField(containerEl, this.commands.length-1);
+					this.createCommandField(command_fields_container, this.commands.length-1);
 					console.log("New empty command created.");
 				})
 			)
