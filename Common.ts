@@ -16,6 +16,10 @@ export function isWindows() {
 
 export function getEditor(app: App): Editor {
     let view = app.workspace.getActiveViewOfType(MarkdownView);
+    if (!view) {
+        console.log("getEditor(): Could not get a view. Will return null.");
+        return null;
+    }
     let view_mode = view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
     switch (view_mode) {
         case "preview":
