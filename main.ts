@@ -162,6 +162,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					}
 					await this.plugin.saveSettings();
 					console.log("Shell command settings updated.");
+					new Notice("Applied!");
 				})
 			)
 		;
