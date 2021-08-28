@@ -131,42 +131,40 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		let command_fields_container = containerEl.createEl("div");
 
 		// Fields for modifying existing commands
-		if (this.commands.length > 0) {
-			for (let command_id in this.commands) {
-				this.createCommandField(command_fields_container, parseInt(command_id));
-			}
-
-			// "Apply changes" button
-			new Setting(containerEl)
-				.setDesc("Click this when you make changes to commands. Other settings are applied automatically.")
-				.addButton(button => button
-					.setButtonText("APPLY CHANGES")
-					.onClick(async () => {
-						console.log("Updating shell command settings...")
-						for (let command_id in this.commands) {
-							let command = this.commands[command_id];
-							if (command.length > 0) {
-								// Define/change a command
-								console.log("Command " + command_id + " gonna change to: " + command);
-								this.plugin.settings.commands[command_id] = command;
-								this.plugin.registerShellCommand(parseInt(command_id), command);
-								// TODO: How to remove the old command from Obsidian commands list?
-								console.log("Command changed.");
-							} else {
-								// Remove a command
-								console.log("Command " + command_id + " gonna be removed.");
-								this.plugin.settings.commands.splice(parseInt(command_id),1); // Why .remove() does not work? :( :( :(
-
-								// TODO: How to remove a command from Obsidian commands list?
-								console.log("Command removed.");
-							}
-						}
-						await this.plugin.saveSettings();
-						console.log("Shell command settings updated.");
-					})
-				)
-			;
+		for (let command_id in this.commands) {
+			this.createCommandField(command_fields_container, parseInt(command_id));
 		}
+
+		// "Apply changes" button
+		new Setting(containerEl)
+			.setDesc("Click this when you make changes to commands. Other settings are applied automatically.")
+			.addButton(button => button
+				.setButtonText("APPLY CHANGES")
+				.onClick(async () => {
+					console.log("Updating shell command settings...")
+					for (let command_id in this.commands) {
+						let command = this.commands[command_id];
+						if (command.length > 0) {
+							// Define/change a command
+							console.log("Command " + command_id + " gonna change to: " + command);
+							this.plugin.settings.commands[command_id] = command;
+							this.plugin.registerShellCommand(parseInt(command_id), command);
+							// TODO: How to remove the old command from Obsidian commands list?
+							console.log("Command changed.");
+						} else {
+							// Remove a command
+							console.log("Command " + command_id + " gonna be removed.");
+							this.plugin.settings.commands.splice(parseInt(command_id),1); // Why .remove() does not work? :( :( :(
+
+							// TODO: How to remove a command from Obsidian commands list?
+							console.log("Command removed.");
+						}
+					}
+					await this.plugin.saveSettings();
+					console.log("Shell command settings updated.");
+				})
+			)
+		;
 
 		// "New command" button
 		new Setting(containerEl)
