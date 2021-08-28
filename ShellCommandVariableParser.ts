@@ -74,7 +74,8 @@ abstract class ShellCommandVariable {
     protected notify(message: string) {
         // Notifications can be disabled. This is done when previewing commands while they are being typed.
         if (this.enable_notifications) {
-            new Notice(message);
+            let prefix = "{{" + this.name + "}}: ";
+            new Notice(prefix + message);
         }
     }
 }
@@ -114,7 +115,7 @@ class ShellCommandVariable_FileName extends ShellCommandVariable{
     getValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
-            this.notify(`file_name: No file is active at the moment. Open a file or click a pane that has a file open.`);
+            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         return file.name;
@@ -137,11 +138,11 @@ class ShellCommandVariable_FilePath extends ShellCommandVariable{
                 case "relative":
                     return active_file.path;
                 default:
-                    this.notify(`file_path: Unknown mode "${mode}"! Use "absolute" or "relative".`);
+                    this.notify(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                     return null; // null indicates that getting a value has failed and the command should not be executed.
             }
         } else {
-            this.notify(`file_path: No file is active at the moment. Open a file or click a pane that has a file open.`);
+            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
     }
@@ -156,11 +157,11 @@ class ShellCommandVariable_FolderName extends ShellCommandVariable{
     getValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
-            this.notify(`folder_name: No file is active at the moment. Open a file or click a pane that has a file open.`);
+            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         if (!file.parent) {
-            this.notify(`folder_name: The current file does not have a parent for some strange reason.`);
+            this.notify("The current file does not have a parent for some strange reason.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         return file.parent.name;
@@ -185,15 +186,15 @@ class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                     case "relative":
                         return folder.path;
                     default:
-                        this.notify(`folder_path: Unknown mode "${mode}"! Use "absolute" or "relative".`);
+                        this.notify(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                         return null; // null indicates that getting a value has failed and the command should not be executed.
                 }
             } else {
-                this.notify(`folder_path: The current file does not have a parent for some strange reason.`);
+                this.notify("The current file does not have a parent for some strange reason.");
                 return null; // null indicates that getting a value has failed and the command should not be executed.
             }
         } else {
-            this.notify(`folder_path: No file is active at the moment. Open a file or click a pane that has a file open.`);
+            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
     }
@@ -231,7 +232,7 @@ class ShellCommandVariable_Title extends ShellCommandVariable{
         if (active_file) {
             return active_file.basename;
         }
-        this.notify("title: No file is active at the moment. Open a file or click a pane that has a file open.")
+        this.notify("No file is active at the moment. Open a file or click a pane that has a file open.")
         return null;
     }
 }
