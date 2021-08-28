@@ -176,6 +176,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					this.commands.push(""); // The command is just an empty string at this point.
 					this.createCommandField(command_fields_container, this.commands.length-1);
 					console.log("New empty command created.");
+					new Notice("Remember to click APPLY CHANGES after you have written the new command!");
 				})
 			)
 		;
