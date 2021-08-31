@@ -12,7 +12,6 @@ You can customise your commands with built-in variables that can provide the cur
 
 ## Main issues
 
-- Only tested on Windows and Linux at the moment. I don't have a Mac, so I can't test this on Mac. [Help wanted!](https://github.com/Taitava/obsidian-shellcommands/issues/1) :)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
 ## Would be nice to have features (these are not so important):
@@ -50,14 +49,15 @@ These are just examples, and this plugin **does not** define them for you automa
 
 Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
 
-| Windows 10 | Linux (Xubuntu 20.04)
-| ---------- | ------
-| Obsidian 0.12.12<br>SC 0.0.0<br>Works | Obsidian 0.12.12<br>SC 0.0.0<br>Works
+| Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
+| -----------------------| ---------- | --------------------- | --- |
+|SC 0.1.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | macOS: 11.5.2<br>Obsidian: 0.12.5<br>Works, tested by [skipadu](https://github.com/skipadu), thank you! 🙂 |
+| SC 0.0.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | |
+
+As I do not own a Mac, tests on Mac are performed by other people, and I cannot quarantee that every version will be tested on Mac. That's the reason why Mac might not appear on every row in the above table. If you notice that a newest SC version does not have a Mac test record in the table, you can help by [performing a Mac test yourself and submitting your freeform test result here](https://github.com/Taitava/obsidian-shellcommands/issues/1).
 
 ## Contributing
 Ideas, issues, feedback, pull requests etc. are all welcome! :)
-
-If you have a Mac, I'd be very glad if you could [test this plugin on your Mac and report here](https://github.com/Taitava/obsidian-shellcommands/issues/1).
 
 ## Author
 
