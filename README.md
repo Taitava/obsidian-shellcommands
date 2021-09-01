@@ -45,6 +45,8 @@ These examples are written for Windows, but you can invent similar ones in Linux
 
 These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
 
+Note that for the sake of simplicity, there is no escaping done for variable values. If you have a command and a quoted string parameter like `mycommand "{{clipboard}}"`, it might break if your clipboard content contains `"` quote characters, because those are inserted into the command as-is. Your command might end up looking like this: `mycommand "Text pasted from clipboard that contains a " character."` I am open to discussion how to best implement variable value escaping in the future.
+
 ## Tested platforms
 
 Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
