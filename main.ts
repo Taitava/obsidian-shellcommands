@@ -1,53 +1,92 @@
-import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import {App, Command, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {getVaultAbsolutePath, isWindows} from "./Common";
-import {
-	getShellCommandVariableInstructions,
-	parseShellCommandVariables
-} from "./ShellCommandVariableParser";
+import {getShellCommandVariableInstructions, parseShellCommandVariables} from "./ShellCommandVariableParser";
+import {RunMigrations} from "./Migrations";
 
+// SETTINGS AND DEFAULT VALUES
 interface ShellCommandsPluginSettings {
 	working_directory: string;
+	shell_commands: ShellCommandsConfiguration;
+
+	// Legacy:
+	/** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
 	commands: string[];
 }
-
 const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 	working_directory: "",
-	commands: []
+	shell_commands: {},
+
+	// Legacy:
+	commands: [] // Deprecated, but must be present in the default values as long as migrating from commands to shell_commands is supported.
+}
+
+interface ShellCommandsConfiguration {
+	[key: string]: ShellCommandConfiguration;
+}
+
+export interface ShellCommandConfiguration { // Migrations.ts uses this also.
+	shell_command: string;
+}
+
+interface ObsidianCommandsContainer {
+	[key: string]: Command;
 }
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
+	obsidian_commands: ObsidianCommandsContainer = {};
 
 	async onload() {
 		console.log('loading plugin');
 
 		await this.loadSettings();
 
+		// Run possible configuration migrations
+		await RunMigrations(this);
+
 		// Make all defined shell commands to appear in the Obsidian command list
-		for (let command_id in this.settings.commands) {
-			let command = this.settings.commands[command_id];
-			this.registerShellCommand(parseInt(command_id), command);
+		let shell_commands = this.getShellCommands();
+		for (let command_id in shell_commands) {
+			let command = shell_commands[command_id];
+			this.registerShellCommand(command_id, command);
 		}
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
 	}
 
-	registerShellCommand(command_id: number, command: string) {
-		this.addCommand({
-			id: "shell-command-" + command_id,
-			name: "Execute: " + command,
-			callback: () => {
-				this.executeShellCommand(command);
-			}
-		})
+	getShellCommands() {
+		return this.settings.shell_commands;
 	}
 
-	executeShellCommand(command: string) {
-		let parsed_command = parseShellCommandVariables(this.app, command, true);
+	/**
+	 *
+	 * @param command_id string, but in practise it's a number in a string format, e.g. "0" or "1" etc.
+	 * @param shell_command
+	 */
+	registerShellCommand(command_id: string, shell_command: ShellCommandConfiguration) {
+		console.log("Registering shell command #" + command_id + " (" + shell_command.shell_command + ") to Obsidian...");
+		let obsidian_command: Command = {
+			id: "shell-command-" + command_id,
+			name: this.generateObsidianCommandName(shell_command.shell_command),
+			callback: () => {
+				this.executeShellCommand(shell_command);
+			}
+		};
+		this.addCommand(obsidian_command)
+		this.obsidian_commands[command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
+		console.log("Registered.")
+	}
+
+	generateObsidianCommandName(shell_command_string: string) {
+		return "Execute: " + shell_command_string;
+	}
+
+	executeShellCommand(command: ShellCommandConfiguration) {
+		let parsed_command = parseShellCommandVariables(this.app, command.shell_command, true);
 		if (null === parsed_command) {
 			// The command could not be parsed correctly.
-			console.log("Parsing command " + command + " failed.");
+			console.log("Parsing command " + command.shell_command + " failed.");
 			// No need to create a notice here, because the parsing process creates notices every time something goes wrong.
 		} else {
 			// The command was parsed correctly.
@@ -87,17 +126,29 @@ export default class ShellCommandsPlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+
+	/**
+	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
+	 */
+	generateNewShellCommandID() {
+		let existing_ids = Object.getOwnPropertyNames(this.getShellCommands());
+		let new_id = 0;
+		for (let i in existing_ids) {
+			let existing_id = parseInt(existing_ids[i]);
+			if (existing_id >= new_id) {
+				new_id = existing_id + 1;
+			}
+		}
+		return String(new_id);
+	}
 }
 
 class ShellCommandsSettingsTab extends PluginSettingTab {
 	plugin: ShellCommandsPlugin;
 
-	commands: string[]; // This holds all commands temporarily: every time an command field fires its onchange event (every time user types a character), the change will be recorded here. Only when the user hits the apply changes button, will this array's content be copied over to this.plugin.settings.commands .
-
 	constructor(app: App, plugin: ShellCommandsPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
-		this.commands = this.plugin.settings.commands;
 	}
 
 	display(): void {
@@ -122,8 +173,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			)
 
 		// Tips when the user has already defined some commands
-		if (this.commands.length > 0) {
-			containerEl.createEl('p', {text: "To remove a command, clear its text field. Note that if you remove commands, other shell commands can switch place and hotkeys might change! Always check your shell commands' hotkey configurations after removing or making changes to shell commands!"});
+		if (Object.keys(this.plugin.getShellCommands()).length > 0) {
+			containerEl.createEl('p', {text: "To remove a command, clear its text field and click \"Apply deletions\"."});
 			if (isWindows()) containerEl.createEl('p', {text: "Tip for Windows: If you get an error starting with \"[259]: Command failed:\" even though the execution works ok, you can try to prefix your command with \"start \". E.g. \"start git-gui\"."});
 		}
 
@@ -131,38 +182,37 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		let command_fields_container = containerEl.createEl("div");
 
 		// Fields for modifying existing commands
-		for (let command_id in this.commands) {
-			this.createCommandField(command_fields_container, parseInt(command_id));
+		for (let command_id in this.plugin.getShellCommands()) {
+			this.createCommandField(command_fields_container, command_id);
 		}
 
-		// "Apply changes" button
+		// "Apply deletions" button
 		new Setting(containerEl)
-			.setDesc("Click this when you make changes to commands. Other settings are applied automatically.")
+			.setDesc("Click this when you have deleted any commands (= cleared command text fields). Other changes are applied automatically.")
 			.addButton(button => button
-				.setButtonText("APPLY CHANGES")
+				.setButtonText("APPLY DELETIONS")
 				.onClick(async () => {
-					console.log("Updating shell command settings...")
-					for (let command_id in this.commands) {
-						let command = this.commands[command_id];
-						if (command.length > 0) {
-							// Define/change a command
-							console.log("Command " + command_id + " gonna change to: " + command);
-							this.plugin.settings.commands[command_id] = command;
-							this.plugin.registerShellCommand(parseInt(command_id), command);
-							// TODO: How to remove the old command from Obsidian commands list?
-							console.log("Command changed.");
-						} else {
+					console.log("Updating shell command settings concerning deleted commands...")
+					let count_deletions = 0;
+					for (let command_id in this.plugin.getShellCommands()) {
+						let shell_command_string = this.plugin.getShellCommands()[command_id].shell_command;
+						if (shell_command_string.length == 0 && "new" !== command_id) {
 							// Remove a command
 							console.log("Command " + command_id + " gonna be removed.");
-							this.plugin.settings.commands.splice(parseInt(command_id),1); // Why .remove() does not work? :( :( :(
+							delete this.plugin.getShellCommands()[command_id]; // Remove from the plugin's settings.
+							delete this.plugin.obsidian_commands[command_id]; // Remove from the command palette.
+							count_deletions++;
 
-							// TODO: How to remove a command from Obsidian commands list?
 							console.log("Command removed.");
 						}
 					}
 					await this.plugin.saveSettings();
 					console.log("Shell command settings updated.");
-					new Notice("Applied!");
+					if (0 === count_deletions) {
+						new Notice("Nothing to delete :)");
+					} else {
+						new Notice("Deleted " + count_deletions + " shell command(s)!");
+					}
 				})
 			)
 		;
@@ -172,10 +222,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			.addButton(button => button
 				.setButtonText("New command")
 				.onClick(async () => {
-					this.commands.push(""); // The command is just an empty string at this point.
-					this.createCommandField(command_fields_container, this.commands.length-1);
+					this.createCommandField(command_fields_container, "new");
 					console.log("New empty command created.");
-					new Notice("Remember to click APPLY CHANGES after you have written the new command!");
 				})
 			)
 		;
@@ -194,20 +242,58 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		containerEl.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
 	}
 
-	createCommandField(container_element: HTMLElement, command_id: number) {
-		let command = this.commands[command_id];
+	/**
+	 *
+	 * @param container_element
+	 * @param command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
+	 */
+	createCommandField(container_element: HTMLElement, command_id: string) {
+		let is_new = "new" === command_id;
+		if (is_new) {
+			// Create an empty command
+			command_id = this.plugin.generateNewShellCommandID();
+			this.plugin.getShellCommands()[command_id] = {
+				shell_command: ""
+			};
+		}
+		console.log("Create command field for command #" + command_id + (is_new ? " (NEW)" : ""));
+		let shell_command_string: string;
+		if (is_new) {
+			shell_command_string = "";
+		} else {
+			shell_command_string = this.plugin.getShellCommands()[command_id].shell_command;
+		}
 		let setting = new Setting(container_element)
 			.setName("Command #" + command_id)
-			.setDesc(this.getCommandPreview(command))
+			.setDesc(this.getCommandPreview(shell_command_string))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
-				.setValue(command)
-				.onChange(async (value) => {
-					this.commands[command_id] = value;
-					setting.setDesc(this.getCommandPreview(value));
+				.setValue(shell_command_string)
+				.onChange(async (field_value) => {
+					let shell_command_string = field_value;
+					setting.setDesc(this.getCommandPreview(shell_command_string));
+
+					if (is_new) {
+						// Create a new command
+						console.log("Creating new command " + command_id + ": " + shell_command_string);
+						let shell_command: ShellCommandConfiguration = {
+							shell_command: shell_command_string
+						};
+						this.plugin.getShellCommands()[command_id] = shell_command;
+						this.plugin.registerShellCommand(command_id, shell_command);
+						console.log("Command created.");
+					} else {
+						// Change an old command
+						console.log("Command " + command_id + " gonna change to: " + shell_command_string);
+						this.plugin.getShellCommands()[command_id].shell_command = shell_command_string;
+						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(shell_command_string); // Change the command's name in Obsidian's command palette.
+						console.log("Command changed.");
+					}
+					await this.plugin.saveSettings();
 				})
 			)
 		;
+		console.log("Created.");
 	}
 
 	getCommandPreview(command: string) {
