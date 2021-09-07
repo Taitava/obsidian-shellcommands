@@ -29,6 +29,12 @@ export interface ShellCommandConfiguration { // Migrations.ts uses this also.
 	shell_command: string;
 }
 
+function newShellCommandConfiguration(shell_command_string: string = ""): ShellCommandConfiguration {
+	return {
+		shell_command: shell_command_string,
+	}
+}
+
 interface ObsidianCommandsContainer {
 	[key: string]: Command;
 }
@@ -252,9 +258,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		if (is_new) {
 			// Create an empty command
 			command_id = this.plugin.generateNewShellCommandID();
-			this.plugin.getShellCommands()[command_id] = {
-				shell_command: ""
-			};
+			this.plugin.getShellCommands()[command_id] = newShellCommandConfiguration();
 		}
 		console.log("Create command field for command #" + command_id + (is_new ? " (NEW)" : ""));
 		let shell_command_string: string;
