@@ -377,8 +377,8 @@ class ShellCommandAliasModal extends Modal {
 			this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.shell_command_configuration);
 			this.setting_field.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.shell_command_configuration));
 			await this.plugin.saveSettings();
-			console.log("Alias changed.")
-			new Notice("Alias changed!");
+			console.log(new_alias ? "Alias changed." : "Alias removed.");
+			new Notice(new_alias ? "Alias changed!" : "Alias removed!");
 		}
 	}
 }
