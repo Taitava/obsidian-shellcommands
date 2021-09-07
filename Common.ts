@@ -43,3 +43,7 @@ export function getEditor(app: App): Editor {
             break;
     }
 }
+
+export function cloneObject(object: Object) {
+    return Object.assign({}, object);
+}
