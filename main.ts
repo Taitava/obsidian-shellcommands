@@ -274,18 +274,21 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					setting.setDesc(this.getCommandPreview(shell_command_string));
 
 					if (is_new) {
-						// Create a new command
 						console.log("Creating new command " + command_id + ": " + shell_command_string);
-						let shell_command: ShellCommandConfiguration = {
-							shell_command: shell_command_string
-						};
-						this.plugin.getShellCommands()[command_id] = shell_command;
-						this.plugin.registerShellCommand(command_id, shell_command);
+					}
+					else {
+						console.log("Command " + command_id + " gonna change to: " + shell_command_string);
+					}
+
+					// Do this in both cases, when creating a new command and when changing an old one:
+					this.plugin.getShellCommands()[command_id].shell_command = shell_command_string;
+
+					if (is_new) {
+						// Create a new command
+						this.plugin.registerShellCommand(command_id, this.plugin.getShellCommands()[command_id]);
 						console.log("Command created.");
 					} else {
 						// Change an old command
-						console.log("Command " + command_id + " gonna change to: " + shell_command_string);
-						this.plugin.getShellCommands()[command_id].shell_command = shell_command_string;
 						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(shell_command_string); // Change the command's name in Obsidian's command palette.
 						console.log("Command changed.");
 					}
