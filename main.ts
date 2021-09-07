@@ -7,6 +7,7 @@ import {RunMigrations} from "./Migrations";
 // SETTINGS AND DEFAULT VALUES
 interface ShellCommandsPluginSettings {
 	working_directory: string;
+	preview_variables_in_command_palette: boolean;
 	shell_commands: ShellCommandsConfiguration;
 
 	// Legacy:
@@ -15,6 +16,7 @@ interface ShellCommandsPluginSettings {
 }
 const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 	working_directory: "",
+	preview_variables_in_command_palette: true,
 	shell_commands: {},
 
 	// Legacy:
@@ -184,6 +186,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
+		;
 
 		// Tips when the user has already defined some commands
 		if (Object.keys(this.plugin.getShellCommands()).length > 0) {
@@ -241,8 +244,24 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			)
 		;
 
-		// Variable instructions
+		// "Variables" section
 		containerEl.createEl("h2", {text: "Variables"});
+
+		// "Preview variables in command palette" field
+		new Setting(containerEl)
+			.setName("Preview variables in command palette")
+			.setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette. A nice way to ensure your commands will use correct values.")
+			.addToggle(checkbox => checkbox
+				.setValue(this.plugin.settings.preview_variables_in_command_palette)
+				.onChange(async (value: boolean) => {
+					console.log("Changing preview_variables_in_command_palette to " + value);
+					this.plugin.settings.preview_variables_in_command_palette = value;
+					await this.plugin.saveSettings();
+				})
+			)
+		;
+
+		// Variable instructions
 		getShellCommandVariableInstructions().forEach((instructions) => {
 			let paragraph = containerEl.createEl("p");
 			// @ts-ignore
@@ -365,6 +384,7 @@ class ShellCommandAliasModal extends Modal {
 		this.modalEl.createEl("h2", {text: "Alias for: " + this.shell_command_configuration.shell_command});
 		this.alias_field = this.modalEl.createEl("input", {type: "text", value: this.shell_command_configuration.alias});
 		this.modalEl.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
+		this.modalEl.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
 
 	}
 
