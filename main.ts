@@ -255,17 +255,22 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 	 */
 	createCommandField(container_element: HTMLElement, shell_command_id: string) {
 		let is_new = "new" === shell_command_id;
+		let shell_command_configuration: ShellCommandConfiguration;
 		if (is_new) {
 			// Create an empty command
 			shell_command_id = this.plugin.generateNewShellCommandID();
-			this.plugin.getShellCommands()[shell_command_id] = newShellCommandConfiguration();
+			shell_command_configuration = newShellCommandConfiguration();
+			this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
+		} else {
+			// Use an old shell command
+			shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
 		}
 		console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
 		let shell_command: string;
 		if (is_new) {
 			shell_command = "";
 		} else {
-			shell_command = this.plugin.getShellCommands()[shell_command_id].shell_command;
+			shell_command = shell_command_configuration.shell_command;
 		}
 		let setting = new Setting(container_element)
 			.setName("Command #" + shell_command_id)
@@ -285,11 +290,11 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					}
 
 					// Do this in both cases, when creating a new command and when changing an old one:
-					this.plugin.getShellCommands()[shell_command_id].shell_command = shell_command;
+					shell_command_configuration.shell_command = shell_command;
 
 					if (is_new) {
 						// Create a new command
-						this.plugin.registerShellCommand(shell_command_id, this.plugin.getShellCommands()[shell_command_id]);
+						this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
 						console.log("Command created.");
 					} else {
 						// Change an old command
