@@ -29,9 +29,9 @@ export interface ShellCommandConfiguration { // Migrations.ts uses this also.
 	shell_command: string;
 }
 
-function newShellCommandConfiguration(shell_command_string: string = ""): ShellCommandConfiguration {
+function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
 	return {
-		shell_command: shell_command_string,
+		shell_command: shell_command,
 	}
 }
 
@@ -54,8 +54,8 @@ export default class ShellCommandsPlugin extends Plugin {
 		// Make all defined shell commands to appear in the Obsidian command list
 		let shell_commands = this.getShellCommands();
 		for (let command_id in shell_commands) {
-			let command = shell_commands[command_id];
-			this.registerShellCommand(command_id, command);
+			let shell_command_configuration = shell_commands[command_id];
+			this.registerShellCommand(command_id, shell_command_configuration);
 		}
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
@@ -68,15 +68,15 @@ export default class ShellCommandsPlugin extends Plugin {
 	/**
 	 *
 	 * @param command_id string, but in practise it's a number in a string format, e.g. "0" or "1" etc.
-	 * @param shell_command
+	 * @param shell_command_configuration
 	 */
-	registerShellCommand(command_id: string, shell_command: ShellCommandConfiguration) {
-		console.log("Registering shell command #" + command_id + " (" + shell_command.shell_command + ") to Obsidian...");
+	registerShellCommand(command_id: string, shell_command_configuration: ShellCommandConfiguration) {
+		console.log("Registering shell command #" + command_id + " (" + shell_command_configuration.shell_command + ") to Obsidian...");
 		let obsidian_command: Command = {
 			id: "shell-command-" + command_id,
-			name: this.generateObsidianCommandName(shell_command.shell_command),
+			name: this.generateObsidianCommandName(shell_command_configuration.shell_command),
 			callback: () => {
-				this.executeShellCommand(shell_command);
+				this.executeShellCommand(shell_command_configuration);
 			}
 		};
 		this.addCommand(obsidian_command)
@@ -84,15 +84,15 @@ export default class ShellCommandsPlugin extends Plugin {
 		console.log("Registered.")
 	}
 
-	generateObsidianCommandName(shell_command_string: string) {
-		return "Execute: " + shell_command_string;
+	generateObsidianCommandName(shell_command: string) {
+		return "Execute: " + shell_command;
 	}
 
-	executeShellCommand(command: ShellCommandConfiguration) {
-		let parsed_command = parseShellCommandVariables(this.app, command.shell_command, true);
+	executeShellCommand(shell_command_configuration: ShellCommandConfiguration) {
+		let parsed_command = parseShellCommandVariables(this.app, shell_command_configuration.shell_command, true);
 		if (null === parsed_command) {
 			// The command could not be parsed correctly.
-			console.log("Parsing command " + command.shell_command + " failed.");
+			console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
 			// No need to create a notice here, because the parsing process creates notices every time something goes wrong.
 		} else {
 			// The command was parsed correctly.
@@ -201,8 +201,8 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					console.log("Updating shell command settings concerning deleted commands...")
 					let count_deletions = 0;
 					for (let command_id in this.plugin.getShellCommands()) {
-						let shell_command_string = this.plugin.getShellCommands()[command_id].shell_command;
-						if (shell_command_string.length == 0 && "new" !== command_id) {
+						let shell_command = this.plugin.getShellCommands()[command_id].shell_command;
+						if (shell_command.length == 0 && "new" !== command_id) {
 							// Remove a command
 							console.log("Command " + command_id + " gonna be removed.");
 							delete this.plugin.getShellCommands()[command_id]; // Remove from the plugin's settings.
@@ -261,31 +261,31 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			this.plugin.getShellCommands()[command_id] = newShellCommandConfiguration();
 		}
 		console.log("Create command field for command #" + command_id + (is_new ? " (NEW)" : ""));
-		let shell_command_string: string;
+		let shell_command: string;
 		if (is_new) {
-			shell_command_string = "";
+			shell_command = "";
 		} else {
-			shell_command_string = this.plugin.getShellCommands()[command_id].shell_command;
+			shell_command = this.plugin.getShellCommands()[command_id].shell_command;
 		}
 		let setting = new Setting(container_element)
 			.setName("Command #" + command_id)
-			.setDesc(this.getCommandPreview(shell_command_string))
+			.setDesc(this.getShellCommandPreview(shell_command))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
-				.setValue(shell_command_string)
+				.setValue(shell_command)
 				.onChange(async (field_value) => {
-					let shell_command_string = field_value;
-					setting.setDesc(this.getCommandPreview(shell_command_string));
+					let shell_command = field_value;
+					setting.setDesc(this.getShellCommandPreview(shell_command));
 
 					if (is_new) {
-						console.log("Creating new command " + command_id + ": " + shell_command_string);
+						console.log("Creating new command " + command_id + ": " + shell_command);
 					}
 					else {
-						console.log("Command " + command_id + " gonna change to: " + shell_command_string);
+						console.log("Command " + command_id + " gonna change to: " + shell_command);
 					}
 
 					// Do this in both cases, when creating a new command and when changing an old one:
-					this.plugin.getShellCommands()[command_id].shell_command = shell_command_string;
+					this.plugin.getShellCommands()[command_id].shell_command = shell_command;
 
 					if (is_new) {
 						// Create a new command
@@ -293,7 +293,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 						console.log("Command created.");
 					} else {
 						// Change an old command
-						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(shell_command_string); // Change the command's name in Obsidian's command palette.
+						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(shell_command); // Change the command's name in Obsidian's command palette.
 						console.log("Command changed.");
 					}
 					await this.plugin.saveSettings();
@@ -303,7 +303,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 		console.log("Created.");
 	}
 
-	getCommandPreview(command: string) {
+	getShellCommandPreview(command: string) {
 		let parsed_command = parseShellCommandVariables(this.app, command, false); // false: disables notifications if variables have syntax errors.
 		if (null === parsed_command) {
 			return "[Error while parsing variables.]";
