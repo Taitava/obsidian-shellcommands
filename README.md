@@ -42,6 +42,9 @@ These examples are written for Windows, but you can invent similar ones in Linux
 | Create a monthly folder like 2021-08. | `mkdir {{date:YYYY-MM}}` | Ctrl + Shift + M |
 | Create a new file and paste content there from clipboard. | `echo {{clipboard}} >> NewNote.md` | Ctrl + Shift + N |
 | Search the web using text you have selected. | `start https://duckduckgo.com/?q={{selection}}` | Ctrl + Shift + S |
+| Obsidian URI: Open another vault * | `start "" "obsidian://open?vault=my%20vault"` | Ctrl + Shift + A |
+| [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): Open a workspace * | `start "" "obsidian://advanced-uri?vault=my%20vault&workspace=main"` | Ctrl + Shift + W |
+| *) Thank you [FelipeRearden](https://github.com/FelipeRearden) for ideas about using Obsidian URI with this plugin! 🙂 | | |
 
 These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
 
