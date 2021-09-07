@@ -258,24 +258,24 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 	/**
 	 *
 	 * @param container_element
-	 * @param command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
+	 * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
 	 */
-	createCommandField(container_element: HTMLElement, command_id: string) {
-		let is_new = "new" === command_id;
+	createCommandField(container_element: HTMLElement, shell_command_id: string) {
+		let is_new = "new" === shell_command_id;
 		if (is_new) {
 			// Create an empty command
-			command_id = this.plugin.generateNewShellCommandID();
-			this.plugin.getShellCommands()[command_id] = newShellCommandConfiguration();
+			shell_command_id = this.plugin.generateNewShellCommandID();
+			this.plugin.getShellCommands()[shell_command_id] = newShellCommandConfiguration();
 		}
-		console.log("Create command field for command #" + command_id + (is_new ? " (NEW)" : ""));
+		console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
 		let shell_command: string;
 		if (is_new) {
 			shell_command = "";
 		} else {
-			shell_command = this.plugin.getShellCommands()[command_id].shell_command;
+			shell_command = this.plugin.getShellCommands()[shell_command_id].shell_command;
 		}
 		let setting = new Setting(container_element)
-			.setName(this.generateCommandFieldName(command_id, this.plugin.getShellCommands()[command_id]))
+			.setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[command_id]))
 			.setDesc(this.getShellCommandPreview(shell_command))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
@@ -285,22 +285,22 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					setting.setDesc(this.getShellCommandPreview(shell_command));
 
 					if (is_new) {
-						console.log("Creating new command " + command_id + ": " + shell_command);
+						console.log("Creating new command " + shell_command_id + ": " + shell_command);
 					}
 					else {
-						console.log("Command " + command_id + " gonna change to: " + shell_command);
+						console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
 					}
 
 					// Do this in both cases, when creating a new command and when changing an old one:
-					this.plugin.getShellCommands()[command_id].shell_command = shell_command;
+					this.plugin.getShellCommands()[shell_command_id].shell_command = shell_command;
 
 					if (is_new) {
 						// Create a new command
-						this.plugin.registerShellCommand(command_id, this.plugin.getShellCommands()[command_id]);
+						this.plugin.registerShellCommand(shell_command_id, this.plugin.getShellCommands()[shell_command_id]);
 						console.log("Command created.");
 					} else {
 						// Change an old command
-						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[command_id]); // Change the command's name in Obsidian's command palette.
+						this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[command_id]); // Change the command's name in Obsidian's command palette.
 						console.log("Command changed.");
 					}
 					await this.plugin.saveSettings();
