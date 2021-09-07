@@ -76,7 +76,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		console.log("Registering shell command #" + command_id + " (" + shell_command_configuration.shell_command + ") to Obsidian...");
 		let obsidian_command: Command = {
 			id: "shell-command-" + command_id,
-			name: this.generateObsidianCommandName(shell_command_configuration.shell_command),
+			name: this.generateObsidianCommandName(shell_command_configuration),
 			callback: () => {
 				this.executeShellCommand(shell_command_configuration);
 			}
@@ -86,8 +86,13 @@ export default class ShellCommandsPlugin extends Plugin {
 		console.log("Registered.")
 	}
 
-	generateObsidianCommandName(shell_command: string) {
-		return "Execute: " + shell_command;
+	generateObsidianCommandName(shell_command_configuration: ShellCommandConfiguration) {
+		let prefix = "Execute: ";
+		if (shell_command_configuration.alias) {
+			// If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
+			return prefix + shell_command_configuration.alias;
+		}
+		return prefix + shell_command_configuration.shell_command;
 	}
 
 	executeShellCommand(shell_command_configuration: ShellCommandConfiguration) {
@@ -295,7 +300,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 						console.log("Command created.");
 					} else {
 						// Change an old command
-						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(shell_command); // Change the command's name in Obsidian's command palette.
+						this.plugin.obsidian_commands[command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[command_id]); // Change the command's name in Obsidian's command palette.
 						console.log("Command changed.");
 					}
 					await this.plugin.saveSettings();
