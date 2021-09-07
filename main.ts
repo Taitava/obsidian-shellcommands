@@ -280,7 +280,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			shell_command = shell_command_configuration.shell_command;
 		}
 		let setting = new Setting(container_element)
-			.setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[command_id]))
+			.setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
 			.setDesc(this.getShellCommandPreview(shell_command))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
@@ -305,7 +305,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 						console.log("Command created.");
 					} else {
 						// Change an old command
-						this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[command_id]); // Change the command's name in Obsidian's command palette.
+						this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
 						console.log("Command changed.");
 					}
 					await this.plugin.saveSettings();
@@ -315,7 +315,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				.setTooltip("Define an alias")
 				.onClick(async () => {
 					// Open an alias modal
-					let modal = new ShellCommandAliasModal(this.app, this.plugin, command_id, setting, this);
+					let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting, this);
 					modal.open();
 				})
 			)
