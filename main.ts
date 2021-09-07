@@ -27,11 +27,13 @@ interface ShellCommandsConfiguration {
 
 export interface ShellCommandConfiguration { // Migrations.ts uses this also.
 	shell_command: string;
+	alias: string;
 }
 
 function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
 	return {
 		shell_command: shell_command,
+		alias: ""
 	}
 }
 
