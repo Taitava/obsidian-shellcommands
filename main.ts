@@ -1,4 +1,4 @@
-import {App, Command, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
+import {App, Command, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {getVaultAbsolutePath, isWindows} from "./Common";
 import {getShellCommandVariableInstructions, parseShellCommandVariables} from "./ShellCommandVariableParser";
@@ -275,7 +275,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			shell_command = this.plugin.getShellCommands()[command_id].shell_command;
 		}
 		let setting = new Setting(container_element)
-			.setName("Command #" + command_id)
+			.setName(this.generateCommandFieldName(command_id, this.plugin.getShellCommands()[command_id]))
 			.setDesc(this.getShellCommandPreview(shell_command))
 			.addText(text => text
 				.setPlaceholder("Enter your command")
@@ -306,6 +306,14 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				})
 			)
+			.addExtraButton(button => button
+				.setTooltip("Define an alias")
+				.onClick(async () => {
+					// Open an alias modal
+					let modal = new ShellCommandAliasModal(this.app, this.plugin, command_id, setting, this);
+					modal.open();
+				})
+			)
 		;
 		console.log("Created.");
 	}
@@ -316,5 +324,56 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 			return "[Error while parsing variables.]";
 		}
 		return parsed_command;
+	}
+
+	/**
+	 * @param shell_command_id String like "0" or "1" etc.
+	 * @param shell_command_configuration
+	 * @public Public because ShellCommandAliasModal uses this too.
+	 */
+	public generateCommandFieldName(shell_command_id: string, shell_command_configuration: ShellCommandConfiguration) {
+		if (shell_command_configuration.alias) {
+			return shell_command_configuration.alias;
+		}
+		return "Command #" + shell_command_id;
+	}
+}
+
+class ShellCommandAliasModal extends Modal {
+	private plugin: ShellCommandsPlugin;
+	private readonly shell_command_id: string;
+	private readonly shell_command_configuration: ShellCommandConfiguration;
+	private setting_field: Setting;
+	private setting_tab: ShellCommandsSettingsTab;
+	private alias_field: HTMLInputElement;
+
+	constructor(app: App, plugin: ShellCommandsPlugin, shell_command_id: string, setting_field: Setting, setting_tab: ShellCommandsSettingsTab) {
+		super(app);
+		this.plugin = plugin;
+		this.shell_command_id = shell_command_id;
+		this.shell_command_configuration = plugin.getShellCommands()[shell_command_id];
+		this.setting_field = setting_field;
+		this.setting_tab = setting_tab;
+	}
+
+	onOpen() {
+		this.modalEl.createEl("h2", {text: "Alias for: " + this.shell_command_configuration.shell_command});
+		this.alias_field = this.modalEl.createEl("input", {type: "text", value: this.shell_command_configuration.alias});
+		this.modalEl.createEl("p", {text: "You can define an alias text that will be displayed in the command palette instead of the actual command."});
+
+	}
+
+	async onClose() {
+		let new_alias = this.alias_field.value;
+		if (new_alias !== this.shell_command_configuration.alias) {
+			// Change the alias
+			console.log("Change shell command #" + this.shell_command_id + "'s alias from \"" + this.shell_command_configuration.alias + "\" to \"" + new_alias + "\".");
+			this.shell_command_configuration.alias = new_alias;
+			this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.shell_command_configuration);
+			this.setting_field.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.shell_command_configuration));
+			await this.plugin.saveSettings();
+			console.log("Alias changed.")
+			new Notice("Alias changed!");
+		}
 	}
 }
