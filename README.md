@@ -4,14 +4,17 @@ This plugin lets you define shell/terminal commands in settings and run them qui
 
 You can customise your commands with built-in variables that can provide the current file title/name/path, current file's parent folder name/path, and date/time stamp with a custom format.
 
-**Note:** This plugin is still under development and will be improved some da... some ye... some decade!
+[A changelog is available in a separate file.](CHANGELOG.md)
 
 **WARNING:** Be careful with system commands! Only use commands that you know and trust. If you are copy pasting commands from the internet or from files written by other people, you need to understand precisely what those commands do! Otherwise, you might lose your files, or screw up your system!
+
+**The plugin is still in its early development stage.** And its developer is not yet very experienced in creating solid testing patterns to find out possible problems. Use at your own risk, and note that when you upgrade the plugin, things may break.
 
 **This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) ([mainly this file](https://github.com/Taitava/obsidian-shellcommands/blob/main/main.ts)) so you know how it executes commands. The source code is not long.
 
 ## Main issues
-
+- [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
+- [Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
 ## Would be nice to have features (these are not so important):
