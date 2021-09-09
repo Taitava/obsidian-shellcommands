@@ -13,7 +13,8 @@ You can customise your commands with built-in variables that can provide the cur
 **This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) ([mainly this file](https://github.com/Taitava/obsidian-shellcommands/blob/main/main.ts)) so you know how it executes commands. The source code is not long.
 
 ## Main issues
-
+- [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
+- [Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
 ## Would be nice to have features (these are not so important):
