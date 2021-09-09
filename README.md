@@ -42,6 +42,9 @@ These examples are written for Windows, but you can invent similar ones in Linux
 | Create a monthly folder like 2021-08. | `mkdir {{date:YYYY-MM}}` | Ctrl + Shift + M |
 | Create a new file and paste content there from clipboard. | `echo {{clipboard}} >> NewNote.md` | Ctrl + Shift + N |
 | Search the web using text you have selected. | `start https://duckduckgo.com/?q={{selection}}` | Ctrl + Shift + S |
+| Obsidian URI: Open another vault * | `start "" "obsidian://open?vault=my%20vault"` | Ctrl + Shift + A |
+| [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): Open a workspace * | `start "" "obsidian://advanced-uri?vault=my%20vault&workspace=main"` | Ctrl + Shift + W |
+| *) Thank you [FelipeRearden](https://github.com/FelipeRearden) for ideas about using Obsidian URI with this plugin! 🙂 | | |
 
 These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
 
@@ -57,6 +60,10 @@ Here is a list of operating systems this plugin has been tested on, along with O
 | SC 0.0.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | |
 
 As I do not own a Mac, tests on Mac are performed by other people, and I cannot quarantee that every version will be tested on Mac. That's the reason why Mac might not appear on every row in the above table. If you notice that a newest SC version does not have a Mac test record in the table, you can help by [performing a Mac test yourself and submitting your freeform test result here](https://github.com/Taitava/obsidian-shellcommands/issues/1).
+
+## Ask for help
+
+If you have any questions about how to use this plugin, please feel free to [open an issue in GitHub](https://github.com/Taitava/obsidian-shellcommands/issues), or [post in the plugin's Obsidian.md forum topic](https://forum.obsidian.md/t/shell-commands-plugin/23497).
 
 ## Contributing
 Ideas, issues, feedback, pull requests etc. are all welcome! :)
