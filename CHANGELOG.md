@@ -14,6 +14,7 @@ Features that are planned for future versions, but are not released yet.
 ### Unreleased, to be Changed
 - [Internal rewriting of how command settings are stored (#8)](https://github.com/Taitava/obsidian-shellcommands/issues/8)
 - [Error messages will be shown for longer (#7)](https://github.com/Taitava/obsidian-shellcommands/issues/7)
+- Settings: Changing or creating commands does not require pressing Apply button anymore. Apply is still needed after removing commands.
 
 ### Unreleased, to be Deprecated
 - [`commands` configuration setting (#8)](https://github.com/Taitava/obsidian-shellcommands/issues/8): Version `0.1.1` (and above) will replace this setting in users' `data.json` settings file with a new `shell_commands` setting. This is an internal change, and the plugin will handle it automatically, but it's important to be noted by end users, because users need to upgrade to `0.1.1` (or newer) *before* upgrading to `1.0.0` in the future, because [`1.0.0` will finally remove the migration support for `commands` setting (#9)](https://github.com/Taitava/obsidian-shellcommands/issues/9). That being said, `1.0.0` is not going to be released any time soon, it's just a milestone in the far future (at the time of writing this on 2021-09-09).
