@@ -4,7 +4,7 @@ This plugin lets you define shell/terminal commands in settings and run them qui
 
 You can customise your commands with built-in variables that can provide the current file title/name/path, current file's parent folder name/path, and date/time stamp with a custom format.
 
-**Note:** This plugin is still under development and will be improved some da... some ye... some decade!
+[A changelog is available in a separate file.](CHANGELOG.md)
 
 **WARNING:** Be careful with system commands! Only use commands that you know and trust. If you are copy pasting commands from the internet or from files written by other people, you need to understand precisely what those commands do! Otherwise, you might lose your files, or screw up your system!
 
