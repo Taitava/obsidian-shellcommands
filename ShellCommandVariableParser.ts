@@ -1,19 +1,20 @@
 import {App, moment, normalizePath, Notice} from "obsidian";
 import {getEditor, getVaultAbsolutePath} from "./Common";
+import ShellCommandsPlugin from "./main";
 
 let shell_command_variable_instructions: Object[] = [];
 
-export function parseShellCommandVariables(app: App, command: string, enable_notifications: boolean) {
+export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, enable_error_messages: boolean) {
     let shell_variables: ShellCommandVariable[] = [
-        new ShellCommandVariable_Clipboard(app, enable_notifications),
-        new ShellCommandVariable_Date(app, enable_notifications),
-        new ShellCommandVariable_FileName(app, enable_notifications),
-        new ShellCommandVariable_FilePath(app, enable_notifications),
-        new ShellCommandVariable_FolderName(app, enable_notifications),
-        new ShellCommandVariable_FolderPath(app, enable_notifications),
-        new ShellCommandVariable_Selection(app, enable_notifications),
-        new ShellCommandVariable_Title(app, enable_notifications),
-        new ShellCommandVariable_VaultPath(app, enable_notifications),
+        new ShellCommandVariable_Clipboard(plugin, enable_error_messages),
+        new ShellCommandVariable_Date(plugin, enable_error_messages),
+        new ShellCommandVariable_FileName(plugin, enable_error_messages),
+        new ShellCommandVariable_FilePath(plugin, enable_error_messages),
+        new ShellCommandVariable_FolderName(plugin, enable_error_messages),
+        new ShellCommandVariable_FolderPath(plugin, enable_error_messages),
+        new ShellCommandVariable_Selection(plugin, enable_error_messages),
+        new ShellCommandVariable_Title(plugin, enable_error_messages),
+        new ShellCommandVariable_VaultPath(plugin, enable_error_messages),
     ];
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     let parsing_failed = false;
@@ -50,14 +51,16 @@ export function getShellCommandVariableInstructions() {
 }
 
 abstract class ShellCommandVariable {
+    readonly plugin: ShellCommandsPlugin;
     readonly app: App;
-    readonly enable_notifications: boolean;
+    readonly enable_error_messages: boolean;
     readonly name: string;
     readonly has_argument: boolean = false;
 
-    constructor(app: App, enable_notifications: boolean) {
-        this.app = app;
-        this.enable_notifications = enable_notifications;
+    constructor(plugin: ShellCommandsPlugin, enable_error_messages: boolean) {
+        this.plugin = plugin
+        this.app = plugin.app;
+        this.enable_error_messages = enable_error_messages;
     }
 
     abstract getValue(argument: string): string|null;

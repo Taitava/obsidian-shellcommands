@@ -91,7 +91,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	executeShellCommand(shell_command_configuration: ShellCommandConfiguration) {
-		let parsed_command = parseShellCommandVariables(this.app, shell_command_configuration.shell_command, true);
+		let parsed_command = parseShellCommandVariables(this, shell_command_configuration.shell_command, true);
 		if (null === parsed_command) {
 			// The command could not be parsed correctly.
 			console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
@@ -338,7 +338,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 	}
 
 	getShellCommandPreview(command: string) {
-		let parsed_command = parseShellCommandVariables(this.app, command, false); // false: disables notifications if variables have syntax errors.
+		let parsed_command = parseShellCommandVariables(this.plugin, command, false); // false: disables notifications if variables have syntax errors.
 		if (null === parsed_command) {
 			return "[Error while parsing variables.]";
 		}
