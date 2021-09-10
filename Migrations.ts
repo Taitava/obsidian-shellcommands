@@ -11,32 +11,32 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
 }
 
 function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
-    let count_commands = plugin.settings.commands.length;
+    let count_shell_commands = plugin.settings.commands.length;
     let save = false;
-    if (0 < count_commands) {
+    if (0 < count_shell_commands) {
         let count_empty_commands = 0; // A counter for empty or null commands
-        console.log("settings.commands is not empty, will migrate " + count_commands + " commands to settings.shell_commands.");
-        for (let command_id in plugin.settings.commands) {
-            let shell_command_string = plugin.settings.commands[command_id];
+        console.log("settings.commands is not empty, will migrate " + count_shell_commands + " commands to settings.shell_commands.");
+        for (let shell_command_id in plugin.settings.commands) {
+            let shell_command = plugin.settings.commands[shell_command_id];
             // Ensure that the command is not empty. Just in case.
-            if (null === shell_command_string || 0 === shell_command_string.length) {
+            if (null === shell_command || 0 === shell_command.length) {
                 // The command is empty
-                console.log("Migration failure for command #" + command_id + ": The original command string is empty, so it cannot be migrated.");
+                console.log("Migration failure for shell command #" + shell_command_id + ": The original shell command string is empty, so it cannot be migrated.");
                 count_empty_commands++;
             }
-            else if (undefined !== plugin.settings.shell_commands[command_id]) {
+            else if (undefined !== plugin.settings.shell_commands[shell_command_id]) {
                 // A command with the same id already exists
-                console.log("Migration failure for command #" + command_id + ": A command with same ID already exists in settings.shell_commands.");
+                console.log("Migration failure for shell command #" + shell_command_id + ": A shell command with same ID already exists in settings.shell_commands.");
             } else {
                 // All OK, migrate.
-                plugin.settings.shell_commands[command_id] = newShellCommandConfiguration(shell_command_string); // Creates a shell command with default values and defines the command for it.
-                delete plugin.settings.commands[command_id]; // Leaves a null in place, but we can deal with it by deleting the whole array if it gets empty.
+                plugin.settings.shell_commands[shell_command_id] = newShellCommandConfiguration(shell_command); // Creates a shell command with default values and defines the command for it.
+                delete plugin.settings.commands[shell_command_id]; // Leaves a null in place, but we can deal with it by deleting the whole array if it gets empty.
                 count_empty_commands++; // Account the null generated on the previous line.
                 save = true;
-                console.log("Migrated command #" + command_id + ": " + shell_command_string);
+                console.log("Migrated shell command #" + shell_command_id + ": " + shell_command);
             }
         }
-        if (count_empty_commands === count_commands) {
+        if (count_empty_commands === count_shell_commands) {
             // The whole commands array now contains only empty/null commands.
             // Delete it.
             delete plugin.settings.commands;
