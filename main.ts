@@ -14,6 +14,7 @@ interface ShellCommandsPluginSettings {
 	working_directory: string;
 	preview_variables_in_command_palette: boolean;
 	shell_commands: ShellCommandsConfiguration;
+	error_message_duration: number;
 
 	// Legacy:
 	/** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -23,6 +24,7 @@ const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 	working_directory: "",
 	preview_variables_in_command_palette: true,
 	shell_commands: {},
+	error_message_duration: 20,
 
 	// Legacy:
 	commands: [] // Deprecated, but must be present in the default values as long as migrating from commands to shell_commands is supported.
@@ -91,7 +93,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						let preparsed_shell_command_configuration: ShellCommandConfiguration = cloneObject(shell_command_configuration); // Clone shell_command_configuration so that we won't edit the original object.
 
 						// Parse variables in the actual shell command
-						let parsed_shell_command = parseShellCommandVariables(this.app, preparsed_shell_command_configuration.shell_command, false);
+						let parsed_shell_command = parseShellCommandVariables(this, preparsed_shell_command_configuration.shell_command, false);
 						if (null === parsed_shell_command) {
 							// Variable parsing failed.
 							// Just cancel the preview, the command will be shown with variable names.
@@ -104,7 +106,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						}
 
 						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-						let parsed_alias = parseShellCommandVariables(this.app, preparsed_shell_command_configuration.alias, false);
+						let parsed_alias = parseShellCommandVariables(this, preparsed_shell_command_configuration.alias, false);
 						if (null === parsed_alias) {
 							// Variable parsing failed.
 							// Just cancel the preview, the command will be shown with variable names.
@@ -130,7 +132,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					// Check if we happen to have a preparsed command (= variables parsed at the time of opening the command palette)
 					if (undefined === this.preparsed_shell_command_configurations[command_id]) {
 						// No preparsed command. Execute a standard version of the command, and do variable parsing now.
-						let parsed_shell_command = parseShellCommandVariables(this.app, shell_command_configuration.shell_command, true);
+						let parsed_shell_command = parseShellCommandVariables(this, shell_command_configuration.shell_command, true);
 						if (null === parsed_shell_command) {
 							// The command could not be parsed correctly.
 							console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
@@ -178,7 +180,7 @@ export default class ShellCommandsPlugin extends Plugin {
 			if (null !== error) {
 				// Some error occurred
 				console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-				new Notice("[" + error.code + "]: " + error.message);
+				this.newError("[" + error.code + "]: " + error.message);
 			} else {
 				// No errors
 				console.log("Command executed without errors.")
@@ -220,6 +222,14 @@ export default class ShellCommandsPlugin extends Plugin {
 			}
 		}
 		return String(new_id);
+	}
+
+	newError(message: string) {
+		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+	}
+
+	newNotice(message: string) {
+		new Notice(message); // Use Obsidian's default timeout for notices.
 	}
 }
 
@@ -290,9 +300,9 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					console.log("Shell command settings updated.");
 					if (0 === count_deletions) {
-						new Notice("Nothing to delete :)");
+						this.plugin.newNotice("Nothing to delete :)");
 					} else {
-						new Notice("Deleted " + count_deletions + " shell command(s)!");
+						this.plugin.newNotice("Deleted " + count_deletions + " shell command(s)!");
 					}
 				})
 			)
@@ -305,6 +315,25 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				.onClick(async () => {
 					this.createCommandField(command_fields_container, "new");
 					console.log("New empty command created.");
+				})
+			)
+		;
+
+		// "Error message duration" field
+		new Setting(containerEl)
+			.setName("Error message duration")
+			.setDesc("In seconds, between 1 and 180.")
+			.addText(field => field
+				.setValue(String(this.plugin.settings.error_message_duration))
+				.onChange(async (duration_string: string) => {
+					let duration: number = parseInt(duration_string);
+					if (duration >= 1 && duration <= 180) {
+						console.log("Change error_message_duration from " + this.plugin.settings.error_message_duration + " to " + duration);
+						this.plugin.settings.error_message_duration = duration;
+						await this.plugin.saveSettings();
+						console.log("Changed.");
+					}
+					// Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
 				})
 			)
 		;
@@ -408,7 +437,7 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 	}
 
 	getShellCommandPreview(command: string) {
-		let parsed_command = parseShellCommandVariables(this.app, command, false); // false: disables notifications if variables have syntax errors.
+		let parsed_command = parseShellCommandVariables(this.plugin, command, false); // false: disables notifications if variables have syntax errors.
 		if (null === parsed_command) {
 			return "[Error while parsing variables.]";
 		}
