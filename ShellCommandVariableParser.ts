@@ -1,4 +1,4 @@
-import {App, moment, normalizePath, Notice} from "obsidian";
+import {App, moment, normalizePath} from "obsidian";
 import {getEditor, getVaultAbsolutePath} from "./Common";
 import ShellCommandsPlugin from "./main";
 
@@ -74,11 +74,11 @@ abstract class ShellCommandVariable {
         return pattern;
     }
 
-    protected notify(message: string) {
+    protected newError(message: string) {
         // Notifications can be disabled. This is done when previewing commands while they are being typed.
-        if (this.enable_notifications) {
+        if (this.enable_error_messages) {
             let prefix = "{{" + this.name + "}}: ";
-            new Notice(prefix + message);
+            this.plugin.newError(prefix + message);
         }
     }
 }
@@ -118,7 +118,7 @@ class ShellCommandVariable_FileName extends ShellCommandVariable{
     getValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
-            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         return file.name;
@@ -141,11 +141,11 @@ class ShellCommandVariable_FilePath extends ShellCommandVariable{
                 case "relative":
                     return active_file.path;
                 default:
-                    this.notify(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
+                    this.newError(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                     return null; // null indicates that getting a value has failed and the command should not be executed.
             }
         } else {
-            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
     }
@@ -160,11 +160,11 @@ class ShellCommandVariable_FolderName extends ShellCommandVariable{
     getValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
-            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         if (!file.parent) {
-            this.notify("The current file does not have a parent for some strange reason.");
+            this.newError("The current file does not have a parent for some strange reason.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         return file.parent.name;
@@ -189,15 +189,15 @@ class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                     case "relative":
                         return folder.path;
                     default:
-                        this.notify(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
+                        this.newError(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                         return null; // null indicates that getting a value has failed and the command should not be executed.
                 }
             } else {
-                this.notify("The current file does not have a parent for some strange reason.");
+                this.newError("The current file does not have a parent for some strange reason.");
                 return null; // null indicates that getting a value has failed and the command should not be executed.
             }
         } else {
-            this.notify("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
     }
@@ -214,7 +214,7 @@ class ShellCommandVariable_Selection extends ShellCommandVariable{
         if (null === editor) {
             // Probably the leaf is in preview mode or some other problem happened.
             // FIXME: Make it possible to use this feature also in preview mode.
-            this.notify("You need to turn editing mode on, as I'm not able to get selected text when in preview mode. Blame the one who developed this plugin! This should be fixed in the future.");
+            this.newError("You need to turn editing mode on, as I'm not able to get selected text when in preview mode. Blame the one who developed this plugin! This should be fixed in the future.");
             return null;
         }
         if (editor.somethingSelected()) {
@@ -235,7 +235,7 @@ class ShellCommandVariable_Title extends ShellCommandVariable{
         if (active_file) {
             return active_file.basename;
         }
-        this.notify("No file is active at the moment. Open a file or click a pane that has a file open.")
+        this.newError("No file is active at the moment. Open a file or click a pane that has a file open.")
         return null;
     }
 }
