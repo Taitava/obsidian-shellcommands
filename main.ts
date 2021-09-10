@@ -8,6 +8,7 @@ import {RunMigrations} from "./Migrations";
 interface ShellCommandsPluginSettings {
 	working_directory: string;
 	shell_commands: ShellCommandsConfiguration;
+	error_message_duration: number;
 
 	// Legacy:
 	/** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -16,6 +17,7 @@ interface ShellCommandsPluginSettings {
 const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 	working_directory: "",
 	shell_commands: {},
+	error_message_duration: 20,
 
 	// Legacy:
 	commands: [] // Deprecated, but must be present in the default values as long as migrating from commands to shell_commands is supported.
@@ -230,6 +232,25 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 				.onClick(async () => {
 					this.createCommandField(command_fields_container, "new");
 					console.log("New empty command created.");
+				})
+			)
+		;
+
+		// "Error message duration" field
+		new Setting(containerEl)
+			.setName("Error message duration")
+			.setDesc("In seconds, between 1 and 180.")
+			.addText(field => field
+				.setValue(String(this.plugin.settings.error_message_duration))
+				.onChange(async (duration_string: string) => {
+					let duration: number = parseInt(duration_string);
+					if (duration >= 1 && duration <= 180) {
+						console.log("Change error_message_duration from " + this.plugin.settings.error_message_duration + " to " + duration);
+						this.plugin.settings.error_message_duration = duration;
+						await this.plugin.saveSettings();
+						console.log("Changed.");
+					}
+					// Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
 				})
 			)
 		;
