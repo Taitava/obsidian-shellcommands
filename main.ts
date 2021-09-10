@@ -30,7 +30,12 @@ export interface ShellCommandConfiguration { // Migrations.ts uses this also.
 	alias: string;
 }
 
-function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
+/**
+ * Exported because Migrations.ts uses this too.
+ *
+ * @param shell_command
+ */
+export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
 	return {
 		shell_command: shell_command,
 		alias: ""

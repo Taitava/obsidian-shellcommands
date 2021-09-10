@@ -1,4 +1,4 @@
-import ShellCommandsPlugin, {ShellCommandConfiguration} from "./main";
+import ShellCommandsPlugin, {newShellCommandConfiguration} from "./main";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
@@ -29,9 +29,7 @@ function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
                 console.log("Migration failure for command #" + command_id + ": A command with same ID already exists in settings.shell_commands.");
             } else {
                 // All OK, migrate.
-                plugin.settings.shell_commands[command_id] = {
-                    shell_command: shell_command_string
-                };
+                plugin.settings.shell_commands[command_id] = newShellCommandConfiguration(shell_command_string); // Creates a shell command with default values and defines the command for it.
                 delete plugin.settings.commands[command_id]; // Leaves a null in place, but we can deal with it by deleting the whole array if it gets empty.
                 count_empty_commands++; // Account the null generated on the previous line.
                 save = true;
