@@ -105,7 +105,7 @@ export default class ShellCommandsPlugin extends Plugin {
 				if (null !== error) {
 					// Some error occurred
 					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-					new Notice("[" + error.code + "]: " + error.message);
+					this.newError("[" + error.code + "]: " + error.message);
 				} else {
 					// No errors
 					console.log("Command executed without errors.")
@@ -148,6 +148,14 @@ export default class ShellCommandsPlugin extends Plugin {
 			}
 		}
 		return String(new_id);
+	}
+
+	newError(message: string) {
+		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+	}
+
+	newNotice(message: string) {
+		new Notice(message); // Use Obsidian's default timeout for notices.
 	}
 }
 
@@ -217,9 +225,9 @@ class ShellCommandsSettingsTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 					console.log("Shell command settings updated.");
 					if (0 === count_deletions) {
-						new Notice("Nothing to delete :)");
+						this.plugin.newNotice("Nothing to delete :)");
 					} else {
-						new Notice("Deleted " + count_deletions + " shell command(s)!");
+						this.plugin.newNotice("Deleted " + count_deletions + " shell command(s)!");
 					}
 				})
 			)
