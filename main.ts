@@ -3,6 +3,11 @@ import {exec, ExecException} from "child_process";
 import {getVaultAbsolutePath, isWindows} from "./Common";
 import {getShellCommandVariableInstructions, parseShellCommandVariables} from "./ShellCommandVariableParser";
 import {RunMigrations} from "./Migrations";
+import {
+	newShellCommandConfiguration,
+	ShellCommandConfiguration,
+	ShellCommandsConfiguration
+} from "./ShellCommandConfiguration";
 
 // SETTINGS AND DEFAULT VALUES
 interface ShellCommandsPluginSettings {
@@ -19,27 +24,6 @@ const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 
 	// Legacy:
 	commands: [] // Deprecated, but must be present in the default values as long as migrating from commands to shell_commands is supported.
-}
-
-interface ShellCommandsConfiguration {
-	[key: string]: ShellCommandConfiguration;
-}
-
-export interface ShellCommandConfiguration { // Migrations.ts uses this also.
-	shell_command: string;
-	alias: string;
-}
-
-/**
- * Exported because Migrations.ts uses this too.
- *
- * @param shell_command
- */
-export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
-	return {
-		shell_command: shell_command,
-		alias: ""
-	}
 }
 
 interface ObsidianCommandsContainer {
