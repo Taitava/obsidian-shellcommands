@@ -5,14 +5,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-Features that are planned for future versions, but are not released yet.
+Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [1.0.0 milestone on GitHub](https://github.com/Taitava/obsidian-shellcommands/milestone/4).
 
-### Unreleased, to be Added
-- [Alias names for commands (#6)](https://github.com/Taitava/obsidian-shellcommands/issues/6)
+- No in-progress features at the moment.
+
+## [0.2.0] - 2021-09-11
+
+### Added
+- [Alias names for commands (#6)](https://github.com/Taitava/obsidian-shellcommands/issues/6) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
 - [Preview variables in command palette (#10)](https://github.com/Taitava/obsidian-shellcommands/issues/10)
-
-### Unreleased, to be Changed
-- [Error messages will be shown for longer (#7)](https://github.com/Taitava/obsidian-shellcommands/issues/7)
+- [A setting for how long to display error messages (#7)](https://github.com/Taitava/obsidian-shellcommands/issues/7)
 
 ## [0.1.1] - 2021-09-10
 
@@ -39,7 +41,8 @@ Features that are planned for future versions, but are not released yet.
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...HEAD
+[0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.0.0...0.1.0
 [0.0.0]: https://github.com/Taitava/obsidian-shellcommands/releases/tag/0.0.0
