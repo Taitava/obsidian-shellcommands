@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [1.0.0 milestone on GitHub](https://github.com/Taitava/obsidian-shellcommands/milestone/4).
 
-- No in-progress features at the moment.
+### Changed
+- Settings: When opening alias modal, the alias text field has now focus.
 
 ## [0.2.0] - 2021-09-11
 
