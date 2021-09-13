@@ -479,7 +479,7 @@ class ShellCommandAliasModal extends Modal {
 		this.alias_field = this.modalEl.createEl("input", {type: "text", value: this.shell_command_configuration.alias});
 		this.modalEl.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
 		this.modalEl.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
-
+		this.alias_field.focus(); // Focus without a need to click the field.
 	}
 
 	async onClose() {
