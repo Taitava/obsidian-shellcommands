@@ -10,16 +10,14 @@ You can customise your commands with built-in variables that can provide the cur
 
 **The plugin is still in its early development stage.** And its developer is not yet very experienced in creating solid testing patterns to find out possible problems. Use at your own risk, and note that when you upgrade the plugin, things may break.
 
-**This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) ([mainly this file](https://github.com/Taitava/obsidian-shellcommands/blob/main/main.ts)) so you know how it executes commands. The source code is not long.
+**This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) ([mainly this file](https://github.com/Taitava/obsidian-shellcommands/blob/main/main.ts)) so you know how it executes commands.
 
 ## Main issues
 - [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
 - [Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
-## Would be nice to have features (these are not so important):
-- Add configurable environment variables, that will be passed to the executed processes. This way you could for example indicate tell your own made script/program that you initiated it from Obsidian, in case it happens to have practical benefit.
-- A configurable timeout (milliseconds). If the command execution takes longer than the timeout, a kill signal would be sent (`SIGTERM`). Timeout could be defined in the settings, and it would be turned off by default. Currently, there is no timeout.
+For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsidian-shellcommands/issues).
 
 ## Installation & usage
 
@@ -59,7 +57,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | -----------------------| ---------- | --------------------- | --- |
-| SC 0.2.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
+| SC 0.2.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.1.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
 | SC 0.1.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | macOS: 11.5.2<br>Obsidian: 0.12.5<br>Works, tested by [skipadu](https://github.com/skipadu), thank you! 🙂 |
 | SC 0.0.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | |
