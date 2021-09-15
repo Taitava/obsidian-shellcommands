@@ -1,6 +1,6 @@
 import {App, Modal, Notice, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandConfiguration} from "../../ShellCommandConfiguration";
+import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 
 export class ShellCommandAliasModal extends Modal {

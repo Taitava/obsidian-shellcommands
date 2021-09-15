@@ -1,5 +1,5 @@
 // SETTINGS AND DEFAULT VALUES
-import {ShellCommandsConfiguration} from "../../ShellCommandConfiguration";
+import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 
 export interface ShellCommandsPluginSettings {
     working_directory: string;

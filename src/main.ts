@@ -6,7 +6,7 @@ import {RunMigrations} from "./Migrations";
 import {
 	ShellCommandConfiguration,
 	ShellCommandsConfiguration
-} from "../ShellCommandConfiguration";
+} from "./settings/ShellCommandConfiguration";
 import {DEFAULT_SETTINGS, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
