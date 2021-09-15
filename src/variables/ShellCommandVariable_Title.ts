@@ -14,5 +14,5 @@ export class ShellCommandVariable_Title extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{title}}",
-    "Gives the current file name without a file extension.",
+    "Gives the current file name without a file extension. If you need it with the extension, use {{file_name}} instead.",
 );
