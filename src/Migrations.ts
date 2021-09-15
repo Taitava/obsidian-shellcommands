@@ -1,5 +1,5 @@
 import ShellCommandsPlugin from "./main";
-import {newShellCommandConfiguration} from "./ShellCommandConfiguration";
+import {newShellCommandConfiguration} from "../ShellCommandConfiguration";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);

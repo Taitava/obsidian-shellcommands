@@ -2,7 +2,7 @@ import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {cloneObject, getVaultAbsolutePath} from "../Common";
 import {parseShellCommandVariables} from "../ShellCommandVariableParser";
-import {RunMigrations} from "../Migrations";
+import {RunMigrations} from "./Migrations";
 import {
 	ShellCommandConfiguration,
 	ShellCommandsConfiguration
