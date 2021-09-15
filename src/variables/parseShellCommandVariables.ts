@@ -9,6 +9,7 @@ import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
 import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
 import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
 import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
+import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
 
 export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, enable_error_messages: boolean) {
     let shell_variables: ShellCommandVariable[] = [
@@ -21,6 +22,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
         new ShellCommandVariable_Selection(plugin, enable_error_messages),
         new ShellCommandVariable_Title(plugin, enable_error_messages),
         new ShellCommandVariable_VaultPath(plugin, enable_error_messages),
+        new ShellCommandVariable_Workspace(plugin, enable_error_messages),
     ];
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     let parsing_failed = false;
