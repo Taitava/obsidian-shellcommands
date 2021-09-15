@@ -1,4 +1,7 @@
-abstract class ShellCommandVariable {
+import {App} from "obsidian";
+import ShellCommandsPlugin from "../main";
+
+export abstract class ShellCommandVariable {
     readonly plugin: ShellCommandsPlugin;
     readonly app: App;
     readonly enable_error_messages: boolean;

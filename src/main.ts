@@ -1,7 +1,7 @@
 import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException} from "child_process";
 import {cloneObject, getVaultAbsolutePath} from "../Common";
-import {parseShellCommandVariables} from "../ShellCommandVariableParser";
+import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
 import {
 	ShellCommandConfiguration,

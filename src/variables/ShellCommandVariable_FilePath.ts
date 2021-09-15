@@ -1,4 +1,9 @@
-class ShellCommandVariable_FilePath extends ShellCommandVariable{
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {getVaultAbsolutePath} from "../../Common";
+import {normalizePath} from "obsidian";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_FilePath extends ShellCommandVariable{
     name = "file_path";
     has_argument = true;
     getValue(mode: string): string|null {

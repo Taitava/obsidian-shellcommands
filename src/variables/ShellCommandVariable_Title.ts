@@ -1,4 +1,7 @@
-class ShellCommandVariable_Title extends ShellCommandVariable{
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_Title extends ShellCommandVariable{
     name = "title";
     getValue(): string {
         let active_file = this.app.workspace.getActiveFile();

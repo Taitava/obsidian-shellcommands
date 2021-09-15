@@ -1,3 +1,15 @@
+import {ShellCommandVariable} from "./ShellCommandVariable";
+import ShellCommandsPlugin from "../main";
+import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
+import {ShellCommandVariable_Selection} from "./ShellCommandVariable_Selection";
+import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
+import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
+import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
+import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
+import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
+import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
+import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
+
 export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, enable_error_messages: boolean) {
     let shell_variables: ShellCommandVariable[] = [
         new ShellCommandVariable_Clipboard(plugin, enable_error_messages),

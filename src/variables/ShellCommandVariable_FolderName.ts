@@ -1,4 +1,7 @@
-class ShellCommandVariable_FolderName extends ShellCommandVariable{
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_FolderName extends ShellCommandVariable{
     name = "folder_name";
     getValue(): string {
         let file = this.app.workspace.getActiveFile();

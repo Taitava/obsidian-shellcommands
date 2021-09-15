@@ -1,4 +1,8 @@
-class ShellCommandVariable_VaultPath extends ShellCommandVariable{
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {getVaultAbsolutePath} from "../../Common";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_VaultPath extends ShellCommandVariable{
     name = "vault_path";
     getValue(): string {
         return getVaultAbsolutePath(this.app);

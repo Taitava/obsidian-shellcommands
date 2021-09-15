@@ -1,4 +1,8 @@
-class ShellCommandVariable_Selection extends ShellCommandVariable{
+import {getEditor} from "../../Common";
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_Selection extends ShellCommandVariable{
     name = "selection";
     getValue(): string {
         let editor = getEditor(this.app);

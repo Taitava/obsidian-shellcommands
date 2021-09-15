@@ -1,4 +1,7 @@
-class ShellCommandVariable_Clipboard extends ShellCommandVariable {
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_Clipboard extends ShellCommandVariable {
     name = "clipboard";
 
     getValue(): string {

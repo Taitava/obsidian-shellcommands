@@ -1,4 +1,8 @@
-class ShellCommandVariable_Date extends ShellCommandVariable {
+import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {moment} from "obsidian";
+import {ShellCommandVariable} from "./ShellCommandVariable";
+
+export class ShellCommandVariable_Date extends ShellCommandVariable {
     name = "date";
     has_argument = true;
 
