@@ -1,13 +1,15 @@
-import {App, Command, Modal, Notice, Plugin, PluginSettingTab, Setting} from 'obsidian';
+import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException} from "child_process";
-import {cloneObject, getVaultAbsolutePath, isWindows} from "../Common";
-import {getShellCommandVariableInstructions, parseShellCommandVariables} from "../ShellCommandVariableParser";
+import {cloneObject, getVaultAbsolutePath} from "../Common";
+import {parseShellCommandVariables} from "../ShellCommandVariableParser";
 import {RunMigrations} from "../Migrations";
 import {
-	newShellCommandConfiguration,
 	ShellCommandConfiguration,
 	ShellCommandsConfiguration
 } from "../ShellCommandConfiguration";
+import {DEFAULT_SETTINGS, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
+import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
+import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 
 export default class ShellCommandsPlugin extends Plugin {
 	/**

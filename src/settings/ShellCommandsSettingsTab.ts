@@ -1,4 +1,11 @@
-class ShellCommandsSettingsTab extends PluginSettingTab {
+import {App, PluginSettingTab, Setting} from "obsidian";
+import ShellCommandsPlugin from "../main";
+import {getVaultAbsolutePath, isWindows} from "../../Common";
+import {newShellCommandConfiguration, ShellCommandConfiguration} from "../../ShellCommandConfiguration";
+import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
+import {getShellCommandVariableInstructions, parseShellCommandVariables} from "../../ShellCommandVariableParser";
+
+export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
 
     constructor(app: App, plugin: ShellCommandsPlugin) {

@@ -1,4 +1,9 @@
-class ShellCommandAliasModal extends Modal {
+import {App, Modal, Notice, Setting} from "obsidian";
+import ShellCommandsPlugin from "../main";
+import {ShellCommandConfiguration} from "../../ShellCommandConfiguration";
+import {ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+
+export class ShellCommandAliasModal extends Modal {
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
     private readonly shell_command_configuration: ShellCommandConfiguration;

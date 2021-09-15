@@ -1,5 +1,7 @@
 // SETTINGS AND DEFAULT VALUES
-interface ShellCommandsPluginSettings {
+import {ShellCommandsConfiguration} from "../../ShellCommandConfiguration";
+
+export interface ShellCommandsPluginSettings {
     working_directory: string;
     preview_variables_in_command_palette: boolean;
     shell_commands: ShellCommandsConfiguration;
@@ -9,7 +11,8 @@ interface ShellCommandsPluginSettings {
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
     commands: string[];
 }
-const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+
+export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     working_directory: "",
     preview_variables_in_command_palette: true,
     shell_commands: {},
