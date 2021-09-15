@@ -1,4 +1,4 @@
-import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderName extends ShellCommandVariable{
@@ -16,7 +16,7 @@ export class ShellCommandVariable_FolderName extends ShellCommandVariable{
         return file.parent.name;
     }
 }
-shell_command_variable_instructions.push({
-    variable_name: "{{folder_name}}",
-    instructions: "Gives the current file's parent folder name. No ancestor folders are included.",
-});
+addShellCommandVariableInstructions(
+    "{{folder_name}}",
+    "Gives the current file's parent folder name. No ancestor folders are included.",
+);

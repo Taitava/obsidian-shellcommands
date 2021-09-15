@@ -1,5 +1,5 @@
 import {getEditor} from "../../Common";
-import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Selection extends ShellCommandVariable{
@@ -18,7 +18,7 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
         return "";
     }
 }
-shell_command_variable_instructions.push({
-    variable_name: "{{selection}}",
-    instructions: "Gives the currently selected text. Atm only works in editing mode, not in preview mode!",
-});
+addShellCommandVariableInstructions(
+    "{{selection}}",
+    "Gives the currently selected text. Atm only works in editing mode, not in preview mode!",
+);

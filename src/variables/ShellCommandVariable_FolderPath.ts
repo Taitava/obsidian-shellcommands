@@ -1,5 +1,5 @@
 import {normalizePath} from "obsidian";
-import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {getVaultAbsolutePath} from "../../Common";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
@@ -30,7 +30,7 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
         }
     }
 }
-shell_command_variable_instructions.push({
-    variable_name: "{{folder_path:relative}} or {{folder_path:absolute}}",
-    instructions: "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.",
-});
+addShellCommandVariableInstructions(
+    "{{folder_path:relative}} or {{folder_path:absolute}}",
+    "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.",
+);

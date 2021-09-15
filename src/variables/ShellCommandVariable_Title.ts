@@ -1,4 +1,4 @@
-import {shell_command_variable_instructions} from "./ShellCommandVariableInstructions";
+import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Title extends ShellCommandVariable{
@@ -12,7 +12,7 @@ export class ShellCommandVariable_Title extends ShellCommandVariable{
         return null;
     }
 }
-shell_command_variable_instructions.push({
-    variable_name: "{{title}}",
-    instructions: "Gives the current file name without a file extension.",
-});
+addShellCommandVariableInstructions(
+    "{{title}}",
+    "Gives the current file name without a file extension.",
+);

@@ -3,7 +3,8 @@ import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
-import {getShellCommandVariableInstructions, parseShellCommandVariables} from "../../ShellCommandVariableParser";
+import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
+import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
