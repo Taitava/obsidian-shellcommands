@@ -59,7 +59,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	registerShellCommand(command_id: string, shell_command_configuration: ShellCommandConfiguration) {
 		console.log("Registering shell command #" + command_id + " (" + shell_command_configuration.shell_command + ") to Obsidian...");
 		let obsidian_command: Command = {
-			id: "shell-command-" + command_id,
+			id: this.generateObsidianCommandId(command_id),
 			name: this.generateObsidianCommandName(shell_command_configuration),
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette) => {
@@ -138,6 +138,10 @@ export default class ShellCommandsPlugin extends Plugin {
 		this.addCommand(obsidian_command)
 		this.obsidian_commands[command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
 		console.log("Registered.")
+	}
+
+	generateObsidianCommandId(shell_command_id: string) {
+		return "shell-command-" + shell_command_id;
 	}
 
 	generateObsidianCommandName(shell_command_configuration: ShellCommandConfiguration) {
