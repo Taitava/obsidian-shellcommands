@@ -3,6 +3,7 @@ import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
+import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 
@@ -49,37 +50,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         for (let command_id in this.plugin.getShellCommands()) {
             this.createCommandField(command_fields_container, command_id);
         }
-
-        // "Apply deletions" button
-        new Setting(containerEl)
-            .setDesc("Click this when you have deleted any commands (= cleared command text fields). Other changes are applied automatically.")
-            .addButton(button => button
-                .setButtonText("APPLY DELETIONS")
-                .onClick(async () => {
-                    console.log("Updating shell command settings concerning deleted commands...")
-                    let count_deletions = 0;
-                    for (let command_id in this.plugin.getShellCommands()) {
-                        let shell_command = this.plugin.getShellCommands()[command_id].shell_command;
-                        if (shell_command.length == 0 && "new" !== command_id) {
-                            // Remove a command
-                            console.log("Command " + command_id + " gonna be removed.");
-                            delete this.plugin.getShellCommands()[command_id]; // Remove from the plugin's settings.
-                            delete this.plugin.obsidian_commands[command_id]; // Remove from the command palette.
-                            count_deletions++;
-
-                            console.log("Command removed.");
-                        }
-                    }
-                    await this.plugin.saveSettings();
-                    console.log("Shell command settings updated.");
-                    if (0 === count_deletions) {
-                        this.plugin.newNotice("Nothing to delete :)");
-                    } else {
-                        this.plugin.newNotice("Deleted " + count_deletions + " shell command(s)!");
-                    }
-                })
-            )
-        ;
 
         // "New command" button
         new Setting(containerEl)
@@ -202,6 +172,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .onClick(async () => {
                     // Open an alias modal
                     let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting, this);
+                    modal.open();
+                })
+            )
+            .addExtraButton(button => button
+                .setTooltip("Delete this command")
+                .setIcon("trash")
+                .onClick(async () => {
+                    // Open a delete modal
+                    let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting);
                     modal.open();
                 })
             )
