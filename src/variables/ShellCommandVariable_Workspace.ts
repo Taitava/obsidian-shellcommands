@@ -19,7 +19,7 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
 
         let workspace_name = workspaces_plugin.instance?.activeWorkspace;
         if (!workspace_name) {
-            this.newError("Could not figure out the current workspace's name, although the Workspaces core plugin is enabled. Please raise an issue in GitHub.")
+            this.newError("Could not figure out the current workspace's name. Probably you have not loaded a workspace. You can do it e.g. via \"Manage workspaces\" from the left side panel.")
             return null;
         }
 
