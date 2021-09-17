@@ -11,6 +11,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [{{workspace}} variable](https://github.com/Taitava/obsidian-shellcommands/issues/14) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
 
 ### Changed
+- Settings: Widen the command fields.
 - Settings: When opening alias modal, the alias text field has now focus.
 - Internal restructuring of code without external implications.
 - Small improvement on descriptions of {{file_name}} and {{title}} in the plugin's settings.
