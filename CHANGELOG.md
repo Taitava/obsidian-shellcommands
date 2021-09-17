@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### Changed
 - Settings: Widen the command fields.
+- Settings: Shell commands are now deleted with an icon button, not by clearing a text field.
 - Settings: When opening alias modal, the alias text field has now focus.
 - Internal restructuring of code without external implications.
 - Small improvement on descriptions of {{file_name}} and {{title}} in the plugin's settings.
