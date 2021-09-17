@@ -40,7 +40,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         // Tips when the user has already defined some commands
         if (Object.keys(this.plugin.getShellCommands()).length > 0) {
-            containerEl.createEl('p', {text: "To remove a command, clear its text field and click \"Apply deletions\"."});
             if (isWindows()) containerEl.createEl('p', {text: "Tip for Windows: If you get an error starting with \"[259]: Command failed:\" even though the execution works ok, you can try to prefix your command with \"start \". E.g. \"start git-gui\"."});
         }
 
