@@ -8,11 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [1.0.0 milestone on GitHub](https://github.com/Taitava/obsidian-shellcommands/milestone/4).
 
 ### Added
-- [{{workspace}} variable](https://github.com/Taitava/obsidian-shellcommands/issues/14) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
-- Settings: Display hotkeys next to commands.
+- [{{workspace}} variable (#14)](https://github.com/Taitava/obsidian-shellcommands/issues/14) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
+- [Settings: Display hotkeys next to commands. (#21)](https://github.com/Taitava/obsidian-shellcommands/issues/21)
 
 ### Changed
-- Settings: Widen the command fields.
+- [Settings: Widen the command fields. (#19)](https://github.com/Taitava/obsidian-shellcommands/issues/19)
+- [Settings: Shell commands are now deleted with an icon button, not by clearing a text field. (#20)](https://github.com/Taitava/obsidian-shellcommands/issues/20)
 - Settings: When opening alias modal, the alias text field has now focus.
 - Internal restructuring of code without external implications.
 - Small improvement on descriptions of {{file_name}} and {{title}} in the plugin's settings.
