@@ -10,6 +10,9 @@ export function getVaultAbsolutePath(app: App) {
     return null;
 }
 
+/**
+ * For some reason there is no Platform.isWindows .
+ */
 export function isWindows() {
     return process.platform === "win32";
 }
