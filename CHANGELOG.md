@@ -50,7 +50,7 @@ Features that are in development, but are not released yet. Does not include stu
 - Initial release.
 
 [Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...HEAD
-[0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...0.2.0
+[0.2.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.0.0...0.1.0
 [0.0.0]: https://github.com/Taitava/obsidian-shellcommands/releases/tag/0.0.0
