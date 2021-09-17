@@ -149,11 +149,11 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     })
                 )
                 .addExtraButton(button => button
-                    .setTooltip("Delete this command")
+                    .setTooltip("Delete this shell command")
                     .setIcon("trash")
                     .onClick(async () => {
                         // Open a delete modal
-                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting);
+                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting_group);
                         modal.open();
                     })
                 )
