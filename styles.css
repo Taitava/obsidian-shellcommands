@@ -37,3 +37,7 @@ div.shell-commands-shell-command-setting div.setting-item-info {
 div.shell-commands-shell-command-setting input[type=text] {
     width: 100%;
 }
+
+div.shell-commands-hotkey-info svg {
+    vertical-align: middle; /* Not middle but close enough. */
+}

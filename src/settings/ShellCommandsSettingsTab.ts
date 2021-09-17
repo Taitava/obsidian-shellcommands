@@ -1,10 +1,11 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
+import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
+import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -217,6 +218,25 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     .setClass("shell-commands-preview-setting")
             ,
         };
+
+        // Add hotkey information
+        if (!is_new) {
+            let hotkeys = getHotkeysForShellCommand(this.plugin, shell_command_id);
+            if (hotkeys) {
+                let hotkeys_joined: string = "";
+                hotkeys.forEach((hotkey: Hotkey) => {
+                    if (hotkeys_joined) {
+                        hotkeys_joined += "<br>"
+                    }
+                    hotkeys_joined += HotkeyToString(hotkey);
+                });
+                let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
+                setIcon(hotkey_div, "any-key", 22); // Hotkey icon
+                hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
+            }
+        }
+
+        console.log(getHotkeysForShellCommand(this.plugin, shell_command_id)); // TODO: Do not commit
         console.log("Created.");
     }
 

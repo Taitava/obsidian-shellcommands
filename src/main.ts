@@ -205,6 +205,10 @@ export default class ShellCommandsPlugin extends Plugin {
 		return String(new_id);
 	}
 
+	getPluginId() {
+		return this.manifest.id;
+	}
+
 	newError(message: string) {
 		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
