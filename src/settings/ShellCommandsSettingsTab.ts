@@ -1,6 +1,6 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {getVaultAbsolutePath, isWindows} from "../../Common";
+import {getVaultAbsolutePath, isWindows} from "../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";

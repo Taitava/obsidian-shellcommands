@@ -1,5 +1,5 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath} from "../../Common";
+import {getVaultAbsolutePath} from "../Common";
 import {normalizePath} from "obsidian";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 

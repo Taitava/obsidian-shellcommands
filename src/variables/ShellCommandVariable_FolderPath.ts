@@ -1,6 +1,6 @@
 import {normalizePath} from "obsidian";
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath} from "../../Common";
+import {getVaultAbsolutePath} from "../Common";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
