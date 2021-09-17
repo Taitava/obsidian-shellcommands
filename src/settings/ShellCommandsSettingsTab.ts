@@ -152,7 +152,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     .setIcon("trash")
                     .onClick(async () => {
                         // Open a delete modal
-                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting_group);
+                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting_group, container_element);
                         modal.open();
                     })
                 )

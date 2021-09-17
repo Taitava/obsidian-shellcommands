@@ -8,13 +8,15 @@ export class ShellCommandDeleteModal extends Modal {
     private readonly shell_command_id: string;
     private readonly shell_command_configuration: ShellCommandConfiguration;
     private setting_group: ShellCommandSettingGroup;
+    private container_element: HTMLElement;
 
-    constructor(plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup) {
+    constructor(plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, container_element: HTMLElement) {
         super(plugin.app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;
         this.shell_command_configuration = plugin.getShellCommands()[shell_command_id];
         this.setting_group = setting_group;
+        this.container_element = container_element;
     }
 
     onOpen() {
@@ -30,8 +32,10 @@ export class ShellCommandDeleteModal extends Modal {
             delete this.plugin.getShellCommands()[this.shell_command_id]; // Remove from the plugin's settings.
             delete this.plugin.obsidian_commands[this.shell_command_id]; // Remove from the command palette.
 
-            // TODO: Remove the setting field
-
+            // Remove the setting fields
+            this.container_element.removeChild(this.setting_group.name_setting.settingEl);
+            this.container_element.removeChild(this.setting_group.shell_command_setting.settingEl);
+            this.container_element.removeChild(this.setting_group.preview_setting.settingEl);
 
             await this.plugin.saveSettings();
             console.log("Command removed.");
