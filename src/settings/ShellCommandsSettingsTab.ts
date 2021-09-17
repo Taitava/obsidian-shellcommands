@@ -165,47 +165,58 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         } else {
             shell_command = shell_command_configuration.shell_command;
         }
-        let setting = new Setting(container_element)
-            .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
-            .setDesc(this.getShellCommandPreview(shell_command))
-            .addText(text => text
-                .setPlaceholder("Enter your command")
-                .setValue(shell_command)
-                .onChange(async (field_value) => {
-                    let shell_command = field_value;
-                    setting.setDesc(this.getShellCommandPreview(shell_command));
+        let setting_group: ShellCommandSettingGroup = {
+            name_setting:
+                new Setting(container_element)
+                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
+                .addExtraButton(button => button
+                    .setTooltip("Define an alias")
+                    .onClick(async () => {
+                        // Open an alias modal
+                        let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting_group, this);
+                        modal.open();
+                    })
+                )
+                .setClass("shell-commands-name-setting")
+            ,
+            shell_command_setting:
+                new Setting(container_element)
+                .addText(text => text
+                    .setPlaceholder("Enter your command")
+                    .setValue(shell_command)
+                    .onChange(async (field_value) => {
+                        let shell_command = field_value;
+                        setting_group.preview_setting.setDesc(this.getShellCommandPreview(shell_command));
 
-                    if (is_new) {
-                        console.log("Creating new command " + shell_command_id + ": " + shell_command);
-                    }
-                    else {
-                        console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
-                    }
+                        if (is_new) {
+                            console.log("Creating new command " + shell_command_id + ": " + shell_command);
+                        } else {
+                            console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
+                        }
 
-                    // Do this in both cases, when creating a new command and when changing an old one:
-                    shell_command_configuration.shell_command = shell_command;
+                        // Do this in both cases, when creating a new command and when changing an old one:
+                        shell_command_configuration.shell_command = shell_command;
 
-                    if (is_new) {
-                        // Create a new command
-                        this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-                        console.log("Command created.");
-                    } else {
-                        // Change an old command
-                        this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                        console.log("Command changed.");
-                    }
-                    await this.plugin.saveSettings();
-                })
-            )
-            .addExtraButton(button => button
-                .setTooltip("Define an alias")
-                .onClick(async () => {
-                    // Open an alias modal
-                    let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting, this);
-                    modal.open();
-                })
-            )
-        ;
+                        if (is_new) {
+                            // Create a new command
+                            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
+                            console.log("Command created.");
+                        } else {
+                            // Change an old command
+                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                            console.log("Command changed.");
+                        }
+                        await this.plugin.saveSettings();
+                    })
+                )
+                .setClass("shell-commands-shell-command-setting")
+            ,
+            preview_setting:
+                new Setting(container_element)
+                    .setDesc(this.getShellCommandPreview(shell_command))
+                    .setClass("shell-commands-preview-setting")
+            ,
+        };
         console.log("Created.");
     }
 
@@ -228,4 +239,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         }
         return "Command #" + shell_command_id;
     }
+}
+
+export interface ShellCommandSettingGroup {
+    name_setting: Setting;
+    shell_command_setting: Setting;
+    preview_setting: Setting;
 }
