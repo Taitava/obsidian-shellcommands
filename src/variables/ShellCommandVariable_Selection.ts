@@ -1,4 +1,4 @@
-import {getEditor} from "../../Common";
+import {getEditor} from "../Common";
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
