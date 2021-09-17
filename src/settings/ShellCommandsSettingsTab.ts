@@ -214,8 +214,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
             }
         }
-
-        console.log(getHotkeysForShellCommand(this.plugin, shell_command_id)); // TODO: Do not commit
         console.log("Created.");
     }
 
