@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [1.0.0 milestone on GitHub](https://github.com/Taitava/obsidian-shellcommands/milestone/4).
 
+- No in-progress work at the moment.
+
+## [0.3.0] - 2021-09-17
+
 ### Added
 - [{{workspace}} variable (#14)](https://github.com/Taitava/obsidian-shellcommands/issues/14) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
 - [Settings: Display hotkeys next to commands. (#21)](https://github.com/Taitava/obsidian-shellcommands/issues/21)
@@ -50,7 +54,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.3.0...HEAD
+[0.3.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.0...0.1.1
 [0.1.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.0.0...0.1.0
