@@ -1,0 +1,43 @@
+/*
+ * SHELL COMMAND SETTING CONTAINERS
+ */
+
+div.shell-commands-name-setting,
+div.shell-commands-shell-command-setting,
+div.shell-commands-preview-setting {
+    padding: 0;
+}
+
+div.shell-commands-name-setting {
+    padding-top: 18px;
+}
+
+div.shell-commands-shell-command-setting {
+    border-top: none;
+    padding: 5px 0; /* Padding top & bottom 5px, sides 0. */
+}
+
+div.shell-commands-preview-setting {
+    border-top: none;
+    padding-bottom: 18px;
+}
+
+div.shell-commands-shell-command-setting div.setting-item-info {
+    /* Make the left cell (=div.setting-item-info) to have no space at all: */
+    flex: none;
+    flex-grow: unset;
+    margin-right: 0;
+}
+
+
+/*
+ * SHELL COMMAND SETTING FIELDS
+ */
+
+div.shell-commands-shell-command-setting input[type=text] {
+    width: 100%;
+}
+
+div.shell-commands-hotkey-info svg {
+    vertical-align: middle; /* Not middle but close enough. */
+}

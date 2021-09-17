@@ -199,6 +199,10 @@ export default class ShellCommandsPlugin extends Plugin {
 		return String(new_id);
 	}
 
+	getPluginId() {
+		return this.manifest.id;
+	}
+
 	getPluginName() {
 		return this.manifest.name;
 	}

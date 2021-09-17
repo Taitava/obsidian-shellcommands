@@ -1,22 +1,22 @@
 import {App, Modal, Notice, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 
 export class ShellCommandAliasModal extends Modal {
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
     private readonly shell_command_configuration: ShellCommandConfiguration;
-    private setting_field: Setting;
+    private name_setting: Setting;
     private setting_tab: ShellCommandsSettingsTab;
     private alias_field: HTMLInputElement;
 
-    constructor(app: App, plugin: ShellCommandsPlugin, shell_command_id: string, setting_field: Setting, setting_tab: ShellCommandsSettingsTab) {
+    constructor(app: App, plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, setting_tab: ShellCommandsSettingsTab) {
         super(app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;
         this.shell_command_configuration = plugin.getShellCommands()[shell_command_id];
-        this.setting_field = setting_field;
+        this.name_setting = setting_group.name_setting;
         this.setting_tab = setting_tab;
     }
 
@@ -35,7 +35,7 @@ export class ShellCommandAliasModal extends Modal {
             console.log("Change shell command #" + this.shell_command_id + "'s alias from \"" + this.shell_command_configuration.alias + "\" to \"" + new_alias + "\".");
             this.shell_command_configuration.alias = new_alias;
             this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.shell_command_configuration);
-            this.setting_field.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.shell_command_configuration));
+            this.name_setting.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.shell_command_configuration));
             await this.plugin.saveSettings();
             console.log(new_alias ? "Alias changed." : "Alias removed.");
             new Notice(new_alias ? "Alias changed!" : "Alias removed!");

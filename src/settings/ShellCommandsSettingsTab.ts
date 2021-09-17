@@ -1,4 +1,4 @@
-import {App, PluginSettingTab, Setting} from "obsidian";
+import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
@@ -6,6 +6,7 @@ import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
+import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -135,56 +136,86 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         } else {
             shell_command = shell_command_configuration.shell_command;
         }
-        let setting = new Setting(container_element)
-            .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
-            .setDesc(this.getShellCommandPreview(shell_command))
-            .addText(text => text
-                .setPlaceholder("Enter your command")
-                .setValue(shell_command)
-                .onChange(async (field_value) => {
-                    let shell_command = field_value;
-                    setting.setDesc(this.getShellCommandPreview(shell_command));
+        let setting_group: ShellCommandSettingGroup = {
+            name_setting:
+                new Setting(container_element)
+                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
+                .addExtraButton(button => button
+                    .setTooltip("Define an alias")
+                    .onClick(async () => {
+                        // Open an alias modal
+                        let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting_group, this);
+                        modal.open();
+                    })
+                )
+                .addExtraButton(button => button
+                    .setTooltip("Delete this command")
+                    .setIcon("trash")
+                    .onClick(async () => {
+                        // Open a delete modal
+                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting);
+                        modal.open();
+                    })
+                )
+                .setClass("shell-commands-name-setting")
+            ,
+            shell_command_setting:
+                new Setting(container_element)
+                .addText(text => text
+                    .setPlaceholder("Enter your command")
+                    .setValue(shell_command)
+                    .onChange(async (field_value) => {
+                        let shell_command = field_value;
+                        setting_group.preview_setting.setDesc(this.getShellCommandPreview(shell_command));
 
-                    if (is_new) {
-                        console.log("Creating new command " + shell_command_id + ": " + shell_command);
-                    }
-                    else {
-                        console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
-                    }
+                        if (is_new) {
+                            console.log("Creating new command " + shell_command_id + ": " + shell_command);
+                        } else {
+                            console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
+                        }
 
-                    // Do this in both cases, when creating a new command and when changing an old one:
-                    shell_command_configuration.shell_command = shell_command;
+                        // Do this in both cases, when creating a new command and when changing an old one:
+                        shell_command_configuration.shell_command = shell_command;
 
-                    if (is_new) {
-                        // Create a new command
-                        this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-                        console.log("Command created.");
-                    } else {
-                        // Change an old command
-                        this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                        console.log("Command changed.");
+                        if (is_new) {
+                            // Create a new command
+                            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
+                            console.log("Command created.");
+                        } else {
+                            // Change an old command
+                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                            console.log("Command changed.");
+                        }
+                        await this.plugin.saveSettings();
+                    })
+                )
+                .setClass("shell-commands-shell-command-setting")
+            ,
+            preview_setting:
+                new Setting(container_element)
+                    .setDesc(this.getShellCommandPreview(shell_command))
+                    .setClass("shell-commands-preview-setting")
+            ,
+        };
+
+        // Add hotkey information
+        if (!is_new) {
+            let hotkeys = getHotkeysForShellCommand(this.plugin, shell_command_id);
+            if (hotkeys) {
+                let hotkeys_joined: string = "";
+                hotkeys.forEach((hotkey: Hotkey) => {
+                    if (hotkeys_joined) {
+                        hotkeys_joined += "<br>"
                     }
-                    await this.plugin.saveSettings();
-                })
-            )
-            .addExtraButton(button => button
-                .setTooltip("Define an alias")
-                .onClick(async () => {
-                    // Open an alias modal
-                    let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting, this);
-                    modal.open();
-                })
-            )
-            .addExtraButton(button => button
-                .setTooltip("Delete this command")
-                .setIcon("trash")
-                .onClick(async () => {
-                    // Open a delete modal
-                    let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting);
-                    modal.open();
-                })
-            )
-        ;
+                    hotkeys_joined += HotkeyToString(hotkey);
+                });
+                let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
+                setIcon(hotkey_div, "any-key", 22); // Hotkey icon
+                hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
+            }
+        }
+
+        console.log(getHotkeysForShellCommand(this.plugin, shell_command_id)); // TODO: Do not commit
         console.log("Created.");
     }
 
@@ -207,4 +238,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         }
         return "Command #" + shell_command_id;
     }
+}
+
+export interface ShellCommandSettingGroup {
+    name_setting: Setting;
+    shell_command_setting: Setting;
+    preview_setting: Setting;
 }
