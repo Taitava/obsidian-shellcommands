@@ -12,12 +12,6 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 
 export default class ShellCommandsPlugin extends Plugin {
-	/**
-	 * TODO: Is there a way to get the plugin name information from Obsidian API somehow?
-	 * @private
-	 */
-	private static PluginName = "Shell commands";
-
 	settings: ShellCommandsPluginSettings;
 	obsidian_commands: ObsidianCommandsContainer = {};
 
@@ -96,7 +90,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						}
 
 						// Rename the command in command palette
-						let prefix = ShellCommandsPlugin.PluginName + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
+						let prefix = this.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
 						obsidian_command.name = prefix + this.generateObsidianCommandName(preparsed_shell_command_configuration);
 
 						// Store the preparsed shell command so that we can use exactly the same values if the command gets later executed.
@@ -203,6 +197,10 @@ export default class ShellCommandsPlugin extends Plugin {
 			}
 		}
 		return String(new_id);
+	}
+
+	getPluginName() {
+		return this.manifest.name;
 	}
 
 	newError(message: string) {
