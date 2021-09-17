@@ -231,7 +231,8 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     hotkeys_joined += HotkeyToString(hotkey);
                 });
                 let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
-                setIcon(hotkey_div, "any-key", 22); // Hotkey icon
+                // Comment out the icon because it would look like a clickable button (as there are other clickable icons in the settings).
+                // setIcon(hotkey_div, "any-key", 22); // Hotkey icon
                 hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
             }
         }
