@@ -26,7 +26,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         // "Working directory" field
         new Setting(containerEl)
             .setName("Working directory")
-            .setDesc("Enter a directory where your commands will be run. If empty, defaults to your vault's location.")
+            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
             .addText(text => text
                 .setPlaceholder(getVaultAbsolutePath(this.app))
                 .setValue(this.plugin.settings.working_directory)

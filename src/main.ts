@@ -10,6 +10,8 @@ import {
 import {DEFAULT_SETTINGS, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
+import * as path from "path";
+import * as fs from "fs";
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
@@ -167,7 +169,12 @@ export default class ShellCommandsPlugin extends Plugin {
 		// Returns either a user defined working directory, or an automatically detected one.
 		let working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
+			// No working directory specified, so use the vault directory.
 			return getVaultAbsolutePath(this.app);
+		} else if (!path.isAbsolute(working_directory)) {
+			// The working directory is relative.
+			// Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
+			return path.join(getVaultAbsolutePath(this.app), working_directory);
 		}
 		return working_directory;
 	}
