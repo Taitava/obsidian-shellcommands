@@ -150,19 +150,37 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	executeShellCommand(shell_command: string) {
-		console.log("Executing command "+shell_command+" in "+this.getWorkingDirectory() + "...");
-		exec(shell_command, {
-			"cwd": this.getWorkingDirectory()
-		}, (error: (ExecException|null)) => {
-			if (null !== error) {
-				// Some error occurred
-				console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-				this.newError("[" + error.code + "]: " + error.message);
-			} else {
-				// No errors
-				console.log("Command executed without errors.")
-			}
-		});
+		let working_directory = this.getWorkingDirectory();
+
+		// Check that the working directory exists and is a folder
+		if (!fs.existsSync(working_directory)) {
+			// Working directory does not exist
+			// Prevent execution
+			console.log("Working directory does not exist: " + working_directory);
+			this.newError("Working directory does not exist: " + working_directory);
+		}
+		else if (!fs.lstatSync(working_directory).isDirectory()) {
+			// Working directory is not a directory.
+			// Prevent execution
+			console.log("Working directory exists but is not a folder: " + working_directory);
+			this.newError("Working directory exists but is not a folder: " + working_directory);
+		} else {
+			// Working directory is OK
+			// Execute the shell command
+			console.log("Executing command " + shell_command + " in " + working_directory + "...");
+			exec(shell_command, {
+				"cwd": working_directory
+			}, (error: (ExecException|null)) => {
+				if (null !== error) {
+					// Some error occurred
+					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+					this.newError("[" + error.code + "]: " + error.message);
+				} else {
+					// No errors
+					console.log("Command executed without errors.")
+				}
+			});
+		}
 	}
 
 	getWorkingDirectory() {
