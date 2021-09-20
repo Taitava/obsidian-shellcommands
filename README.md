@@ -55,9 +55,12 @@ Note that for the sake of simplicity, there is no escaping done for variable val
 Not a single plugin can be great just by itself. And not a single plugin suits every situation. Here I'm collecting a list of plugins that can be good companions or good alternatives to *Shell commands*.
 
 <!-- Keep in alphabetical order! -->
-- **[cMenu](https://github.com/chetachiezikeuzor/cMenu-Plugin)**: When you select text in editor/preview mode, this plugin opens a small modal of buttons for text formatting and other actions. You can add shell commands to the mix! (Thanks [FelipeRearden](https://github.com/FelipeRearden) for telling me about this plugin!)
-- **[Customizable Sidemenu](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands! (Thanks [FelipeRearden](https://github.com/FelipeRearden) for this tip too!)
+- **[cMenu](https://github.com/chetachiezikeuzor/cMenu-Plugin)**: When you select text in editor/preview mode, this plugin opens a small modal of buttons for text formatting and other actions. You can add shell commands to the mix!
+- **[Customizable Sidemenu](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands!
+- **[QuickAdd](https://github.com/chhoumann/quickadd)**: You can create macros that launch multiple commands at once. Sure, in *Shell commands*, you can have multiple terminal commands executed one after another (with `&&` operator for Linux and Mac, and `&` operator for Windows), but *QuickAdd* allows you to have macros that combine shell commands to other Obsidian commands.
 - **[Text Expander](https://github.com/konodyuk/obsidian-text-expander)**: If you want to write codeblocks in your markdown note files and execute them, then *Text Expander* is the solution for you. *Shell commands* focuses on bringing short, rarely changed terminal commands at your finger tips via hotkeys. You can run longer scripts with *Shell commands* too by writing them into a bash/batch file and executing that file as a command, but if you need to view the script before executing it, or make changes regularly, then *Shell commands* is not so optimal for your situation, and you might benefit more from *Text Expander*. But of course, you can also have both if you like.
+
+(Thanks [FelipeRearden](https://github.com/FelipeRearden) for telling me about many of these plugins!)
 
 ## Tested platforms
 
