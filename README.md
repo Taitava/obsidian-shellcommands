@@ -51,6 +51,14 @@ These are just examples, and this plugin **does not** define them for you automa
 
 Note that for the sake of simplicity, there is no escaping done for variable values. If you have a command and a quoted string parameter like `mycommand "{{clipboard}}"`, it might break if your clipboard content contains `"` quote characters, because those are inserted into the command as-is. Your command might end up looking like this: `mycommand "Text pasted from clipboard that contains a " character."` I am open to discussion how to best implement variable value escaping in the future.
 
+## Benefits from other plugins
+Not a single plugin can be great just by itself. And not a single plugin suits every situation. Here I'm collecting a list of plugins that can be good companions or good alternatives to *Shell commands*.
+
+<!-- Keep in alphabetical order! -->
+- **[cMenu](https://github.com/chetachiezikeuzor/cMenu-Plugin)**: When you select text in editor/preview mode, this plugin opens a small modal of buttons for text formatting and other actions. You can add shell commands to the mix!
+- **[Customizable Sidemenu](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands!
+- **[Text Expander](https://github.com/konodyuk/obsidian-text-expander)**: If you want to write codeblocks in your markdown note files and execute them, then *Text Expander* is the solution for you. *Shell commands* focuses on bringing short, rarely changed terminal commands at your finger tips via hotkeys. You can run longer scripts with *Shell commands* too by writing them into a bash/batch file and executing that file as a command, but if you need to view the script before executing it, or make changes regularly, then *Shell commands* is not so optimal for your situation, and you might benefit more from *Text Expander*. But of course, you can also have both if you like.
+
 ## Tested platforms
 
 Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
