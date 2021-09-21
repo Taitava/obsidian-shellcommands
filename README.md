@@ -1,3 +1,5 @@
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Install & **enable**! <!-- Meant for Obsidian community plugin list view. -->
+
 # Shell commands plugin for Obsidian
 
 This plugin lets you define shell/terminal commands in settings and run them quickly when needed via Obsidian's command palette, or via hotkeys that you can assign in Obsidian's hotkey settings.
