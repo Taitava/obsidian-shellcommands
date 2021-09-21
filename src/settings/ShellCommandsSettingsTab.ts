@@ -2,7 +2,7 @@ import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
+import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
@@ -140,10 +140,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 new Setting(container_element)
                 .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
                 .addExtraButton(button => button
-                    .setTooltip("Define an alias")
+                    .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
                     .onClick(async () => {
-                        // Open an alias modal
-                        let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting_group, this);
+                        // Open an extra options modal
+                        let modal = new ShellCommandExtraOptionsModal(this.app, this.plugin, shell_command_id, setting_group, this);
                         modal.open();
                     })
                 )
