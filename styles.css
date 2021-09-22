@@ -1,4 +1,13 @@
 /*
+ * COMMON
+ */
+
+.shell-commands-hide {
+    display: none;
+}
+
+
+/*
  * SHELL COMMAND SETTING CONTAINERS
  */
 
@@ -40,4 +49,12 @@ div.shell-commands-shell-command-setting input[type=text] {
 
 div.shell-commands-hotkey-info svg {
     vertical-align: middle; /* Not middle but close enough. */
+}
+
+/*
+ * SHELL COMMAND ICONS (not button icons, just informational icons)
+ */
+
+span.shell-commands-main-icon-container {
+    margin-left: 10px;
 }

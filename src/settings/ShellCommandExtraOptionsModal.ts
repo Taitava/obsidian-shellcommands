@@ -59,6 +59,14 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 .setValue(this.shell_command_configuration.confirm_execution)
                 .onChange(async (value) => {
                     this.shell_command_configuration.confirm_execution = value;
+                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
+                    if (this.shell_command_configuration.confirm_execution) {
+                        // Show icon
+                        icon_container.removeClass("shell-commands-hide");
+                    } else {
+                        // Hide icon
+                        icon_container.addClass("shell-commands-hide");
+                    }
                     await this.plugin.saveSettings();
                 })
             )

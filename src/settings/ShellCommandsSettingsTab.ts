@@ -197,6 +197,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             ,
         };
 
+        // Add "Ask confirmation" icon.
+        let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
+        let confirm_execution_icon_container = icon_container.createEl("span", {title: "Asks confirmation before execution.", attr: {class: "shell-commands-confirm-execution-icon-container"}});
+        setIcon(confirm_execution_icon_container, "languages");
+        if (!shell_command_configuration.confirm_execution) {
+            // Do not display the icon for commands that do not use confirmation.
+            confirm_execution_icon_container.addClass("shell-commands-hide");
+        }
+
         // Add hotkey information
         if (!is_new) {
             let hotkeys = getHotkeysForShellCommand(this.plugin, shell_command_id);
