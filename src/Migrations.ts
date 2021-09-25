@@ -3,6 +3,7 @@ import {newShellCommandConfiguration} from "./settings/ShellCommandConfiguration
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
+    save ||= EnsureShellCommandsHaveAllFields(plugin);
     if (save) {
         // Only save if there were changes to configuration.
         console.log("Saving migrations...")
@@ -44,6 +45,36 @@ function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
         }
     } else {
         console.log("settings.commands is empty, so no need to migrate commands. Good thing! :)");
+    }
+    return save;
+}
+
+/**
+ * This is a general migrator that adds new, missing properties to ShellCommandConfiguration objects. This is not tied to any specific version update, unlike MigrateCommandsToShellCommands().
+ *
+ * @param plugin
+ * @constructor
+ */
+function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
+    let save = false;
+    let shell_command_default_configuration = newShellCommandConfiguration();
+    let shell_command_id: string;
+    let shell_command_configurations = plugin.getShellCommands();
+    for (shell_command_id in shell_command_configurations) {
+        let shell_command_configuration = shell_command_configurations[shell_command_id];
+        for (let property_name in shell_command_default_configuration) {
+            // @ts-ignore property_default_value can have (almost) whatever datatype
+            let property_default_value: any = shell_command_default_configuration[property_name];
+            // @ts-ignore
+            if (undefined === shell_command_configuration[property_name]) {
+                // This shell command does not have this property.
+                // Add the property to the shell command and use a default value.
+                console.log("EnsureShellCommandsHaveAllFields(): Shell command #" + shell_command_id + " does not have property '" + property_name + "'. Will create the property and assign a default value '" + property_default_value + "'.");
+                // @ts-ignore
+                shell_command_configuration[property_name] = property_default_value;
+                save = true;
+            }
+        }
     }
     return save;
 }

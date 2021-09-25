@@ -77,7 +77,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setName("Ignore error codes")
             .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
             .addText(text => text
-                .setValue((this.shell_command_configuration.ignore_error_codes ?? []).join(",")) // ignore_error_codes can be undefined because older config files do not have it.
+                .setValue(this.shell_command_configuration.ignore_error_codes.join(","))
                 .onChange(async (value) => {
                     // Parse the string of comma separated numbers
                     let ignore_error_codes: number[] = [];

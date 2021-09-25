@@ -218,9 +218,9 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         }
 
         // "Ignored error codes" icon
-        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes ?? []), class: "shell-commands-ignored-error-codes-icon-container"}});
+        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes), class: "shell-commands-ignored-error-codes-icon-container"}});
         setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
-        if (!(shell_command_configuration.ignore_error_codes ?? []).length) {
+        if (!shell_command_configuration.ignore_error_codes.length) {
             // Do not display the icon for commands that do not ignore any errors.
             ignored_error_codes_icon_container.addClass("shell-commands-hide");
         }
