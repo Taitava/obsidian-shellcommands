@@ -1,6 +1,6 @@
 import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {getVaultAbsolutePath, isWindows} from "../Common";
+import {getVaultAbsolutePath} from "../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
@@ -37,11 +37,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 })
             )
         ;
-
-        // Tips when the user has already defined some commands
-        if (Object.keys(this.plugin.getShellCommands()).length > 0) {
-            if (isWindows()) containerEl.createEl('p', {text: "Tip for Windows: If you get an error starting with \"[259]: Command failed:\" even though the execution works ok, you can try to prefix your command with \"start \". E.g. \"start git-gui\"."});
-        }
 
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         let command_fields_container = containerEl.createEl("div");
@@ -211,13 +206,21 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             ,
         };
 
-        // Add "Ask confirmation" icon.
+        // Informational icons (= non-clickable)
         let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
         let confirm_execution_icon_container = icon_container.createEl("span", {title: "Asks confirmation before execution.", attr: {class: "shell-commands-confirm-execution-icon-container"}});
         setIcon(confirm_execution_icon_container, "languages");
         if (!shell_command_configuration.confirm_execution) {
             // Do not display the icon for commands that do not use confirmation.
             confirm_execution_icon_container.addClass("shell-commands-hide");
+        }
+
+        // "Ignored error codes" icon
+        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes ?? []), class: "shell-commands-ignored-error-codes-icon-container"}});
+        setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
+        if (!(shell_command_configuration.ignore_error_codes ?? []).length) {
+            // Do not display the icon for commands that do not ignore any errors.
+            ignored_error_codes_icon_container.addClass("shell-commands-hide");
         }
 
         // Add hotkey information
@@ -254,13 +257,22 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     /**
      * @param shell_command_id String like "0" or "1" etc.
      * @param shell_command_configuration
-     * @public Public because ShellCommandAliasModal uses this too.
+     * @public Public because ShellCommandExtraOptionsModal uses this too.
      */
     public generateCommandFieldName(shell_command_id: string, shell_command_configuration: ShellCommandConfiguration) {
         if (shell_command_configuration.alias) {
             return shell_command_configuration.alias;
         }
         return "Command #" + shell_command_id;
+    }
+
+    /**
+     * @param ignored_error_codes
+     * @public Public because ShellCommandExtraOptionsModal uses this too.
+     */
+    public generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
+        let plural = ignored_error_codes.length !== 1 ? "s" : "";
+        return "Ignored error"+plural+": " + ignored_error_codes.join(",");
     }
 }
 

@@ -12,10 +12,11 @@ export function getVaultAbsolutePath(app: App) {
 
 /**
  * For some reason there is no Platform.isWindows .
+ * 2021-09-25: Not used anymore because issue #36 removed a need to display a tip for Windows users. I'm still keeping this, as there might become new use for this in the future, butI'll comment this out.
  */
-export function isWindows() {
-    return process.platform === "win32";
-}
+// export function isWindows() {
+//     return process.platform === "win32";
+// }
 
 export function getEditor(app: App): Editor {
     let view = app.workspace.getActiveViewOfType(MarkdownView);

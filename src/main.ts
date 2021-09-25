@@ -168,7 +168,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// No need to confirm.
 			// Execute.
-			this.executeShellCommand(shell_command);
+			this.executeShellCommand(shell_command, shell_command_configuration.ignore_error_codes);
 		}
 	}
 
@@ -177,8 +177,9 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
 	 *
 	 * @param shell_command
+	 * @param ignore_error_codes
 	 */
-	executeShellCommand(shell_command: string) {
+	executeShellCommand(shell_command: string, ignore_error_codes: number[]) {
 		let working_directory = this.getWorkingDirectory();
 
 		// Check that the working directory exists and is a folder
@@ -203,7 +204,16 @@ export default class ShellCommandsPlugin extends Plugin {
 				if (null !== error) {
 					// Some error occurred
 					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
-					this.newError("[" + error.code + "]: " + error.message);
+
+					// Check if this error should be displayed to the user or not
+					if (ignore_error_codes.contains(error.code)) {
+						// The user has ignored this error.
+						console.log("User has ignored this error, so won't display it.");
+					} else {
+						// Show the error.
+						console.log("Will display the error to user.");
+						this.newError("[" + error.code + "]: " + error.message);
+					}
 				} else {
 					// No errors
 					console.log("Command executed without errors.")

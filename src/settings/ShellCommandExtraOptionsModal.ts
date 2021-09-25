@@ -4,7 +4,7 @@ import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 
 export class ShellCommandExtraOptionsModal extends Modal {
-    static OPTIONS_SUMMARY = "Options: Alias, Confirmation";
+    static OPTIONS_SUMMARY = "Alias, Confirmation, Ignore errors";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -72,5 +72,42 @@ export class ShellCommandExtraOptionsModal extends Modal {
             )
         ;
 
+        // Ignore errors field
+        new Setting(this.modalEl)
+            .setName("Ignore error codes")
+            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
+            .addText(text => text
+                .setValue((this.shell_command_configuration.ignore_error_codes ?? []).join(",")) // ignore_error_codes can be undefined because older config files do not have it.
+                .onChange(async (value) => {
+                    // Parse the string of comma separated numbers
+                    let ignore_error_codes: number[] = [];
+                    let raw_error_codes = value.split(",");
+                    for (let i in raw_error_codes) {
+                        let raw_error_code = raw_error_codes[i];
+                        let error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
+                        // Ensure that the error code is not NaN, 0 or a negative number.
+                        if (!isNaN(error_code_candidate) && error_code_candidate >= 1) {
+                            // The candidate is legit.
+                            ignore_error_codes.push(error_code_candidate);
+                        }
+                    }
+
+                    // Save the validated error numbers
+                    this.shell_command_configuration.ignore_error_codes = ignore_error_codes;
+                    await this.plugin.saveSettings();
+
+                    // Update icon
+                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
+                    if (this.shell_command_configuration.ignore_error_codes.length) {
+                        // Show icon
+                        icon_container.setAttr("aria-label", this.setting_tab.generateIgnoredErrorCodesIconTitle(this.shell_command_configuration.ignore_error_codes));
+                        icon_container.removeClass("shell-commands-hide");
+                    } else {
+                        // Hide icon
+                        icon_container.addClass("shell-commands-hide");
+                    }
+                })
+            )
+        ;
     }
 }
