@@ -2,7 +2,7 @@ import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, isWindows} from "../Common";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {ShellCommandAliasModal} from "./ShellCommandAliasModal";
+import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
@@ -154,10 +154,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     })
                 )
                 .addExtraButton(button => button
-                    .setTooltip("Define an alias")
+                    .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
                     .onClick(async () => {
-                        // Open an alias modal
-                        let modal = new ShellCommandAliasModal(this.app, this.plugin, shell_command_id, setting_group, this);
+                        // Open an extra options modal
+                        let modal = new ShellCommandExtraOptionsModal(this.app, this.plugin, shell_command_id, setting_group, this);
                         modal.open();
                     })
                 )
@@ -210,6 +210,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     .setClass("shell-commands-preview-setting")
             ,
         };
+
+        // Add "Ask confirmation" icon.
+        let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
+        let confirm_execution_icon_container = icon_container.createEl("span", {title: "Asks confirmation before execution.", attr: {class: "shell-commands-confirm-execution-icon-container"}});
+        setIcon(confirm_execution_icon_container, "languages");
+        if (!shell_command_configuration.confirm_execution) {
+            // Do not display the icon for commands that do not use confirmation.
+            confirm_execution_icon_container.addClass("shell-commands-hide");
+        }
 
         // Add hotkey information
         if (!is_new) {

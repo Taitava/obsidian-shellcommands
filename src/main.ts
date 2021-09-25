@@ -12,6 +12,7 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
+import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
@@ -112,13 +113,13 @@ export default class ShellCommandsPlugin extends Plugin {
 							// No need to create a notice here, because the parsing process creates notices every time something goes wrong.
 						} else {
 							// The command was parsed correctly.
-							this.executeShellCommand(parsed_shell_command);
+							this.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
 						}
 
 					} else {
 						// We do have a preparsed version of this command.
 						// No need to check if the parsing had previously succeeded, because if it would have failed, the command would not be in the preparsed commands' array.
-						this.executeShellCommand(this.preparsed_shell_command_configurations[command_id].shell_command);
+						this.confirmAndExecuteShellCommand(this.preparsed_shell_command_configurations[command_id].shell_command, shell_command_configuration);
 					}
 
 					// Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
@@ -149,6 +150,34 @@ export default class ShellCommandsPlugin extends Plugin {
 		return prefix + shell_command_configuration.shell_command;
 	}
 
+	/**
+	 *
+	 * @param shell_command The actual shell command that will be executed.
+	 * @param shell_command_configuration Used for reading other properties. shell_command_configuration.shell_command won't be used!
+	 */
+	confirmAndExecuteShellCommand(shell_command: string, shell_command_configuration: ShellCommandConfiguration) {
+
+		// Check if the command needs confirmation before execution
+		if (shell_command_configuration.confirm_execution) {
+			// Yes, a confirmation is needed.
+			// Open a confirmation modal.
+			new ConfirmExecutionModal(this, shell_command, shell_command_configuration)
+				.open()
+			;
+			return; // Do not execute now. The modal will call executeShellCommand() later if needed.
+		} else {
+			// No need to confirm.
+			// Execute.
+			this.executeShellCommand(shell_command);
+		}
+	}
+
+	/**
+	 * Does not ask for confirmation before execution. This should only be called if: a) a confirmation is already asked from a user, or b) this command is defined not to need a confirmation.
+	 * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
+	 *
+	 * @param shell_command
+	 */
 	executeShellCommand(shell_command: string) {
 		let working_directory = this.getWorkingDirectory();
 
