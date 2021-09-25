@@ -149,7 +149,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                         if (null === parsed_shell_command) {
                             console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
                         } else {
-                            this.plugin.executeShellCommand(parsed_shell_command);
+                            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
                         }
                     })
                 )
