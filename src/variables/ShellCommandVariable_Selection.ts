@@ -9,7 +9,7 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
         if (null === editor) {
             // Probably the leaf is in preview mode or some other problem happened.
             // FIXME: Make it possible to use this feature also in preview mode.
-            this.newError("You need to turn editing mode on, as I'm not able to get selected text when in preview mode. Blame the one who developed this plugin! This should be fixed in the future.");
+            this.newErrorMessage("You need to turn editing mode on, as I'm not able to get selected text when in preview mode. Blame the one who developed this plugin! This should be fixed in the future.");
             return null;
         }
         if (editor.somethingSelected()) {

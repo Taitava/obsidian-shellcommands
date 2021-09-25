@@ -4,14 +4,13 @@ import ShellCommandsPlugin from "../main";
 export abstract class ShellCommandVariable {
     readonly plugin: ShellCommandsPlugin;
     readonly app: App;
-    readonly enable_error_messages: boolean;
+    private error_messages: string[] = [];
     readonly name: string;
     readonly has_argument: boolean = false;
 
-    constructor(plugin: ShellCommandsPlugin, enable_error_messages: boolean) {
+    constructor(plugin: ShellCommandsPlugin) {
         this.plugin = plugin
         this.app = plugin.app;
-        this.enable_error_messages = enable_error_messages;
     }
 
     abstract getValue(argument: string): string|null;
@@ -25,11 +24,15 @@ export abstract class ShellCommandVariable {
         return pattern;
     }
 
-    protected newError(message: string) {
-        // Notifications can be disabled. This is done when previewing commands while they are being typed.
-        if (this.enable_error_messages) {
-            let prefix = "{{" + this.name + "}}: ";
-            this.plugin.newError(prefix + message);
-        }
+    /**
+     * Note that error messages can only exist after getValue() is called!
+     */
+    getErrorMessages() {
+        return this.error_messages;
+    }
+
+    protected newErrorMessage(message: string) {
+        let prefix = "{{" + this.name + "}}: ";
+        this.error_messages.push(prefix + message);
     }
 }

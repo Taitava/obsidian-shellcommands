@@ -145,9 +145,9 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     .onClick(() => {
                         // Execute the shell command now (for trying it out in the settings)
                         let shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command, true);
-                        if (null === parsed_shell_command) {
-                            console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
+                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command);
+                        if (Array.isArray(parsed_shell_command)) {
+                            this.plugin.newErrors(parsed_shell_command);
                         } else {
                             this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
                         }
@@ -240,12 +240,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         console.log("Created.");
     }
 
-    getShellCommandPreview(command: string) {
-        let parsed_command = parseShellCommandVariables(this.plugin, command, false); // false: disables notifications if variables have syntax errors.
-        if (null === parsed_command) {
-            return "[Error while parsing variables.]";
+    getShellCommandPreview(shell_command: string) {
+        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command); // false: disables notifications if variables have syntax errors.
+        if (Array.isArray(parsed_shell_command)) {
+            // Variable parsing failed.
+            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
+            return parsed_shell_command[0];
         }
-        return parsed_command;
+        // Variable parsing succeeded
+        return parsed_shell_command;
     }
 
     /**

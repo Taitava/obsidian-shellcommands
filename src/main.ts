@@ -67,10 +67,10 @@ export default class ShellCommandsPlugin extends Plugin {
 						let preparsed_shell_command_configuration: ShellCommandConfiguration = cloneObject(shell_command_configuration); // Clone shell_command_configuration so that we won't edit the original object.
 
 						// Parse variables in the actual shell command
-						let parsed_shell_command = parseShellCommandVariables(this, preparsed_shell_command_configuration.shell_command, false);
-						if (null === parsed_shell_command) {
-							// Variable parsing failed.
-							// Just cancel the preview, the command will be shown with variable names.
+						let parsed_shell_command = parseShellCommandVariables(this, preparsed_shell_command_configuration.shell_command);
+						if (Array.isArray(parsed_shell_command)) {
+							// Variable parsing failed, because an array was returned, which contains error messages.
+							// Just cancel the preview, the command will be shown with variable names. Discard the error messages.
 							console.log("Shell command preview: Variable parsing failed for shell command " + preparsed_shell_command_configuration.shell_command);
 							return true;
 						} else {
@@ -80,10 +80,10 @@ export default class ShellCommandsPlugin extends Plugin {
 						}
 
 						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-						let parsed_alias = parseShellCommandVariables(this, preparsed_shell_command_configuration.alias, false);
-						if (null === parsed_alias) {
-							// Variable parsing failed.
-							// Just cancel the preview, the command will be shown with variable names.
+						let parsed_alias = parseShellCommandVariables(this, preparsed_shell_command_configuration.alias);
+						if (Array.isArray(parsed_alias)) {
+							// Variable parsing failed, because an array was returned, which contains error messages.
+							// Just cancel the preview, the alias will be shown with variable names. Discard the error messages.
 							console.log("Shell command preview: Variable parsing failed for alias " + preparsed_shell_command_configuration.alias);
 							return true;
 						} else {
@@ -106,11 +106,11 @@ export default class ShellCommandsPlugin extends Plugin {
 					// Check if we happen to have a preparsed command (= variables parsed at the time of opening the command palette)
 					if (undefined === this.preparsed_shell_command_configurations[command_id]) {
 						// No preparsed command. Execute a standard version of the command, and do variable parsing now.
-						let parsed_shell_command = parseShellCommandVariables(this, shell_command_configuration.shell_command, true);
-						if (null === parsed_shell_command) {
+						let parsed_shell_command = parseShellCommandVariables(this, shell_command_configuration.shell_command);
+						if (Array.isArray(parsed_shell_command)) {
 							// The command could not be parsed correctly.
-							console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
-							// No need to create a notice here, because the parsing process creates notices every time something goes wrong.
+							// Display error messages
+							this.newErrors(parsed_shell_command);
 						} else {
 							// The command was parsed correctly.
 							this.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
@@ -263,6 +263,12 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	newError(message: string) {
 		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+	}
+
+	newErrors(messages: string[]) {
+		messages.forEach((message: string) => {
+			this.newError(message);
+		});
 	}
 
 	newNotice(message: string) {

@@ -17,15 +17,15 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                     case "relative":
                         return folder.path;
                     default:
-                        this.newError(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
+                        this.newErrorMessage(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                         return null; // null indicates that getting a value has failed and the command should not be executed.
                 }
             } else {
-                this.newError("The current file does not have a parent for some strange reason.");
+                this.newErrorMessage("The current file does not have a parent for some strange reason.");
                 return null; // null indicates that getting a value has failed and the command should not be executed.
             }
         } else {
-            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
     }

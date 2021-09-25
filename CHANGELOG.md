@@ -13,6 +13,10 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### Changed
 - [Working directory: support a relative path (#28)](https://github.com/Taitava/obsidian-shellcommands/issues/28)
+- [Internal: Make variables to return error messages in an array, not to display error messages directly (#39)](https://github.com/Taitava/obsidian-shellcommands/issues/39)
+- The above internal change also made these changes:
+  - Settings: command preview can now show error messages from variables.
+  - If one variable fails to parse, parsing the rests of variables is cancelled, so in some cases less error messages are displayed at the same time.
 
 ## [0.3.0] - 2021-09-17
 

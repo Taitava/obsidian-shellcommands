@@ -9,17 +9,17 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
         // @ts-ignore internalPlugins exists although it's not in obsidian.d.ts.
         let workspaces_plugin = this.app.internalPlugins?.plugins?.workspaces;
         if (!workspaces_plugin) {
-            this.newError("Workspaces core plugin is not found for some reason. Please raise an issue in GitHub.")
+            this.newErrorMessage("Workspaces core plugin is not found for some reason. Please raise an issue in GitHub.")
             return null;
         }
         else if (!workspaces_plugin.enabled) {
-            this.newError("Workspaces core plugin is not enabled.")
+            this.newErrorMessage("Workspaces core plugin is not enabled.")
             return null;
         }
 
         let workspace_name = workspaces_plugin.instance?.activeWorkspace;
         if (!workspace_name) {
-            this.newError("Could not figure out the current workspace's name. Probably you have not loaded a workspace. You can do it e.g. via \"Manage workspaces\" from the left side panel.")
+            this.newErrorMessage("Could not figure out the current workspace's name. Probably you have not loaded a workspace. You can do it e.g. via \"Manage workspaces\" from the left side panel.")
             return null;
         }
 

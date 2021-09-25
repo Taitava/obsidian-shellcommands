@@ -6,11 +6,11 @@ export class ShellCommandVariable_FolderName extends ShellCommandVariable{
     getValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
-            this.newError("No file is active at the moment. Open a file or click a pane that has a file open.");
+            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         if (!file.parent) {
-            this.newError("The current file does not have a parent for some strange reason.");
+            this.newErrorMessage("The current file does not have a parent for some strange reason.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
         return file.parent.name;
