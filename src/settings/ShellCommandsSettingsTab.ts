@@ -140,6 +140,20 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 new Setting(container_element)
                 .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
                 .addExtraButton(button => button
+                    .setTooltip("Execute now")
+                    .setIcon("run-command")
+                    .onClick(() => {
+                        // Execute the shell command now (for trying it out in the settings)
+                        let shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
+                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command, true);
+                        if (null === parsed_shell_command) {
+                            console.log("Parsing command " + shell_command_configuration.shell_command + " failed.");
+                        } else {
+                            this.plugin.executeShellCommand(parsed_shell_command);
+                        }
+                    })
+                )
+                .addExtraButton(button => button
                     .setTooltip("Define an alias")
                     .onClick(async () => {
                         // Open an alias modal
