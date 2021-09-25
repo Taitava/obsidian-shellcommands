@@ -208,7 +208,9 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         // Informational icons (= non-clickable)
         let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
-        let confirm_execution_icon_container = icon_container.createEl("span", {title: "Asks confirmation before execution.", attr: {class: "shell-commands-confirm-execution-icon-container"}});
+
+        // "Ask confirmation" icon.
+        let confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
         setIcon(confirm_execution_icon_container, "languages");
         if (!shell_command_configuration.confirm_execution) {
             // Do not display the icon for commands that do not use confirmation.
