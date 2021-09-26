@@ -5,7 +5,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
-Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [1.0.0 milestone on GitHub](https://github.com/Taitava/obsidian-shellcommands/milestone/4).
+Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
+
+- Nothing at the moment.
+
+## [0.4.0] - 2021-09-26
 
 ### Added
 - [Confirmation before executing a shell command (#35)](https://github.com/Taitava/obsidian-shellcommands/issues/35)
@@ -64,7 +68,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.3.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.0...HEAD
+[0.4.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...0.3.0
 [0.2.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.1...0.2.0
 [0.1.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.1.0...0.1.1
