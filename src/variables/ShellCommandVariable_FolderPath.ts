@@ -1,6 +1,5 @@
-import {normalizePath} from "obsidian";
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath} from "../Common";
+import {getVaultAbsolutePath, normalizePath2} from "../Common";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
@@ -13,7 +12,7 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                 let folder = active_file.parent;
                 switch (mode) {
                     case "absolute":
-                        return normalizePath(getVaultAbsolutePath(this.app) + "/" + folder.path);
+                        return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder.path);
                     case "relative":
                         if (folder.isRoot()) {
                             // Obsidian API does not give a correct folder.path value for the vault's root folder.
@@ -21,7 +20,7 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                             return ".";
                         } else {
                             // This is a normal subfolder
-                            return folder.path;
+                            return normalizePath2(folder.path); // Normalize to get a correct slash between directories depending on platform. On Windows it should be \ .
                         }
                     default:
                         this.newErrorMessage(`Unknown mode "${mode}"! Use "absolute" or "relative".`);

@@ -1,6 +1,5 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath} from "../Common";
-import {normalizePath} from "obsidian";
+import {getVaultAbsolutePath, normalizePath2} from "../Common";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FilePath extends ShellCommandVariable{
@@ -11,9 +10,9 @@ export class ShellCommandVariable_FilePath extends ShellCommandVariable{
         if (active_file) {
             switch (mode) {
                 case "absolute":
-                    return normalizePath(getVaultAbsolutePath(this.app) + "/" + active_file.path);
+                    return normalizePath2(getVaultAbsolutePath(this.app) + "/" + active_file.path);
                 case "relative":
-                    return active_file.path;
+                    return normalizePath2(active_file.path); // Normalize to get a correct slash depending on platform. On Windows it should be \ .
                 default:
                     this.newErrorMessage(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                     return null; // null indicates that getting a value has failed and the command should not be executed.
