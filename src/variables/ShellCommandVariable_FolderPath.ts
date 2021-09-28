@@ -15,7 +15,14 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                     case "absolute":
                         return normalizePath(getVaultAbsolutePath(this.app) + "/" + folder.path);
                     case "relative":
-                        return folder.path;
+                        if (folder.isRoot()) {
+                            // Obsidian API does not give a correct folder.path value for the vault's root folder.
+                            // TODO: See this discussion and apply possible changes if something will come up: https://forum.obsidian.md/t/vault-root-folders-relative-path-gives/24857
+                            return ".";
+                        } else {
+                            // This is a normal subfolder
+                            return folder.path;
+                        }
                     default:
                         this.newErrorMessage(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
                         return null; // null indicates that getting a value has failed and the command should not be executed.
