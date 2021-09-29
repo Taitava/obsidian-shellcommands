@@ -13,6 +13,7 @@ import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
+import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
@@ -186,7 +187,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// No need to confirm.
 			// Execute.
-			this.executeShellCommand(shell_command, shell_command_configuration.ignore_error_codes);
+			this.executeShellCommand(shell_command, shell_command_configuration);
 		}
 	}
 
@@ -194,10 +195,10 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * Does not ask for confirmation before execution. This should only be called if: a) a confirmation is already asked from a user, or b) this command is defined not to need a confirmation.
 	 * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
 	 *
-	 * @param shell_command
-	 * @param ignore_error_codes
+	 * @param shell_command The actual shell command that will be executed.
+	 * @param shell_command_configuration Used for reading other properties. shell_command_configuration.shell_command won't be used!
 	 */
-	executeShellCommand(shell_command: string, ignore_error_codes: number[]) {
+	executeShellCommand(shell_command: string, shell_command_configuration: ShellCommandConfiguration) {
 		let working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
@@ -227,13 +228,13 @@ export default class ShellCommandsPlugin extends Plugin {
 			console.log("Executing command " + shell_command + " in " + working_directory + "...");
 			exec(shell_command, {
 				"cwd": working_directory
-			}, (error: (ExecException|null)) => {
+			}, (error: ExecException|null, stdout: string, stderr: string) => {
 				if (null !== error) {
 					// Some error occurred
 					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
 
 					// Check if this error should be displayed to the user or not
-					if (ignore_error_codes.contains(error.code)) {
+					if (shell_command_configuration.ignore_error_codes.contains(error.code)) {
 						// The user has ignored this error.
 						console.log("User has ignored this error, so won't display it.");
 					} else {
@@ -244,6 +245,9 @@ export default class ShellCommandsPlugin extends Plugin {
 				} else {
 					// No errors
 					console.log("Command executed without errors.")
+
+					// Handle output
+					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr);
 				}
 			});
 		}

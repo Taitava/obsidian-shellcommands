@@ -2,9 +2,11 @@ import {App, Modal, Notice, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
+import {OutputChannel} from "../output_channels/OutputChannel";
 
 export class ShellCommandExtraOptionsModal extends Modal {
-    static OPTIONS_SUMMARY = "Alias, Confirmation, Ignore errors";
+    static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -51,6 +53,20 @@ export class ShellCommandExtraOptionsModal extends Modal {
         alias_setting.controlEl.find("input").focus(); // Focus without a need to click the field.
         this.modalEl.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
         this.modalEl.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
+
+        // Output channeling
+        let output_channel_options = getOutputChannelDriversOptionList();
+        new Setting(this.modalEl)
+            .setName("Handle output: stdout")
+            .addDropdown(dropdown => dropdown
+                .addOptions(output_channel_options)
+                .setValue(this.shell_command_configuration.stdout_channel)
+                .onChange(async (value: OutputChannel) => {
+                    this.shell_command_configuration.stdout_channel = value;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
 
         // Confirm execution field
         new Setting(this.modalEl)

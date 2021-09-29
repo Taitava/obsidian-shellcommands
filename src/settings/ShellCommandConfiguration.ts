@@ -1,3 +1,5 @@
+import {OutputChannel} from "../output_channels/OutputChannel";
+
 export interface ShellCommandsConfiguration {
     [key: string]: ShellCommandConfiguration;
 }
@@ -7,6 +9,7 @@ export interface ShellCommandConfiguration {
     alias: string;
     confirm_execution: boolean;
     ignore_error_codes: number[];
+    stdout_channel: OutputChannel;
 }
 
 export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
@@ -15,5 +18,6 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
         alias: "",
         confirm_execution: false,
         ignore_error_codes: [],
+        stdout_channel: "ignore",
     }
 }
