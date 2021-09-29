@@ -1,4 +1,4 @@
-import {App, Editor, FileSystemAdapter, MarkdownView} from "obsidian";
+import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -12,11 +12,10 @@ export function getVaultAbsolutePath(app: App) {
 
 /**
  * For some reason there is no Platform.isWindows .
- * 2021-09-25: Not used anymore because issue #36 removed a need to display a tip for Windows users. I'm still keeping this, as there might become new use for this in the future, butI'll comment this out.
  */
-// export function isWindows() {
-//     return process.platform === "win32";
-// }
+export function isWindows() {
+    return process.platform === "win32";
+}
 
 export function getEditor(app: App): Editor {
     let view = app.workspace.getActiveViewOfType(MarkdownView);
@@ -50,4 +49,40 @@ export function getEditor(app: App): Editor {
 
 export function cloneObject(object: Object) {
     return Object.assign({}, object);
+}
+
+/**
+ * Same as normalizePath(), but fixes these glitches:
+ * - Leading forward slashes / backward slashes should not be removed.
+ * - \ should not be converted to / if platform is Windows. In other words, / should be converted to \ if platform is Windows.
+ *
+ * TODO: I've opened a discussion about this on Obsidian's forums. If anything new comes up in the discussion, make changes accordingly. https://forum.obsidian.md/t/normalizepath-removes-a-leading/24713
+ */
+export function normalizePath2(path: string) {
+    // 1. Preparations
+    path = path.trim();
+    let leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
+    let leading_slashes = leading_slashes_regexp.exec(path)[0];
+
+    // 2. Run the original normalizePath()
+    path = normalizePath(path);
+
+    // 3. Fixes
+    // Check that correct slashes are used.
+    if (isWindows()) {
+        // The platform is Windows.
+        // Convert / to \
+        path = path.replace(/\//g, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
+        leading_slashes = leading_slashes.replace(/\//g, "\\"); // Same here.
+    }
+    // Now ensure that path still contains leading slashes (if there were any before calling normalizePath()).
+    // Check that the path should have a similar set of leading slashes at the beginning. It can be at least "/" (on linux/Mac), or "\\" (on Windows when it's a network path), in theory even "///" or "\\\\\" whatever.
+    // normalizePath() seems to remove leading slashes (and they are needed to be re-added), but it's needed to check first, otherwise the path would have double leading slashes if normalizePath() gets fixed in the future.
+    if (leading_slashes.length && path.slice(0, leading_slashes.length) !== leading_slashes) {
+        // The path does not contain the required set of leading slashes, so add them.
+        path = leading_slashes + path;
+    }
+
+    // 4. Done
+    return path;
 }
