@@ -119,6 +119,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             shell_command_id = this.plugin.generateNewShellCommandID();
             shell_command_configuration = newShellCommandConfiguration();
             this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
+
+            // Register the empty shell command to Obsidian's command palette.
+            // Do it already now, because there are settings (e.g. Alias) that, when changed by the user, will try to modify the Obsidian command. Sometimes users edit these settings before writing the actual command. See issue #46: https://github.com/Taitava/obsidian-shellcommands/issues/46
+            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
         } else {
             // Use an old shell command
             shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
