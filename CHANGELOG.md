@@ -10,6 +10,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### Fixed
 - [Variables `{{file_path:absolute}}` / `{{folder_path:absolute}}` missed leading `/`/`\` slash (#44)](https://github.com/Taitava/obsidian-shellcommands/issues/44)
 - [Variable `{{folder_path:relative}}` returned `/` when current file is in vault root (#52)](https://github.com/Taitava/obsidian-shellcommands/issues/52)
+- [Turning off 'Preview variables' setting left old previews to command palette (#45)](https://github.com/Taitava/obsidian-shellcommands/issues/45)
+- [Entering an alias for a new, empty command did not update the command title in settings (#46)](https://github.com/Taitava/obsidian-shellcommands/issues/46)
+- [Prevent executing empty shell commands (#53)](https://github.com/Taitava/obsidian-shellcommands/issues/53)
 
 ## [0.4.0] - 2021-09-26
 
