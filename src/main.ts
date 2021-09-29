@@ -182,6 +182,15 @@ export default class ShellCommandsPlugin extends Plugin {
 	executeShellCommand(shell_command: string, ignore_error_codes: number[]) {
 		let working_directory = this.getWorkingDirectory();
 
+		// Check that the shell command is not empty
+		shell_command = shell_command.trim();
+		if (!shell_command.length) {
+			// It is empty
+			console.log("The shell command is empty. :(");
+			this.newError("The shell command is empty :(");
+			return;
+		}
+
 		// Check that the working directory exists and is a folder
 		if (!fs.existsSync(working_directory)) {
 			// Working directory does not exist
