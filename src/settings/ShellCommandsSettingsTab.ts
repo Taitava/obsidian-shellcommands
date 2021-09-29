@@ -88,6 +88,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .onChange(async (value: boolean) => {
                     console.log("Changing preview_variables_in_command_palette to " + value);
                     this.plugin.settings.preview_variables_in_command_palette = value;
+                    if (!value) {
+                        // Variable previewing is turned from on to off.
+                        // This means that the command palette may have old, stale variable data in it (if a user has opened the palette, but closed it without executing anything).
+                        // Remove old, preparsed variable data and reset shell commands' names in the command palette.
+                        this.plugin.resetPreparsedShellCommandConfigurations();
+                        this.plugin.resetCommandPaletteNames();
+                    }
                     await this.plugin.saveSettings();
                 })
             )
@@ -119,6 +126,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             shell_command_id = this.plugin.generateNewShellCommandID();
             shell_command_configuration = newShellCommandConfiguration();
             this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
+
+            // Register the empty shell command to Obsidian's command palette.
+            // Do it already now, because there are settings (e.g. Alias) that, when changed by the user, will try to modify the Obsidian command. Sometimes users edit these settings before writing the actual command. See issue #46: https://github.com/Taitava/obsidian-shellcommands/issues/46
+            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
         } else {
             // Use an old shell command
             shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
