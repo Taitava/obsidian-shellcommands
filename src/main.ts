@@ -128,13 +128,31 @@ export default class ShellCommandsPlugin extends Plugin {
 					// execute obsolete commands accidentally. This deletion also needs to be done even if the executed command was not a preparsed command, because
 					// even when preparsing is turned on in the settings, singular commands may fail to parse and therefore they would not be in this array, but other
 					// commands might be.
-					this.preparsed_shell_command_configurations = {};
+					this.resetPreparsedShellCommandConfigurations();
 				}
 			}
 		};
 		this.addCommand(obsidian_command)
 		this.obsidian_commands[command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
 		console.log("Registered.")
+	}
+
+	/**
+	 * Called when it's known that preparsed shell command variables have old data and should not be used later.
+	 */
+	resetPreparsedShellCommandConfigurations() {
+		this.preparsed_shell_command_configurations = {};
+	}
+
+	/**
+	 * Called after turning "Preview variables in command palette" setting off, to make sure that all shell commands have {{variable}} names visible instead of their values.
+	 */
+	resetCommandPaletteNames() {
+		let shell_commands = this.getShellCommands();
+		for (let shell_command_id in shell_commands) {
+			let shell_command_configuration = shell_commands[shell_command_id];
+			this.obsidian_commands[shell_command_id].name = this.generateObsidianCommandName(shell_command_configuration);
+		}
 	}
 
 	generateObsidianCommandId(shell_command_id: string) {
