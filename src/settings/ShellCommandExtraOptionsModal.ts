@@ -133,7 +133,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
     }
 
     private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {
-        let output_channel_options = getOutputChannelDriversOptionList();
+        let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
         new Setting(this.modalEl)
             .setName(title)
             .setDesc(description)

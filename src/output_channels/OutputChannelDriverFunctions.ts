@@ -112,14 +112,13 @@ function handle_stream(
     }
 }
 
-export function getOutputChannelDriversOptionList() {
+export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
     let list: {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (let name in output_channel_drivers) {
-        list[name] = output_channel_drivers[name].title;
+        list[name] = output_channel_drivers[name].getTitle(output_stream);
     }
-    console.log(list);
     return list;
 }
 

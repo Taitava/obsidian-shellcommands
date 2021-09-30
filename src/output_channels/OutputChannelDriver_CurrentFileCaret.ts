@@ -3,7 +3,7 @@ import {getEditor, joinObjectProperties} from "../Common";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 
 export class OutputChannelDriver_CurrentFileCaret extends OutputChannelDriver {
-    public readonly title = "Current file: caret position";
+    protected readonly title = "Current file: caret position";
 
     public handle(output: OutputStreams) {
         let editor = getEditor(this.app);
