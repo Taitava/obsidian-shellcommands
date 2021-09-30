@@ -245,7 +245,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						console.log("Will display the error to user.");
 
 						// Handle both stdout and stderr output streams
-						handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error);
+						handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error.code);
 					}
 				} else {
 					// No errors

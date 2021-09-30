@@ -3,8 +3,12 @@ import ShellCommandsPlugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
-import {OutputStream} from "./OutputChannel";
-import {ExecException} from "child_process";
+import {OutputChannel, OutputStream} from "./OutputChannel";
+
+export interface OutputStreams {
+    stdout?: string;
+    stderr?: string;
+}
 
 let output_channel_drivers:{
     [key: string]: OutputChannelDriver;
@@ -14,70 +18,98 @@ let output_channel_drivers:{
 registerOutputChannelDriver("notification", new OutputChannelDriver_Notification());
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 
-export function handleShellCommandOutput(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration, stdout: string, stderr: string, error: ExecException|null) {
-    let output_channels = shell_command_configuration.output_channels;
-
+export function handleShellCommandOutput(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration, stdout: string, stderr: string, error_code: number|null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
-    // Find out which data stream should be processed first, stdout or stderr.
-    let output_stream_order: { // TODO: Ensure that the order can change
-        "stdout": string,
-        "stderr"?: string, // Can be omitted, if output is combined
-    };
-    let combined_output: string; // Only used if both streams are defined to use the same channel.
-    switch (shell_command_configuration.output_channel_order) {
-        case "stdout-first":
-            output_stream_order = {
-                stdout: stdout,
-                stderr: stderr,
-            };
-            combined_output = stdout + stderr; // Only used if both streams are defined to use the same channel.
-            break;
-        case "stderr-first":
-            output_stream_order = {
-                stderr: stderr,
-                stdout: stdout,
-            }
-            combined_output = stderr + stdout; // Only used if both streams are defined to use the same channel.
-            break;
-    }
 
-    // Should stderr be combined to stdout?
-    if (output_channels.stdout === output_channels.stderr) {
-        // Stdout and stderr use the same channel.
-        // Combine the streams
-        output_stream_order = {
-            stdout: combined_output
-        };
-    }
-
-    // Direct output streams to output channels
-    let output_stream_name: OutputStream;
-    for (output_stream_name in output_stream_order) {
-        let output_message = output_stream_order[output_stream_name];
-        let output_channel_name = output_channels[output_stream_name];
-
-        // Ensure that the output should not be ignored
-        if ("ignore" !== output_channel_name) {
-            // The output should not be ignored.
-
-            // Check that an output driver exists
-            if (undefined === output_channel_drivers[output_channel_name]) {
-                throw new Error("No output driver found for channel '" + output_channel_name + "'.");
-            }
-            let driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
-
-            // Check that the output is not empty, or that the driver can handle empty outputs.
-            if (output_message.length || driver.handles_empty_output) {
-                // Perform handling the output
-                driver.initialize(plugin);
-                driver.handle(output_message, error);
-            }
-
+    // Insert stdout and stderr to an object in a correct order
+    let output: OutputStreams = {};
+    if (stdout.length && stderr.length) {
+        // Both stdout and stderr have content
+        // Decide the output order == Find out which data stream should be processed first, stdout or stderr.
+        switch (shell_command_configuration.output_channel_order) {
+            case "stdout-first":
+                output = {
+                    stdout: stdout,
+                    stderr: stderr,
+                };
+                break;
+            case "stderr-first":
+                output = {
+                    stderr: stderr,
+                    stdout: stdout,
+                };
+                break;
         }
+    } else if (stdout.length) {
+        // Only stdout has content
+        output = {
+            stdout: stdout,
+        };
+    } else if (stderr.length) {
+        // Only stderr has content
+        output = {
+            stderr: stderr,
+        };
+    } else {
+        // Neither stdout nor stderr have content
+        // Do nothing
+        return;
     }
 
+    // Should stderr be processed same time with stdout?
+    if (shell_command_configuration.output_channels.stdout === shell_command_configuration.output_channels.stderr) {
+        // Stdout and stderr use the same channel.
+        // Make one handling call.
+        handle_stream(
+            plugin,
+            shell_command_configuration,
+            shell_command_configuration.output_channels.stdout,
+            output,
+            error_code,
+        );
+    } else {
+        // Stdout and stderr use different channels.
+        // Make two handling calls.
+        let output_stream_name: OutputStream;
+        for (output_stream_name in output) {
+            let output_channel_name = shell_command_configuration.output_channels[output_stream_name];
+            let output_message = output[output_stream_name];
+            let separated_output: OutputStreams = {};
+            separated_output[output_stream_name] = output_message;
+            handle_stream(
+                plugin,
+                shell_command_configuration,
+                output_channel_name,
+                separated_output,
+                error_code,
+            );
+        }
 
+    }
+}
 
+function handle_stream(
+        plugin: ShellCommandsPlugin,
+        shell_command_configuration: ShellCommandConfiguration,
+        output_channel_name: OutputChannel,
+        output: OutputStreams,
+        error_code: number|null
+    ) {
+
+    // Check if the output should be ignored
+    if ("ignore" !== output_channel_name) {
+        // The output should not be ignored.
+
+        // Check that an output driver exists
+        if (undefined === output_channel_drivers[output_channel_name]) {
+            throw new Error("No output driver found for channel '" + output_channel_name + "'.");
+        }
+        let driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
+
+        // Perform handling the output
+        driver.initialize(plugin);
+        driver.handle(output, error_code);
+    }
 }
 
 export function getOutputChannelDriversOptionList() {

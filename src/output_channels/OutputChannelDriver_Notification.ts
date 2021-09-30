@@ -1,22 +1,29 @@
 import {OutputChannelDriver} from "./OutputChannelDriver";
-import {ExecException} from "child_process";
+import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {OutputStream} from "./OutputChannel";
 
 
 export class OutputChannelDriver_Notification extends OutputChannelDriver {
     public readonly title = "Notification";
 
-    handles_empty_output = false;
+    public handle(output: OutputStreams, error_code: number|null) {
 
-    public handle(output: string, error: ExecException|null) {
-        if (null !== error) {
-            // Usually, error.message contains something like: "Command failed: command-name and parameters " + stderr.
-            // But I'm not sure if stderr is always included in error.message or not, so I want to include both error.message
-            // and stderr in the message. I just don't want stderr to be accidentally duplicated in the message, so I'll first
-            // remove stderr from error.message. And stderr == output here in this case.
-            let error_message = error.message.replace(output, "") + " " + output;
-            this.plugin.newError("[" + error.code + "]: " + error_message);
-        } else {
-            this.plugin.newNotice(output);
+        // Iterate output streams.
+        // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, two
+        // notifications will be created.
+        let output_stream_name: OutputStream;
+        for (output_stream_name in output) {
+            let output_message = output[output_stream_name];
+            switch (output_stream_name) {
+                case "stdout":
+                    // Normal output
+                    this.plugin.newNotice(output_message);
+                    break;
+                case "stderr":
+                    // Error output
+                    this.plugin.newError("[" + error_code + "]: " + output_message);
+                    break;
+            }
         }
     }
 }

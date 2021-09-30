@@ -86,3 +86,15 @@ export function normalizePath2(path: string) {
     // 4. Done
     return path;
 }
+
+export function joinObjectProperties(object: {}, glue: string) {
+    let result = "";
+    for (let property_name in object) {
+        if (result.length) {
+            result += glue;
+        }
+        // @ts-ignore
+        result += object[property_name];
+    }
+    return result;
+}
