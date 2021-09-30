@@ -3,7 +3,7 @@ import ShellCommandsPlugin from "../main";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
-import {OutputChannel, OutputStream} from "../output_channels/OutputChannel";
+import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
@@ -77,7 +77,21 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Output channeling
         this.newOutputChannelSetting("Output channel for stdout", "stdout");
         this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
-        // TODO: Add output_channel_order setting.
+        new Setting(this.modalEl)
+            .setName("Order of stdout/stderr output")
+            .setDesc("When output contains both errors and normal output, which one should be presented first?")
+            .addDropdown(dropdown => dropdown
+                .addOptions({
+                    "stdout-first": "Stdout first, then stderr.",
+                    "stderr-first": "Stderr first, then stdout.",
+                })
+                .setValue(this.shell_command_configuration.output_channel_order)
+                .onChange(async (value: OutputChannelOrder) => {
+                    this.shell_command_configuration.output_channel_order = value;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
 
         // Ignore errors field
         new Setting(this.modalEl)
