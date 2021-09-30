@@ -3,3 +3,7 @@
  * See discussion: https://github.com/Taitava/obsidian-shellcommands/discussions/16
  */
 export type OutputChannel = "ignore" | "notification" | "current-file-caret";
+
+export type OutputChannelOrder = "stdout-first" | "stderr-first";
+
+export type OutputStream = "stdout" | "stderr";

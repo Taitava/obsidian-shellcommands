@@ -4,7 +4,9 @@ import {getEditor} from "../Common";
 export class OutputChannelDriver_CurrentFileCaret extends OutputChannelDriver {
     public readonly title = "Current file: caret position";
 
-    public handle(output: string, is_error: boolean) {
+    public readonly handles_empty_output = true;
+
+    public handle(output: string) {
         let editor = getEditor(this.app);
         if (null === editor) {
             // Probably the leaf is in preview mode or some other problem happened.

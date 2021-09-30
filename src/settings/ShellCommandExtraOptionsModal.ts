@@ -3,7 +3,7 @@ import ShellCommandsPlugin from "../main";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
-import {OutputChannel} from "../output_channels/OutputChannel";
+import {OutputChannel, OutputStream} from "../output_channels/OutputChannel";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
@@ -54,20 +54,6 @@ export class ShellCommandExtraOptionsModal extends Modal {
         this.modalEl.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
         this.modalEl.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
 
-        // Output channeling
-        let output_channel_options = getOutputChannelDriversOptionList();
-        new Setting(this.modalEl)
-            .setName("Handle output: stdout")
-            .addDropdown(dropdown => dropdown
-                .addOptions(output_channel_options)
-                .setValue(this.shell_command_configuration.stdout_channel)
-                .onChange(async (value: OutputChannel) => {
-                    this.shell_command_configuration.stdout_channel = value;
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
-
         // Confirm execution field
         new Setting(this.modalEl)
             .setName("Ask confirmation before execution")
@@ -88,10 +74,15 @@ export class ShellCommandExtraOptionsModal extends Modal {
             )
         ;
 
+        // Output channeling
+        this.newOutputChannelSetting("Output channel for stdout", "stdout");
+        this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
+        // TODO: Add output_channel_order setting.
+
         // Ignore errors field
         new Setting(this.modalEl)
             .setName("Ignore error codes")
-            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
+            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
             .addText(text => text
                 .setValue(this.shell_command_configuration.ignore_error_codes.join(","))
                 .onChange(async (value) => {
@@ -122,6 +113,22 @@ export class ShellCommandExtraOptionsModal extends Modal {
                         // Hide icon
                         icon_container.addClass("shell-commands-hide");
                     }
+                })
+            )
+        ;
+    }
+
+    private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {
+        let output_channel_options = getOutputChannelDriversOptionList();
+        new Setting(this.modalEl)
+            .setName(title)
+            .setDesc(description)
+            .addDropdown(dropdown => dropdown
+                .addOptions(output_channel_options)
+                .setValue(this.shell_command_configuration.output_channels[output_stream_name])
+                .onChange(async (value: OutputChannel) => {
+                    this.shell_command_configuration.output_channels[output_stream_name] = value;
+                    await this.plugin.saveSettings();
                 })
             )
         ;

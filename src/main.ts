@@ -237,17 +237,22 @@ export default class ShellCommandsPlugin extends Plugin {
 					if (shell_command_configuration.ignore_error_codes.contains(error.code)) {
 						// The user has ignored this error.
 						console.log("User has ignored this error, so won't display it.");
+
+						// Handle only stdout output stream
+						handleShellCommandOutput(this, shell_command_configuration, stdout, "", null);
 					} else {
 						// Show the error.
 						console.log("Will display the error to user.");
-						this.newError("[" + error.code + "]: " + error.message);
+
+						// Handle both stdout and stderr output streams
+						handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error);
 					}
 				} else {
 					// No errors
 					console.log("Command executed without errors.")
 
 					// Handle output
-					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr);
+					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, null);
 				}
 			});
 		}
