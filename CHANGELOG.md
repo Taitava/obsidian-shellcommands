@@ -7,7 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-- Nothing at the moment.
+### To be Added
+- [Shell command output can now be accessed in various ways (#34)](https://github.com/Taitava/obsidian-shellcommands/issues/34):
+  - Output can be directed to a chosen channel: a notification balloon, or to currently open note file at caret position, possibly replacing a selection.
+  - Output can also be ignored = not displayed anywhere.
+  - Separate output channels can be defined for each output stream: stdout and stderr.
+  - Output channel definitions can be altered separately for each shell command.
+  - Previously stdout was always ignored, and stderr could only be directed into a notification balloon.
+
+### To be Changed
+- Error messages do not contain the failed shell command anymore, only exit code number and the actual error message (stderr). This is due to error message simplification that had to be done when implementing new ways to use outputs, including stderr in issue #34.
 
 ## [0.4.1] - 2021-09-29
 
