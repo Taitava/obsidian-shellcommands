@@ -58,23 +58,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         // "Error message duration" field
-        new Setting(containerEl)
-            .setName("Error message duration")
-            .setDesc("In seconds, between 1 and 180.")
-            .addText(field => field
-                .setValue(String(this.plugin.settings.error_message_duration))
-                .onChange(async (duration_string: string) => {
-                    let duration: number = parseInt(duration_string);
-                    if (duration >= 1 && duration <= 180) {
-                        console.log("Change error_message_duration from " + this.plugin.settings.error_message_duration + " to " + duration);
-                        this.plugin.settings.error_message_duration = duration;
-                        await this.plugin.saveSettings();
-                        console.log("Changed.");
-                    }
-                    // Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
-                })
-            )
-        ;
+        this.createNotificationDurationField(containerEl, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
+
+        // "Notification message duration" field
+        this.createNotificationDurationField(containerEl, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
 
         // "Variables" section
         containerEl.createEl("h2", {text: "Variables"});
@@ -254,6 +241,26 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             }
         }
         console.log("Created.");
+    }
+
+    createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
+        new Setting(container_element)
+            .setName(title)
+            .setDesc(description + " In seconds, between 1 and 180.")
+            .addText(field => field
+                .setValue(String(this.plugin.settings[setting_name]))
+                .onChange(async (duration_string: string) => {
+                    let duration: number = parseInt(duration_string);
+                    if (duration >= 1 && duration <= 180) {
+                        console.log("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
+                        this.plugin.settings[setting_name] = duration;
+                        await this.plugin.saveSettings();
+                        console.log("Changed.");
+                    }
+                    // Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
+                })
+            )
+        ;
     }
 
     getShellCommandPreview(shell_command: string) {

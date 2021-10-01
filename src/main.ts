@@ -318,7 +318,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	newNotification(message: string) {
-		new Notice(message); // Use Obsidian's default timeout for notices.
+		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
 }
 
