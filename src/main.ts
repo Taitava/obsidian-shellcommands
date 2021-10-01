@@ -317,7 +317,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		});
 	}
 
-	newNotice(message: string) {
+	newNotification(message: string) {
 		new Notice(message); // Use Obsidian's default timeout for notices.
 	}
 }

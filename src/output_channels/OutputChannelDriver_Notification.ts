@@ -30,7 +30,7 @@ export class OutputChannelDriver_Notification extends OutputChannelDriver {
             switch (output_stream_name) {
                 case "stdout":
                     // Normal output
-                    this.plugin.newNotice(output_message);
+                    this.plugin.newNotification(output_message);
                     break;
                 case "stderr":
                     // Error output
