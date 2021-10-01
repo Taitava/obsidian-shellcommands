@@ -14,7 +14,8 @@ Features that are in development, but are not released yet. Does not include stu
   - Separate output channels can be defined for each output stream: stdout and stderr.
   - Output channel definitions can be altered separately for each shell command.
   - Previously stdout was always ignored, and stderr could only be directed into a notification balloon.
-- [A setting for how long to display notifications (#58)](https://github.com/Taitava/obsidian-shellcommands/issues/58). Mainly affects when shell command output is directed to a _notification balloon_. 
+- [A setting for how long to display notifications (#58)](https://github.com/Taitava/obsidian-shellcommands/issues/58). Mainly affects when shell command output is directed to a _notification balloon_.
+- [A new variable {{tags}}(#51)](https://github.com/Taitava/obsidian-shellcommands/issues/51) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
 
 ### To be Changed
 - Error messages do not contain the failed shell command anymore, only exit code number and the actual error message (stderr). This is due to error message simplification that had to be done when implementing new ways to use outputs, including stderr in issue #34.
