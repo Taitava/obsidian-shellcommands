@@ -244,6 +244,13 @@ export default class ShellCommandsPlugin extends Plugin {
 						// Show the error.
 						console.log("Will display the error to user.");
 
+						// Check that stderr actually contains an error message
+						if (!stderr.length) {
+							// Stderr is empty, so the error message is probably given by Node.js's child_process.
+							// Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
+							stderr = error.message;
+						}
+
 						// Handle both stdout and stderr output streams
 						handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error.code);
 					}
