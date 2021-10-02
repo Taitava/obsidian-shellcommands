@@ -2,9 +2,11 @@ import {App, Modal, Notice, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
+import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 
 export class ShellCommandExtraOptionsModal extends Modal {
-    static OPTIONS_SUMMARY = "Alias, Confirmation, Ignore errors";
+    static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -72,10 +74,29 @@ export class ShellCommandExtraOptionsModal extends Modal {
             )
         ;
 
+        // Output channeling
+        this.newOutputChannelSetting("Output channel for stdout", "stdout");
+        this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
+        new Setting(this.modalEl)
+            .setName("Order of stdout/stderr output")
+            .setDesc("When output contains both errors and normal output, which one should be presented first?")
+            .addDropdown(dropdown => dropdown
+                .addOptions({
+                    "stdout-first": "Stdout first, then stderr.",
+                    "stderr-first": "Stderr first, then stdout.",
+                })
+                .setValue(this.shell_command_configuration.output_channel_order)
+                .onChange(async (value: OutputChannelOrder) => {
+                    this.shell_command_configuration.output_channel_order = value;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
+
         // Ignore errors field
         new Setting(this.modalEl)
             .setName("Ignore error codes")
-            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
+            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
             .addText(text => text
                 .setValue(this.shell_command_configuration.ignore_error_codes.join(","))
                 .onChange(async (value) => {
@@ -106,6 +127,22 @@ export class ShellCommandExtraOptionsModal extends Modal {
                         // Hide icon
                         icon_container.addClass("shell-commands-hide");
                     }
+                })
+            )
+        ;
+    }
+
+    private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {
+        let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
+        new Setting(this.modalEl)
+            .setName(title)
+            .setDesc(description)
+            .addDropdown(dropdown => dropdown
+                .addOptions(output_channel_options)
+                .setValue(this.shell_command_configuration.output_channels[output_stream_name])
+                .onChange(async (value: OutputChannel) => {
+                    this.shell_command_configuration.output_channels[output_stream_name] = value;
+                    await this.plugin.saveSettings();
                 })
             )
         ;

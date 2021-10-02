@@ -17,34 +17,33 @@ export function isWindows() {
     return process.platform === "win32";
 }
 
-export function getEditor(app: App): Editor {
+export function getView(app: App) {
     let view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
-        console.log("getEditor(): Could not get a view. Will return null.");
+        console.log("getView(): Could not get a view. Will return null.");
         return null;
     }
-    let view_mode = view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
-    switch (view_mode) {
-        case "preview":
-            // The leaf is in preview mode, which makes things difficult.
-            // We could still return view.editor, but it does not work at least for getting selected text, maybe for other things, but currently this function is only used for getting selected text.
-            // At this moment, just return null to indicate that we were not able to offer an editor instance which could work reliably on text selections.
-            // FIXME: Find a way to work in preview mode, too!
-            console.log("getEditor(): 'view' is in preview mode, and the poor guy who wrote this code, does not know how to return an editor instance that could be used for getting text selection.");
-            return null;
-        case "source":
-            // Ensure that view.editor exists! It exists at least if this is a MarkDownView.
-            if ("editor" in view) {
-                // Good, it exists.
-                // @ts-ignore We already know that view.editor exists.
-                return view.editor;
-            }
-            console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
-            return null;
-        default:
-            Error("getEditor(): Unrecognised view mode: "+view_mode);
-            break;
+    return view;
+}
+
+export function getEditor(app: App): Editor {
+
+    let view = getView(app);
+    if (null === view) {
+        // Could not get a view.
+        return null;
     }
+
+    // Ensure that view.editor exists! It exists at least if this is a MarkDownView.
+    if ("editor" in view) {
+        // Good, it exists.
+        // @ts-ignore We already know that view.editor exists.
+        return view.editor;
+    }
+
+    // Did not find an editor.
+    console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
+    return null;
 }
 
 export function cloneObject(object: Object) {
@@ -85,4 +84,16 @@ export function normalizePath2(path: string) {
 
     // 4. Done
     return path;
+}
+
+export function joinObjectProperties(object: {}, glue: string) {
+    let result = "";
+    for (let property_name in object) {
+        if (result.length) {
+            result += glue;
+        }
+        // @ts-ignore
+        result += object[property_name];
+    }
+    return result;
 }

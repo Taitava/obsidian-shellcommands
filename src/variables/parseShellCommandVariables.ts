@@ -8,6 +8,7 @@ import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
 import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
 import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
 import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
+import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
 import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
 import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
 
@@ -25,6 +26,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
         new ShellCommandVariable_FolderName(plugin),
         new ShellCommandVariable_FolderPath(plugin),
         new ShellCommandVariable_Selection(plugin),
+        new ShellCommandVariable_Tags(plugin),
         new ShellCommandVariable_Title(plugin),
         new ShellCommandVariable_VaultPath(plugin),
         new ShellCommandVariable_Workspace(plugin),

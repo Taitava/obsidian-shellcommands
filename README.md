@@ -2,7 +2,7 @@
 
 # Shell commands plugin for Obsidian
 
-This plugin lets you define shell/terminal commands in settings and run them quickly when needed via Obsidian's command palette, or via hotkeys that you can assign in Obsidian's hotkey settings.
+This plugin lets you define shell/terminal commands in settings and run them quickly via Obsidian's command palette, or via hotkeys. Use note related variables as part of the commands, and insert output back to your notes, if you wish. This is a Swiss army knife when it comes to accessing external applications from Obsidian, and you are the one who defines its tools.
 
 You can customise your commands with built-in variables that can provide the current file title/name/path, current file's parent folder name/path, and date/time stamp with a custom format.
 
@@ -16,7 +16,7 @@ You can customise your commands with built-in variables that can provide the cur
 
 ## Main issues
 - [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
-- [Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
+- [Windows: Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
 For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsidian-shellcommands/issues).
@@ -27,8 +27,9 @@ For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsid
 2. Click Install, and after that **remember to click Enable**!
 3. Head to *Shell commands* settings tab.
 4. All commands will be run in a certain directory. By default, it's your vault's base directory. If you want to run the commands in some other directory, you can type it in the *Working directory* field.
-5. Define one or more commands by clicking the *New command* button, entering a command and clicking *Apply changes*. Read variable usage instructions in the settings panel if you need them.
-6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
+5. Define one or more commands by clicking the *New command* button and entering a command. Read variable usage instructions in the settings panel if you need them.
+6. For advanced settings, such as a command alias name that appears in the command palette instead of the actual shell command, or an ability to direct command output to a currently active note, click a small gear icon next to the shell command.
+7. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 
 ## Usage examples
 
@@ -60,7 +61,7 @@ Not a single plugin can be great just by itself. And not a single plugin suits e
 <!-- Keep in alphabetical order! -->
 - **[Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri)**: You can use this to open other vaults, switch workspaces without using a graphical user interface, and append content to notes, etc. Example command to insert clipboard content into a note with a shell command: `start "" obsidian://advanced-uri?vault=Vault_name&filepath=Filename.md&data={{clipboard}}&mode=append` (on Windows). Another way, without *Advanced URI*, is to use something like `echo {{clipboard}} >> Filename.md` (on Windows).
 - **[cMenu](https://github.com/chetachiezikeuzor/cMenu-Plugin)**: When you select text, this plugin opens a small modal of buttons for text formatting and other actions. You can add shell commands to the mix!
-- **[Customizable Sidemenu](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands!
+- **[Customizable Sidebar](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands!
 - **[QuickAdd](https://github.com/chhoumann/quickadd)**: You can create macros that launch multiple commands at once. Sure, in *Shell commands*, you can have multiple terminal commands executed one after another (with `&&` operator for Linux and Mac, and `&` operator for Windows), but *QuickAdd* allows you to have macros that combine shell commands to other Obsidian commands.
 - **[Text Expander](https://github.com/konodyuk/obsidian-text-expander)**: If you want to write codeblocks in your markdown note files and execute them, then *Text Expander* is the solution for you. *Shell commands* focuses on bringing short, rarely changed terminal commands at your finger tips via hotkeys. You can run longer scripts with *Shell commands* too by writing them into a bash/batch file and executing that file as a command, but if you need to view the script before executing it, or make changes regularly, then *Shell commands* is not so optimal for your situation, and you might benefit more from *Text Expander*. But of course, you can also have both if you like.
 
@@ -72,7 +73,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | -----------------------| ---------- | --------------------- | --- |
-| SC 0.4.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
+| SC 0.4.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.4.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
 | SC 0.3.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.2.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
