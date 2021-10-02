@@ -16,7 +16,7 @@ You can customise your commands with built-in variables that can provide the cur
 
 ## Main issues
 - [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
-- [Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
+- [Windows: Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
 For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsidian-shellcommands/issues).
