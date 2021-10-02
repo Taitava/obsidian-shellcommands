@@ -2,7 +2,7 @@
 
 # Shell commands plugin for Obsidian
 
-This plugin lets you define shell/terminal commands in settings and run them quickly when needed via Obsidian's command palette, or via hotkeys that you can assign in Obsidian's hotkey settings.
+This plugin lets you define shell/terminal commands in settings and run them quickly via Obsidian's command palette, or via hotkeys. Use note related variables as part of the commands, and insert output back to your notes, if you wish. This is a Swiss army knife when it comes to accessing external applications from Obsidian, and you are the one who defines its tools.
 
 You can customise your commands with built-in variables that can provide the current file title/name/path, current file's parent folder name/path, and date/time stamp with a custom format.
 
