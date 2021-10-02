@@ -28,7 +28,8 @@ For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsid
 3. Head to *Shell commands* settings tab.
 4. All commands will be run in a certain directory. By default, it's your vault's base directory. If you want to run the commands in some other directory, you can type it in the *Working directory* field.
 5. Define one or more commands by clicking the *New command* button and entering a command. Read variable usage instructions in the settings panel if you need them.
-6. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
+6. For advanced settings, such as a command alias name that appears in the command palette instead of the actual shell command, or an ability to direct command output to a currently active note, click a small gear icon next to the shell command.
+7. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 
 ## Usage examples
 
