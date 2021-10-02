@@ -29,7 +29,6 @@ export class OutputChannelDriver_CurrentFileCaret extends OutputChannelDriver {
             // We do have a view
             if ("source" !== view.getMode()) {
                 // Warn that the output might go to an unexpected place in the note file.
-                // TODO: Create this.newNotification()
                 this.plugin.newNotification("Note that your active note is not in 'Edit' mode! The output goes where the caret last was in 'edit' mode and comes visible when you switch to 'Edit' mode again!");
             }
         }
