@@ -30,7 +30,7 @@ export class ConfirmExecutionModal extends Modal {
                 .setButtonText("Yes, execute!")
                 .onClick(() => {
                     console.log("User confirmed execution of shell command: " + this.shell_command);
-                    this.plugin.executeShellCommand(this.shell_command, this.shell_command_configuration.ignore_error_codes);
+                    this.plugin.executeShellCommand(this.shell_command, this.shell_command_configuration);
                     this.close();
                 })
             )
