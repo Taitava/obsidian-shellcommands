@@ -7,7 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
+- Nothing at the moment.
+
+## [0.5.0] - 2021-10-02
+
+### Added
 - [Shell command output can now be accessed in various ways (#34)](https://github.com/Taitava/obsidian-shellcommands/issues/34):
   - Output can be directed to a chosen channel: a notification balloon, or to currently open note file at caret position, possibly replacing a selection.
   - Output can also be ignored = not displayed anywhere.
@@ -17,7 +21,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [A setting for how long to display notifications (#58)](https://github.com/Taitava/obsidian-shellcommands/issues/58). Mainly affects when shell command output is directed to a _notification balloon_.
 - [A new variable {{tags}}(#51)](https://github.com/Taitava/obsidian-shellcommands/issues/51) (Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!)
 
-### To be Changed
+### Changed
 - Error messages do not contain the failed shell command anymore, only exit code number and the actual error message (stderr). This is due to error message simplification that had to be done when implementing new ways to use outputs, including stderr in issue #34.
 
 ## [0.4.1] - 2021-09-29
@@ -88,7 +92,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.0...HEAD
+[0.5.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.0...0.4.1
 [0.4.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.3.0...0.4.0
 [0.3.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.2.0...0.3.0
