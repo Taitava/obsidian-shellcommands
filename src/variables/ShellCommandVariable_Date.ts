@@ -1,13 +1,22 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {moment} from "obsidian";
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Date extends ShellCommandVariable {
     name = "date";
-    has_argument = true;
+    protected readonly parameters: IParameters = {
+        format: {
+            type: "string",
+            required: true,
+        },
+    }
 
-    getValue(format: string): string {
-        return moment().format(format);
+    protected arguments: {
+        format: string,
+    }
+
+    getValue(): string {
+        return moment().format(this.arguments.format);
     }
 }
 addShellCommandVariableInstructions(

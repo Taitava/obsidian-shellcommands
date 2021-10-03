@@ -4,13 +4,24 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
     name = "folder_path";
-    has_argument = true;
-    getValue(mode: string): string|null {
+
+    protected readonly parameters = {
+        mode: {
+            options: ["absolute", "relative"],
+            required: true,
+        }
+    };
+
+    protected arguments: {
+        mode: string;
+    }
+
+    getValue(): string|null {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
             if (active_file.parent) {
                 let folder = active_file.parent;
-                switch (mode) {
+                switch (this.arguments.mode.toLowerCase()) {
                     case "absolute":
                         return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder.path);
                     case "relative":
@@ -22,9 +33,6 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                             // This is a normal subfolder
                             return normalizePath2(folder.path); // Normalize to get a correct slash between directories depending on platform. On Windows it should be \ .
                         }
-                    default:
-                        this.newErrorMessage(`Unknown mode "${mode}"! Use "absolute" or "relative".`);
-                        return null; // null indicates that getting a value has failed and the command should not be executed.
                 }
             } else {
                 this.newErrorMessage("The current file does not have a parent for some strange reason.");
