@@ -97,3 +97,12 @@ export function joinObjectProperties(object: {}, glue: string) {
     }
     return result;
 }
+
+/**
+ * Removes all duplicates from an array.
+ *
+ * Idea is copied 2021-10-06 from https://stackoverflow.com/a/33121880/2754026
+ */
+export function uniqueArray(array: any[]) {
+    return [...new Set(array)];
+}
