@@ -16,7 +16,8 @@ Features that are in development, but are not released yet. Does not include stu
 - `{{file_path}}` and `{{folder_path}}` will not give an error message anymore if the given argument is not *relative* or *absolute*. Instead, the variable will be left unparsed silently. This change happened during [#43](https://github.com/Taitava/obsidian-shellcommands/issues/43).
 
 ## To be Fixed
-- [`{{tags}}` does not give duplicate tags anymore (#65)](https://github.com/Taitava/obsidian-shellcommands/issues/65)
+- [`{{tags}}` does not give duplicate tags anymore (#65)](https://github.com/Taitava/obsidian-shellcommands/issues/65).
+- [Error balloon: Exit code was sometimes null (#67)](https://github.com/Taitava/obsidian-shellcommands/issues/67).
 
 ## [0.5.0] - 2021-10-02
 
