@@ -124,7 +124,7 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
     return list;
 }
 
-function registerOutputChannelDriver(name: string, driver: OutputChannelDriver) {
+function registerOutputChannelDriver(name: OutputChannel, driver: OutputChannelDriver) {
     if (undefined !== output_channel_drivers[name]) {
         throw new Error("OutputChannelDriver named '" + name + "' is already registered!");
     }
