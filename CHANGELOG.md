@@ -7,9 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
+## To be Added
+- [New shell command output channels (#68)](https://github.com/Taitava/obsidian-shellcommands/issues/68):
+  - Status bar: Good for showing short outputs in a permanent place.
+
 ## To be Changed
 - [Internal: Support multiple parameters for variables](https://github.com/Taitava/obsidian-shellcommands/issues/43). In the future, allows developing new variables that takes multiple arguments, and/or optional arguments.
-- `{{file_path}}` and `{{folder_path}}` will not give an error message anymore if the given argument is not *relative* or *absolute*. Instead, the variable will be left unparsed silently. This change happened during [#43](https://github.com/Taitava/obsidian-shellcommands/issues/43). 
+- `{{file_path}}` and `{{folder_path}}` will not give an error message anymore if the given argument is not *relative* or *absolute*. Instead, the variable will be left unparsed silently. This change happened during [#43](https://github.com/Taitava/obsidian-shellcommands/issues/43).
+
+## To be Fixed
+- [`{{tags}}` does not give duplicate tags anymore (#65)](https://github.com/Taitava/obsidian-shellcommands/issues/65)
 
 ## [0.5.0] - 2021-10-02
 
