@@ -4,6 +4,7 @@ import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notificati
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
 import {OutputChannel, OutputStream} from "./OutputChannel";
+import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 
 export interface OutputStreams {
     stdout?: string;
@@ -15,6 +16,7 @@ let output_channel_drivers:{
 } = {};
 
 // Register output channel drivers
+registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
 registerOutputChannelDriver("notification", new OutputChannelDriver_Notification());
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 
