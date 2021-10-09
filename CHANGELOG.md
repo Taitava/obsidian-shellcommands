@@ -10,6 +10,9 @@ Features that are in development, but are not released yet. Does not include stu
 ## To be Added
 - [New shell command output channels (#68)](https://github.com/Taitava/obsidian-shellcommands/issues/68):
   - Status bar: Good for showing short outputs in a permanent place.
+  - Current file, top: Puts the output at the very beginning of a file.
+  - Current file, bottom: Puts the output at the very end of a file.
+  - Clipboard: So that you can easily paste the output anywhere you like.
 
 ## To be Changed
 - [`{{tags}}` does not include preceding hash (#) characters anymore (#62)](https://github.com/Taitava/obsidian-shellcommands/issues/62). This is a backwards incompatible change (although a small one), and normally these kinds of changes would not be released in a _minor_ version update. But this plugin is still in its 0.x era, so breaking changes are tolerated more than in stable releases. If you want to have your tags prefixed with a hash again, use something like `#{{tags:,#}}` instead of `{{tags:,}}`.
