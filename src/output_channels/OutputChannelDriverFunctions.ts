@@ -3,6 +3,7 @@ import ShellCommandsPlugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
+import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
 import {OutputChannel, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 
@@ -19,6 +20,7 @@ let output_channel_drivers:{
 registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
 registerOutputChannelDriver("notification", new OutputChannelDriver_Notification());
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
+registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
 
 export function handleShellCommandOutput(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration, stdout: string, stderr: string, error_code: number|null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
