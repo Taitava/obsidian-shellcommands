@@ -259,7 +259,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					console.log("Command executed without errors.")
 
 					// Handle output
-					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, null);
+					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
 				}
 			});
 		}

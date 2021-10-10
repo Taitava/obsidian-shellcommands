@@ -1,6 +1,7 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 import {getAllTags} from "obsidian";
+import {uniqueArray} from "../Common";
 
 export class ShellCommandVariable_Tags extends ShellCommandVariable {
     name = "tags";
@@ -20,7 +21,7 @@ export class ShellCommandVariable_Tags extends ShellCommandVariable {
         if (active_file) {
             // We do have an active file
             let cache = this.app.metadataCache.getFileCache(active_file);
-            let tags = getAllTags(cache);
+            let tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
             return tags.join(this.arguments.separator);
         } else {
             // No file is active at the moment
