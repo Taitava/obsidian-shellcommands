@@ -17,7 +17,7 @@ Features that are in development, but are not released yet. Does not include stu
 ## To be Changed
 - [Settings: Scroll position is now remembered (#71)](https://github.com/Taitava/obsidian-shellcommands/issues/71)
 - [`{{tags}}` does not include preceding hash (#) characters anymore (#62)](https://github.com/Taitava/obsidian-shellcommands/issues/62). This is a backwards incompatible change (although a small one), and normally these kinds of changes would not be released in a _minor_ version update. But this plugin is still in its 0.x era, so breaking changes are tolerated more than in stable releases. If you want to have your tags prefixed with a hash again, use something like `#{{tags:,#}}` instead of `{{tags:,}}`.
-- [Internal: Support multiple parameters for variables](https://github.com/Taitava/obsidian-shellcommands/issues/43). In the future, allows developing new variables that takes multiple arguments, and/or optional arguments.
+- [Internal: Support multiple parameters for variables (#43)](https://github.com/Taitava/obsidian-shellcommands/issues/43). In the future, allows developing new variables that takes multiple arguments, and/or optional arguments.
 - `{{file_path}}` and `{{folder_path}}` will not give an error message anymore if the given argument is not *relative* or *absolute*. Instead, the variable will be left unparsed silently. This change happened during [#43](https://github.com/Taitava/obsidian-shellcommands/issues/43).
 
 ## [0.5.1] - 2021-10-09
