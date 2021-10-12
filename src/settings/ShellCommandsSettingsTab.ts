@@ -98,6 +98,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         containerEl.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
         containerEl.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
         containerEl.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
+
+
+        // KEEP THIS AFTER CREATING ALL ELEMENTS:
+        this.rememberScrollPosition(containerEl);
     }
 
     /**
@@ -272,6 +276,17 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         }
         // Variable parsing succeeded
         return parsed_shell_command;
+    }
+
+    private scroll_position: number = 0;
+    private rememberScrollPosition(container_element: HTMLElement) {
+        container_element.scrollTo({
+            top: this.scroll_position,
+            behavior: "auto",
+        });
+        container_element.addEventListener("scroll", (event) => {
+            this.scroll_position = container_element.scrollTop;
+        });
     }
 
     /**
