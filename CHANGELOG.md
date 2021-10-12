@@ -7,14 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-## To be Added
+### To be Added
 - [New shell command output channels (#68)](https://github.com/Taitava/obsidian-shellcommands/issues/68):
   - Status bar: Good for showing short outputs in a permanent place.
   - Current file, top: Puts the output at the very beginning of a file.
   - Current file, bottom: Puts the output at the very end of a file.
   - Clipboard: So that you can easily paste the output anywhere you like.
 
-## To be Changed
+### To be Changed
 - [Settings: Scroll position is now remembered (#71)](https://github.com/Taitava/obsidian-shellcommands/issues/71)
 - [`{{tags}}` does not include preceding hash (#) characters anymore (#62)](https://github.com/Taitava/obsidian-shellcommands/issues/62). This is a backwards incompatible change (although a small one), and normally these kinds of changes would not be released in a _minor_ version update. But this plugin is still in its 0.x era, so breaking changes are tolerated more than in stable releases. If you want to have your tags prefixed with a hash again, use something like `#{{tags:,#}}` instead of `{{tags:,}}`.
 - [Internal: Support multiple parameters for variables (#43)](https://github.com/Taitava/obsidian-shellcommands/issues/43). In the future, allows developing new variables that takes multiple arguments, and/or optional arguments.
@@ -22,7 +22,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ## [0.5.1] - 2021-10-09
 
-## Fixed
+### Fixed
 - [`{{tags}}` does not give duplicate tags anymore (#65)](https://github.com/Taitava/obsidian-shellcommands/issues/65).
 - [Error balloon: Exit code was sometimes null (#67)](https://github.com/Taitava/obsidian-shellcommands/issues/67).
 
@@ -97,6 +97,7 @@ Features that are in development, but are not released yet. Does not include stu
 - Deleting commands should not cause non-removed commands to change/lose their hotkeys.
 
 ## [0.1.0] - 2021-08-29
+
 ### Added
 - Support for certain in-built variables (see the settings panel - actually I should put the variables to the README.md file too at some point).
 - Display execution errors.
