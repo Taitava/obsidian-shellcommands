@@ -22,6 +22,12 @@ export class ShellCommandVariable_Tags extends ShellCommandVariable {
             // We do have an active file
             let cache = this.app.metadataCache.getFileCache(active_file);
             let tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
+
+            // Remove preceding hash characters. E.g. #tag becomes tag
+            tags.forEach((tag: string, index) => {
+                tags[index] = tag.replace("#", "");
+            });
+
             return tags.join(this.arguments.separator);
         } else {
             // No file is active at the moment
