@@ -73,6 +73,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | -----------------------| ---------- | --------------------- | --- |
+| SC 0.6.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
 | SC 0.5.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
 | SC 0.5.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.4.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |

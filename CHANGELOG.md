@@ -7,14 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
+- Nothing at the moment.
+
+## [0.6.0] - 2021-10-12
+
+### Added
 - [New shell command output channels (#68)](https://github.com/Taitava/obsidian-shellcommands/issues/68):
   - Status bar: Good for showing short outputs in a permanent place.
   - Current file, top: Puts the output at the very beginning of a file.
   - Current file, bottom: Puts the output at the very end of a file.
   - Clipboard: So that you can easily paste the output anywhere you like.
 
-### To be Changed
+### Changed
 - [Settings: Scroll position is now remembered (#71)](https://github.com/Taitava/obsidian-shellcommands/issues/71)
 - [`{{tags}}` does not include preceding hash (#) characters anymore (#62)](https://github.com/Taitava/obsidian-shellcommands/issues/62). This is a backwards incompatible change (although a small one), and normally these kinds of changes would not be released in a _minor_ version update. But this plugin is still in its 0.x era, so breaking changes are tolerated more than in stable releases. If you want to have your tags prefixed with a hash again, use something like `#{{tags:,#}}` instead of `{{tags:,}}`.
 - [Internal: Support multiple parameters for variables (#43)](https://github.com/Taitava/obsidian-shellcommands/issues/43). In the future, allows developing new variables that takes multiple arguments, and/or optional arguments.
@@ -110,7 +114,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.0...HEAD
+[0.6.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.1...0.5.0
 [0.4.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.0...0.4.1
