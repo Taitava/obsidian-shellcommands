@@ -36,15 +36,30 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
     {
         let variable: ShellCommandVariable = shell_variables[variable_index];
         let pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
-        let match;
-        while ((match = pattern.exec(command)) !== null) {
-            let substitute = match[0];
-            let argument = null;
-            if (variable.has_argument && undefined !== match[1]) {
-                // Extract an argument from the match.
-                argument = match[1];
+        const parameter_names = variable.getParameterNames();
+        let _arguments: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
+        while ((_arguments = pattern.exec(command)) !== null) {
+            const substitute = _arguments.shift(); // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'.
+
+            // Remove stuff that should not be iterated in the next loop.
+            // "If the property which you are trying to delete does not exist, delete will not have any effect and will return true." This is good. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete
+            delete _arguments["groups"];
+            delete _arguments["index"];
+            delete _arguments["input"];
+
+            // Iterate all arguments
+            for (let i in _arguments) {
+                // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
+                if (undefined !== _arguments[i]) {
+                    // The argument is present.
+                    const argument = _arguments[i].slice(1); // .slice(1): Remove a preceding :
+                    const parameter_name = parameter_names[i];
+                    variable.setArgument(parameter_name, argument);
+                }
             }
-            let variable_value = variable.getValue(argument);
+
+            // Render the variable
+            let variable_value = variable.getValue();
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 console.log("Parsing command " + command + " failed.");
