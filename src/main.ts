@@ -1,6 +1,6 @@
 import {Command, Notice, Plugin} from 'obsidian';
-import {exec, ExecException} from "child_process";
-import {cloneObject, getVaultAbsolutePath} from "./Common";
+import {exec, ExecException, ExecOptions} from "child_process";
+import {cloneObject, getOperatingSystem, getVaultAbsolutePath} from "./Common";
 import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
 import {
@@ -14,6 +14,9 @@ import * as path from "path";
 import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
+import {BaseEncodingOptions} from "fs";
+import {TShellCommand} from "./TShellCommand";
+import {getUsersDefaultShell} from "./Shell";
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
@@ -55,7 +58,8 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param shell_command_configuration
 	 */
 	registerShellCommand(command_id: string, shell_command_configuration: ShellCommandConfiguration) {
-		console.log("Registering shell command #" + command_id + " (" + shell_command_configuration.shell_command + ") to Obsidian...");
+		let t_shell_command = new TShellCommand(this, shell_command_configuration); // TODO: Take this as a parameter.
+		console.log("Registering shell command #" + command_id + " (" + t_shell_command.getShellCommand() + ") to Obsidian...");
 		let obsidian_command: Command = {
 			id: this.generateObsidianCommandId(command_id),
 			name: this.generateObsidianCommandName(shell_command_configuration),
@@ -107,7 +111,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					// Check if we happen to have a preparsed command (= variables parsed at the time of opening the command palette)
 					if (undefined === this.preparsed_shell_command_configurations[command_id]) {
 						// No preparsed command. Execute a standard version of the command, and do variable parsing now.
-						let parsed_shell_command = parseShellCommandVariables(this, shell_command_configuration.shell_command);
+						let parsed_shell_command = parseShellCommandVariables(this, t_shell_command.getShellCommand());
 						if (Array.isArray(parsed_shell_command)) {
 							// The command could not be parsed correctly.
 							// Display error messages
@@ -161,12 +165,13 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	generateObsidianCommandName(shell_command_configuration: ShellCommandConfiguration) {
+		let t_shell_command = new TShellCommand(this, shell_command_configuration); // TODO: Take this as a parameter.
 		let prefix = "Execute: ";
 		if (shell_command_configuration.alias) {
 			// If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
 			return prefix + shell_command_configuration.alias;
 		}
-		return prefix + shell_command_configuration.shell_command;
+		return prefix + t_shell_command.getShellCommand();
 	}
 
 	/**
@@ -200,6 +205,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 */
 	executeShellCommand(shell_command: string, shell_command_configuration: ShellCommandConfiguration) {
 		let working_directory = this.getWorkingDirectory();
+		let t_shell_command = new TShellCommand(this, shell_command_configuration); // TODO: Take this as a parameter.
 
 		// Check that the shell command is not empty
 		shell_command = shell_command.trim();
@@ -224,11 +230,15 @@ export default class ShellCommandsPlugin extends Plugin {
 			this.newError("Working directory exists but is not a folder: " + working_directory);
 		} else {
 			// Working directory is OK
+			// Prepare execution options
+			let options: BaseEncodingOptions & ExecOptions = {
+				"cwd": working_directory,
+				"shell": t_shell_command.getShell(),
+			};
+
 			// Execute the shell command
 			console.log("Executing command " + shell_command + " in " + working_directory + "...");
-			exec(shell_command, {
-				"cwd": working_directory
-			}, (error: ExecException|null, stdout: string, stderr: string) => {
+			exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 				if (null !== error) {
 					// Some error occurred
 					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
@@ -326,6 +336,15 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	newNotification(message: string) {
 		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+	}
+
+	public getDefaultShell(): string {
+		let operating_system = getOperatingSystem()
+		let shell_name = this.settings.default_shell[operating_system]; // Can also be undefined.
+		if (undefined === shell_name) {
+			shell_name = getUsersDefaultShell();
+		}
+		return shell_name;
 	}
 }
 
