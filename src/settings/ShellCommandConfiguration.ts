@@ -1,13 +1,18 @@
 import {OutputChannel, OutputChannelOrder} from "../output_channels/OutputChannel";
-import {IOperatingSystemSpecificString, IOperatingSystemSpecificStringWithDefault} from "./ShellCommandsPluginSettings";
+import {IPlatformSpecificString, IPlatformSpecificStringWithDefault} from "./ShellCommandsPluginSettings";
 
 export interface ShellCommandsConfiguration {
     [key: string]: ShellCommandConfiguration;
 }
 
 export interface ShellCommandConfiguration {
-    shell_commands: IOperatingSystemSpecificStringWithDefault;
-    shells: IOperatingSystemSpecificString;
+    /**
+     * Contains operating system specific shell commands.
+     *  - key: platform (= OS) name
+     *  - value: shell command
+     */
+    platforms: IPlatformSpecificStringWithDefault;
+    shells: IPlatformSpecificString;
     alias: string;
     confirm_execution: boolean;
     ignore_error_codes: number[];
@@ -24,7 +29,7 @@ export interface ShellCommandConfiguration {
 
 export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
     return {
-        shell_commands: {
+        platforms: {
             default: shell_command,
         },
         shells: {},

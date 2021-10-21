@@ -2,7 +2,7 @@
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 
 export interface ShellCommandsPluginSettings {
-    default_shell: IOperatingSystemSpecificString;
+    default_shell: IPlatformSpecificString;
     working_directory: string;
     preview_variables_in_command_palette: boolean;
     shell_commands: ShellCommandsConfiguration;
@@ -45,13 +45,13 @@ export type OperatingSystemName = "darwin" | "linux" | "win32";
  *
  * @see NodeJS.Platform
  */
-export interface IOperatingSystemSpecificString {
+export interface IPlatformSpecificString {
     /** This is Macintosh */
     darwin?: string,
     linux?: string,
     win32?: string,
 }
 
-export interface IOperatingSystemSpecificStringWithDefault extends IOperatingSystemSpecificString{
+export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
     default?: string,
 }

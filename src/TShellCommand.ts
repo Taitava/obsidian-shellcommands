@@ -30,13 +30,13 @@ export class TShellCommand {
         let operating_system = getOperatingSystem();
 
         // Check if the shell command has defined a specific command for this operating system.
-        if (undefined === this.configuration.shell_commands[operating_system]) {
+        if (undefined === this.configuration.platforms[operating_system]) {
             // No command is defined specifically for this operating system.
             // Return an "OS agnostic" command.
-            return this.configuration.shell_commands.default;
+            return this.configuration.platforms.default;
         } else {
             // The shell command has defined a specific command for this operating system.
-            return this.configuration.shell_commands[operating_system];
+            return this.configuration.platforms[operating_system];
         }
     }
 }

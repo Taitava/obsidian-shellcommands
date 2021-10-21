@@ -4,7 +4,7 @@ import {newShellCommandConfiguration, ShellCommandConfiguration} from "./setting
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
     save ||= EnsureShellCommandsHaveAllFields(plugin);
-    save ||= MigrateShellCommandToShellCommands(plugin);
+    save ||= MigrateShellCommandToPlatforms(plugin);
     if (save) {
         // Only save if there were changes to configuration.
         console.log("Saving migrations...")
@@ -80,17 +80,17 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
     return save;
 }
 
-function MigrateShellCommandToShellCommands(plugin: ShellCommandsPlugin) {
+function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
     let save = false;
     for (let shell_command_id in plugin.settings.shell_commands) {
         let shell_command_configuration: ShellCommandConfiguration = plugin.settings.shell_commands[shell_command_id];
         if (null !== shell_command_configuration.shell_command) {
             // The shell command should be migrated.
-            if (undefined !== shell_command_configuration.shell_commands) {
+            if (undefined !== shell_command_configuration.platforms) {
                 console.log("Migration failure for shell command #" + shell_command_id + ": shell_commands exists already.");
             } else {
                 console.log("Migrating shell command #" + shell_command_id + ": shell_command string will be moved to shell_commands.default: " + shell_command_configuration.shell_command);
-                shell_command_configuration.shell_commands = {
+                shell_command_configuration.platforms = {
                     default: shell_command_configuration.shell_command,
                 };
                 shell_command_configuration.shell_command = null;
