@@ -60,7 +60,7 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
     let save = false;
     let shell_command_default_configuration = newShellCommandConfiguration();
     let shell_command_id: string;
-    let shell_command_configurations = plugin.getShellCommands();
+    let shell_command_configurations = plugin.settings.shell_commands;
     for (shell_command_id in shell_command_configurations) {
         let shell_command_configuration = shell_command_configurations[shell_command_id];
         for (let property_name in shell_command_default_configuration) {
