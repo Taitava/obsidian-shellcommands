@@ -53,5 +53,5 @@ export interface IPlatformSpecificString {
 }
 
 export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
-    default?: string,
+    default: string,
 }
