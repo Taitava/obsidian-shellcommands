@@ -26,12 +26,23 @@ export class ShellCommandExtraOptionsModal extends Modal {
     onOpen() {
         this.modalEl.createEl("h2", {text: this.shell_command_configuration.shell_command});
 
+        // Tab headers
+        let tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
+        tab_header.createEl("button", {text: "General"}).onclick = () => {
+
+        };
+
+        // Tab contents
+
+    }
+
+    private tabGeneral(container_element: HTMLElement) {
         // Alias field
-        new Setting(this.modalEl)
+        new Setting(container_element)
             .setName("Alias")
             .setClass("shell-commands-name-setting")
         ;
-        let alias_setting = new Setting(this.modalEl)
+        let alias_setting = new Setting(container_element)
             .addText(text => text
                 .setValue(this.shell_command_configuration.alias)
                 .onChange(async (value) => {
@@ -51,11 +62,11 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setClass("shell-commands-shell-command-setting")
         ;
         alias_setting.controlEl.find("input").focus(); // Focus without a need to click the field.
-        this.modalEl.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
-        this.modalEl.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
+        container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
+        container_element.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details."});
 
         // Confirm execution field
-        new Setting(this.modalEl)
+        new Setting(container_element)
             .setName("Ask confirmation before execution")
             .addToggle(toggle => toggle
                 .setValue(this.shell_command_configuration.confirm_execution)
@@ -77,7 +88,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Output channeling
         this.newOutputChannelSetting("Output channel for stdout", "stdout");
         this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
-        new Setting(this.modalEl)
+        new Setting(container_element)
             .setName("Order of stdout/stderr output")
             .setDesc("When output contains both errors and normal output, which one should be presented first?")
             .addDropdown(dropdown => dropdown
@@ -94,7 +105,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         ;
 
         // Ignore errors field
-        new Setting(this.modalEl)
+        new Setting(container_element)
             .setName("Ignore error codes")
             .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
             .addText(text => text
