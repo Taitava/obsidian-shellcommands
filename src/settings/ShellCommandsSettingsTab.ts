@@ -7,6 +7,7 @@ import {getShellCommandVariableInstructions} from "../variables/ShellCommandVari
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 import {TShellCommand} from "../TShellCommand";
+import {PlatformId, PlatformNames, PlatformShells} from "./ShellCommandsPluginSettings";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -37,6 +38,37 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 })
             )
         ;
+
+        // Platforms' default shells
+        let platform_id: PlatformId;
+        for (platform_id in PlatformNames) {
+            let platform_name = PlatformNames[platform_id];
+            let options = {"default": "Use system default"};
+            for (let shell_path in PlatformShells[platform_id]) {
+                // @ts-ignore // TODO: Get rid of these two ts-ignores.
+                let shell_name = PlatformShells[platform_id][shell_path];
+                // @ts-ignore
+                options[shell_path] = shell_name;
+            }
+            new Setting(containerEl)
+                .setName(platform_name + " default shell")
+                .setDesc("Can be overridden by each shell command.")
+                .addDropdown(dropdown => dropdown
+                    .addOptions(options)
+                    .setValue(this.plugin.settings.default_shell[platform_id] ?? "default")
+                    .onChange(async (value) => {
+                        if ("default" === value) {
+                            // When using system default shell, the value should be unset.
+                            delete this.plugin.settings.default_shell[platform_id];
+                        } else {
+                            // FIXME: platform_id is here always "win32" (the last of PlatformNames). See instructions in https://www.pluralsight.com/guides/javascript-callbacks-variable-scope-problem .
+                            this.plugin.settings.default_shell[platform_id] = value;
+                        }
+                        await this.plugin.saveSettings();
+                    })
+                )
+            ;
+        }
 
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         let command_fields_container = containerEl.createEl("div");

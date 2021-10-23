@@ -37,6 +37,12 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
  */
 export type PlatformId = "darwin" | "linux" | "win32";
 
+export const PlatformNames: IPlatformSpecificString = {
+    darwin: "Macintosh",
+    linux: "Linux",
+    win32: "Windows",
+};
+
 /**
  * All OSes supported by the Shell commands plugin.
  * Values are borrowed from NodeJS.Platform.
@@ -54,4 +60,20 @@ export interface IPlatformSpecificString {
 
 export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
     default: string,
+}
+
+export const PlatformShells = {
+    darwin: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)"
+    },
+    linux: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)"
+    },
+    win32: {
+        "pwsh.exe": "PowerShell Core",
+        "PowerShell.exe": "PowerShell 5",
+        "CMD.EXE": "CMD (not recommended)",
+    }
 }
