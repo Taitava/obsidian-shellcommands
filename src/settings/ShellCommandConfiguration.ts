@@ -24,7 +24,7 @@ export interface ShellCommandConfiguration {
 
     // LEGACY
     /** @deprecated Can only be used for migration. */
-    shell_command: string;
+    shell_command?: string;
 }
 
 export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
@@ -41,8 +41,5 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
             stderr: "notification",
         },
         output_channel_order: "stdout-first",
-
-        // LEGACY
-        shell_command: null,
     }
 }

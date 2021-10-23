@@ -1,12 +1,12 @@
 import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath} from "../Common";
-import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
+import {TShellCommand} from "../TShellCommand";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -42,7 +42,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         let command_fields_container = containerEl.createEl("div");
 
         // Fields for modifying existing commands
-        for (let command_id in this.plugin.getShellCommands()) {
+        for (let command_id in this.plugin.getTShellCommands()) {
             this.createCommandField(command_fields_container, command_id);
         }
 
@@ -111,42 +111,36 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
      */
     createCommandField(container_element: HTMLElement, shell_command_id: string) {
         let is_new = "new" === shell_command_id;
-        let shell_command_configuration: ShellCommandConfiguration;
+        let t_shell_command: TShellCommand;
         if (is_new) {
             // Create an empty command
-            shell_command_id = this.plugin.generateNewShellCommandID();
-            shell_command_configuration = newShellCommandConfiguration();
-            this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
-
-            // Register the empty shell command to Obsidian's command palette.
-            // Do it already now, because there are settings (e.g. Alias) that, when changed by the user, will try to modify the Obsidian command. Sometimes users edit these settings before writing the actual command. See issue #46: https://github.com/Taitava/obsidian-shellcommands/issues/46
-            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
+            t_shell_command = this.plugin.newTShellCommand();
         } else {
             // Use an old shell command
-            shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
+            t_shell_command = this.plugin.getTShellCommands()[shell_command_id];
         }
         console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
         let shell_command: string;
         if (is_new) {
             shell_command = "";
         } else {
-            shell_command = shell_command_configuration.shell_command;
+            shell_command = t_shell_command.getDefaultShellCommand();
         }
         let setting_group: ShellCommandSettingGroup = {
             name_setting:
                 new Setting(container_element)
-                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
+                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getTShellCommands()[shell_command_id]))
                 .addExtraButton(button => button
                     .setTooltip("Execute now")
                     .setIcon("run-command")
                     .onClick(() => {
                         // Execute the shell command now (for trying it out in the settings)
-                        let shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command);
+                        let t_shell_command = this.plugin.getTShellCommands()[shell_command_id];
+                        let parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand());
                         if (Array.isArray(parsed_shell_command)) {
                             this.plugin.newErrors(parsed_shell_command);
                         } else {
-                            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
+                            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
                         }
                     })
                 )
@@ -185,15 +179,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                         }
 
                         // Do this in both cases, when creating a new command and when changing an old one:
-                        shell_command_configuration.shell_command = shell_command;
+                        t_shell_command.getConfiguration().platforms.default = shell_command;
 
                         if (is_new) {
                             // Create a new command
-                            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
+                            // this.plugin.registerShellCommand(t_shell_command); // I don't think this is needed to be done anymore
                             console.log("Command created.");
                         } else {
                             // Change an old command
-                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
                             console.log("Command changed.");
                         }
                         await this.plugin.saveSettings();
@@ -214,15 +208,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         // "Ask confirmation" icon.
         let confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
         setIcon(confirm_execution_icon_container, "languages");
-        if (!shell_command_configuration.confirm_execution) {
+        if (!t_shell_command.getConfirmExecution()) {
             // Do not display the icon for commands that do not use confirmation.
             confirm_execution_icon_container.addClass("shell-commands-hide");
         }
 
         // "Ignored error codes" icon
-        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes), class: "shell-commands-ignored-error-codes-icon-container"}});
+        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(t_shell_command.getIgnoreErrorCodes()), class: "shell-commands-ignored-error-codes-icon-container"}});
         setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
-        if (!shell_command_configuration.ignore_error_codes.length) {
+        if (!t_shell_command.getIgnoreErrorCodes().length) {
             // Do not display the icon for commands that do not ignore any errors.
             ignored_error_codes_icon_container.addClass("shell-commands-hide");
         }
@@ -290,13 +284,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     }
 
     /**
-     * @param shell_command_id String like "0" or "1" etc.
-     * @param shell_command_configuration
+     * @param shell_command_id String like "0" or "1" etc. TODO: Remove this parameter and use id from t_shell_command.
+     * @param t_shell_command
      * @public Public because ShellCommandExtraOptionsModal uses this too.
      */
-    public generateCommandFieldName(shell_command_id: string, shell_command_configuration: ShellCommandConfiguration) {
-        if (shell_command_configuration.alias) {
-            return shell_command_configuration.alias;
+    public generateCommandFieldName(shell_command_id: string, t_shell_command: TShellCommand) {
+        if (t_shell_command.getAlias()) {
+            return t_shell_command.getAlias();
         }
         return "Command #" + shell_command_id;
     }
