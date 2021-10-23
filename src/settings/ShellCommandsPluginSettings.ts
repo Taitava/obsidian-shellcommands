@@ -35,7 +35,7 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
  *
  * @see NodeJS.Platform
  */
-export type OperatingSystemName = "darwin" | "linux" | "win32";
+export type PlatformId = "darwin" | "linux" | "win32";
 
 /**
  * All OSes supported by the Shell commands plugin.
