@@ -1,11 +1,11 @@
 import {TShellCommand} from "../../TShellCommand";
-import {Hotkey, setIcon, Setting} from "obsidian";
+import {Hotkey, setIcon} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
 import {ShellCommandExtraOptionsModal} from "../ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "../ShellCommandDeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
-import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
 import ShellCommandsPlugin from "../../main";
+import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 
 /**
  *
@@ -30,81 +30,69 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     } else {
         shell_command = t_shell_command.getDefaultShellCommand();
     }
-    let setting_group: ShellCommandSettingGroup = {
-        name_setting:
-            new Setting(container_element)
-                .setName(generateShellCommandFieldName(shell_command_id, plugin.getTShellCommands()[shell_command_id]))
-                .addExtraButton(button => button
-                    .setTooltip("Execute now")
-                    .setIcon("run-command")
-                    .onClick(() => {
-                        // Execute the shell command now (for trying it out in the settings)
-                        let t_shell_command = plugin.getTShellCommands()[shell_command_id];
-                        let parsed_shell_command = parseShellCommandVariables(plugin, t_shell_command.getShellCommand());
-                        if (Array.isArray(parsed_shell_command)) {
-                            plugin.newErrors(parsed_shell_command);
-                        } else {
-                            plugin.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
-                        }
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
-                    .onClick(async () => {
-                        // Open an extra options modal
-                        let modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
-                        modal.open();
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip("Delete this shell command")
-                    .setIcon("trash")
-                    .onClick(async () => {
-                        // Open a delete modal
-                        let modal = new ShellCommandDeleteModal(plugin, shell_command_id, setting_group, container_element);
-                        modal.open();
-                    })
-                )
-                .setClass("shell-commands-name-setting")
-        ,
-        shell_command_setting:
-            new Setting(container_element)
-                .addText(text => text
-                    .setPlaceholder("Enter your command")
-                    .setValue(shell_command)
-                    .onChange(async (field_value) => {
-                        let shell_command = field_value;
-                        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command));
 
-                        if (is_new) {
-                            console.log("Creating new command " + shell_command_id + ": " + shell_command);
-                        } else {
-                            console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
-                        }
+    const setting_group = CreateShellCommandFieldCore(
+        plugin,
+        container_element,
+        generateShellCommandFieldName(shell_command_id, plugin.getTShellCommands()[shell_command_id]),
+        shell_command,
+        async (shell_command: string) => {
+            if (is_new) {
+                console.log("Creating new command " + shell_command_id + ": " + shell_command);
+            } else {
+                console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
+            }
 
-                        // Do this in both cases, when creating a new command and when changing an old one:
-                        t_shell_command.getConfiguration().platform_specific_commands.default = shell_command;
+            // Do this in both cases, when creating a new command and when changing an old one:
+            t_shell_command.getConfiguration().platform_specific_commands.default = shell_command;
 
-                        if (is_new) {
-                            // Create a new command
-                            // plugin.registerShellCommand(t_shell_command); // I don't think this is needed to be done anymore
-                            console.log("Command created.");
-                        } else {
-                            // Change an old command
-                            plugin.obsidian_commands[shell_command_id].name = plugin.generateObsidianCommandName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                            console.log("Command changed.");
-                        }
-                        await plugin.saveSettings();
-                    })
-                )
-                .setClass("shell-commands-shell-command-setting")
-        ,
-        preview_setting:
-            new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command))
-                .setClass("shell-commands-preview-setting")
-        ,
-    };
+            if (is_new) {
+                // Create a new command
+                // plugin.registerShellCommand(t_shell_command); // I don't think this is needed to be done anymore
+                console.log("Command created.");
+            } else {
+                // Change an old command
+                plugin.obsidian_commands[shell_command_id].name = plugin.generateObsidianCommandName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                console.log("Command changed.");
+            }
+            await plugin.saveSettings();
+        },
+    );
+
+    // Icon buttons
+    setting_group.name_setting
+        .addExtraButton(button => button
+            .setTooltip("Execute now")
+            .setIcon("run-command")
+            .onClick(() => {
+                // Execute the shell command now (for trying it out in the settings)
+                let t_shell_command = plugin.getTShellCommands()[shell_command_id];
+                let parsed_shell_command = parseShellCommandVariables(plugin, t_shell_command.getShellCommand());
+                if (Array.isArray(parsed_shell_command)) {
+                    plugin.newErrors(parsed_shell_command);
+                } else {
+                    plugin.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
+                }
+            })
+        )
+        .addExtraButton(button => button
+            .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
+            .onClick(async () => {
+                // Open an extra options modal
+                let modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                modal.open();
+            })
+        )
+        .addExtraButton(button => button
+            .setTooltip("Delete this shell command")
+            .setIcon("trash")
+            .onClick(async () => {
+                // Open a delete modal
+                let modal = new ShellCommandDeleteModal(plugin, shell_command_id, setting_group, container_element);
+                modal.open();
+            })
+        )
+    ;
 
     // Informational icons (= non-clickable)
     let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
@@ -164,15 +152,4 @@ export function generateShellCommandFieldName(shell_command_id: string, t_shell_
 export function generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
     let plural = ignored_error_codes.length !== 1 ? "s" : "";
     return "Ignored error"+plural+": " + ignored_error_codes.join(",");
-}
-
-function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string) {
-    let parsed_shell_command = parseShellCommandVariables(plugin, shell_command); // false: disables notifications if variables have syntax errors.
-    if (Array.isArray(parsed_shell_command)) {
-        // Variable parsing failed.
-        // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-        return parsed_shell_command[0];
-    }
-    // Variable parsing succeeded
-    return parsed_shell_command;
 }
