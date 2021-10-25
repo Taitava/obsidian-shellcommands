@@ -54,7 +54,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             }
             new Setting(containerEl)
                 .setName(platform_name + " default shell")
-                .setDesc("Can be overridden by each shell command.")
+                .setDesc("Can be overridden by each shell command. " + ("win32" === platform_id ? "Powershell is recommended over cmd.exe, because this plugin does not support escaping variables in CMD." : ""))
                 .addDropdown(dropdown => dropdown
                     .addOptions(options)
                     .setValue(this.plugin.settings.default_shell[platform_id] ?? "default")

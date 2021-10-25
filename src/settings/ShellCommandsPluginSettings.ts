@@ -74,6 +74,6 @@ export const PlatformShells = {
     win32: {
         "pwsh.exe": "PowerShell Core",
         "PowerShell.exe": "PowerShell 5",
-        "CMD.EXE": "CMD (not recommended)",
+        "CMD.EXE": "cmd.exe",
     }
 }
