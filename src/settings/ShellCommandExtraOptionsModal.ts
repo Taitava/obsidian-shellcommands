@@ -4,6 +4,7 @@ import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommand
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
+import {createShellSelectionField} from "./SettingElements/CreateShellSelectionField";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
@@ -130,6 +131,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+
+        // Platform specific shell selection
+        createShellSelectionField(this.plugin, this.modalEl, this.t_shell_command.getShells(), false);
     }
 
     private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {

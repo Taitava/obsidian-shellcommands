@@ -47,6 +47,10 @@ export class TShellCommand {
         }
     }
 
+    public getShells() {
+        return this.configuration.shells;
+    }
+
     /**
      * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
      * command does not have an explicit version for the current OS.
