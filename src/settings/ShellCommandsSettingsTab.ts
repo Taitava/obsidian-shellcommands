@@ -58,16 +58,16 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .addDropdown(dropdown => dropdown
                     .addOptions(options)
                     .setValue(this.plugin.settings.default_shell[platform_id] ?? "default")
-                    .onChange(async (value) => {
+                    .onChange(((_platform_id: PlatformId) => { return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
                         if ("default" === value) {
                             // When using system default shell, the value should be unset.
-                            delete this.plugin.settings.default_shell[platform_id];
+                            delete this.plugin.settings.default_shell[_platform_id];
                         } else {
-                            // FIXME: platform_id is here always "win32" (the last of PlatformNames). See instructions in https://www.pluralsight.com/guides/javascript-callbacks-variable-scope-problem .
-                            this.plugin.settings.default_shell[platform_id] = value;
+                            // Normal case: assign the shell value.
+                            this.plugin.settings.default_shell[_platform_id] = value;
                         }
                         await this.plugin.saveSettings();
-                    })
+                    }})(platform_id))
                 )
             ;
         }
