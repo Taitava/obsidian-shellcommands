@@ -6,6 +6,10 @@
     display: none;
 }
 
+.SC-scrollable {
+    overflow-y: auto;
+}
+
 
 /*
  * SHELL COMMAND SETTING CONTAINERS

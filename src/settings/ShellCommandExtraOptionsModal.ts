@@ -27,6 +27,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
     onOpen() {
         this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
 
+        // Make the modal scrollable if it has more content than what fits in the screen.
+        this.modalEl.addClass("SC-scrollable");
+
         // Alias field
         new Setting(this.modalEl)
             .setName("Alias")
