@@ -1,6 +1,7 @@
 import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
 import {PlatformId} from "./settings/ShellCommandsPluginSettings";
 import {platform} from "os";
+import * as path from "path";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -98,6 +99,10 @@ export function normalizePath2(path: string) {
 
     // 4. Done
     return path;
+}
+
+export function extractFileName(file_path: string) {
+    return path.parse(file_path).base;
 }
 
 export function joinObjectProperties(object: {}, glue: string) {

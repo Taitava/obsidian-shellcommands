@@ -1,6 +1,6 @@
 import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {getVaultAbsolutePath} from "../Common";
+import {extractFileName, getOperatingSystem, getVaultAbsolutePath} from "../Common";
 import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
@@ -8,6 +8,7 @@ import {parseShellCommandVariables} from "../variables/parseShellCommandVariable
 import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 import {TShellCommand} from "../TShellCommand";
 import {PlatformId, PlatformNames, PlatformShells} from "./ShellCommandsPluginSettings";
+import {getUsersDefaultShell} from "../Shell";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -43,7 +44,8 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         let platform_id: PlatformId;
         for (platform_id in PlatformNames) {
             let platform_name = PlatformNames[platform_id];
-            let options = {"default": "Use system default"};
+            let current_system_default = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShell()) + ")" : "";
+            let options = {"default": "Use system default" + current_system_default};
             for (let shell_path in PlatformShells[platform_id]) {
                 // @ts-ignore // TODO: Get rid of these two ts-ignores.
                 let shell_name = PlatformShells[platform_id][shell_path];
