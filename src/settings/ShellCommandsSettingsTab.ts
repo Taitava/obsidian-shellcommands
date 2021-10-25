@@ -1,14 +1,13 @@
 import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {extractFileName, getOperatingSystem, getVaultAbsolutePath} from "../Common";
+import {getVaultAbsolutePath} from "../Common";
 import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 import {TShellCommand} from "../TShellCommand";
-import {PlatformId, PlatformNames, PlatformShells} from "./ShellCommandsPluginSettings";
-import {getUsersDefaultShell} from "../Shell";
+import {createShellSelectionField} from "./SettingElements/CreateShellSelectionField";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -41,36 +40,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         // Platforms' default shells
-        let platform_id: PlatformId;
-        for (platform_id in PlatformNames) {
-            let platform_name = PlatformNames[platform_id];
-            let current_system_default = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShell()) + ")" : "";
-            let options = {"default": "Use system default" + current_system_default};
-            for (let shell_path in PlatformShells[platform_id]) {
-                // @ts-ignore // TODO: Get rid of these two ts-ignores.
-                let shell_name = PlatformShells[platform_id][shell_path];
-                // @ts-ignore
-                options[shell_path] = shell_name;
-            }
-            new Setting(containerEl)
-                .setName(platform_name + " default shell")
-                .setDesc("Can be overridden by each shell command. " + ("win32" === platform_id ? "Powershell is recommended over cmd.exe, because this plugin does not support escaping variables in CMD." : ""))
-                .addDropdown(dropdown => dropdown
-                    .addOptions(options)
-                    .setValue(this.plugin.settings.default_shell[platform_id] ?? "default")
-                    .onChange(((_platform_id: PlatformId) => { return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
-                        if ("default" === value) {
-                            // When using system default shell, the value should be unset.
-                            delete this.plugin.settings.default_shell[_platform_id];
-                        } else {
-                            // Normal case: assign the shell value.
-                            this.plugin.settings.default_shell[_platform_id] = value;
-                        }
-                        await this.plugin.saveSettings();
-                    }})(platform_id))
-                )
-            ;
-        }
+        createShellSelectionField(this.plugin, containerEl, this.plugin.settings.default_shell);
 
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         let command_fields_container = containerEl.createEl("div");
