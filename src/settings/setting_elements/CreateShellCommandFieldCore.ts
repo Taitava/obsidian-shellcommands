@@ -9,6 +9,7 @@ export function CreateShellCommandFieldCore(
     setting_name: string,
     shell_command: string,
     on_change: (shell_command: string) => void,
+    shell_command_placeholder: string = "Enter your command"
     ) {
     let setting_group: ShellCommandSettingGroup = {
         name_setting:
@@ -19,7 +20,7 @@ export function CreateShellCommandFieldCore(
         shell_command_setting:
             new Setting(container_element)
                 .addText(text => text
-                    .setPlaceholder("Enter your command")
+                    .setPlaceholder(shell_command_placeholder)
                     .setValue(shell_command)
                     .onChange((shell_command) => {
                         // Update preview
