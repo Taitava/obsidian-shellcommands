@@ -7,7 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-- Nothing at the moment.
+### To be Changed
+- [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
 
 ## [0.6.0] - 2021-10-12
 
