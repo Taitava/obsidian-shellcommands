@@ -16,7 +16,7 @@ import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
 import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./Shell";
+import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
 
 export default class ShellCommandsPlugin extends Plugin {
@@ -244,6 +244,17 @@ export default class ShellCommandsPlugin extends Plugin {
 			return;
 		}
 
+		// Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
+		// that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
+		// shell can be written there.
+		const shell = t_shell_command.getShell();
+		if (!isShellSupported(shell)) {
+			console.log("Shell is not supported: " + shell);
+			this.newError("This plugin does not support the following shell: " + shell);
+			return;
+		}
+
+
 		// Check that the working directory exists and is a folder
 		if (!fs.existsSync(working_directory)) {
 			// Working directory does not exist
@@ -261,7 +272,7 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Prepare execution options
 			let options: BaseEncodingOptions & ExecOptions = {
 				"cwd": working_directory,
-				"shell": t_shell_command.getShell(),
+				"shell": shell,
 			};
 
 			// Execute the shell command
