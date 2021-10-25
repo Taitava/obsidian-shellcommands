@@ -7,7 +7,7 @@ import {getShellCommandVariableInstructions} from "../variables/ShellCommandVari
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
 import {TShellCommand} from "../TShellCommand";
-import {createShellSelectionField} from "./SettingElements/CreateShellSelectionField";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;

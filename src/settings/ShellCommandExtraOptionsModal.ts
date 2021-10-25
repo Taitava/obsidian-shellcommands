@@ -4,7 +4,7 @@ import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommand
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
-import {createShellSelectionField} from "./SettingElements/CreateShellSelectionField";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
