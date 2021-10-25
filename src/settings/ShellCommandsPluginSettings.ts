@@ -2,7 +2,7 @@
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 
 export interface ShellCommandsPluginSettings {
-    default_shell: IPlatformSpecificString;
+    default_shells: IPlatformSpecificString;
     working_directory: string;
     preview_variables_in_command_palette: boolean;
     shell_commands: ShellCommandsConfiguration;
@@ -15,7 +15,7 @@ export interface ShellCommandsPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
-    default_shell: {},
+    default_shells: {},
     working_directory: "",
     preview_variables_in_command_palette: true,
     shell_commands: {},

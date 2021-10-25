@@ -379,7 +379,7 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	public getDefaultShell(): string {
 		let operating_system = getOperatingSystem()
-		let shell_name = this.settings.default_shell[operating_system]; // Can also be undefined.
+		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
 		if (undefined === shell_name) {
 			shell_name = getUsersDefaultShell();
 		}

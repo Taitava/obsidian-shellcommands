@@ -40,7 +40,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         // Platforms' default shells
-        createShellSelectionField(this.plugin, containerEl, this.plugin.settings.default_shell, true);
+        createShellSelectionField(this.plugin, containerEl, this.plugin.settings.default_shells, true);
 
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         let command_fields_container = containerEl.createEl("div");
