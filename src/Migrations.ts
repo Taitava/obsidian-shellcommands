@@ -86,9 +86,9 @@ function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
         let shell_command_configuration: ShellCommandConfiguration = plugin.settings.shell_commands[shell_command_id];
         if (undefined !== shell_command_configuration.shell_command) {
             // The shell command should be migrated.
-            if (undefined === shell_command_configuration.platforms || shell_command_configuration.platforms.default === "") {
+            if (undefined === shell_command_configuration.platform_specific_commands || shell_command_configuration.platform_specific_commands.default === "") {
                 console.log("Migrating shell command #" + shell_command_id + ": shell_command string will be moved to platforms.default: " + shell_command_configuration.shell_command);
-                shell_command_configuration.platforms = {
+                shell_command_configuration.platform_specific_commands = {
                     default: shell_command_configuration.shell_command,
                 };
                 delete shell_command_configuration.shell_command;

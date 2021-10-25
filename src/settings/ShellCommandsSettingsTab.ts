@@ -183,7 +183,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                         }
 
                         // Do this in both cases, when creating a new command and when changing an old one:
-                        t_shell_command.getConfiguration().platforms.default = shell_command;
+                        t_shell_command.getConfiguration().platform_specific_commands.default = shell_command;
 
                         if (is_new) {
                             // Create a new command

@@ -111,7 +111,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						} else {
 							// Variable parsing succeeded.
 							// Use the parsed values.
-							preparsed_t_shell_command.getConfiguration().platforms = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
+							preparsed_t_shell_command.getConfiguration().platform_specific_commands = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
 						}
 
 						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.

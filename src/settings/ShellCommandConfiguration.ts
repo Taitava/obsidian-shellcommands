@@ -11,7 +11,7 @@ export interface ShellCommandConfiguration {
      *  - key: platform (= OS) name
      *  - value: shell command
      */
-    platforms: IPlatformSpecificStringWithDefault;
+    platform_specific_commands: IPlatformSpecificStringWithDefault;
     shells: IPlatformSpecificString;
     alias: string;
     confirm_execution: boolean;
@@ -29,7 +29,7 @@ export interface ShellCommandConfiguration {
 
 export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
     return {
-        platforms: {
+        platform_specific_commands: {
             default: shell_command,
         },
         shells: {},
