@@ -14,7 +14,9 @@ import {createPlatformSpecificShellCommandField} from "./setting_elements/Create
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 
 export class ShellCommandExtraOptionsModal extends Modal {
-    static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
+    static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
+    static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
+    static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -178,6 +180,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
         // Platform specific shell selection
         createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+    }
+
+    public activateTab(tab_id: string) {
+        if (undefined === this.tab_structure.buttons[tab_id]) {
+            throw Error("Invalid tab id: " + tab_id);
+        }
+        this.tab_structure.buttons[tab_id].click();
     }
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
