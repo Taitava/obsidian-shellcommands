@@ -90,8 +90,8 @@ span.shell-commands-main-icon-container {
 }
 
 /* Create an active/current tablink class */
-.SC-tab-header button.SC-tab-active,
-.SC-tab-header button:hover {
+.SC-tab-header-button.SC-tab-active,
+.SC-tab-header-button:hover {
     background-color: #bbb !important;
 }
 
