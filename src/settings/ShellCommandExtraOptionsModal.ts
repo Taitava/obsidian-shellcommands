@@ -11,6 +11,7 @@ import {
     generateShellCommandFieldName
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
+import {createTabs, TabStructure} from "./setting_elements/Tabs";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
@@ -20,6 +21,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
     private readonly t_shell_command: TShellCommand;
     private name_setting: Setting;
     private setting_tab: ShellCommandsSettingsTab;
+    private tab_structure: TabStructure;
 
     constructor(app: App, plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, setting_tab: ShellCommandsSettingsTab) {
         super(app);
@@ -36,72 +38,26 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Make the modal scrollable if it has more content than what fits in the screen.
         this.modalEl.addClass("SC-scrollable");
 
-        // Tab headers
-        // TODO: Move the tab mechanism to a more general place so that the main settings view can use it, too.
-        const show_tab = (event: MouseEvent) => {
-            let max_height = 0;
-            const tab_contents = document.getElementsByClassName("SC-tab-content");
-            for (let index= 0; index < tab_contents.length; index++) {
-                let tab_content = (tab_contents.item(index) as HTMLElement);
-
-                // Get the maximum tab height so that all tabs can have the same height.
-                tab_content.addClass("SC-tab-active"); // Need to make the tab visible temporarily in order to get the height.
-                if (tab_content.offsetHeight > max_height) {
-                    max_height = tab_content.offsetHeight;
-                }
-
-                // Finally hide the tab
-                tab_content.removeClass("SC-tab-active");
-            }
-
-            // Remove active status from all buttons
-            const tab_buttons = document.getElementsByClassName("SC-tab-header-button");
-            for (let index= 0; index < tab_buttons.length; index++) {
-                let tab_button = (tab_buttons.item(index) as HTMLElement);
-                tab_button.removeClass("SC-tab-active");
-            }
-
-            // Activate the clicked tab
-            let tab_button = event.target as HTMLElement;
-            tab_button.addClass("SC-tab-active");
-            const activate_tab_id = tab_button.attributes.getNamedItem("activateTab").value;
-            const tab_content = document.getElementById(activate_tab_id);
-            tab_content.addClass("SC-tab-active");
-
-            // Apply the max height to this tab
-            tab_content.style.height = max_height+"px";
-
-            // Do nothing else (I don't know if this is needed or not)
-            event.preventDefault();
-        };
-        const tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
-
-        // Tab button: General
-        const general_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-general"}});
-        general_tab_button.onclick = show_tab;
-        setIcon(general_tab_button, "gear");
-        general_tab_button.insertAdjacentText("beforeend", " General");
-
-        // Tab button: Output
-        const output_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-output"}});
-        output_tab_button.onclick = show_tab;
-        setIcon(output_tab_button, "lines-of-text");
-        output_tab_button.insertAdjacentText("beforeend", " Output");
-
-        // Tab button: Operating systems & shells
-        const operating_systems_and_shells_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-operating-systems-and-shells"}});
-        operating_systems_and_shells_tab_button.onclick = show_tab;
-        setIcon(operating_systems_and_shells_tab_button, "bullet-list-glyph");
-        operating_systems_and_shells_tab_button.insertAdjacentText("beforeend", " Operating systems & shells");
+        // Tabs
+        this.tab_structure = createTabs(this.modalEl, {
+            "extra-options-general": {
+                title: "General",
+                icon: "gear",
+            },
+            "extra-options-output": {
+                title: "Output",
+                icon: "lines-of-text",
+            },
+            "extra-options-operating-systems-and-shells": {
+                title: "Operating systems & shells",
+                icon: "bullet-list-glyph",
+            },
+        });
 
         // Tab contents
-        const tab_general_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-general"}});
-        const tab_output_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-output"}});
-        const tab_operating_systems_and_shells_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-operating-systems-and-shells"}});
-        this.tabGeneral(tab_general_content);
-        this.tabOutput(tab_output_content);
-        this.tabOperatingSystemsAndShells(tab_operating_systems_and_shells_content);
-        general_tab_button.click();
+        this.tabGeneral(this.tab_structure.contentContainers["extra-options-general"]);
+        this.tabOutput(this.tab_structure.contentContainers["extra-options-output"]);
+        this.tabOperatingSystemsAndShells(this.tab_structure.contentContainers["extra-options-operating-systems-and-shells"]);
     }
 
     private tabGeneral(container_element: HTMLElement) {
