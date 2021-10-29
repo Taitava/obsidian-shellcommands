@@ -96,7 +96,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
         )
         .addExtraButton(button => button
             .setTooltip(ShellCommandExtraOptionsModal.OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY)
-            .setIcon("bullet-list-glyph")
+            .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Operating systems and shells tab
                 const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);

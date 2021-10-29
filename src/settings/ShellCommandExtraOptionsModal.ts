@@ -52,7 +52,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             },
             "extra-options-operating-systems-and-shells": {
                 title: "Operating systems & shells",
-                icon: "bullet-list-glyph",
+                icon: "stacked-levels",
             },
         });
 
