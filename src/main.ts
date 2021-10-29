@@ -16,7 +16,7 @@ import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
 import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./Shell";
+import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
 
 export default class ShellCommandsPlugin extends Plugin {
@@ -111,7 +111,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						} else {
 							// Variable parsing succeeded.
 							// Use the parsed values.
-							preparsed_t_shell_command.getConfiguration().platforms = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
+							preparsed_t_shell_command.getConfiguration().platform_specific_commands = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
 						}
 
 						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
@@ -244,6 +244,17 @@ export default class ShellCommandsPlugin extends Plugin {
 			return;
 		}
 
+		// Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
+		// that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
+		// shell can be written there.
+		const shell = t_shell_command.getShell();
+		if (!isShellSupported(shell)) {
+			console.log("Shell is not supported: " + shell);
+			this.newError("This plugin does not support the following shell: " + shell);
+			return;
+		}
+
+
 		// Check that the working directory exists and is a folder
 		if (!fs.existsSync(working_directory)) {
 			// Working directory does not exist
@@ -261,7 +272,7 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Prepare execution options
 			let options: BaseEncodingOptions & ExecOptions = {
 				"cwd": working_directory,
-				"shell": t_shell_command.getShell(),
+				"shell": shell,
 			};
 
 			// Execute the shell command
@@ -368,7 +379,7 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	public getDefaultShell(): string {
 		let operating_system = getOperatingSystem()
-		let shell_name = this.settings.default_shell[operating_system]; // Can also be undefined.
+		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
 		if (undefined === shell_name) {
 			shell_name = getUsersDefaultShell();
 		}

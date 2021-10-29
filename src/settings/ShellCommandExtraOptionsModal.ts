@@ -4,6 +4,13 @@ import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommand
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
+import {PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {
+    generateIgnoredErrorCodesIconTitle,
+    generateShellCommandFieldName
+} from "./setting_elements/CreateShellCommandField";
+import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
@@ -25,6 +32,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     onOpen() {
         this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
+
+        // Make the modal scrollable if it has more content than what fits in the screen.
+        this.modalEl.addClass("SC-scrollable");
 
         // Tab headers
         let tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
@@ -53,7 +63,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.t_shell_command);
 
                     // UpdateShell commands settings panel
-                    this.name_setting.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.t_shell_command));
+                    this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));
 
                     // Save
                     await this.plugin.saveSettings();
@@ -132,7 +142,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     let icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
                     if (this.t_shell_command.getIgnoreErrorCodes().length) {
                         // Show icon
-                        icon_container.setAttr("aria-label", this.setting_tab.generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
+                        icon_container.setAttr("aria-label", generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
                         icon_container.removeClass("shell-commands-hide");
                     } else {
                         // Hide icon
@@ -141,6 +151,15 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+
+        // Platform specific shell selection
+        createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+
+        // Platform specific shell commands
+        let platform_id: PlatformId;
+        for (platform_id in PlatformNames) {
+            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id);
+        }
     }
 
     private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {

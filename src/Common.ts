@@ -1,6 +1,7 @@
 import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
-import {OperatingSystemName} from "./settings/ShellCommandsPluginSettings";
+import {PlatformId} from "./settings/ShellCommandsPluginSettings";
 import {platform} from "os";
+import * as path from "path";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -20,9 +21,10 @@ export function isWindows() {
 }
 
 /**
- * This is just a wrapper around platform() in order to cast the type to OperatingSystemName.
+ * This is just a wrapper around platform() in order to cast the type to PlatformId.
+ * TODO: Consider renaming this to getPlatformId().
  */
-export function getOperatingSystem(): OperatingSystemName  {
+export function getOperatingSystem(): PlatformId  {
     // @ts-ignore In theory, platform() can return an OS name not included in OperatingSystemName. But as Obsidian
     // currently does not support anything else than Windows, Mac and Linux (except mobile platforms, but they are
     // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
@@ -97,6 +99,10 @@ export function normalizePath2(path: string) {
 
     // 4. Done
     return path;
+}
+
+export function extractFileName(file_path: string) {
+    return path.parse(file_path).base;
 }
 
 export function joinObjectProperties(object: {}, glue: string) {

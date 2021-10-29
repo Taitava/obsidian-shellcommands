@@ -2,7 +2,7 @@
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 
 export interface ShellCommandsPluginSettings {
-    default_shell: IPlatformSpecificString;
+    default_shells: IPlatformSpecificString;
     working_directory: string;
     preview_variables_in_command_palette: boolean;
     shell_commands: ShellCommandsConfiguration;
@@ -15,7 +15,7 @@ export interface ShellCommandsPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
-    default_shell: {},
+    default_shells: {},
     working_directory: "",
     preview_variables_in_command_palette: true,
     shell_commands: {},
@@ -35,7 +35,13 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
  *
  * @see NodeJS.Platform
  */
-export type OperatingSystemName = "darwin" | "linux" | "win32";
+export type PlatformId = "darwin" | "linux" | "win32";
+
+export const PlatformNames: IPlatformSpecificString = {
+    darwin: "Macintosh",
+    linux: "Linux",
+    win32: "Windows",
+};
 
 /**
  * All OSes supported by the Shell commands plugin.
@@ -54,4 +60,20 @@ export interface IPlatformSpecificString {
 
 export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
     default: string,
+}
+
+export const PlatformShells = {
+    darwin: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)"
+    },
+    linux: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)"
+    },
+    win32: {
+        "pwsh.exe": "PowerShell Core",
+        "PowerShell.exe": "PowerShell 5",
+        "CMD.EXE": "cmd.exe",
+    }
 }
