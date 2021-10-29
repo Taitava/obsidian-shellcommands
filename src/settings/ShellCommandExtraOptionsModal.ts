@@ -98,8 +98,8 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private tabOutput(container_element: HTMLElement) {
         // Output channeling
-        this.newOutputChannelSetting("Output channel for stdout", "stdout");
-        this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
+        this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
+        this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
         new Setting(container_element)
             .setName("Order of stdout/stderr output")
             .setDesc("When output contains both errors and normal output, which one should be presented first?")
@@ -166,9 +166,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
         }
     }
 
-    private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {
+    private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
         let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
-        new Setting(this.modalEl)
+        new Setting(container_element)
             .setName(title)
             .setDesc(description)
             .addDropdown(dropdown => dropdown
