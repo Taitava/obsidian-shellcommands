@@ -1,5 +1,8 @@
 /**
- * Copied 2021-1029 from https://gist.github.com/TheDistantSea/8021359
+ * Copied 2021-10-29 from https://gist.github.com/TheDistantSea/8021359
+ * Modifications:
+ *  - Made compatible with TypeScript by adding type definitions.
+ *  - Changed var to let.
  *
  * Compares two software version numbers (e.g. "1.7.1" or "1.2b").
  *
@@ -30,13 +33,13 @@
  * @copyright by Jon Papaioannou (["john", "papaioannou"].join(".") + "@gmail.com")
  * @license This function is in the public domain. Do what you want with it, no strings attached.
  */
-function versionCompare(v1, v2, options) {
-    var lexicographical = options && options.lexicographical,
+export function versionCompare(v1: string, v2: string, options: {lexicographical?: boolean, zeroExtend?: boolean} = {}) {
+    let lexicographical = options && options.lexicographical,
         zeroExtend = options && options.zeroExtend,
-        v1parts = v1.split('.'),
-        v2parts = v2.split('.');
+        v1parts: any = v1.split('.'),
+        v2parts: any = v2.split('.');
 
-    function isValidPart(x) {
+    function isValidPart(x: string) {
         return (lexicographical ? /^\d+[A-Za-z]*$/ : /^\d+$/).test(x);
     }
 
@@ -54,7 +57,7 @@ function versionCompare(v1, v2, options) {
         v2parts = v2parts.map(Number);
     }
 
-    for (var i = 0; i < v1parts.length; ++i) {
+    for (let i = 0; i < v1parts.length; ++i) {
         if (v2parts.length == i) {
             return 1;
         }
