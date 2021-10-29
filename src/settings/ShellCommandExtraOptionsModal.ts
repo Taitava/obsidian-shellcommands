@@ -37,13 +37,56 @@ export class ShellCommandExtraOptionsModal extends Modal {
         this.modalEl.addClass("SC-scrollable");
 
         // Tab headers
-        let tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
-        tab_header.createEl("button", {text: "General"}).onclick = () => {
+        // TODO: Move the tab mechanism to a more general place so that the main settings view can use it, too.
+        const show_tab = (event: MouseEvent) => {
+            let max_height = 0;
+            const tab_contents = document.getElementsByClassName("SC-tab-content");
+            for (let index= 0; index < tab_contents.length; index++) {
+                let tab_content = (tab_contents.item(index) as HTMLElement);
 
+                // Get the maximum tab height so that all tabs can have the same height.
+                tab_content.addClass("SC-tab-active"); // Need to make the tab visible temporarily in order to get the height.
+                if (tab_content.offsetHeight > max_height) {
+                    max_height = tab_content.offsetHeight;
+                }
+
+                // Finally hide the tab
+                tab_content.removeClass("SC-tab-active");
+            }
+
+            // Remove active status from all buttons
+            const tab_buttons = document.getElementsByClassName("SC-tab-header-button");
+            for (let index= 0; index < tab_buttons.length; index++) {
+                let tab_button = (tab_buttons.item(index) as HTMLElement);
+                tab_button.removeClass("SC-tab-active");
+            }
+
+            // Activate the clicked tab
+            let tab_button = event.target as HTMLElement;
+            tab_button.addClass("SC-tab-active");
+            const activate_tab_id = tab_button.attributes.getNamedItem("activateTab").value;
+            const tab_content = document.getElementById(activate_tab_id);
+            tab_content.addClass("SC-tab-active");
+
+            // Apply the max height to this tab
+            tab_content.style.height = max_height+"px";
+
+            // Do nothing else (I don't know if this is needed or not)
+            event.preventDefault();
         };
+        const tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
+        const first_tab_button = tab_header.createEl("button", {text: "General", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-general"}}); first_tab_button.onclick = show_tab;
+        tab_header.createEl("button", {text: "Output", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-output"}}).onclick = show_tab;
+        tab_header.createEl("button", {text: "Operating systems & shells", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-operating-systems-and-shells"}}).onclick = show_tab;
 
         // Tab contents
-
+        const tab_general_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-general"}});
+        const tab_output_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-output"}});
+        const tab_operating_systems_and_shells_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-operating-systems-and-shells"}});
+        this.tabGeneral(tab_general_content);
+        this.tabOutput(tab_output_content);
+        this.tabOperatingSystemsAndShells(tab_operating_systems_and_shells_content);
+        first_tab_button.click();
     }
 
     private tabGeneral(container_element: HTMLElement) {

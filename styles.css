@@ -79,7 +79,7 @@ span.shell-commands-main-icon-container {
 }
 
 /* Style the buttons that are used to open the tab content */
-.SC-tab-header button {
+.SC-tab-header-button {
     background-color: inherit;
     float: left;
     border: none;
@@ -89,14 +89,10 @@ span.shell-commands-main-icon-container {
     transition: 0.3s;
 }
 
-/* Change background color of buttons on hover */
-.SC-tab-header button:hover {
-    background-color: #ddd;
-}
-
 /* Create an active/current tablink class */
-.SC-tab-header button.active {
-    background-color: #ccc;
+.SC-tab-header button.SC-tab-active,
+.SC-tab-header button:hover {
+    background-color: #bbb !important;
 }
 
 /* Style the tab content */
@@ -105,4 +101,8 @@ span.shell-commands-main-icon-container {
     padding: 6px 12px;
     border: 1px solid #ccc;
     border-top: none;
+}
+
+.SC-tab-content.SC-tab-active {
+    display: block;
 }
