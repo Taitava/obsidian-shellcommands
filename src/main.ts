@@ -7,7 +7,7 @@ import {
 	newShellCommandConfiguration,
 	ShellCommandsConfiguration
 } from "./settings/ShellCommandConfiguration";
-import {DEFAULT_SETTINGS, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
+import {DEFAULT_SETTINGS, SettingsVersionString, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
@@ -18,8 +18,15 @@ import {BaseEncodingOptions} from "fs";
 import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
+import {versionCompare} from "./lib/version_compare";
 
 export default class ShellCommandsPlugin extends Plugin {
+	/**
+	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
+	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
+	 */
+	public static SettingsVersion: SettingsVersionString = "0.7.0";
+
 	settings: ShellCommandsPluginSettings;
 	obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
@@ -332,12 +339,62 @@ export default class ShellCommandsPlugin extends Plugin {
 		console.log('unloading plugin');
 	}
 
+	/**
+	 *
+	 * @param current_settings_version
+	 * @private
+	 * @return True if the given settings version is supported by this plugin version, or an error message string if it's not supported.
+	 */
+	private isSettingsVersionSupported(current_settings_version: SettingsVersionString) {
+		if (current_settings_version === "prior-to-0.7.0") {
+			// 0.x.y supports all old settings formats that do not define a version number. This support will be removed in 1.0.0.
+			return true;
+		} else {
+			// Compare the version number
+			/** Note that the plugin version may be different than what will be used in the version comparison. The plugin version will be displayed in possible error messages. */
+			const plugin_version = this.manifest.version;
+			const version_comparison = versionCompare(ShellCommandsPlugin.SettingsVersion, current_settings_version);
+			if (version_comparison === 0) {
+				// The versions are equal.
+				// Supported.
+				return true;
+			} else if (version_comparison < 0) {
+				// The compared version is newer than what the plugin can support.
+				return "The settings file is saved by a newer version of this plugin, so this plugin does not support the structure of the settings file. Please upgrade this plugin to at least version " + current_settings_version + ". Now the plugin version is " + plugin_version;
+			} else {
+				// The compared version is older than the version that the plugin currently uses to write settings.
+				// 0.x.y supports all old settings versions. In 1.0.0, some old settings formats might lose their support, but that's not yet certain.
+				return true;
+			}
+
+		}
+	}
+
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+		// Ensure that the loaded settings file is supported.
+		const version_support = this.isSettingsVersionSupported(this.settings.settings_version);
+		if (typeof version_support === "string") {
+			// The settings version is not supported.
+			new Notice("SHELL COMMANDS PLUGIN HAS DISABLED ITSELF in order to prevent misinterpreting settings / corrupting the settings file!", 120*1000);
+			new Notice(version_support as string, 120*1000);
+			await this.disablePlugin();
+		}
 	}
 
 	async saveSettings() {
+		// Update settings version in case it's old.
+		this.settings.settings_version = ShellCommandsPlugin.SettingsVersion;
+
+		// Write settings
 		await this.saveData(this.settings);
+	}
+
+	private async disablePlugin() {
+		// This unfortunately accesses a private API.
+		// @ts-ignore
+		await this.app.plugins.disablePlugin(this.manifest.id);
 	}
 
 	/**
