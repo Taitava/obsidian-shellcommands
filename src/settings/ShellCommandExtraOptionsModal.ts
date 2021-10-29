@@ -94,7 +94,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+    }
 
+    private tabOutput(container_element: HTMLElement) {
         // Output channeling
         this.newOutputChannelSetting("Output channel for stdout", "stdout");
         this.newOutputChannelSetting("Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
@@ -151,7 +153,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+    }
 
+    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
         // Platform specific shell selection
         createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
 
