@@ -95,6 +95,10 @@ span.shell-commands-main-icon-container {
     background-color: #bbb !important;
 }
 
+.SC-tab-header-button svg {
+    vertical-align: middle; /* Not middle but close enough. */
+}
+
 /* Style the tab content */
 .SC-tab-content {
     display: none;

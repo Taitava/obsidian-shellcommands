@@ -1,4 +1,4 @@
-import {App, Modal, Setting} from "obsidian";
+import {App, Modal, setIcon, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
@@ -75,9 +75,24 @@ export class ShellCommandExtraOptionsModal extends Modal {
             event.preventDefault();
         };
         const tab_header = this.modalEl.createEl("div", {attr: {class: "SC-tab-header"}});
-        const first_tab_button = tab_header.createEl("button", {text: "General", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-general"}}); first_tab_button.onclick = show_tab;
-        tab_header.createEl("button", {text: "Output", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-output"}}).onclick = show_tab;
-        tab_header.createEl("button", {text: "Operating systems & shells", attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-operating-systems-and-shells"}}).onclick = show_tab;
+
+        // Tab button: General
+        const general_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-general"}});
+        general_tab_button.onclick = show_tab;
+        setIcon(general_tab_button, "gear");
+        general_tab_button.insertAdjacentText("beforeend", " General");
+
+        // Tab button: Output
+        const output_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-output"}});
+        output_tab_button.onclick = show_tab;
+        setIcon(output_tab_button, "lines-of-text");
+        output_tab_button.insertAdjacentText("beforeend", " Output");
+
+        // Tab button: Operating systems & shells
+        const operating_systems_and_shells_tab_button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-extra-options-operating-systems-and-shells"}});
+        operating_systems_and_shells_tab_button.onclick = show_tab;
+        setIcon(operating_systems_and_shells_tab_button, "bullet-list-glyph");
+        operating_systems_and_shells_tab_button.insertAdjacentText("beforeend", " Operating systems & shells");
 
         // Tab contents
         const tab_general_content = this.modalEl.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-extra-options-general"}});
@@ -86,7 +101,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         this.tabGeneral(tab_general_content);
         this.tabOutput(tab_output_content);
         this.tabOperatingSystemsAndShells(tab_operating_systems_and_shells_content);
-        first_tab_button.click();
+        general_tab_button.click();
     }
 
     private tabGeneral(container_element: HTMLElement) {
