@@ -156,14 +156,14 @@ export class ShellCommandExtraOptionsModal extends Modal {
     }
 
     private tabOperatingSystemsAndShells(container_element: HTMLElement) {
-        // Platform specific shell selection
-        createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
-
         // Platform specific shell commands
         let platform_id: PlatformId;
         for (platform_id in PlatformNames) {
             createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id);
         }
+
+        // Platform specific shell selection
+        createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
     }
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
