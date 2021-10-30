@@ -4,9 +4,12 @@ import {getVaultAbsolutePath} from "../Common";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
+import {createTabs, TabStructure} from "./setting_elements/Tabs";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
+
+    private tab_structure: TabStructure;
 
     constructor(app: App, plugin: ShellCommandsPlugin) {
         super(app, plugin);
@@ -18,28 +21,37 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', {text: "Shell commands"});
+        this.tab_structure = createTabs(containerEl, {
+            "main-shell-commands": {
+                title: "Shell commands",
+                icon: "run-command",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabShellCommands(container_element);
+                },
+            },
+            "main-operating-systems-and-shells": {
+                title: "Operating systems & shells",
+                icon: "stacked-levels",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOperatingSystemsAndShells(container_element);
+                },
+            },
+            "main-output": {
+                title: "Output",
+                icon: "lines-of-text",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOutput(container_element);
+                },
+            },
+        });
 
-        // "Working directory" field
-        new Setting(containerEl)
-            .setName("Working directory")
-            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
-            .addText(text => text
-                .setPlaceholder(getVaultAbsolutePath(this.app))
-                .setValue(this.plugin.settings.working_directory)
-                .onChange(async (value) => {
-                    console.log("Changing working_directory to " + value);
-                    this.plugin.settings.working_directory = value;
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
+        // KEEP THIS AFTER CREATING ALL ELEMENTS:
+        this.rememberLastPosition(containerEl);
+    }
 
-        // Platforms' default shells
-        createShellSelectionField(this.plugin, containerEl, this.plugin.settings.default_shells, true);
-
+    private tabShellCommands(container_element: HTMLElement) {
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
-        let command_fields_container = containerEl.createEl("div");
+        let command_fields_container = container_element.createEl("div");
 
         // Fields for modifying existing commands
         for (let command_id in this.plugin.getTShellCommands()) {
@@ -47,7 +59,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         }
 
         // "New command" button
-        new Setting(containerEl)
+        new Setting(container_element)
             .addButton(button => button
                 .setButtonText("New command")
                 .onClick(async () => {
@@ -57,17 +69,11 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             )
         ;
 
-        // "Error message duration" field
-        this.createNotificationDurationField(containerEl, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
-
-        // "Notification message duration" field
-        this.createNotificationDurationField(containerEl, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
-
         // "Variables" section
-        containerEl.createEl("h2", {text: "Variables"});
+        container_element.createEl("h2", {text: "Variables"});
 
         // "Preview variables in command palette" field
-        new Setting(containerEl)
+        new Setting(container_element)
             .setName("Preview variables in command palette")
             .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette. A nice way to ensure your commands will use correct values.")
             .addToggle(checkbox => checkbox
@@ -89,21 +95,44 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         // Variable instructions
         getShellCommandVariableInstructions().forEach((instructions) => {
-            let paragraph = containerEl.createEl("p");
+            let paragraph = container_element.createEl("p");
             // @ts-ignore
             paragraph.createEl("strong", {text: instructions.variable_name + " "});
             // @ts-ignore
             paragraph.createEl("span", {text: instructions.instructions});
         });
-        containerEl.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
-        containerEl.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
-        containerEl.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
-
-
-        // KEEP THIS AFTER CREATING ALL ELEMENTS:
-        this.rememberScrollPosition(containerEl);
+        container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
+        container_element.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
+        container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
     }
 
+    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
+        // "Working directory" field
+        new Setting(container_element)
+            .setName("Working directory")
+            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
+            .addText(text => text
+                .setPlaceholder(getVaultAbsolutePath(this.app))
+                .setValue(this.plugin.settings.working_directory)
+                .onChange(async (value) => {
+                    console.log("Changing working_directory to " + value);
+                    this.plugin.settings.working_directory = value;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
+
+        // Platforms' default shells
+        createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+    }
+
+    private tabOutput(container_element: HTMLElement) {
+        // "Error message duration" field
+        this.createNotificationDurationField(container_element, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
+
+        // "Notification message duration" field
+        this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
+    }
 
     createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
         new Setting(container_element)
@@ -125,15 +154,33 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
     }
 
-    private scroll_position: number = 0;
-    private rememberScrollPosition(container_element: HTMLElement) {
+    private last_position: {
+        scroll_position: number;
+        tab_name: string;
+    } = {
+        scroll_position: 0,
+        tab_name: "main-shell-commands",
+    };
+    private rememberLastPosition(container_element: HTMLElement) {
+        const last_position = this.last_position;
+
+        // Go to last position now
+        this.tab_structure.buttons[last_position.tab_name].click();
         container_element.scrollTo({
-            top: this.scroll_position,
+            top: this.last_position.scroll_position,
             behavior: "auto",
         });
+
+        // Listen to changes
         container_element.addEventListener("scroll", (event) => {
-            this.scroll_position = container_element.scrollTop;
+            this.last_position.scroll_position = container_element.scrollTop;
         });
+        for (let tab_name in this.tab_structure.buttons) {
+            let button = this.tab_structure.buttons[tab_name];
+            button.onClickEvent((event: MouseEvent) => {
+                last_position.tab_name = tab_name;
+            });
+        }
     }
 }
 
