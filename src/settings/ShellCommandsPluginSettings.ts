@@ -1,7 +1,10 @@
 // SETTINGS AND DEFAULT VALUES
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 
+export type SettingsVersionString = "prior-to-0.7.0" | string;
+
 export interface ShellCommandsPluginSettings {
+    settings_version: SettingsVersionString;
     default_shells: IPlatformSpecificString;
     working_directory: string;
     preview_variables_in_command_palette: boolean;
@@ -15,6 +18,7 @@ export interface ShellCommandsPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+    settings_version: "prior-to-0.7.0", // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
     default_shells: {},
     working_directory: "",
     preview_variables_in_command_palette: true,
