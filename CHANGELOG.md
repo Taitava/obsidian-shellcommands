@@ -11,6 +11,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [Internal: Store plugin version in the settings file (#90)](https://github.com/Taitava/obsidian-shellcommands/issues/90)
 
 ### To be Changed
+- Settings: Split settings content to tabs ([#78](https://github.com/Taitava/obsidian-shellcommands/issues/78) and [#85](https://github.com/Taitava/obsidian-shellcommands/issues/85)).
 - [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
 - Internal: Old `commands` field in *data.json* settings file is completely removed if it's empty, because it haven't been used as of 0.1.1.
 
