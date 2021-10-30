@@ -12,6 +12,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Changed
 - [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
+- Internal: Old `commands` field in *data.json* settings file is completely removed if it's empty, because it haven't been used as of 0.1.1.
 
 ## [0.6.0] - 2021-10-12
 
