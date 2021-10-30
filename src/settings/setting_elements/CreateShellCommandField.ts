@@ -19,6 +19,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     if (is_new) {
         // Create an empty command
         t_shell_command = plugin.newTShellCommand();
+        shell_command_id = t_shell_command.getId(); // Replace "new" with a real id.
     } else {
         // Use an old shell command
         t_shell_command = plugin.getTShellCommands()[shell_command_id];
