@@ -1,18 +1,19 @@
 import {Hotkey, Modifier, Platform} from "obsidian";
 import ShellCommandsPlugin from "./main";
+import {debugLog} from "./Debug";
 
 export function getHotkeysForShellCommand(plugin: ShellCommandsPlugin, shell_command_id: string): Hotkey[] {
     // Retrieve all hotkeys set by user.
     // @ts-ignore
     let app_custom_hotkeys = plugin.app.hotkeyManager?.customKeys;
     if (!app_custom_hotkeys) {
-        console.log("getHotkeysForShellCommand() failed, will return an empty array.")
+        debugLog("getHotkeysForShellCommand() failed, will return an empty array.")
         return [];
     }
 
     // Get only our hotkeys.
     let hotkey_index =plugin.getPluginId() + ":" + plugin.generateObsidianCommandId(shell_command_id); // E.g. "obsidian-shellcommands:shell-command-0"
-    console.log("getHotkeysForShellCommand() succeeded.")
+    debugLog("getHotkeysForShellCommand() succeeded.")
     return app_custom_hotkeys[hotkey_index] ?? []; // If no hotkey array is set for this command, return an empty array. Although I do believe that all commands do have an array anyway, but have this check just in case.
 }
 

@@ -2,6 +2,7 @@ import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsid
 import {PlatformId} from "./settings/ShellCommandsPluginSettings";
 import {platform} from "os";
 import * as path from "path";
+import {debugLog} from "./Debug";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -35,7 +36,7 @@ export function getOperatingSystem(): PlatformId  {
 export function getView(app: App) {
     let view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
-        console.log("getView(): Could not get a view. Will return null.");
+        debugLog("getView(): Could not get a view. Will return null.");
         return null;
     }
     return view;
@@ -57,7 +58,7 @@ export function getEditor(app: App): Editor {
     }
 
     // Did not find an editor.
-    console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
+    debugLog("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
     return null;
 }
 

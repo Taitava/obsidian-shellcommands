@@ -5,6 +5,7 @@ import {getShellCommandVariableInstructions} from "../variables/ShellCommandVari
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
+import {debugLog} from "../Debug";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -64,7 +65,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .setButtonText("New command")
                 .onClick(async () => {
                     createShellCommandField(this.plugin, command_fields_container, "new");
-                    console.log("New empty command created.");
+                    debugLog("New empty command created.");
                 })
             )
         ;
@@ -79,7 +80,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.preview_variables_in_command_palette)
                 .onChange(async (value: boolean) => {
-                    console.log("Changing preview_variables_in_command_palette to " + value);
+                    debugLog("Changing preview_variables_in_command_palette to " + value);
                     this.plugin.settings.preview_variables_in_command_palette = value;
                     if (!value) {
                         // Variable previewing is turned from on to off.
@@ -115,7 +116,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .setPlaceholder(getVaultAbsolutePath(this.app))
                 .setValue(this.plugin.settings.working_directory)
                 .onChange(async (value) => {
-                    console.log("Changing working_directory to " + value);
+                    debugLog("Changing working_directory to " + value);
                     this.plugin.settings.working_directory = value;
                     await this.plugin.saveSettings();
                 })
@@ -143,10 +144,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .onChange(async (duration_string: string) => {
                     let duration: number = parseInt(duration_string);
                     if (duration >= 1 && duration <= 180) {
-                        console.log("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
+                        debugLog("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
                         this.plugin.settings[setting_name] = duration;
                         await this.plugin.saveSettings();
-                        console.log("Changed.");
+                        debugLog("Changed.");
                     }
                     // Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
                 })

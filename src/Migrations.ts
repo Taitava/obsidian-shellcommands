@@ -1,5 +1,6 @@
 import ShellCommandsPlugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
+import {debugLog} from "./Debug";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
@@ -8,9 +9,9 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
     save ||= DeleteEmptyCommandsField(plugin);
     if (save) {
         // Only save if there were changes to configuration.
-        console.log("Saving migrations...")
+        debugLog("Saving migrations...")
         await plugin.saveSettings();
-        console.log("Migrations saved...")
+        debugLog("Migrations saved...")
     }
 }
 
@@ -22,25 +23,25 @@ function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
     let save = false;
     if (0 < count_shell_commands) {
         let count_empty_commands = 0; // A counter for empty or null commands
-        console.log("settings.commands is not empty, will migrate " + count_shell_commands + " commands to settings.shell_commands.");
+        debugLog("settings.commands is not empty, will migrate " + count_shell_commands + " commands to settings.shell_commands.");
         for (let shell_command_id in plugin.settings.commands) {
             let shell_command = plugin.settings.commands[shell_command_id];
             // Ensure that the command is not empty. Just in case.
             if (null === shell_command || 0 === shell_command.length) {
                 // The command is empty
-                console.log("Migration failure for shell command #" + shell_command_id + ": The original shell command string is empty, so it cannot be migrated.");
+                debugLog("Migration failure for shell command #" + shell_command_id + ": The original shell command string is empty, so it cannot be migrated.");
                 count_empty_commands++;
             }
             else if (undefined !== plugin.settings.shell_commands[shell_command_id]) {
                 // A command with the same id already exists
-                console.log("Migration failure for shell command #" + shell_command_id + ": A shell command with same ID already exists in settings.shell_commands.");
+                debugLog("Migration failure for shell command #" + shell_command_id + ": A shell command with same ID already exists in settings.shell_commands.");
             } else {
                 // All OK, migrate.
                 plugin.settings.shell_commands[shell_command_id] = newShellCommandConfiguration(shell_command); // Creates a shell command with default values and defines the command for it.
                 delete plugin.settings.commands[shell_command_id]; // Leaves a null in place, but we can deal with it by deleting the whole array if it gets empty.
                 count_empty_commands++; // Account the null generated on the previous line.
                 save = true;
-                console.log("Migrated shell command #" + shell_command_id + ": " + shell_command);
+                debugLog("Migrated shell command #" + shell_command_id + ": " + shell_command);
             }
         }
         if (count_empty_commands === count_shell_commands) {
@@ -49,7 +50,7 @@ function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
             delete plugin.settings.commands;
         }
     } else {
-        console.log("settings.commands is empty, so no need to migrate commands. Good thing! :)");
+        debugLog("settings.commands is empty, so no need to migrate commands. Good thing! :)");
     }
     return save;
 }
@@ -74,7 +75,7 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
             if (undefined === shell_command_configuration[property_name]) {
                 // This shell command does not have this property.
                 // Add the property to the shell command and use a default value.
-                console.log("EnsureShellCommandsHaveAllFields(): Shell command #" + shell_command_id + " does not have property '" + property_name + "'. Will create the property and assign a default value '" + property_default_value + "'.");
+                debugLog("EnsureShellCommandsHaveAllFields(): Shell command #" + shell_command_id + " does not have property '" + property_name + "'. Will create the property and assign a default value '" + property_default_value + "'.");
                 // @ts-ignore
                 shell_command_configuration[property_name] = property_default_value;
                 save = true;
@@ -91,14 +92,14 @@ function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
         if (undefined !== shell_command_configuration.shell_command) {
             // The shell command should be migrated.
             if (undefined === shell_command_configuration.platform_specific_commands || shell_command_configuration.platform_specific_commands.default === "") {
-                console.log("Migrating shell command #" + shell_command_id + ": shell_command string will be moved to platforms.default: " + shell_command_configuration.shell_command);
+                debugLog("Migrating shell command #" + shell_command_id + ": shell_command string will be moved to platforms.default: " + shell_command_configuration.shell_command);
                 shell_command_configuration.platform_specific_commands = {
                     default: shell_command_configuration.shell_command,
                 };
                 delete shell_command_configuration.shell_command;
                 save = true;
             } else {
-                console.log("Migration failure for shell command #" + shell_command_id + ": platforms exists already.");
+                debugLog("Migration failure for shell command #" + shell_command_id + ": platforms exists already.");
             }
         }
     }

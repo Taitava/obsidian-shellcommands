@@ -11,6 +11,7 @@ import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath
 import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
 import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
 import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
+import {debugLog} from "../Debug";
 
 /**
  * @param plugin
@@ -70,7 +71,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
             let variable_value = variable.getValue(escape);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
-                console.log("Parsing command " + command + " failed.");
+                debugLog("Parsing command " + command + " failed.");
                 return variable.getErrorMessages(); // Returning now prevents parsing rest of the variables.
             }
             else

@@ -2,6 +2,7 @@ import {Modal} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandSettingGroup} from "./ShellCommandsSettingsTab";
 import {TShellCommand} from "../TShellCommand";
+import {debugLog} from "../Debug";
 
 export class ShellCommandDeleteModal extends Modal {
     private plugin: ShellCommandsPlugin;
@@ -28,7 +29,7 @@ export class ShellCommandDeleteModal extends Modal {
         let delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
         delete_button.onclick = async () => {
             // Remove the command
-            console.log("Command " + this.shell_command_id + " gonna be removed.");
+            debugLog("Command " + this.shell_command_id + " gonna be removed.");
             delete this.plugin.getTShellCommands()[this.shell_command_id]; // Remove the TShellCommand object.
             delete this.plugin.settings.shell_commands[this.shell_command_id]; // Remove from the plugin's settings.
             delete this.plugin.obsidian_commands[this.shell_command_id]; // Remove from the command palette.
@@ -39,7 +40,7 @@ export class ShellCommandDeleteModal extends Modal {
             this.container_element.removeChild(this.setting_group.preview_setting.settingEl);
 
             await this.plugin.saveSettings();
-            console.log("Command removed.");
+            debugLog("Command removed.");
             this.close();
         };
     }

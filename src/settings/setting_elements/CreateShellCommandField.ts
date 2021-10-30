@@ -6,6 +6,7 @@ import {ShellCommandDeleteModal} from "../ShellCommandDeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import ShellCommandsPlugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
+import {debugLog} from "../../Debug";
 
 /**
  *
@@ -24,7 +25,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
         // Use an old shell command
         t_shell_command = plugin.getTShellCommands()[shell_command_id];
     }
-    console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
+    debugLog("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
     let shell_command: string;
     if (is_new) {
         shell_command = "";
@@ -40,9 +41,9 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
         t_shell_command.getShell(),
         async (shell_command: string) => {
             if (is_new) {
-                console.log("Creating new command " + shell_command_id + ": " + shell_command);
+                debugLog("Creating new command " + shell_command_id + ": " + shell_command);
             } else {
-                console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
+                debugLog("Command " + shell_command_id + " gonna change to: " + shell_command);
             }
 
             // Do this in both cases, when creating a new command and when changing an old one:
@@ -51,11 +52,11 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             if (is_new) {
                 // Create a new command
                 // plugin.registerShellCommand(t_shell_command); // I don't think this is needed to be done anymore
-                console.log("Command created.");
+                debugLog("Command created.");
             } else {
                 // Change an old command
                 plugin.obsidian_commands[shell_command_id].name = plugin.generateObsidianCommandName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                console.log("Command changed.");
+                debugLog("Command changed.");
             }
             await plugin.saveSettings();
         },
@@ -153,7 +154,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
         }
     }
-    console.log("Created.");
+    debugLog("Created.");
 }
 
 /**

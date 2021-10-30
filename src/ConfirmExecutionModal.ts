@@ -1,6 +1,7 @@
 import {Modal, Setting} from "obsidian";
 import ShellCommandsPlugin from "./main";
 import {TShellCommand} from "./TShellCommand";
+import {debugLog} from "./Debug";
 
 export class ConfirmExecutionModal extends Modal {
     private plugin: ShellCommandsPlugin;
@@ -29,7 +30,7 @@ export class ConfirmExecutionModal extends Modal {
             .addButton(button => button
                 .setButtonText("Yes, execute!")
                 .onClick(() => {
-                    console.log("User confirmed execution of shell command: " + this.shell_command);
+                    debugLog("User confirmed execution of shell command: " + this.shell_command);
                     this.plugin.executeShellCommand(this.shell_command, this.t_shell_command);
                     this.close();
                 })

@@ -5,6 +5,11 @@ export type SettingsVersionString = "prior-to-0.7.0" | string;
 
 export interface ShellCommandsPluginSettings {
     settings_version: SettingsVersionString;
+    /**
+     * If true, logging stuff to console.log() will be enabled.
+     * Might also enable some testing {{variables}} in the future, perhaps.
+     */
+    debug: boolean;
     default_shells: IPlatformSpecificString;
     working_directory: string;
     preview_variables_in_command_palette: boolean;
@@ -19,6 +24,7 @@ export interface ShellCommandsPluginSettings {
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     settings_version: "prior-to-0.7.0", // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
+    debug: false,
     default_shells: {},
     working_directory: "",
     preview_variables_in_command_palette: true,

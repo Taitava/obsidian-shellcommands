@@ -19,6 +19,7 @@ import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
 import {versionCompare} from "./lib/version_compare";
+import {debugLog, setDEBUG_ON} from "./Debug";
 
 export default class ShellCommandsPlugin extends Plugin {
 	/**
@@ -40,7 +41,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	private preparsed_t_shell_commands: TShellCommandContainer = {};
 
 	async onload() {
-		console.log('loading plugin');
+		debugLog('loading plugin');
 
 		await this.loadSettings();
 
@@ -95,7 +96,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 */
 	private registerShellCommand(t_shell_command: TShellCommand) {
 		let shell_command_id = t_shell_command.getId();
-		console.log("Registering shell command #" + shell_command_id + "...");
+		debugLog("Registering shell command #" + shell_command_id + "...");
 		let obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
 			name: this.generateObsidianCommandName(t_shell_command),
@@ -104,7 +105,7 @@ export default class ShellCommandsPlugin extends Plugin {
 				if (is_opening_command_palette) {
 					// The user is currently opening the command palette.
 					// Do not execute the command yet, but parse variables for preview, if enabled in the settings.
-					console.log("Getting command palette preview for shell command #" + t_shell_command.getId());
+					debugLog("Getting command palette preview for shell command #" + t_shell_command.getId());
 					if (this.settings.preview_variables_in_command_palette) {
 						let preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(t_shell_command); // Clone t_shell_command so that we won't edit the original configuration.
 
@@ -113,7 +114,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						if (Array.isArray(parsed_shell_command)) {
 							// Variable parsing failed, because an array was returned, which contains error messages.
 							// Just cancel the preview, the command will be shown with variable names. Discard the error messages.
-							console.log("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
+							debugLog("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
 							return true;
 						} else {
 							// Variable parsing succeeded.
@@ -126,7 +127,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						if (Array.isArray(parsed_alias)) {
 							// Variable parsing failed, because an array was returned, which contains error messages.
 							// Just cancel the preview, the alias will be shown with variable names. Discard the error messages.
-							console.log("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());
+							debugLog("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());
 							return true;
 						} else {
 							// Variable parsing succeeded.
@@ -176,7 +177,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		};
 		this.addCommand(obsidian_command)
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
-		console.log("Registered.")
+		debugLog("Registered.")
 	}
 
 	/**
@@ -246,7 +247,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		shell_command = shell_command.trim();
 		if (!shell_command.length) {
 			// It is empty
-			console.log("The shell command is empty. :(");
+			debugLog("The shell command is empty. :(");
 			this.newError("The shell command is empty :(");
 			return;
 		}
@@ -256,7 +257,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		// shell can be written there.
 		const shell = t_shell_command.getShell();
 		if (!isShellSupported(shell)) {
-			console.log("Shell is not supported: " + shell);
+			debugLog("Shell is not supported: " + shell);
 			this.newError("This plugin does not support the following shell: " + shell);
 			return;
 		}
@@ -266,13 +267,13 @@ export default class ShellCommandsPlugin extends Plugin {
 		if (!fs.existsSync(working_directory)) {
 			// Working directory does not exist
 			// Prevent execution
-			console.log("Working directory does not exist: " + working_directory);
+			debugLog("Working directory does not exist: " + working_directory);
 			this.newError("Working directory does not exist: " + working_directory);
 		}
 		else if (!fs.lstatSync(working_directory).isDirectory()) {
 			// Working directory is not a directory.
 			// Prevent execution
-			console.log("Working directory exists but is not a folder: " + working_directory);
+			debugLog("Working directory exists but is not a folder: " + working_directory);
 			this.newError("Working directory exists but is not a folder: " + working_directory);
 		} else {
 			// Working directory is OK
@@ -283,22 +284,22 @@ export default class ShellCommandsPlugin extends Plugin {
 			};
 
 			// Execute the shell command
-			console.log("Executing command " + shell_command + " in " + working_directory + "...");
+			debugLog("Executing command " + shell_command + " in " + working_directory + "...");
 			exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 				if (null !== error) {
 					// Some error occurred
-					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+					debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
 
 					// Check if this error should be displayed to the user or not
 					if (t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
 						// The user has ignored this error.
-						console.log("User has ignored this error, so won't display it.");
+						debugLog("User has ignored this error, so won't display it.");
 
 						// Handle only stdout output stream
 						handleShellCommandOutput(this, t_shell_command, stdout, "", null);
 					} else {
 						// Show the error.
-						console.log("Will display the error to user.");
+						debugLog("Will display the error to user.");
 
 						// Check that stderr actually contains an error message
 						if (!stderr.length) {
@@ -312,7 +313,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					}
 				} else {
 					// No errors
-					console.log("Command executed without errors.")
+					debugLog("Command executed without errors.")
 
 					// Handle output
 					handleShellCommandOutput(this, t_shell_command, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
@@ -336,7 +337,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	onunload() {
-		console.log('unloading plugin');
+		debugLog('unloading plugin');
 	}
 
 	/**
@@ -372,6 +373,9 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	async loadSettings() {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+		// Update debug status - before this line debugging is always OFF!
+		setDEBUG_ON(this.settings.debug);
 
 		// Ensure that the loaded settings file is supported.
 		const version_support = this.isSettingsVersionSupported(this.settings.settings_version);
