@@ -4,10 +4,12 @@ import {getVaultAbsolutePath} from "../Common";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
-import {createTabs} from "./setting_elements/Tabs";
+import {createTabs, TabStructure} from "./setting_elements/Tabs";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
+
+    private tab_structure: TabStructure;
 
     constructor(app: App, plugin: ShellCommandsPlugin) {
         super(app, plugin);
@@ -19,7 +21,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        createTabs(containerEl, {
+        this.tab_structure = createTabs(containerEl, {
             "main-shell-commands": {
                 title: "Shell commands",
                 icon: "run-command",
@@ -42,6 +44,9 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 },
             },
         });
+
+        // KEEP THIS AFTER CREATING ALL ELEMENTS:
+        this.rememberLastPosition(containerEl);
     }
 
     private tabShellCommands(container_element: HTMLElement) {
@@ -99,10 +104,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
         container_element.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
         container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
-
-
-        // KEEP THIS AFTER CREATING ALL ELEMENTS:
-        this.rememberScrollPosition(container_element);
     }
 
     private tabOperatingSystemsAndShells(container_element: HTMLElement) {
@@ -153,15 +154,33 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
     }
 
-    private scroll_position: number = 0;
-    private rememberScrollPosition(container_element: HTMLElement) {
+    private last_position: {
+        scroll_position: number;
+        tab_name: string;
+    } = {
+        scroll_position: 0,
+        tab_name: "main-shell-commands",
+    };
+    private rememberLastPosition(container_element: HTMLElement) {
+        const last_position = this.last_position;
+
+        // Go to last position now
+        this.tab_structure.buttons[last_position.tab_name].click();
         container_element.scrollTo({
-            top: this.scroll_position,
+            top: this.last_position.scroll_position,
             behavior: "auto",
         });
+
+        // Listen to changes
         container_element.addEventListener("scroll", (event) => {
-            this.scroll_position = container_element.scrollTop;
+            this.last_position.scroll_position = container_element.scrollTop;
         });
+        for (let tab_name in this.tab_structure.buttons) {
+            let button = this.tab_structure.buttons[tab_name];
+            button.onClickEvent((event: MouseEvent) => {
+                last_position.tab_name = tab_name;
+            });
+        }
     }
 }
 
