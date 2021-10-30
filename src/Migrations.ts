@@ -1,9 +1,11 @@
 import ShellCommandsPlugin from "./main";
-import {newShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
+import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
+    save ||= MigrateShellCommandToPlatforms(plugin);
     save ||= EnsureShellCommandsHaveAllFields(plugin);
+    save ||= DeleteEmptyCommandsField(plugin);
     if (save) {
         // Only save if there were changes to configuration.
         console.log("Saving migrations...")
@@ -13,6 +15,9 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
 }
 
 function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
+    if (undefined === plugin.settings.commands) {
+        return false;
+    }
     let count_shell_commands = plugin.settings.commands.length;
     let save = false;
     if (0 < count_shell_commands) {
@@ -59,7 +64,7 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
     let save = false;
     let shell_command_default_configuration = newShellCommandConfiguration();
     let shell_command_id: string;
-    let shell_command_configurations = plugin.getShellCommands();
+    let shell_command_configurations = plugin.settings.shell_commands;
     for (shell_command_id in shell_command_configurations) {
         let shell_command_configuration = shell_command_configurations[shell_command_id];
         for (let property_name in shell_command_default_configuration) {
@@ -74,6 +79,44 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
                 shell_command_configuration[property_name] = property_default_value;
                 save = true;
             }
+        }
+    }
+    return save;
+}
+
+function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
+    let save = false;
+    for (let shell_command_id in plugin.settings.shell_commands) {
+        let shell_command_configuration: ShellCommandConfiguration = plugin.settings.shell_commands[shell_command_id];
+        if (undefined !== shell_command_configuration.shell_command) {
+            // The shell command should be migrated.
+            if (undefined === shell_command_configuration.platform_specific_commands || shell_command_configuration.platform_specific_commands.default === "") {
+                console.log("Migrating shell command #" + shell_command_id + ": shell_command string will be moved to platforms.default: " + shell_command_configuration.shell_command);
+                shell_command_configuration.platform_specific_commands = {
+                    default: shell_command_configuration.shell_command,
+                };
+                delete shell_command_configuration.shell_command;
+                save = true;
+            } else {
+                console.log("Migration failure for shell command #" + shell_command_id + ": platforms exists already.");
+            }
+        }
+    }
+    return save;
+}
+
+/**
+ * Can be removed in 1.0.0.
+ *
+ * @param plugin
+ * @constructor
+ */
+function DeleteEmptyCommandsField(plugin: ShellCommandsPlugin) {
+    let save = false;
+    if (undefined !== plugin.settings.commands) {
+        if (plugin.settings.commands.length === 0) {
+            delete plugin.settings.commands;
+            save = true;
         }
     }
     return save;

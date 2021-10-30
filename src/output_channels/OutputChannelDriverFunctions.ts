@@ -8,6 +8,7 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
+import {TShellCommand} from "../TShellCommand";
 
 export interface OutputStreams {
     stdout?: string;
@@ -26,8 +27,10 @@ registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentF
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 
-export function handleShellCommandOutput(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration, stdout: string, stderr: string, error_code: number|null) {
+export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, stdout: string, stderr: string, error_code: number|null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
+
+    let shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
 
     // Insert stdout and stderr to an object in a correct order
     let output: OutputStreams = {};

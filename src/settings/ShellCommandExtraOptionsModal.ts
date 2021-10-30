@@ -1,16 +1,23 @@
-import {App, Modal, Notice, Setting} from "obsidian";
+import {App, Modal, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
+import {TShellCommand} from "../TShellCommand";
+import {PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {
+    generateIgnoredErrorCodesIconTitle,
+    generateShellCommandFieldName
+} from "./setting_elements/CreateShellCommandField";
+import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static OPTIONS_SUMMARY = "Alias, Output, Confirmation, Ignore errors";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
-    private readonly shell_command_configuration: ShellCommandConfiguration;
+    private readonly t_shell_command: TShellCommand;
     private name_setting: Setting;
     private setting_tab: ShellCommandsSettingsTab;
 
@@ -18,13 +25,16 @@ export class ShellCommandExtraOptionsModal extends Modal {
         super(app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;
-        this.shell_command_configuration = plugin.getShellCommands()[shell_command_id];
+        this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
         this.name_setting = setting_group.name_setting;
         this.setting_tab = setting_tab;
     }
 
     onOpen() {
-        this.modalEl.createEl("h2", {text: this.shell_command_configuration.shell_command});
+        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
+
+        // Make the modal scrollable if it has more content than what fits in the screen.
+        this.modalEl.addClass("SC-scrollable");
 
         // Alias field
         new Setting(this.modalEl)
@@ -33,16 +43,16 @@ export class ShellCommandExtraOptionsModal extends Modal {
         ;
         let alias_setting = new Setting(this.modalEl)
             .addText(text => text
-                .setValue(this.shell_command_configuration.alias)
+                .setValue(this.t_shell_command.getAlias())
                 .onChange(async (value) => {
                     // Change the actual alias value
-                    this.shell_command_configuration.alias = value;
+                    this.t_shell_command.getConfiguration().alias = value;
 
                     // Update Obsidian command palette
-                    this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.shell_command_configuration);
+                    this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.t_shell_command);
 
                     // UpdateShell commands settings panel
-                    this.name_setting.setName(this.setting_tab.generateCommandFieldName(this.shell_command_id, this.shell_command_configuration));
+                    this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));
 
                     // Save
                     await this.plugin.saveSettings();
@@ -58,11 +68,11 @@ export class ShellCommandExtraOptionsModal extends Modal {
         new Setting(this.modalEl)
             .setName("Ask confirmation before execution")
             .addToggle(toggle => toggle
-                .setValue(this.shell_command_configuration.confirm_execution)
+                .setValue(this.t_shell_command.getConfirmExecution())
                 .onChange(async (value) => {
-                    this.shell_command_configuration.confirm_execution = value;
+                    this.t_shell_command.getConfiguration().confirm_execution = value;
                     let icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
-                    if (this.shell_command_configuration.confirm_execution) {
+                    if (this.t_shell_command.getConfirmExecution()) {
                         // Show icon
                         icon_container.removeClass("shell-commands-hide");
                     } else {
@@ -85,9 +95,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     "stdout-first": "Stdout first, then stderr.",
                     "stderr-first": "Stderr first, then stdout.",
                 })
-                .setValue(this.shell_command_configuration.output_channel_order)
+                .setValue(this.t_shell_command.getOutputChannelOrder())
                 .onChange(async (value: OutputChannelOrder) => {
-                    this.shell_command_configuration.output_channel_order = value;
+                    this.t_shell_command.getConfiguration().output_channel_order = value;
                     await this.plugin.saveSettings();
                 })
             )
@@ -98,7 +108,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setName("Ignore error codes")
             .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
             .addText(text => text
-                .setValue(this.shell_command_configuration.ignore_error_codes.join(","))
+                .setValue(this.t_shell_command.getIgnoreErrorCodes().join(","))
                 .onChange(async (value) => {
                     // Parse the string of comma separated numbers
                     let ignore_error_codes: number[] = [];
@@ -114,14 +124,14 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     }
 
                     // Save the validated error numbers
-                    this.shell_command_configuration.ignore_error_codes = ignore_error_codes;
+                    this.t_shell_command.getConfiguration().ignore_error_codes = ignore_error_codes;
                     await this.plugin.saveSettings();
 
                     // Update icon
                     let icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
-                    if (this.shell_command_configuration.ignore_error_codes.length) {
+                    if (this.t_shell_command.getIgnoreErrorCodes().length) {
                         // Show icon
-                        icon_container.setAttr("aria-label", this.setting_tab.generateIgnoredErrorCodesIconTitle(this.shell_command_configuration.ignore_error_codes));
+                        icon_container.setAttr("aria-label", generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
                         icon_container.removeClass("shell-commands-hide");
                     } else {
                         // Hide icon
@@ -130,6 +140,15 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+
+        // Platform specific shell selection
+        createShellSelectionField(this.plugin, this.modalEl, this.t_shell_command.getShells(), false);
+
+        // Platform specific shell commands
+        let platform_id: PlatformId;
+        for (platform_id in PlatformNames) {
+            createPlatformSpecificShellCommandField(this.plugin, this.modalEl, this.t_shell_command, platform_id);
+        }
     }
 
     private newOutputChannelSetting(title: string, output_stream_name: OutputStream, description: string = "") {
@@ -139,9 +158,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setDesc(description)
             .addDropdown(dropdown => dropdown
                 .addOptions(output_channel_options)
-                .setValue(this.shell_command_configuration.output_channels[output_stream_name])
+                .setValue(this.t_shell_command.getOutputChannels()[output_stream_name])
                 .onChange(async (value: OutputChannel) => {
-                    this.shell_command_configuration.output_channels[output_stream_name] = value;
+                    this.t_shell_command.getConfiguration().output_channels[output_stream_name] = value;
                     await this.plugin.saveSettings();
                 })
             )

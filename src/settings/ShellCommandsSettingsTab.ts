@@ -1,12 +1,9 @@
-import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
+import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath} from "../Common";
-import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
-import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
-import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
-import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -38,12 +35,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             )
         ;
 
+        // Platforms' default shells
+        createShellSelectionField(this.plugin, containerEl, this.plugin.settings.default_shells, true);
+
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         let command_fields_container = containerEl.createEl("div");
 
         // Fields for modifying existing commands
-        for (let command_id in this.plugin.getShellCommands()) {
-            this.createCommandField(command_fields_container, command_id);
+        for (let command_id in this.plugin.getTShellCommands()) {
+            createShellCommandField(this.plugin, command_fields_container, command_id);
         }
 
         // "New command" button
@@ -51,7 +51,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             .addButton(button => button
                 .setButtonText("New command")
                 .onClick(async () => {
-                    this.createCommandField(command_fields_container, "new");
+                    createShellCommandField(this.plugin, command_fields_container, "new");
                     console.log("New empty command created.");
                 })
             )
@@ -104,148 +104,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         this.rememberScrollPosition(containerEl);
     }
 
-    /**
-     *
-     * @param container_element
-     * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
-     */
-    createCommandField(container_element: HTMLElement, shell_command_id: string) {
-        let is_new = "new" === shell_command_id;
-        let shell_command_configuration: ShellCommandConfiguration;
-        if (is_new) {
-            // Create an empty command
-            shell_command_id = this.plugin.generateNewShellCommandID();
-            shell_command_configuration = newShellCommandConfiguration();
-            this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
-
-            // Register the empty shell command to Obsidian's command palette.
-            // Do it already now, because there are settings (e.g. Alias) that, when changed by the user, will try to modify the Obsidian command. Sometimes users edit these settings before writing the actual command. See issue #46: https://github.com/Taitava/obsidian-shellcommands/issues/46
-            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-        } else {
-            // Use an old shell command
-            shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-        }
-        console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
-        let shell_command: string;
-        if (is_new) {
-            shell_command = "";
-        } else {
-            shell_command = shell_command_configuration.shell_command;
-        }
-        let setting_group: ShellCommandSettingGroup = {
-            name_setting:
-                new Setting(container_element)
-                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
-                .addExtraButton(button => button
-                    .setTooltip("Execute now")
-                    .setIcon("run-command")
-                    .onClick(() => {
-                        // Execute the shell command now (for trying it out in the settings)
-                        let shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command);
-                        if (Array.isArray(parsed_shell_command)) {
-                            this.plugin.newErrors(parsed_shell_command);
-                        } else {
-                            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
-                        }
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
-                    .onClick(async () => {
-                        // Open an extra options modal
-                        let modal = new ShellCommandExtraOptionsModal(this.app, this.plugin, shell_command_id, setting_group, this);
-                        modal.open();
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip("Delete this shell command")
-                    .setIcon("trash")
-                    .onClick(async () => {
-                        // Open a delete modal
-                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting_group, container_element);
-                        modal.open();
-                    })
-                )
-                .setClass("shell-commands-name-setting")
-            ,
-            shell_command_setting:
-                new Setting(container_element)
-                .addText(text => text
-                    .setPlaceholder("Enter your command")
-                    .setValue(shell_command)
-                    .onChange(async (field_value) => {
-                        let shell_command = field_value;
-                        setting_group.preview_setting.setDesc(this.getShellCommandPreview(shell_command));
-
-                        if (is_new) {
-                            console.log("Creating new command " + shell_command_id + ": " + shell_command);
-                        } else {
-                            console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
-                        }
-
-                        // Do this in both cases, when creating a new command and when changing an old one:
-                        shell_command_configuration.shell_command = shell_command;
-
-                        if (is_new) {
-                            // Create a new command
-                            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-                            console.log("Command created.");
-                        } else {
-                            // Change an old command
-                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                            console.log("Command changed.");
-                        }
-                        await this.plugin.saveSettings();
-                    })
-                )
-                .setClass("shell-commands-shell-command-setting")
-            ,
-            preview_setting:
-                new Setting(container_element)
-                    .setDesc(this.getShellCommandPreview(shell_command))
-                    .setClass("shell-commands-preview-setting")
-            ,
-        };
-
-        // Informational icons (= non-clickable)
-        let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
-
-        // "Ask confirmation" icon.
-        let confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
-        setIcon(confirm_execution_icon_container, "languages");
-        if (!shell_command_configuration.confirm_execution) {
-            // Do not display the icon for commands that do not use confirmation.
-            confirm_execution_icon_container.addClass("shell-commands-hide");
-        }
-
-        // "Ignored error codes" icon
-        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes), class: "shell-commands-ignored-error-codes-icon-container"}});
-        setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
-        if (!shell_command_configuration.ignore_error_codes.length) {
-            // Do not display the icon for commands that do not ignore any errors.
-            ignored_error_codes_icon_container.addClass("shell-commands-hide");
-        }
-
-        // Add hotkey information
-        if (!is_new) {
-            let hotkeys = getHotkeysForShellCommand(this.plugin, shell_command_id);
-            if (hotkeys) {
-                let hotkeys_joined: string = "";
-                hotkeys.forEach((hotkey: Hotkey) => {
-                    if (hotkeys_joined) {
-                        hotkeys_joined += "<br>"
-                    }
-                    hotkeys_joined += HotkeyToString(hotkey);
-                });
-                let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
-                // Comment out the icon because it would look like a clickable button (as there are other clickable icons in the settings).
-                // setIcon(hotkey_div, "any-key", 22); // Hotkey icon
-                hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
-            }
-        }
-        console.log("Created.");
-    }
 
     createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
         new Setting(container_element)
@@ -267,17 +125,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
     }
 
-    getShellCommandPreview(shell_command: string) {
-        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command); // false: disables notifications if variables have syntax errors.
-        if (Array.isArray(parsed_shell_command)) {
-            // Variable parsing failed.
-            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-            return parsed_shell_command[0];
-        }
-        // Variable parsing succeeded
-        return parsed_shell_command;
-    }
-
     private scroll_position: number = 0;
     private rememberScrollPosition(container_element: HTMLElement) {
         container_element.scrollTo({
@@ -287,27 +134,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         container_element.addEventListener("scroll", (event) => {
             this.scroll_position = container_element.scrollTop;
         });
-    }
-
-    /**
-     * @param shell_command_id String like "0" or "1" etc.
-     * @param shell_command_configuration
-     * @public Public because ShellCommandExtraOptionsModal uses this too.
-     */
-    public generateCommandFieldName(shell_command_id: string, shell_command_configuration: ShellCommandConfiguration) {
-        if (shell_command_configuration.alias) {
-            return shell_command_configuration.alias;
-        }
-        return "Command #" + shell_command_id;
-    }
-
-    /**
-     * @param ignored_error_codes
-     * @public Public because ShellCommandExtraOptionsModal uses this too.
-     */
-    public generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
-        let plural = ignored_error_codes.length !== 1 ? "s" : "";
-        return "Ignored error"+plural+": " + ignored_error_codes.join(",");
     }
 }
 
