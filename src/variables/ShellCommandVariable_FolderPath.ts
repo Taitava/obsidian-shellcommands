@@ -16,7 +16,7 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
         mode: string;
     }
 
-    getValue(): string|null {
+    generateValue(): string|null {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
             if (active_file.parent) {

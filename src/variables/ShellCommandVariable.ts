@@ -1,5 +1,6 @@
 import {App} from "obsidian";
 import ShellCommandsPlugin from "../main";
+import {escapeValue} from "./escapers/EscapeValue";
 
 interface IArguments {
     [key: string]: any;
@@ -27,6 +28,7 @@ export abstract class ShellCommandVariable {
     readonly app: App;
     private error_messages: string[] = [];
     readonly name: string;
+    private shell: string;
 
     /**
      * A definition for what parameters this variables takes.
@@ -40,16 +42,33 @@ export abstract class ShellCommandVariable {
      */
     protected arguments: IArguments = {};
 
-    constructor(plugin: ShellCommandsPlugin) {
+    /**
+     *
+     * @param plugin
+     * @param shell Used to determine what kind of escaping should be used.
+     */
+    constructor(plugin: ShellCommandsPlugin, shell: string) {
         this.plugin = plugin
         this.app = plugin.app;
+        this.shell = shell;
     }
 
-    abstract getValue(): string|null;
+    public getValue(escape: boolean) {
+        let raw_value = this.generateValue();
+        if (escape) {
+            // Value should be escaped.
+            return escapeValue(this.shell, raw_value);
+        } else {
+            // A raw, unescaped value is expected.
+            return raw_value;
+        }
+    }
+
+    protected abstract generateValue(): string|null;
 
     getPattern() {
         const error_prefix = this.name + ".getPattern(): ";
-        let pattern = '\{\{' + this.name;
+        let pattern = '\{\{\!?' + this.name;
         for (let parameter_name in this.parameters) {
             const parameter = this.parameters[parameter_name];
             let parameter_type_pattern: string = this.parameter_separator;  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .

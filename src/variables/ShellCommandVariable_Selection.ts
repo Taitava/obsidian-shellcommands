@@ -4,7 +4,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Selection extends ShellCommandVariable{
     name = "selection";
-    getValue(): string {
+    generateValue(): string {
 
         // Check that we are able to get a view
         let view = getView(this.app);

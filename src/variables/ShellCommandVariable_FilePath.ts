@@ -16,7 +16,7 @@ export class ShellCommandVariable_FilePath extends ShellCommandVariable{
         mode: string;
     }
 
-    getValue(): string|null {
+    generateValue(): string|null {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
             switch (this.arguments.mode.toLowerCase()) {

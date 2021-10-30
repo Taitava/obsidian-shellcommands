@@ -36,6 +36,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
         container_element,
         generateShellCommandFieldName(shell_command_id, plugin.getTShellCommands()[shell_command_id]),
         shell_command,
+        t_shell_command.getShell(),
         async (shell_command: string) => {
             if (is_new) {
                 console.log("Creating new command " + shell_command_id + ": " + shell_command);
@@ -67,7 +68,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             .onClick(() => {
                 // Execute the shell command now (for trying it out in the settings)
                 let t_shell_command = plugin.getTShellCommands()[shell_command_id];
-                let parsed_shell_command = parseShellCommandVariables(plugin, t_shell_command.getShellCommand());
+                let parsed_shell_command = parseShellCommandVariables(plugin, t_shell_command.getShellCommand(), t_shell_command.getShell());
                 if (Array.isArray(parsed_shell_command)) {
                     plugin.newErrors(parsed_shell_command);
                 } else {

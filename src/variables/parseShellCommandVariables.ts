@@ -17,19 +17,19 @@ import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
  * @param command
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string): string | string[] {
+export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string): string | string[] {
     let shell_variables: ShellCommandVariable[] = [
-        new ShellCommandVariable_Clipboard(plugin),
-        new ShellCommandVariable_Date(plugin),
-        new ShellCommandVariable_FileName(plugin),
-        new ShellCommandVariable_FilePath(plugin),
-        new ShellCommandVariable_FolderName(plugin),
-        new ShellCommandVariable_FolderPath(plugin),
-        new ShellCommandVariable_Selection(plugin),
-        new ShellCommandVariable_Tags(plugin),
-        new ShellCommandVariable_Title(plugin),
-        new ShellCommandVariable_VaultPath(plugin),
-        new ShellCommandVariable_Workspace(plugin),
+        new ShellCommandVariable_Clipboard(plugin, shell),
+        new ShellCommandVariable_Date(plugin, shell),
+        new ShellCommandVariable_FileName(plugin, shell),
+        new ShellCommandVariable_FilePath(plugin, shell),
+        new ShellCommandVariable_FolderName(plugin, shell),
+        new ShellCommandVariable_FolderPath(plugin, shell),
+        new ShellCommandVariable_Selection(plugin, shell),
+        new ShellCommandVariable_Tags(plugin, shell),
+        new ShellCommandVariable_Title(plugin, shell),
+        new ShellCommandVariable_VaultPath(plugin, shell),
+        new ShellCommandVariable_Workspace(plugin, shell),
     ];
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (let variable_index in shell_variables)
@@ -58,8 +58,16 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
                 }
             }
 
+            // Should the variable's value be escaped? (Usually yes).
+            let escape = true;
+            if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
+                // The variable usage begins with {{! instead of {{
+                // This means the variable's value should NOT be escaped.
+                escape = false;
+            }
+
             // Render the variable
-            let variable_value = variable.getValue();
+            let variable_value = variable.getValue(escape);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 console.log("Parsing command " + command + " failed.");

@@ -8,6 +8,7 @@ export function CreateShellCommandFieldCore(
     container_element: HTMLElement,
     setting_name: string,
     shell_command: string,
+    shell: string,
     on_change: (shell_command: string) => void,
     shell_command_placeholder: string = "Enter your command"
     ) {
@@ -24,7 +25,7 @@ export function CreateShellCommandFieldCore(
                     .setValue(shell_command)
                     .onChange((shell_command) => {
                         // Update preview
-                        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command));
+                        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell));
 
                         // Let the caller extend this onChange, to preform saving the settings:
                         on_change(shell_command);
@@ -34,7 +35,7 @@ export function CreateShellCommandFieldCore(
         ,
         preview_setting:
             new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command))
+                .setDesc(getShellCommandPreview(plugin,shell_command, shell))
                 .setClass("shell-commands-preview-setting")
         ,
     };
@@ -47,8 +48,8 @@ export function CreateShellCommandFieldCore(
  * @param shell_command
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string) {
-    let parsed_shell_command = parseShellCommandVariables(plugin, shell_command); // false: disables notifications if variables have syntax errors.
+export function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string, shell: string) {
+    let parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell); // false: disables notifications if variables have syntax errors.
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.

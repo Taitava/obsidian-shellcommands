@@ -3,7 +3,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FileName extends ShellCommandVariable{
     name = "file_name";
-    getValue(): string {
+    generateValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
             this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");

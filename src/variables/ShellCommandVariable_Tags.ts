@@ -16,7 +16,7 @@ export class ShellCommandVariable_Tags extends ShellCommandVariable {
         separator: string,
     };
 
-    getValue(): string {
+    generateValue(): string {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
             // We do have an active file
