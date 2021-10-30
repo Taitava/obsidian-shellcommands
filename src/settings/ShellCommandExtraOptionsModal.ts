@@ -45,21 +45,25 @@ export class ShellCommandExtraOptionsModal extends Modal {
             "extra-options-general": {
                 title: "General",
                 icon: "gear",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabGeneral(container_element);
+                },
             },
             "extra-options-output": {
                 title: "Output",
                 icon: "lines-of-text",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOutput(container_element);
+                },
             },
             "extra-options-operating-systems-and-shells": {
                 title: "Operating systems & shells",
                 icon: "stacked-levels",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOperatingSystemsAndShells(container_element);
+                },
             },
         });
-
-        // Tab contents
-        this.tabGeneral(this.tab_structure.contentContainers["extra-options-general"]);
-        this.tabOutput(this.tab_structure.contentContainers["extra-options-output"]);
-        this.tabOperatingSystemsAndShells(this.tab_structure.contentContainers["extra-options-operating-systems-and-shells"]);
     }
 
     private tabGeneral(container_element: HTMLElement) {

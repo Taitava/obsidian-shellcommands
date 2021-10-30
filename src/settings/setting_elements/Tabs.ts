@@ -3,6 +3,7 @@ import {setIcon} from "obsidian";
 export interface Tab {
     title: string;
     icon: string;
+    content_generator: (container_element: HTMLElement) => void;
 }
 
 export interface TabStructure {
@@ -44,6 +45,9 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
 
         // Create content container
         tab_content_containers[tab_id] = container_element.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-" + tab_id}});
+
+        // Generate content
+        tab.content_generator(tab_content_containers[tab_id]);
 
         // Memorize the first tab's button
         if (!first_button) {
