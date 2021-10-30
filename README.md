@@ -73,7 +73,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | -----------------------| ---------- | --------------------- | --- |
-| SC 0.6.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
+| SC 0.6.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.5.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | |
 | SC 0.5.0 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
 | SC 0.4.1 | Obsidian 0.12.15<br>Works | Obsidian 0.12.15<br>Works | macOS: 11.1 <br>Obsidian: 0.12.15<br>Works, tested by [FelipeRearden](https://github.com/FelipeRearden), thank you! 🙂 |
@@ -92,6 +92,8 @@ If you have any questions about how to use this plugin, please feel free to [ope
 
 ## Contributing
 Ideas, issues, feedback, pull requests etc. are all welcome! :)
+- For feature requests, please start [a new discussion](https://github.com/Taitava/obsidian-shellcommands/discussions) in Ideas category.
+- If you're about to create a pull request, please discuss your idea first so that you won't accidentally use your time for something that will be later decided to be implemented in a very different way. There might also be refactorings happening on the codebase, during which time it might be wise to wait until the refactoring is done before creating a PR, otherwise you might base your work on old codebase that will require you to update your PR when the refactoring is finished. So, ask before creating a PR, and I can tell if you should wait or not. :)
 
 ## Author
 
