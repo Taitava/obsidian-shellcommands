@@ -5,6 +5,7 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
     save ||= MigrateShellCommandToPlatforms(plugin);
     save ||= EnsureShellCommandsHaveAllFields(plugin);
+    save ||= DeleteEmptyCommandsField(plugin);
     if (save) {
         // Only save if there were changes to configuration.
         console.log("Saving migrations...")
@@ -14,6 +15,9 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
 }
 
 function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
+    if (undefined === plugin.settings.commands) {
+        return false;
+    }
     let count_shell_commands = plugin.settings.commands.length;
     let save = false;
     if (0 < count_shell_commands) {
@@ -96,6 +100,23 @@ function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
             } else {
                 console.log("Migration failure for shell command #" + shell_command_id + ": platforms exists already.");
             }
+        }
+    }
+    return save;
+}
+
+/**
+ * Can be removed in 1.0.0.
+ *
+ * @param plugin
+ * @constructor
+ */
+function DeleteEmptyCommandsField(plugin: ShellCommandsPlugin) {
+    let save = false;
+    if (undefined !== plugin.settings.commands) {
+        if (plugin.settings.commands.length === 0) {
+            delete plugin.settings.commands;
+            save = true;
         }
     }
     return save;

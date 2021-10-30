@@ -11,7 +11,7 @@ export interface ShellCommandsPluginSettings {
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
-    commands: string[];
+    commands?: string[];
 }
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
@@ -21,9 +21,6 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     shell_commands: {},
     error_message_duration: 20,
     notification_message_duration: 10,
-
-    // Legacy:
-    commands: [] // Deprecated, but must be present in the default values as long as migrating from commands to shell_commands is supported.
 }
 
 /**
