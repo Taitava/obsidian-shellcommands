@@ -69,10 +69,13 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
 }
 
 function tab_button_clicked(event: MouseEvent) {
+    const tab_button = event.target as HTMLElement;
+
+    // Hide all tab contents and get the max height
     let max_height = 0;
-    const tab_contents = document.getElementsByClassName("SC-tab-content");
-    for (let index= 0; index < tab_contents.length; index++) {
-        let tab_content = (tab_contents.item(index) as HTMLElement);
+    const tab_contents = tab_button.parentElement.parentElement.findAll("div.SC-tab-content"); // Do not get all tab contents that exist, because there might be multiple tab systems open at the same time.
+    for (let index in tab_contents) {
+        let tab_content = tab_contents[index];
 
         // Get the maximum tab height so that all tabs can have the same height.
         tab_content.addClass("SC-tab-active"); // Need to make the tab visible temporarily in order to get the height.
@@ -85,14 +88,13 @@ function tab_button_clicked(event: MouseEvent) {
     }
 
     // Remove active status from all buttons
-    const tab_buttons = document.getElementsByClassName("SC-tab-header-button");
-    for (let index= 0; index < tab_buttons.length; index++) {
-        let tab_button = (tab_buttons.item(index) as HTMLElement);
+    const adjacent_tab_buttons = tab_button.parentElement.findAll(".SC-tab-header-button"); // Do not get all tab buttons that exist, because there might be multiple tab systems open at the same time.
+    for (let index in adjacent_tab_buttons) {
+        let tab_button = adjacent_tab_buttons[index];
         tab_button.removeClass("SC-tab-active");
     }
 
     // Activate the clicked tab
-    let tab_button = event.target as HTMLElement;
     tab_button.addClass("SC-tab-active");
     const activate_tab_id = tab_button.attributes.getNamedItem("activateTab").value;
     const tab_content = document.getElementById(activate_tab_id);
