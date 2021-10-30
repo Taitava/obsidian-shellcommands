@@ -15,7 +15,7 @@ export class ShellCommandVariable_Date extends ShellCommandVariable {
         format: string,
     }
 
-    getValue(): string {
+    generateValue(): string {
         return moment().format(this.arguments.format);
     }
 }

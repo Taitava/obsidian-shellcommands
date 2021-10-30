@@ -109,7 +109,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						let preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(t_shell_command); // Clone t_shell_command so that we won't edit the original configuration.
 
 						// Parse variables in the actual shell command
-						let parsed_shell_command = parseShellCommandVariables(this, preparsed_t_shell_command.getShellCommand());
+						let parsed_shell_command = parseShellCommandVariables(this, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell());
 						if (Array.isArray(parsed_shell_command)) {
 							// Variable parsing failed, because an array was returned, which contains error messages.
 							// Just cancel the preview, the command will be shown with variable names. Discard the error messages.
@@ -122,7 +122,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						}
 
 						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-						let parsed_alias = parseShellCommandVariables(this, preparsed_t_shell_command.getAlias());
+						let parsed_alias = parseShellCommandVariables(this, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell());
 						if (Array.isArray(parsed_alias)) {
 							// Variable parsing failed, because an array was returned, which contains error messages.
 							// Just cancel the preview, the alias will be shown with variable names. Discard the error messages.
@@ -148,7 +148,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					// Check if we happen to have a preparsed command (= variables parsed at the time of opening the command palette)
 					if (undefined === this.preparsed_t_shell_commands[shell_command_id]) {
 						// No preparsed command. Execute a standard version of the command, and do variable parsing now.
-						let parsed_shell_command = parseShellCommandVariables(this, t_shell_command.getShellCommand());
+						let parsed_shell_command = parseShellCommandVariables(this, t_shell_command.getShellCommand(), t_shell_command.getShell());
 						if (Array.isArray(parsed_shell_command)) {
 							// The command could not be parsed correctly.
 							// Display error messages

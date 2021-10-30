@@ -10,6 +10,7 @@ export function createPlatformSpecificShellCommandField(plugin: ShellCommandsPlu
         container_element,
         "Shell command on " + platform_name,
         t_shell_command.getPlatformSpecificShellCommands()[platform_id] ?? "",
+        t_shell_command.getShell(),
         async (shell_command: string) => {
             if (shell_command.length) {
                 // shell_command is not empty, so it's a normal command.

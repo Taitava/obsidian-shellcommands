@@ -3,7 +3,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Title extends ShellCommandVariable{
     name = "title";
-    getValue(): string {
+    generateValue(): string {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
             return active_file.basename;

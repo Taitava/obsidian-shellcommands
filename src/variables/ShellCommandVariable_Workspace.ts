@@ -3,7 +3,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Workspace extends ShellCommandVariable{
     name = "workspace";
-    getValue(): string {
+    generateValue(): string {
 
         // Idea how to access the workspaces plugin is copied 2021-09-15 from https://github.com/Vinzent03/obsidian-advanced-uri/blob/f7ef80d5252481242e69496208e925874209f4aa/main.ts#L168-L179
         // @ts-ignore internalPlugins exists although it's not in obsidian.d.ts.

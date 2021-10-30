@@ -4,7 +4,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_VaultPath extends ShellCommandVariable{
     name = "vault_path";
-    getValue(): string {
+    generateValue(): string {
         return getVaultAbsolutePath(this.app);
     }
 }
