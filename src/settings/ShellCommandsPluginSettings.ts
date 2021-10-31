@@ -4,16 +4,24 @@ import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
 export interface ShellCommandsPluginSettings {
+
+    // Common:
     settings_version: SettingsVersionString;
     /**
      * If true, logging stuff to console.log() will be enabled.
      * Might also enable some testing {{variables}} in the future, perhaps.
      */
     debug: boolean;
-    default_shells: IPlatformSpecificString;
-    working_directory: string;
-    preview_variables_in_command_palette: boolean;
+
+    // Shell commands:
     shell_commands: ShellCommandsConfiguration;
+    preview_variables_in_command_palette: boolean;
+
+    // Operating systems & shells:
+    working_directory: string;
+    default_shells: IPlatformSpecificString;
+
+    // Output:
     error_message_duration: number;
     notification_message_duration: number;
 
@@ -23,12 +31,20 @@ export interface ShellCommandsPluginSettings {
 }
 
 export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+
+    // Common:
     settings_version: "prior-to-0.7.0", // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
     debug: false,
-    default_shells: {},
-    working_directory: "",
-    preview_variables_in_command_palette: true,
+
+    // Shell commands:
     shell_commands: {},
+    preview_variables_in_command_palette: true,
+
+    // Operating systems and shells:
+    working_directory: "",
+    default_shells: {},
+
+    // Output:
     error_message_duration: 20,
     notification_message_duration: 10,
 }
