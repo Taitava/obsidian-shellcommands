@@ -19,6 +19,12 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
     }
 }
 
+/**
+ * Can be removed in 1.0.0.
+ *
+ * @param plugin
+ * @constructor
+ */
 function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
     if (undefined === plugin.settings.commands) {
         return false;
@@ -89,6 +95,12 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
     return save;
 }
 
+/**
+ * Can be removed in 1.0.0.
+ *
+ * @param plugin
+ * @constructor
+ */
 function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
     let save = false;
     for (let shell_command_id in plugin.settings.shell_commands) {
