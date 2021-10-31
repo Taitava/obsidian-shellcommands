@@ -55,6 +55,11 @@ export abstract class ShellCommandVariable {
 
     public getValue(escape: boolean) {
         let raw_value = this.generateValue();
+        if (null === raw_value) {
+            // Some error(s) has occurred when generating the variable's value.
+            // Prevent passing null to escapeValue().
+            return null;
+        }
         if (escape) {
             // Value should be escaped.
             return escapeValue(this.shell, raw_value);
