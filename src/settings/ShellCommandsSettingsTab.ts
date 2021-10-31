@@ -134,6 +134,19 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         // "Notification message duration" field
         this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
+
+        // "Output channel 'Clipboard' displays a notification message, too" field
+        new Setting(container_element)
+            .setName("Output channel 'Clipboard' displays a notification message, too")
+            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box on the top right corner. This helps to notice what was inserted into clipboard.")
+            .addToggle(checkbox => checkbox
+                .setValue(this.plugin.settings.output_channel_clipboard_also_outputs_to_notification)
+                .onChange(async (value: boolean) => {
+                    this.plugin.settings.output_channel_clipboard_also_outputs_to_notification = value;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
     }
 
     createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {

@@ -14,7 +14,9 @@ export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
         let output_message = joinObjectProperties(output, " ");
         clipboard.writeText(output_message);
 
-        // Notify the user so they know a) what was copied to clipboard, and b) that their command has finished execution.
-        this.plugin.newNotification("Copied to clipboard: " + EOL + output_message);
+        if (this.plugin.settings.output_channel_clipboard_also_outputs_to_notification) {
+            // Notify the user so they know a) what was copied to clipboard, and b) that their command has finished execution.
+            this.plugin.newNotification("Copied to clipboard: " + EOL + output_message + EOL + EOL + "(Notification can be turned off in settings.)");
+        }
     }
 }

@@ -24,6 +24,7 @@ export interface ShellCommandsPluginSettings {
     // Output:
     error_message_duration: number;
     notification_message_duration: number;
+    output_channel_clipboard_also_outputs_to_notification: boolean;
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -47,6 +48,7 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     // Output:
     error_message_duration: 20,
     notification_message_duration: 10,
+    output_channel_clipboard_also_outputs_to_notification: true,
 }
 
 /**
