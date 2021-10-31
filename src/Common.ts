@@ -3,6 +3,7 @@ import {PlatformId} from "./settings/ShellCommandsPluginSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
+import ShellCommandsPlugin from "./main";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -12,6 +13,12 @@ export function getVaultAbsolutePath(app: App) {
         return adapter.getBasePath();
     }
     return null;
+}
+
+export function getPluginAbsolutePath(plugin: ShellCommandsPlugin) {
+    // FIXME: ".obsidian/plugins/" does not work if the vault's config folder is different than ".obsidian".
+    // See discussion: https://forum.obsidian.md/t/how-to-get-current-plugins-directory/26427
+    return normalizePath2(path.join(getVaultAbsolutePath(plugin.app), ".obsidian/plugins/", plugin.getPluginId()));
 }
 
 /**

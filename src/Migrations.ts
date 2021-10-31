@@ -1,6 +1,9 @@
 import ShellCommandsPlugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import {debugLog} from "./Debug";
+import * as fs from "fs";
+import {getPluginAbsolutePath} from "./Common";
+import * as path from "path";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     let save = MigrateCommandsToShellCommands(plugin);
@@ -10,6 +13,7 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
     if (save) {
         // Only save if there were changes to configuration.
         debugLog("Saving migrations...")
+        backupSettingsFile(plugin); // Make a backup copy of the old file BEFORE writing the new, migrated settings file.
         await plugin.saveSettings();
         debugLog("Migrations saved...")
     }
@@ -121,4 +125,40 @@ function DeleteEmptyCommandsField(plugin: ShellCommandsPlugin) {
         }
     }
     return save;
+}
+
+/**
+ * Permanent, do not remove.
+ *
+ * @param plugin
+ */
+function backupSettingsFile(plugin: ShellCommandsPlugin) {
+    // plugin.app.fileManager.
+    // @ts-ignore
+    const current_settings_version = (plugin.settings.settings_version === "prior-to-0.7.0") ? "0.x" : plugin.settings.settings_version;
+    const settings_file_path = path.join(getPluginAbsolutePath(plugin), "data.json");
+    const backup_file_path_without_extension = path.join(getPluginAbsolutePath(plugin), "data-backup-version-" + current_settings_version + "-before-upgrading-to-" + ShellCommandsPlugin.SettingsVersion);
+
+    // Check that the current settings file can be found.
+    if (!fs.existsSync(settings_file_path)) {
+        // Not found. Probably the vault uses a different config folder than .obsidian.
+        // FIXME: Support custom config folders.
+        // See discussion: https://forum.obsidian.md/t/how-to-get-current-plugins-directory/26427
+        debugLog("backupSettingsFile(): Cannot find data.json");
+        plugin.newNotification("Shell commands: Cannot create a backup of current settings file, because data.json is not found. This might happen if your vault uses a different config folder than .obsidian . Please see this GitHub issue: https://github.com/Taitava/obsidian-shellcommands/issues/83");
+        return;
+    }
+
+    let backup_file_path = backup_file_path_without_extension + ".json";
+    let running_number = 1;
+    while (fs.existsSync(backup_file_path)) {
+        running_number++; // The first number will be 2.
+        backup_file_path = backup_file_path_without_extension + "-" + running_number + ".json";
+        if (running_number >= 1000) {
+            // There is some problem with detecting existing/inexisting files.
+            // Prevent hanging the program in an eternal loop.
+            throw new Error("backupSettingsFile(): Eternal loop detected.");
+        }
+    }
+    fs.copyFileSync(settings_file_path, backup_file_path);
 }
