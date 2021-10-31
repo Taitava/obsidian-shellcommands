@@ -15,7 +15,7 @@ You can customise your commands with built-in variables that can provide the cur
 **This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) so you know how it executes commands.
 
 ## Main issues
-- [Variable values are not escaped, which may cause huge problems (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
+- Special characters in `{{variable}}` values are escaped (except if CMD.EXE is used as a shell), but it's still experimental. Potential escaping problems can be dangerous. [See this issue (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
 - [Windows: Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
 - Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
 
@@ -53,7 +53,13 @@ These examples are written for Windows, but you can invent similar ones in Linux
 
 These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
 
-Note that for the sake of simplicity, there is no escaping done for variable values. If you have a command and a quoted string parameter like `mycommand "{{clipboard}}"`, it might break if your clipboard content contains `"` quote characters, because those are inserted into the command as-is. Your command might end up looking like this: `mycommand "Text pasted from clipboard that contains a " character."` I am open to discussion how to best implement variable value escaping in the future.
+### Escaping special characters in variable values
+
+Note that special characters (= anything else than letters, numbers and underscores `_`) are automatically escaped in variable values. Escaping depends on the shell that you use, but generally speaking, each special character is prefixed with an escape character, which might be `\`, \` or `%` depending on shell.  
+
+**Without escaping**, if you would have a command and a quoted string parameter like `mycommand {{clipboard}}`, it might break if your clipboard content contains `>` characters, because those would be inserted into the command as-is. Your command might end up looking like this: `mycommand Text pasted from clipboard that contains a > character.` The `>` character would redirect output to a file and might overwrite an important file. That's why escaping is in place, making the aforementioned command look like this: `mycommand\ Text\ pasted\ from\ clipboard\ that\ contains\ a\ \>\ character\.` (when the shell is Bash). Your shell then parses the escaped special characters and uses them as literal letters, not as special characters.
+
+If you want to avoid escaping special characters in variable values, you can use `{{!variable}}` syntax, meaning that you can add an exclamation mark `!` in the front of a variable's name. Note that this can be dangerous, and you need to understand very well what you are doing if you use this kind of raw, unescaped variable values! In most situations, you should be able to use escaped variables really well.
 
 ## Benefits from other plugins
 Not a single plugin can be great just by itself. And not a single plugin suits every situation. Here I'm collecting a list of plugins that can be good companions or good alternatives to *Shell commands*.
