@@ -22,7 +22,9 @@ Features that are in development, but are not released yet. Does not include stu
 - Internal: Old `commands` field in *data.json* settings file is completely removed if it's empty, because it haven't been used as of 0.1.1.
 - [Internal: The plugin will not spam hidden console.log() messages anymore, unless a debug option is turned on (#69)](https://github.com/Taitava/obsidian-shellcommands/issues/69).
 
-### To be Fixed
+## [0.6.1] - 2021-11-02
+
+### Fixed
 
 - [Dollar sign in variable value may cause part of the command to be repeated in the variable value (#94)](https://github.com/Taitava/obsidian-shellcommands/issues/94)
 
@@ -131,7 +133,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...HEAD
+[0.6.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.0...0.5.1
 [0.5.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.4.1...0.5.0
