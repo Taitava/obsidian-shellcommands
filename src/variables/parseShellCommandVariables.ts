@@ -11,7 +11,8 @@ import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath
 import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
 import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
 import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
-import {debugLog} from "../Debug";
+import {DEBUG_ON, debugLog} from "../Debug";
+import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
 
 /**
  * @param plugin
@@ -32,6 +33,12 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
         new ShellCommandVariable_VaultPath(plugin, shell),
         new ShellCommandVariable_Workspace(plugin, shell),
     ];
+    if (DEBUG_ON) {
+        // Variables that are only designed for 'Shell commands test suite'.
+        shell_variables.push(
+            new ShellCommandVariable_Passthrough(plugin, shell),
+        );
+    }
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (let variable_index in shell_variables)
     {
