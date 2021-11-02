@@ -16,9 +16,11 @@ export function getVaultAbsolutePath(app: App) {
 }
 
 export function getPluginAbsolutePath(plugin: ShellCommandsPlugin) {
-    // FIXME: ".obsidian/plugins/" does not work if the vault's config folder is different than ".obsidian".
-    // See discussion: https://forum.obsidian.md/t/how-to-get-current-plugins-directory/26427
-    return normalizePath2(path.join(getVaultAbsolutePath(plugin.app), ".obsidian/plugins/", plugin.getPluginId()));
+    return normalizePath2(path.join(
+        getVaultAbsolutePath(plugin.app),
+        plugin.app.vault.configDir,
+        "plugins",
+        plugin.getPluginId()));
 }
 
 /**
