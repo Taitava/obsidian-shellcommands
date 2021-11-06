@@ -6,11 +6,13 @@ import {getPluginAbsolutePath} from "./Common";
 import * as path from "path";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
-    let save = MigrateCommandsToShellCommands(plugin);
-    save ||= MigrateShellCommandToPlatforms(plugin);
-    save ||= EnsureShellCommandsHaveAllFields(plugin); // TODO: Also create a function that saves the settings file if the _root settings_ lack some fields. Currently the saving is only done after user changes settings, which then bypasses backup creation.
-    save ||= DeleteEmptyCommandsField(plugin);
-    if (save) {
+    const should_save = [ // If at least one of the values is true, saving will be triggered.
+        MigrateCommandsToShellCommands(plugin),
+        MigrateShellCommandToPlatforms(plugin),
+        EnsureShellCommandsHaveAllFields(plugin), // TODO: Also create a function that saves the settings file if the _root settings_ lack some fields. Currently the saving is only done after user changes settings, which then bypasses backup creation.
+        DeleteEmptyCommandsField(plugin),
+    ];
+    if (should_save.includes(true)) {
         // Only save if there were changes to configuration.
         debugLog("Saving migrations...")
         backupSettingsFile(plugin); // Make a backup copy of the old file BEFORE writing the new, migrated settings file.
