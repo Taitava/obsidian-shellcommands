@@ -22,6 +22,9 @@ Features that are in development, but are not released yet. Does not include stu
 - Internal: Old `commands` field in *data.json* settings file is completely removed if it's empty, because it haven't been used as of 0.1.1.
 - [Internal: The plugin will not spam hidden console.log() messages anymore, unless a debug option is turned on (#69)](https://github.com/Taitava/obsidian-shellcommands/issues/69).
 
+### To be Fixed
+- [Settings migrations: Small fix for doing multiple migrations at once (no issue)](https://github.com/Taitava/obsidian-shellcommands/commit/e77c65744cbf9445c0a0761c802ecea3744d6323).
+
 ## [0.6.1] - 2021-11-02
 
 ### Fixed
