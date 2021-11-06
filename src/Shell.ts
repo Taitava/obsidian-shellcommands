@@ -1,5 +1,20 @@
 import {extractFileName, getOperatingSystem, isWindows} from "./Common";
-import {PlatformShells} from "./settings/ShellCommandsPluginSettings";
+
+export const PlatformShells = {
+    darwin: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)",
+    },
+    linux: {
+        "/bin/bash": "Bash",
+        "/bin/zsh": "Zsh (Z shell)",
+    },
+    win32: {
+        "pwsh.exe": "PowerShell Core",
+        "PowerShell.exe": "PowerShell 5",
+        "CMD.EXE": "cmd.exe",
+    },
+}
 
 export function getUsersDefaultShell(): string {
     if (isWindows()) {

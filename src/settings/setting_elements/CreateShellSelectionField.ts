@@ -1,6 +1,6 @@
-import {IPlatformSpecificString, PlatformId, PlatformNames, PlatformShells} from "../ShellCommandsPluginSettings";
+import {IPlatformSpecificString, PlatformId, PlatformNames} from "../ShellCommandsPluginSettings";
 import {extractFileName, getOperatingSystem} from "../../Common";
-import {getUsersDefaultShell} from "../../Shell";
+import {getUsersDefaultShell, PlatformShells} from "../../Shell";
 import {Setting} from "obsidian";
 import ShellCommandsPlugin from "../../main";
 
