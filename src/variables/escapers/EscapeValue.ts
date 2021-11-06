@@ -1,5 +1,5 @@
 import {Escaper} from "./Escaper";
-import {BashEscaper} from "./BashEscaper";
+import {ShEscaper} from "./ShEscaper";
 import {PowerShellEscaper} from "./PowerShellEscaper";
 import {Notice} from "obsidian";
 import {extractFileName} from "../../Common";
@@ -10,7 +10,7 @@ export function escapeValue(shell: string, raw_value: string) {
     switch (shell) {
         case "bash":
         case "zsh":
-            escaper = new BashEscaper(raw_value);
+            escaper = new ShEscaper(raw_value);
             break;
         case "powershell.exe":  // PowerShell 5 is only available for Windows.
         case "pwsh.exe":        // In Windows.
