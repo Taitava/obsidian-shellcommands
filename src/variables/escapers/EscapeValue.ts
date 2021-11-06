@@ -9,6 +9,7 @@ export function escapeValue(shell: string, raw_value: string) {
     let escaper: Escaper;
     switch (shell) {
         case "bash":
+        case "dash":
         case "zsh":
             escaper = new ShEscaper(raw_value);
             break;

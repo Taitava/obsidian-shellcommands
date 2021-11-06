@@ -3,10 +3,12 @@ import {extractFileName, getOperatingSystem, isWindows} from "./Common";
 export const PlatformShells = {
     darwin: {
         "/bin/bash": "Bash",
+        "/bin/dash": "Dash",
         "/bin/zsh": "Zsh (Z shell)",
     },
     linux: {
         "/bin/bash": "Bash",
+        "/bin/dash": "Dash",
         "/bin/zsh": "Zsh (Z shell)",
     },
     win32: {
