@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-**VERSION 0.7.0 INCLUDES A POSSIBLY BACKWARDS INCOMPATIBLE CHANGE, see below.**
+**VERSION 0.7.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES, see below.**
 
 ### To be Added
 - [An ability to select a shell that will be used for execution, and operating system specific versions of shell commands (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76).
@@ -15,7 +15,9 @@ Features that are in development, but are not released yet. Does not include stu
 - [Settings file will be backed up before any new migrations (#83)](https://github.com/Taitava/obsidian-shellcommands/issues/83).
 
 ### To be Changed
-- **Possibly backwards incompatible change:** [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
+- **Possibly backwards incompatible changes:**
+  - [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
+  - [Linux and Mac: User's default shell will be used instead of /bin/bash (#76)](#76). SC versions prior to 0.7.0 used `/bin/sh` as a shell on Linux and Mac (`/bin/sh` came as a default value from [Node.js's](https://nodejs.org/en/) [child_process](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)). `0.7.0` changes this so that the default shell is retrieved from the current user's `$SHELL` environment variable. On Windows, default shell is retrieved from `COMSPEC` environment variable, and this has not changed. These are only defaults, and a user can change these shells in settings. If a shell has changed for you, your shell commands might run a bit differently after this upgrade.
 - Settings: Split settings content to tabs ([#78](https://github.com/Taitava/obsidian-shellcommands/issues/78) and [#85](https://github.com/Taitava/obsidian-shellcommands/issues/85)).
 - [Settings: Clipboard output channel notification balloon can be turned off (#75)](https://github.com/Taitava/obsidian-shellcommands/issues/75).
 - [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
