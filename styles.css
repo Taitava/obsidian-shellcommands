@@ -69,30 +69,33 @@ span.shell-commands-main-icon-container {
  * This CSS is copied 2021-10-21 from https://www.w3schools.com/howto/howto_js_tabs.asp
  * Modifications:
  *  - Renamed classes
+ *  - Added tab icons.
+ *  - Changed colors.
+ *  - Changed/removed borders.
+ *  - Removed button transition.
+ *  - Changed button border-radiuses
  */
 
 /* Style the tab */
 .SC-tab-header {
-    overflow: hidden;
-    border: 1px solid #ccc;
-    background-color: #f1f1f1;
+    border-bottom: 2px solid var(--background-modifier-border);
+    background-color: var(--background-secondary);
 }
 
 /* Style the buttons that are used to open the tab content */
 .SC-tab-header-button {
-    background-color: inherit;
-    float: left;
+    background-color: unset !important;
     border: none;
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
-    transition: 0.3s;
+    border-radius: 10px 10px 0 0; /* 0 0 = No border-radius at bottom */
 }
 
 /* Create an active/current tablink class */
 .SC-tab-header-button.SC-tab-active,
 .SC-tab-header-button:hover {
-    background-color: #bbb !important;
+    background-color: var(--background-modifier-border) !important;
 }
 
 .SC-tab-header-button svg {
@@ -103,8 +106,6 @@ span.shell-commands-main-icon-container {
 .SC-tab-content {
     display: none;
     padding: 6px 12px;
-    border: 1px solid #ccc;
-    border-top: none;
 }
 
 .SC-tab-content.SC-tab-active {
