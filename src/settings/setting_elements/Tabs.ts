@@ -71,16 +71,20 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
 function tab_button_clicked(event: MouseEvent) {
     const tab_button = this as HTMLElement; // Use 'this' instead of event.target because this way we'll always get a button element, not an element inside the  button (i.e. an icon).
 
-    // Hide all tab contents and get the max height
+    // Hide all tab contents and get the max dimensions
+    let max_width = 0;
     let max_height = 0;
     const tab_contents = tab_button.parentElement.parentElement.findAll("div.SC-tab-content"); // Do not get all tab contents that exist, because there might be multiple tab systems open at the same time.
     for (let index in tab_contents) {
         let tab_content = tab_contents[index];
 
-        // Get the maximum tab height so that all tabs can have the same height.
-        tab_content.addClass("SC-tab-active"); // Need to make the tab visible temporarily in order to get the height.
+        // Get the maximum tab dimensions so that all tabs can have the same dimensions.
+        tab_content.addClass("SC-tab-active"); // Need to make the tab visible temporarily in order to get the dimensions.
         if (tab_content.offsetHeight > max_height) {
             max_height = tab_content.offsetHeight;
+        }
+        if (tab_content.offsetWidth > max_width) {
+            max_width = tab_content.offsetWidth;
         }
 
         // Finally hide the tab
@@ -100,7 +104,8 @@ function tab_button_clicked(event: MouseEvent) {
     const tab_content = document.getElementById(activate_tab_id);
     tab_content.addClass("SC-tab-active");
 
-    // Apply the max height to this tab
+    // Apply the max dimensions to this tab
+    tab_content.style.width = max_width+"px";
     tab_content.style.height = max_height+"px";
 
     // Do nothing else (I don't know if this is needed or not)
