@@ -69,7 +69,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
 }
 
 function tab_button_clicked(event: MouseEvent) {
-    const tab_button = event.target as HTMLElement;
+    const tab_button = this as HTMLElement; // Use 'this' instead of event.target because this way we'll always get a button element, not an element inside the  button (i.e. an icon).
 
     // Hide all tab contents and get the max height
     let max_height = 0;
