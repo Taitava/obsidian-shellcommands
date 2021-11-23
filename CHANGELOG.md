@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-**VERSION 0.7.0 INCLUDES A POSSIBLY BACKWARDS INCOMPATIBLE CHANGE, see below.**
+**VERSION 0.7.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES, see below.**
 
 ### To be Added
 - [An ability to select a shell that will be used for execution, and operating system specific versions of shell commands (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76).
@@ -16,6 +16,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Changed
 - **Possibly backwards incompatible change:** [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
+- **Possibly backwards incompatible change:** [Only the following shells will be supported: Bash, Dash, Zsh, Windows CMD, PowerShell 5 and PowerShell Core (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76). While SC now supports changing the shell in settings, it needs to be noted that if your operating system's user preferences are defined to use some other shell than those listed before, SC will no longer allow to execute commands, because it will not know how to escape special characters for a shell that is unknown to it. This limitation will be removed later, [when support for different shells gets improved](https://github.com/Taitava/obsidian-shellcommands/issues/108).
 - Settings: Split settings content to tabs ([#78](https://github.com/Taitava/obsidian-shellcommands/issues/78) and [#85](https://github.com/Taitava/obsidian-shellcommands/issues/85)).
 - [Settings: Clipboard output channel notification balloon can be turned off (#75)](https://github.com/Taitava/obsidian-shellcommands/issues/75).
 - [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
