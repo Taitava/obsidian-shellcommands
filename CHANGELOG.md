@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [An ability to select a shell that will be used for execution, and operating system specific versions of shell commands (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76).
 - [Internal: Store plugin version in the settings file (#90)](https://github.com/Taitava/obsidian-shellcommands/issues/90)
 - [Settings file will be backed up before any new migrations (#83)](https://github.com/Taitava/obsidian-shellcommands/issues/83).
+- [A documentation vault in Obsidian Publish (#100)](https://github.com/Taitava/obsidian-shellcommands/issues/100).
 
 ### To be Changed
 - **Possibly backwards incompatible change:** [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
