@@ -31,29 +31,15 @@ For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsid
 6. For advanced settings, such as a command alias name that appears in the command palette instead of the actual shell command, or an ability to direct command output to a currently active note, click a small gear icon next to the shell command.
 7. All commands that you have defined, will be added to Obsidian's command palette. You can execute them from there (by hitting `Ctrl/Cmd + P` and searching for your command) or you can define a hotkey for each individual command in Obsidian's Hotkeys settings tab.
 
+## Extensive documentation
+... is available right here: https://publish.obsidian.md/shellcommands
+
 ## Usage examples
 
-These examples are written for Windows, but you can invent similar ones in Linux and Mac too.
+Example shell commands have been moved to: https://publish.obsidian.md/shellcommands/Example+shell+commands/Example+shell+commands
 
-| Purpose | Command | Hotkey |
-| ------- | ------- | ------ |
-| Open a graphical [Git](https://git-scm.com/) client for committing changes in your vault to a repository. | `start git-gui` | Ctrl + Shift + G |
-| Open a Git command line client for advanced management of a repository. | `start "" "%PROGRAMFILES%\Git\bin\sh.exe" --login` | Ctrl + Alt + G | <!-- Command copied 2021-08-22 from https://stackoverflow.com/a/17306604/2754026  -->
-| Commit the current file in a quick & dirty way to Git (not the best way in all cases). | `git add "{{file_path:relative}}" & git commit -m "Meeting notes {{date:YYYY-MM-DD}}" & git push` | Ctrl + Alt + Shift + G |
-| A quick way to run other commands that you have not defined in the settings. | `start cmd` | Ctrl + Shift + C |
-| In case you feel creative... | `mspaint` | Ctrl + Shift + P |
-| The quickest way to write bug reports regarding this plugin. | `start https://github.com/Taitava/obsidian-shellcommands/issues/new` | Ctrl + Shift + B |
-| Create a monthly folder like 2021-08. | `mkdir {{date:YYYY-MM}}` | Ctrl + Shift + M |
-| Create a new file and paste content there from clipboard. | `echo {{clipboard}} >> NewNote.md` | Ctrl + Shift + N |
-| Search the web using text you have selected. | `start https://duckduckgo.com/?q={{selection}}` | Ctrl + Shift + S |
-| Obsidian URI: Open another vault * | `start "" "obsidian://open?vault=my%20vault"` | Ctrl + Shift + A |
-| [Advanced URI](https://github.com/Vinzent03/obsidian-advanced-uri): Open a workspace * | `start "" "obsidian://advanced-uri?vault=my%20vault&workspace=main"` | Ctrl + Shift + W |
-| Insert a link with file title and workspace name to clipboard. You can have workspaces named by e.g. book names that you read. * | `echo "[[{{title}}\|{{title}} -> {{workspace}}]]" \| clip` (unfortunately echo adds a line break after the text) | Ctrl + L |
-| *) Thank you [FelipeRearden](https://github.com/FelipeRearden) for these ideas! 🙂 | | |
-
-These are just examples, and this plugin **does not** define them for you automatically. They are listed only to give you ideas of what kind of commands you could configure yourself, and what kind of hotkeys you could assign to them. The mentioned hotkeys are not reserved for other uses in Obsidian (v. 0.12.12) at the time of writing these examples.
-
-### Escaping special characters in variable values
+## Escaping special characters in variable values
+(Todo: check that the Documentation has all this content, and then remove this section from README.md.)
 
 Note that special characters (= anything else than letters, numbers and underscores `_`) are automatically escaped in variable values. Escaping depends on the shell that you use, but generally speaking, each special character is prefixed with an escape character, which might be `\`, \` or `%` depending on shell.  
 
