@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
+- Nothing at the moment.
+
+## [0.7.0] - 2021-11-25
+
 **VERSION 0.7.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES, see below.**
 
-### To be Added
+### Added
 - [An ability to select a shell that will be used for execution, and operating system specific versions of shell commands (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76).
 - [Internal: Store plugin version in the settings file (#90)](https://github.com/Taitava/obsidian-shellcommands/issues/90)
 - [Settings file will be backed up before any new migrations (#83)](https://github.com/Taitava/obsidian-shellcommands/issues/83).
-- [A documentation vault in Obsidian Publish (#100)](https://github.com/Taitava/obsidian-shellcommands/issues/100).
+- [A documentation vault in Obsidian Publish (#100)](https://github.com/Taitava/obsidian-shellcommands/issues/100). Here's the link: https://publish.obsidian.md/shellcommands
 
-### To be Changed
+### Changed
 - **Possibly backwards incompatible change:** [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
 - **Possibly backwards incompatible change:** [Only the following shells will be supported: Bash, Dash, Zsh, Windows CMD, PowerShell 5 and PowerShell Core (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76). While SC now supports changing the shell in settings, it needs to be noted that if your operating system's user preferences are defined to use some other shell than those listed before, SC will no longer allow to execute commands, because it will not know how to escape special characters for a shell that is unknown to it. This limitation will be removed later, [when support for different shells gets improved](https://github.com/Taitava/obsidian-shellcommands/issues/108).
 - [Linux and Mac: User's default shell will be used instead of /bin/sh (#76)](#76). SC versions prior to 0.7.0 used `/bin/sh` as a shell on Linux and Mac (`/bin/sh` came as a default value from [Node.js's](https://nodejs.org/en/) [child_process](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)). `0.7.0` changes this so that the default shell is retrieved from the current user's `$SHELL` environment variable. On Windows, default shell is retrieved from `COMSPEC` environment variable, and this has not changed. These are only defaults, and a user can change these shells in settings. If a shell has changed for you, your shell commands might run a bit differently after this upgrade.
@@ -25,7 +29,7 @@ Features that are in development, but are not released yet. Does not include stu
 - Internal: Old `commands` field in *data.json* settings file is completely removed if it's empty, because it haven't been used as of 0.1.1.
 - [Internal: The plugin will not spam hidden console.log() messages anymore, unless a debug option is turned on (#69)](https://github.com/Taitava/obsidian-shellcommands/issues/69).
 
-### To be Fixed
+### Fixed
 - [Settings migrations: Small fix for doing multiple migrations at once (no issue)](https://github.com/Taitava/obsidian-shellcommands/commit/e77c65744cbf9445c0a0761c802ecea3744d6323).
 
 ## [0.6.1] - 2021-11-02
@@ -139,7 +143,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.0...HEAD
+[0.7.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.0...0.6.1
 [0.6.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.1...0.6.0
 [0.5.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.5.0...0.5.1
