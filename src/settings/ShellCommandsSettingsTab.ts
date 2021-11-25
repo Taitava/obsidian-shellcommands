@@ -6,6 +6,7 @@ import {createShellSelectionField} from "./setting_elements/CreateShellSelection
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
+import {DocumentationMainLink, DocumentationVariablesLink, GitHubLink} from "../Documentation";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -45,6 +46,12 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 },
             },
         });
+
+        // Documentation link & GitHub link
+        containerEl.createEl("p").insertAdjacentHTML("beforeend",
+            "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
+            "<a href=\"" + GitHubLink + "\">SC on GitHub</a>",
+        );
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
         this.rememberLastPosition(containerEl);
@@ -95,6 +102,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         // Variable instructions
+        container_element.createEl("p").insertAdjacentHTML("beforeend", "<a href=\"" + DocumentationVariablesLink + "\">See these instructions also in external documentation</a>");
         getShellCommandVariableInstructions().forEach((instructions) => {
             let paragraph = container_element.createEl("p");
             // @ts-ignore
