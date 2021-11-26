@@ -2,6 +2,8 @@ import ShellCommandsPlugin from "../../main";
 import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
+import {createAutocomplete} from "./Autocomplete";
+import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export function CreateShellCommandFieldCore(
     plugin: ShellCommandsPlugin,
@@ -39,6 +41,10 @@ export function CreateShellCommandFieldCore(
                 .setClass("shell-commands-preview-setting")
         ,
     };
+    // @ts-ignore
+    const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input")
+    createAutocomplete(input_element, getVariableAutocompleteItems());
+
     return setting_group;
 }
 

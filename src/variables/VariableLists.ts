@@ -36,3 +36,26 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
     }
     return shell_command_variables;
 }
+
+export function getVariableClasses() {
+    let shell_command_variables = [
+        ShellCommandVariable_Clipboard,
+        ShellCommandVariable_Date,
+        ShellCommandVariable_FileName,
+        ShellCommandVariable_FilePath,
+        ShellCommandVariable_FolderName,
+        ShellCommandVariable_FolderPath,
+        ShellCommandVariable_Selection,
+        ShellCommandVariable_Tags,
+        ShellCommandVariable_Title,
+        ShellCommandVariable_VaultPath,
+        ShellCommandVariable_Workspace,
+    ];
+    if (DEBUG_ON) {
+        // Variables that are only designed for 'Shell commands test suite'.
+        shell_command_variables.push(
+            ShellCommandVariable_Passthrough,
+        );
+    }
+    return shell_command_variables;
+}
