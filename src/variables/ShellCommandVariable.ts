@@ -1,6 +1,7 @@
 import {App} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {escapeValue} from "./escapers/EscapeValue";
+import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 interface IArguments {
     [key: string]: any;
@@ -166,5 +167,23 @@ export abstract class ShellCommandVariable {
     protected newErrorMessage(message: string) {
         let prefix = "{{" + this.getVariableName() + "}}: ";
         this.error_messages.push(prefix + message);
+    }
+
+    public static getAutocompleteItems(): IAutocompleteItem[] {
+        let parameters = ""
+        let parameter_indicator = "";
+        const parameter_names = Object.getOwnPropertyNames(this.parameters);
+        if (parameter_names.length > 0) {
+            parameters = this.parameter_separator + parameter_names.join(this.parameter_separator);
+            parameter_indicator = this.parameter_separator; // When the variable name ends with a parameter separator character, it indicates to a user that an argument should be supplied.
+        }
+
+        return [
+            <IAutocompleteItem>{
+                value: "{{" + this.variable_name + parameter_indicator + "}}",
+                label: "{{" + this.variable_name + parameters + "}}: " + this.help_text,
+                group: "Variables",
+            }
+        ];
     }
 }
