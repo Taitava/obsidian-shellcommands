@@ -3,6 +3,8 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Title extends ShellCommandVariable{
     static variable_name = "title";
+    static help_text = "Gives the current file name without a file extension. If you need it with the extension, use {{file_name}} instead.";
+
     generateValue(): string {
         let active_file = this.app.workspace.getActiveFile();
         if (active_file) {
@@ -14,5 +16,5 @@ export class ShellCommandVariable_Title extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{title}}",
-    "Gives the current file name without a file extension. If you need it with the extension, use {{file_name}} instead.",
+    ShellCommandVariable_Title.help_text,
 );

@@ -4,6 +4,7 @@ import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FilePath extends ShellCommandVariable{
     static variable_name = "file_path";
+    static help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -33,5 +34,5 @@ export class ShellCommandVariable_FilePath extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{file_path:relative}} or {{file_path:absolute}}",
-    "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.",
+    ShellCommandVariable_FilePath.help_text,
 );

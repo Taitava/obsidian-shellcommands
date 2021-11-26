@@ -5,6 +5,8 @@ import {debugLog} from "../Debug";
 
 export class ShellCommandVariable_Selection extends ShellCommandVariable{
     static variable_name = "selection";
+    static help_text = "Gives the currently selected text. Atm only works in editing mode, not in preview mode!";
+
     generateValue(): string {
 
         // Check that we are able to get a view
@@ -48,5 +50,5 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{selection}}",
-    "Gives the currently selected text. Atm only works in editing mode, not in preview mode!",
+    ShellCommandVariable_Selection.help_text,
 );

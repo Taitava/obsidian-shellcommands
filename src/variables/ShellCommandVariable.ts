@@ -29,6 +29,7 @@ export abstract class ShellCommandVariable {
     private error_messages: string[] = [];
     public static readonly variable_name: string;
     private shell: string;
+    public static readonly help_text: string;
 
     /**
      * A definition for what parameters this variables takes.

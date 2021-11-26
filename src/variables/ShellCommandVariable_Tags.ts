@@ -5,6 +5,8 @@ import {uniqueArray} from "../Common";
 
 export class ShellCommandVariable_Tags extends ShellCommandVariable {
     static variable_name = "tags";
+    static help_text = "Gives all tags defined in the current note. Replace the \"separator\" part with a comma, space or whatever characters you want to use as a separator between tags. A separator is always needed to be defined.";
+
     protected static readonly parameters: IParameters = {
         separator: {
             type: "string",
@@ -38,5 +40,5 @@ export class ShellCommandVariable_Tags extends ShellCommandVariable {
 }
 addShellCommandVariableInstructions(
     "{{tags:separator}}",
-    "Gives all tags defined in the current note. Replace the \"separator\" part with a comma, space or whatever characters you want to use as a separator between tags. A separator is always needed to be defined.",
+    ShellCommandVariable_Tags.help_text,
 );

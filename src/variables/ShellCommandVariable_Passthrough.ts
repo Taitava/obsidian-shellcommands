@@ -4,6 +4,7 @@ import {DEBUG_ON} from "../Debug";
 
 export class ShellCommandVariable_Passthrough extends ShellCommandVariable {
     static variable_name = "passthrough";
+    static help_text = "Gives the same value that is passed as an argument. Used for testing special characters' escaping. Available in debug mode only.";
 
     protected static readonly parameters: IParameters = {
         value: {
@@ -26,6 +27,6 @@ if (DEBUG_ON) {
     // Fix by refactoring variables so that the instruction definition is a method in the variable class.
     addShellCommandVariableInstructions(
         "{{passthrough:value}}",
-        "Gives the same value that is passed as an argument. Used for testing special characters' escaping. Available in debug mode only.",
+        ShellCommandVariable_Passthrough.help_text,
     );
 }
