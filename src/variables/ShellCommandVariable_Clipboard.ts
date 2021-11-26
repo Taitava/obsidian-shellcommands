@@ -4,7 +4,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 import {clipboard} from "electron";
 
 export class ShellCommandVariable_Clipboard extends ShellCommandVariable {
-    name = "clipboard";
+    static variable_name = "clipboard";
 
     generateValue(): string {
         return clipboard.readText();

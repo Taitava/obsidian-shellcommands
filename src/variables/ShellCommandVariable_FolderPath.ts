@@ -3,9 +3,9 @@ import {getVaultAbsolutePath, normalizePath2} from "../Common";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
-    name = "folder_path";
+    static variable_name = "folder_path";
 
-    protected readonly parameters: IParameters = {
+    protected static readonly parameters: IParameters = {
         mode: {
             options: ["absolute", "relative"],
             required: true,

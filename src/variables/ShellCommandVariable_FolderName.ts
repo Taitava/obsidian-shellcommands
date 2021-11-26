@@ -2,7 +2,7 @@ import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstruc
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderName extends ShellCommandVariable{
-    name = "folder_name";
+    static variable_name = "folder_name";
     generateValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {

@@ -4,7 +4,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 import {debugLog} from "../Debug";
 
 export class ShellCommandVariable_Selection extends ShellCommandVariable{
-    name = "selection";
+    static variable_name = "selection";
     generateValue(): string {
 
         // Check that we are able to get a view

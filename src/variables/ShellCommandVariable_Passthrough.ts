@@ -3,9 +3,9 @@ import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 import {DEBUG_ON} from "../Debug";
 
 export class ShellCommandVariable_Passthrough extends ShellCommandVariable {
-    name = "passthrough";
+    static variable_name = "passthrough";
 
-    protected readonly parameters: IParameters = {
+    protected static readonly parameters: IParameters = {
         value: {
             type: "string",
             required: true,

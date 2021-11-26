@@ -3,8 +3,8 @@ import {moment} from "obsidian";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Date extends ShellCommandVariable {
-    name = "date";
-    protected readonly parameters: IParameters = {
+    static variable_name = "date";
+    protected static readonly parameters: IParameters = {
         format: {
             type: "string",
             required: true,

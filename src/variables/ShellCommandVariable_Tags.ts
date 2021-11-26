@@ -4,8 +4,8 @@ import {getAllTags} from "obsidian";
 import {uniqueArray} from "../Common";
 
 export class ShellCommandVariable_Tags extends ShellCommandVariable {
-    name = "tags";
-    protected readonly parameters: IParameters = {
+    static variable_name = "tags";
+    protected static readonly parameters: IParameters = {
         separator: {
             type: "string",
             required: true,

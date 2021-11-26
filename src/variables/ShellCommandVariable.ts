@@ -23,18 +23,18 @@ export interface IParameters {
 
 
 export abstract class ShellCommandVariable {
-    private readonly parameter_separator = ":";
+    private static readonly parameter_separator = ":";
     readonly plugin: ShellCommandsPlugin;
     readonly app: App;
     private error_messages: string[] = [];
-    readonly name: string;
+    public static readonly variable_name: string;
     private shell: string;
 
     /**
      * A definition for what parameters this variables takes.
      * @protected
      */
-    protected readonly parameters: IParameters = {};
+    protected static readonly parameters: IParameters = {};
 
     /**
      * This contains actual values for parameters.
@@ -71,12 +71,27 @@ export abstract class ShellCommandVariable {
 
     protected abstract generateValue(): string|null;
 
+    public getVariableName() {
+        const child_class = this.constructor as typeof ShellCommandVariable;
+        return child_class.variable_name;
+    }
+
+    protected getParameters() {
+        const child_class = this.constructor as typeof ShellCommandVariable;
+        return child_class.parameters;
+    }
+
+    private getParameterSeparator() {
+        const child_class = this.constructor as typeof ShellCommandVariable;
+        return child_class.parameter_separator;
+    }
+
     getPattern() {
-        const error_prefix = this.name + ".getPattern(): ";
-        let pattern = '\{\{\!?' + this.name;
-        for (let parameter_name in this.parameters) {
-            const parameter = this.parameters[parameter_name];
-            let parameter_type_pattern: string = this.parameter_separator;  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
+        const error_prefix = this.getVariableName() + ".getPattern(): ";
+        let pattern = '\{\{\!?' + this.getVariableName();
+        for (let parameter_name in this.getParameters()) {
+            const parameter = this.getParameters()[parameter_name];
+            let parameter_type_pattern: string = this.getParameterSeparator();  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
 
             // Check should we use parameter.options or parameter.type.
             if (
@@ -93,7 +108,7 @@ export abstract class ShellCommandVariable {
                 throw Error(error_prefix + "Parameter '" + parameter_name + "' should define either 'type' or 'options', not both!");
             } else if (undefined !== parameter.options) {
                 // Use parameter.options
-                parameter_type_pattern += parameter.options.join("|" + this.parameter_separator); // E.g. "absolute|:relative" for {{file_path:mode}} variable's 'mode' parameter.
+                parameter_type_pattern += parameter.options.join("|" + this.getParameterSeparator()); // E.g. "absolute|:relative" for {{file_path:mode}} variable's 'mode' parameter.
             } else {
                 // Use parameter.type
                 switch (parameter.type) {
@@ -121,7 +136,7 @@ export abstract class ShellCommandVariable {
     }
 
     public getParameterNames() {
-        return Object.getOwnPropertyNames(this.parameters);
+        return Object.getOwnPropertyNames(this.getParameters());
     }
 
     /**
@@ -129,7 +144,7 @@ export abstract class ShellCommandVariable {
      * @param argument At this point 'argument' is always a string, but this method may convert it to another data type, depending on the parameter's data type.
      */
     public setArgument(parameter_name: string, argument: string) {
-        const parameter_type = this.parameters[parameter_name].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
+        const parameter_type = this.getParameters()[parameter_name].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
         switch (parameter_type) {
             case "string":
                 this.arguments[parameter_name] = argument;
@@ -148,7 +163,7 @@ export abstract class ShellCommandVariable {
     }
 
     protected newErrorMessage(message: string) {
-        let prefix = "{{" + this.name + "}}: ";
+        let prefix = "{{" + this.getVariableName() + "}}: ";
         this.error_messages.push(prefix + message);
     }
 }
