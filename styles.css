@@ -139,7 +139,9 @@ span.shell-commands-main-icon-container {
     font-style: italic;
 }
 
-.SC-autocomplete > div.selected {
+.SC-autocomplete > div.selected,
+.SC-autocomplete > div:hover:not(.group) {
+    cursor: pointer;
     background-color: var(--text-selection);
     color: var(--text-normal);
 }
