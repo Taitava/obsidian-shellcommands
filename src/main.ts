@@ -1,6 +1,6 @@
 import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException, ExecOptions} from "child_process";
-import {getOperatingSystem, getVaultAbsolutePath} from "./Common";
+import {combineObjects, getOperatingSystem, getVaultAbsolutePath} from "./Common";
 import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
 import {
@@ -372,13 +372,14 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		this.settings = await this.loadData(); // May have missing main settings fields, if the settings file is from an older version of SC. It will be migrated later.
+		const all_settings = combineObjects( DEFAULT_SETTINGS, this.settings); // This temporary settings object always has all fields defined (except sub fields, such as shell command specific fields, may still be missing, but they are not needed this early). This is used so that it's certain that the fields 'debug' and 'settings_version' exist.
 
 		// Update debug status - before this line debugging is always OFF!
-		setDEBUG_ON(this.settings.debug);
+		setDEBUG_ON(all_settings.debug);
 
 		// Ensure that the loaded settings file is supported.
-		const version_support = this.isSettingsVersionSupported(this.settings.settings_version);
+		const version_support = this.isSettingsVersionSupported(all_settings.settings_version);
 		if (typeof version_support === "string") {
 			// The settings version is not supported.
 			new Notice("SHELL COMMANDS PLUGIN HAS DISABLED ITSELF in order to prevent misinterpreting settings / corrupting the settings file!", 120*1000);
