@@ -12,6 +12,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Changed
 - [Settings: Variables are now located on their own tab (#110)](https://github.com/Taitava/obsidian-shellcommands/issues/110).
+- [Internal: Save new main settings fields to file already during loading (#111)](https://github.com/Taitava/obsidian-shellcommands/issues/111).
 
 ## [0.7.0] - 2021-11-25
 
