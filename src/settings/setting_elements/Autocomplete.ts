@@ -45,10 +45,18 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             // A user has selected an item to be autocompleted
 
             // Get the item text and already typed text
-            const supplement = item.value;
+            let supplement = item.value;
             let caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
             const typed_word = get_typed_word(typed_text);
+
+            // Special case: Check if }} happens to appear after the caret
+            const after_caret = input_element.value.slice(caret_position, caret_position + 2);
+            if ("}}" === after_caret) {
+                // The replacing will happen in a {{variable}}.
+                // Do not accidentally insert another }} pair.
+                supplement = supplement.replace(/}}$/, ""); // Only removes a trailing }} if there is one.
+            }
 
             // Replace the input, but try to save part of the beginning, in case it seems like not being part of the search query.
             let replace_start = find_starting_position(typed_word, supplement); // The length difference of typed_text and typed_word will be added here below.
