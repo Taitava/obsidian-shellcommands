@@ -136,7 +136,19 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         // Variable instructions
-        container_element.createEl("p").insertAdjacentHTML("beforeend", "<a href=\"" + DocumentationVariablesLink + "\">See these instructions also in external documentation</a>");
+
+        new Setting(container_element)
+            .setName("Variables")
+            .setHeading() // Make the "Variables" text bold.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Variables")
+                .onClick(() => {
+                    gotoURL(DocumentationVariablesLink)
+                }),
+            )
+        ;
+
         getShellCommandVariableInstructions().forEach((instructions) => {
             let paragraph = container_element.createEl("p");
             // @ts-ignore
