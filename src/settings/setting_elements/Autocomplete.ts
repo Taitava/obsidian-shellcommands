@@ -27,6 +27,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
+            const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
             let caret_position = input_element.selectionStart;
@@ -38,7 +39,9 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
                 update([]);
             } else {
                 // The word is not empty, so can suggest something.
-                update(autocomplete_items.filter(item => item_match(item, typed_word)));
+                let matched_items = autocomplete_items.filter(item => item_match(item, typed_word));
+                matched_items = matched_items.slice(0, max_suggestions); // Limit to a reasonable amount of suggestions.
+                update(matched_items);
             }
         },
         onSelect: (item) => {
