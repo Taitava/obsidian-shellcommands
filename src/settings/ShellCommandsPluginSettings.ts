@@ -15,6 +15,7 @@ export interface ShellCommandsPluginSettings {
 
     // Variables:
     preview_variables_in_command_palette: boolean;
+    show_autocomplete_menu: boolean;
 
     // Operating systems & shells:
     working_directory: string;
@@ -41,6 +42,7 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
 
     // Variables:
     preview_variables_in_command_palette: true,
+    show_autocomplete_menu: true,
 
     // Operating systems and shells:
     working_directory: "",

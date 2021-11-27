@@ -1,12 +1,17 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {getVaultAbsolutePath} from "../Common";
+import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
-import {DocumentationMainLink, DocumentationVariablesLink, GitHubLink} from "../Documentation";
+import {
+    DocumentationAutocompleteLink,
+    DocumentationMainLink,
+    DocumentationVariablesLink,
+    GitHubLink,
+} from "../Documentation";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -63,7 +68,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         // Fields for modifying existing commands
         for (let command_id in this.plugin.getTShellCommands()) {
-            createShellCommandField(this.plugin, command_fields_container, command_id);
+            createShellCommandField(this.plugin, command_fields_container, command_id, this.plugin.settings.show_autocomplete_menu);
         }
 
         // "New command" button
@@ -71,7 +76,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             .addButton(button => button
                 .setButtonText("New command")
                 .onClick(async () => {
-                    createShellCommandField(this.plugin, command_fields_container, "new");
+                    createShellCommandField(this.plugin, command_fields_container, "new", this.plugin.settings.show_autocomplete_menu);
                     debugLog("New empty command created.");
                 })
             )
@@ -98,6 +103,28 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     }
                     await this.plugin.saveSettings();
                 })
+            )
+        ;
+
+        // "Show autocomplete menu" field
+        new Setting(container_element)
+            .setName("Show autocomplete menu")
+            .setDesc("If on, a dropdown menu shows up when you begin writing {{variable}} names, showing matching variables and their instructions. Also allows defining custom suggestions in autocomplete.yaml file - see the documentation.")
+            .addToggle(checkbox => checkbox
+                .setValue(this.plugin.settings.show_autocomplete_menu)
+                .onChange(async (value: boolean) => {
+                    debugLog("Changing show_autocomplete_menu to " + value);
+                    this.plugin.settings.show_autocomplete_menu = value;
+                    this.display(); // Re-render the whole settings view to apply the change.
+                    await this.plugin.saveSettings();
+                }),
+            )
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Autocomplete")
+                .onClick(() => {
+                    gotoURL(DocumentationAutocompleteLink)
+                }),
             )
         ;
 

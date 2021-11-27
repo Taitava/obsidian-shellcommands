@@ -13,8 +13,9 @@ import {debugLog} from "../../Debug";
  * @param plugin
  * @param container_element
  * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
+ * @param show_autocomplete_menu
  */
-export function createShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, shell_command_id: string) {
+export function createShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, shell_command_id: string, show_autocomplete_menu: boolean) {
     let is_new = "new" === shell_command_id;
     let t_shell_command: TShellCommand;
     if (is_new) {
@@ -39,6 +40,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
         generateShellCommandFieldName(shell_command_id, plugin.getTShellCommands()[shell_command_id]),
         shell_command,
         t_shell_command.getShell(),
+        show_autocomplete_menu,
         async (shell_command: string) => {
             if (is_new) {
                 debugLog("Creating new command " + shell_command_id + ": " + shell_command);

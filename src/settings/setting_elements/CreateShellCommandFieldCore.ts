@@ -11,6 +11,7 @@ export function CreateShellCommandFieldCore(
     setting_name: string,
     shell_command: string,
     shell: string,
+    show_autocomplete_menu: boolean,
     on_change: (shell_command: string) => void,
     shell_command_placeholder: string = "Enter your command"
     ) {
@@ -41,9 +42,13 @@ export function CreateShellCommandFieldCore(
                 .setClass("shell-commands-preview-setting")
         ,
     };
-    // @ts-ignore
-    const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input")
-    createAutocomplete(input_element, getVariableAutocompleteItems());
+
+    // Autocomplete menu
+    if (show_autocomplete_menu) {
+        // @ts-ignore
+        const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
+        createAutocomplete(input_element, getVariableAutocompleteItems());
+    }
 
     return setting_group;
 }
