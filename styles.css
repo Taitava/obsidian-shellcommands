@@ -131,8 +131,8 @@ span.shell-commands-main-icon-container {
 }
 
 .SC-autocomplete > div.selected {
-    background-color: var(--interactive-accent-hover);
-    color: var(--text-on-accent);
+    background-color: var(--text-selection);
+    color: var(--text-normal);
 }
 
 .SC-autocomplete > div.group {
