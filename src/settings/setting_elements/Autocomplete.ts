@@ -3,6 +3,27 @@ import {parseYaml} from "obsidian";
 
 export function createAutocomplete(input_element: HTMLInputElement, autocomplete_items: IAutocompleteItem[]) {
     autocomplete_items = merge_and_sort_autocomplete_items(autocomplete_items, CustomAutocompleteItems);
+
+    /**
+     * Reduces an input string to the nearest logical word.
+     * @param typed_text
+     */
+    function get_typed_word(typed_text: string) {
+        // Reduce the text - limit to a single word (= exclude spaces and everything before them).
+        let typed_word = typed_text.match(/\S*?$/)[0];
+        if (typed_word.contains("{{")) {
+            // A {{variable}} is being queried.
+            // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
+            typed_word = typed_word.replace(/.+{{/, "{{");
+        }
+        if (typed_word.contains("}}")) {
+            // The query happens right after a {{variable}}.
+            // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
+            typed_word = typed_word.replace(/.+}}/, "");
+        }
+        return typed_word;
+    }
+
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
@@ -10,14 +31,8 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             // Get the so far typed text - exclude everything that is on the right side of the caret.
             let caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
+            const typed_word = get_typed_word(typed_text);
 
-            // Reduce the text - limit to a single word (= exclude spaces and everything before them).
-            let typed_word = typed_text.match(/\S*?$/)[0];
-            if (typed_word.contains("{{")) {
-                // A {{variable}} is being queried.
-                // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
-                typed_word = typed_word.replace(/.+{{/, "{{");
-            }
             if ("" === typed_word) {
                 // No suggestions for empty word.
                 update([]);
@@ -33,12 +48,16 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             const supplement = item.value;
             let caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
+            const typed_word = get_typed_word(typed_text);
 
             // Replace the input, but try to save part of the beginning, in case it seems like not being part of the search query.
-            let replace_start = find_starting_position(typed_text, supplement);
+            let replace_start = find_starting_position(typed_word, supplement); // The length difference of typed_text and typed_word will be added here below.
             if (false === replace_start) {
                 // This should never happen, but if it does, do not replace anything, just insert.
                 replace_start = caret_position;
+            } else {
+                // Adjust the position
+                replace_start += typed_text.length - typed_word.length;
             }
             input_element.setRangeText(supplement, replace_start, caret_position);
 
