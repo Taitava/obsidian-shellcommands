@@ -36,6 +36,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     this.tabShellCommands(container_element);
                 },
             },
+            "main-variables": {
+                title: "Variables",
+                icon: "code-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabVariables(container_element);
+                },
+            },
             "main-operating-systems-and-shells": {
                 title: "Operating systems & shells",
                 icon: "stacked-levels",
@@ -81,10 +88,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 })
             )
         ;
+}
 
-        // "Variables" section
-        container_element.createEl("h2", {text: "Variables"});
-
+    private tabVariables(container_element: HTMLElement)
+    {
         // "Preview variables in command palette" field
         new Setting(container_element)
             .setName("Preview variables in command palette")
