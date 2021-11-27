@@ -37,12 +37,12 @@ export class ShellCommandVariable_FilePath extends ShellCommandVariable{
         return [
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
-                label: "{{" + this.variable_name + ":absolute}}: Gives path to the current file, absolute from the root of the file system.",
+                help_text: "Gives path to the current file, absolute from the root of the file system.",
                 group: "Variables",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
-                label: "{{" + this.variable_name + ":relative}}: Gives path to the current file, relative from the root of the Obsidian vault.",
+                help_text: "Gives path to the current file, relative from the root of the Obsidian vault.",
                 group: "Variables",
             },
         ];

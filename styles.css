@@ -130,6 +130,15 @@ span.shell-commands-main-icon-container {
     padding: 0 5px 2px 10px;
 }
 
+.SC-autocomplete > div > span.SC-autocomplete-value {
+    font-weight: bold;
+}
+
+.SC-autocomplete > div > span.SC-autocomplete-help-text {
+    font-size: 90%;
+    font-style: italic;
+}
+
 .SC-autocomplete > div.selected {
     background-color: var(--text-selection);
     color: var(--text-normal);

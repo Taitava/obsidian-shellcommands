@@ -181,7 +181,7 @@ export abstract class ShellCommandVariable {
         return [
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + parameter_indicator + "}}",
-                label: "{{" + this.variable_name + parameters + "}}: " + this.help_text,
+                help_text: this.help_text,
                 group: "Variables",
             }
         ];

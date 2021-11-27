@@ -59,13 +59,20 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
                 inputType: "insertText",
             }));
         },
+        render: (item) => {
+            const div_element = document.createElement("div");
+            div_element.createSpan({text: item.value, attr: {class: "SC-autocomplete-value"}});
+            div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
+            div_element.createSpan({text: item.help_text, attr: {class: "SC-autocomplete-help-text"}});
+            return div_element;
+        },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
         className: "SC-autocomplete", // The component always has a class 'autocomplete', but add 'SC-autocomplete' so that SC's CSS can target 'SC-autocomplete', so it will not mess up stuff if Obsidian happens to have an element with class 'autocomplete'.
     });
 }
 
 export interface IAutocompleteItem {
-    label: string;
+    help_text: string;
     value: string;
     group: string;
 }
@@ -137,7 +144,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
             // The item is ok, add it to the list
             CustomAutocompleteItems.push({
                 value: autocomplete_item_value,
-                label: autocomplete_item_value + ": " + autocomplete_item_label,
+                help_text: autocomplete_item_label,
                 group: group_name,
             });
         });
