@@ -1,6 +1,6 @@
 import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException, ExecOptions} from "child_process";
-import {getOperatingSystem, getVaultAbsolutePath} from "./Common";
+import {getOperatingSystem, getPluginAbsolutePath, getVaultAbsolutePath} from "./Common";
 import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
 import {
@@ -20,6 +20,7 @@ import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
+import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
 
 export default class ShellCommandsPlugin extends Plugin {
 	/**
@@ -57,6 +58,9 @@ export default class ShellCommandsPlugin extends Plugin {
 			let t_shell_command = shell_commands[shell_command_id];
 			this.registerShellCommand(t_shell_command);
 		}
+
+		// Load a custom autocomplete list if it exists.
+		this.loadCustomAutocompleteList();
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
 	}
@@ -393,6 +397,28 @@ export default class ShellCommandsPlugin extends Plugin {
 
 		// Write settings
 		await this.saveData(this.settings);
+	}
+
+	private loadCustomAutocompleteList() {
+		const custom_autocomplete_file_name = "autocomplete.yaml";
+		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this), custom_autocomplete_file_name);
+
+		if (fs.existsSync(custom_autocomplete_file_path)) {
+			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
+			const custom_autocomplete_content = fs.readFileSync(custom_autocomplete_file_path).toLocaleString();
+			const result = addCustomAutocompleteItems(custom_autocomplete_content)
+			if (true === result) {
+				// OK
+				debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " loaded.");
+			} else {
+				// An error has occurred.
+				debugLog("loadCustomAutocompleteList(): " + result);
+				this.newError("Shell commands: Unable to parse " + custom_autocomplete_file_name + ": " + result);
+			}
+		} else {
+			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " does not exists, so won't load it. This is perfectly ok.");
+		}
+
 	}
 
 	private async disablePlugin() {

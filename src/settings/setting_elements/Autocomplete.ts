@@ -1,6 +1,8 @@
 import autocomplete from "autocompleter";
+import {parseYaml} from "obsidian";
 
 export function createAutocomplete(input_element: HTMLInputElement, autocomplete_items: IAutocompleteItem[]) {
+    autocomplete_items = merge_and_sort_autocomplete_items(autocomplete_items, CustomAutocompleteItems);
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
@@ -107,4 +109,68 @@ function find_starting_position(typed_text: string, supplement: string) {
         }
     }
     return false;
+}
+
+
+const CustomAutocompleteItems: IAutocompleteItem[] = [];
+
+export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
+    // Try to parse YAML syntax
+    const yaml = parseYaml(custom_autocomplete_yaml);
+    if (null === yaml || typeof yaml !== "object") {
+        return "Unable to parse the content."
+    }
+
+    // Iterate autocomplete item groups
+    const group_names = Object.getOwnPropertyNames(yaml);
+    group_names.forEach((group_name: string) => {
+        const group_items = yaml[group_name];
+        const group_item_values = Object.getOwnPropertyNames(group_items);
+
+        // Iterate all autocomplete items in the group
+        group_item_values.forEach((autocomplete_item_value: string) => {
+            const autocomplete_item_label = group_items[autocomplete_item_value];
+            if (typeof autocomplete_item_label !== "string") {
+                return "Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + typeof autocomplete_item_label;
+            }
+
+            // The item is ok, add it to the list
+            CustomAutocompleteItems.push({
+                value: autocomplete_item_value,
+                label: autocomplete_item_value + ": " + autocomplete_item_label,
+                group: group_name,
+            });
+        });
+    });
+
+    // All ok
+    return true;
+}
+
+function merge_and_sort_autocomplete_items(...autocomplete_item_sets: IAutocompleteItem[][]) {
+    const merged_autocomplete_items: IAutocompleteItem[] = [].concat(...autocomplete_item_sets);
+    return merged_autocomplete_items.sort((a, b) => {
+        // First compare groups
+        if (a.group < b.group) {
+            // a's group should come before b's group.
+            return -1;
+        } else if (a.group > b.group) {
+            // a's group should come after b's group.
+            return 1;
+        } else {
+            // The groups are the same.
+            // Compare values.
+            if (a.value < b.value) {
+                // a should come before b.
+                return -1;
+            } else if (a.value > b.value) {
+                // a should come after b.
+                return 1;
+            } else {
+                // The values are the same.
+                // The order does not matter.
+                return 0;
+            }
+        }
+    });
 }
