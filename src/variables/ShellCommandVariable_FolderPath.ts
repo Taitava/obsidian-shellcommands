@@ -48,6 +48,7 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
 
     public static getAutocompleteItems() {
         return [
+            // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
                 help_text: "Gives path to the current file's parent folder, absolute from the root of the file system.",
@@ -55,6 +56,18 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
+                help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault.",
+                group: "Variables",
+            },
+
+            // Unescaped variables
+            <IAutocompleteItem>{
+                value: "{{!" + this.variable_name + ":absolute}}",
+                help_text: "Gives path to the current file's parent folder, absolute from the root of the file system.",
+                group: "Variables",
+            },
+            <IAutocompleteItem>{
+                value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault.",
                 group: "Variables",
             },

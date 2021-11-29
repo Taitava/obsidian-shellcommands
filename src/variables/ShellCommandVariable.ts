@@ -179,11 +179,21 @@ export abstract class ShellCommandVariable {
         }
 
         return [
+            // Normal variable
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + parameter_indicator + "}}",
                 help_text: this.help_text,
                 group: "Variables",
-            }
+                type: "normal-variable",
+            },
+
+            // Unescaped version of the variable
+            <IAutocompleteItem>{
+                value: "{{!" + this.variable_name + parameter_indicator + "}}",
+                help_text: this.help_text,
+                group: "Variables",
+                type: "unescaped-variable",
+            },
         ];
     }
 }

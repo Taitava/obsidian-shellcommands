@@ -18,14 +18,14 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             // Get the so far typed text - exclude everything that is on the right side of the caret.
             let caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
-            const typed_word = get_typed_word(typed_text);
+            const search_query = get_search_query(typed_text);
 
-            if ("" === typed_word) {
+            if ("" === search_query.search_text) {
                 // No suggestions for empty word.
                 update([]);
             } else {
                 // The word is not empty, so can suggest something.
-                let matched_items = autocomplete_items.filter(item => item_match(item, typed_word));
+                let matched_items = autocomplete_items.filter(item => item_match(item, search_query));
                 matched_items = matched_items.slice(0, max_suggestions); // Limit to a reasonable amount of suggestions.
                 update(matched_items);
             }
@@ -37,7 +37,8 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             let supplement = item.value;
             let caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
-            const typed_word = get_typed_word(typed_text);
+            const search_query = get_search_query(typed_text);
+            const search_text = search_query.search_text;
 
             // Special case: Check if }} happens to appear after the caret
             const after_caret = input_element.value.slice(caret_position, caret_position + 2);
@@ -48,13 +49,13 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             }
 
             // Replace the input, but try to save part of the beginning, in case it seems like not being part of the search query.
-            let replace_start = find_starting_position(typed_word, supplement); // The length difference of typed_text and typed_word will be added here below.
+            let replace_start = find_starting_position(search_text, supplement); // The length difference of typed_text and search_text will be added here below.
             if (false === replace_start) {
                 // This should never happen, but if it does, do not replace anything, just insert.
                 replace_start = caret_position;
             } else {
                 // Adjust the position
-                replace_start += typed_text.length - typed_word.length;
+                replace_start += typed_text.length - search_text.length;
             }
             input_element.setRangeText(supplement, replace_start, caret_position);
 
@@ -85,26 +86,25 @@ export interface IAutocompleteItem {
     help_text: string;
     value: string;
     group: string;
+    type: AutocompleteSearchQueryType;
 }
 
-function item_match(item: IAutocompleteItem, search_string: string): boolean {
+function item_match(item: IAutocompleteItem, search_query: IAutocompleteSearchQuery): boolean {
     const item_value = item.value.toLocaleLowerCase();
-    search_string = search_string.toLocaleLowerCase();
+    const search_text = search_query.search_text.toLocaleLowerCase();
 
-    // Special for {{variables}}: The search query must have an opening {{ pair
-    if (item_value.startsWith("{{")) {
-        // The autocomplete item is a variable
-        // If the search query does not contain {{ too, variables should not be suggested.
-        if (!search_string.contains("{{")) {
-            return false;
-        }
+    // Match query type
+    if (item.type !== search_query.search_type) {
+        // If the query type is different, do not include this item.
+        // This can happen e.g. if {{ is typed, and the item is not a variable, or {{! is typed, and the item is not an unescaped variable.
+        return false;
     }
 
-    // Normal search
+    // Match text
     let search_character: string;
     let search_position = 0;
-    for (let search_character_index = 0; search_character_index < search_string.length; search_character_index++) {
-        search_character = search_string[search_character_index];
+    for (let search_character_index = 0; search_character_index < search_text.length; search_character_index++) {
+        search_character = search_text[search_character_index];
         if (item_value.includes(search_character, search_position)) {
             // This character was found in item_value.
             search_position = item_value.indexOf(search_character, search_position) + 1;
@@ -151,12 +151,30 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
                 return "Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + typeof autocomplete_item_label;
             }
 
+            // Determine a correct type for the item
+            let type: AutocompleteSearchQueryType = "other";
+            if (autocomplete_item_value.startsWith("{{")) {
+                // This is a variable
+                type = "normal-variable";
+            }
+
             // The item is ok, add it to the list
             CustomAutocompleteItems.push({
                 value: autocomplete_item_value,
                 help_text: autocomplete_item_label,
                 group: group_name,
+                type: type,
             });
+
+            if (type === "normal-variable") {
+                // Add an unescaped version of the variable, too
+                CustomAutocompleteItems.push({
+                    value: autocomplete_item_value.replace(/^{{/, "{{!"), // Add an exclamation mark to the variable name.
+                    help_text: autocomplete_item_label,
+                    group: group_name,
+                    type: "unescaped-variable",
+                });
+            }
         });
     });
 
@@ -192,22 +210,39 @@ function merge_and_sort_autocomplete_items(...autocomplete_item_sets: IAutocompl
     });
 }
 
+type AutocompleteSearchQueryType = "other" | "normal-variable" | "unescaped-variable";
+interface IAutocompleteSearchQuery {
+    search_text: string;
+    search_type: AutocompleteSearchQueryType;
+}
+
 /**
  * Reduces an input string to the nearest logical word.
  * @param typed_text
  */
-function get_typed_word(typed_text: string) {
-    // Reduce the text - limit to a single word (= exclude spaces and everything before them).
-    let typed_word = typed_text.match(/\S*?$/)[0];
-    if (typed_word.contains("{{")) {
+function get_search_query(typed_text: string): IAutocompleteSearchQuery {
+    let search_text = typed_text.match(/\S*?$/)[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
+    let search_type: AutocompleteSearchQueryType = "other"; // May be overwritten.
+
+    if (search_text.contains("{{")) {
         // A {{variable}} is being queried.
         // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
-        typed_word = typed_word.replace(/.+{{/, "{{");
+        search_text = search_text.replace(/.+{{/, "{{");
+        if (search_text.contains("{{!")) {
+            // An _unescaped_ variable is searched for.
+            search_type = "unescaped-variable";
+        } else {
+            // A normal variable is searched for.
+            search_type = "normal-variable";
+        }
     }
-    if (typed_word.contains("}}")) {
+    if (search_text.contains("}}")) {
         // The query happens right after a {{variable}}.
         // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
-        typed_word = typed_word.replace(/.+}}/, "");
+        search_text = search_text.replace(/.+}}/, "");
     }
-    return typed_word;
+    return {
+        search_text: search_text,
+        search_type: search_type,
+    };
 }
