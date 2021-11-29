@@ -48,7 +48,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
                 supplement = supplement.replace(/}}$/, ""); // Only removes a trailing }} if there is one.
             }
 
-            // Replace the input, but try to save part of the beginning, in case it seems like not being part of the search query.
+            // Try to save part of the beginning, in case it seems like not being part of the search query.
             let replace_start = find_starting_position(search_text, supplement); // The length difference of typed_text and search_text will be added here below.
             if (false === replace_start) {
                 // This should never happen, but if it does, do not replace anything, just insert.
@@ -57,7 +57,18 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
                 // Adjust the position
                 replace_start += typed_text.length - search_text.length;
             }
-            input_element.setRangeText(supplement, replace_start, caret_position);
+
+            // Choose a method for doing the inserting
+            if (undefined !== document.execCommand) {
+                // execCommand() is deprecated, but available.
+                // Use it to do the insertion, because this way an undo history can be preserved.
+                input_element.setSelectionRange(replace_start, caret_position); // First select the part that will be replaced, because execCommand() does not support defining positions. This adds a cumbersome selection step to the undo history, but at least undoing works.
+                document.execCommand("insertText", false, supplement);
+            } else {
+                // execCommand() is not available anymore.
+                // Use setRangeText() to do the insertion. It will clear undo history, but at least the insertion works.
+                input_element.setRangeText(supplement, replace_start, caret_position);
+            }
 
             // Move the caret to a logical continuation point
             caret_position = replace_start + supplement.length;
