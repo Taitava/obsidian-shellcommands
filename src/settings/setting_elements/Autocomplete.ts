@@ -10,26 +10,6 @@ import {parseYaml} from "obsidian";
 export function createAutocomplete(input_element: HTMLInputElement, autocomplete_items: IAutocompleteItem[], call_on_completion: (field_value: string) => void) {
     autocomplete_items = merge_and_sort_autocomplete_items(autocomplete_items, CustomAutocompleteItems);
 
-    /**
-     * Reduces an input string to the nearest logical word.
-     * @param typed_text
-     */
-    function get_typed_word(typed_text: string) {
-        // Reduce the text - limit to a single word (= exclude spaces and everything before them).
-        let typed_word = typed_text.match(/\S*?$/)[0];
-        if (typed_word.contains("{{")) {
-            // A {{variable}} is being queried.
-            // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
-            typed_word = typed_word.replace(/.+{{/, "{{");
-        }
-        if (typed_word.contains("}}")) {
-            // The query happens right after a {{variable}}.
-            // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
-            typed_word = typed_word.replace(/.+}}/, "");
-        }
-        return typed_word;
-    }
-
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
@@ -210,4 +190,24 @@ function merge_and_sort_autocomplete_items(...autocomplete_item_sets: IAutocompl
             }
         }
     });
+}
+
+/**
+ * Reduces an input string to the nearest logical word.
+ * @param typed_text
+ */
+function get_typed_word(typed_text: string) {
+    // Reduce the text - limit to a single word (= exclude spaces and everything before them).
+    let typed_word = typed_text.match(/\S*?$/)[0];
+    if (typed_word.contains("{{")) {
+        // A {{variable}} is being queried.
+        // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
+        typed_word = typed_word.replace(/.+{{/, "{{");
+    }
+    if (typed_word.contains("}}")) {
+        // The query happens right after a {{variable}}.
+        // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
+        typed_word = typed_word.replace(/.+}}/, "");
+    }
+    return typed_word;
 }
