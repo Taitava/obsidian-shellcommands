@@ -6,7 +6,7 @@ import {createShellSelectionField} from "./setting_elements/CreateShellSelection
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
-import {DocumentationMainLink, DocumentationVariablesLink, GitHubLink} from "../Documentation";
+import {ChangelogLink, DocumentationMainLink, DocumentationVariablesLink, GitHubLink} from "../Documentation";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -47,10 +47,11 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             },
         });
 
-        // Documentation link & GitHub link
+        // Documentation link & GitHub links
         containerEl.createEl("p").insertAdjacentHTML("beforeend",
             "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
-            "<a href=\"" + GitHubLink + "\">SC on GitHub</a>",
+            "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
+            "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
