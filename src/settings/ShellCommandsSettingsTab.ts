@@ -11,6 +11,7 @@ import {
     DocumentationMainLink,
     DocumentationVariablesLink,
     GitHubLink,
+    ChangelogLink,
 } from "../Documentation";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
@@ -59,10 +60,11 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             },
         });
 
-        // Documentation link & GitHub link
+        // Documentation link & GitHub links
         containerEl.createEl("p").insertAdjacentHTML("beforeend",
             "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
-            "<a href=\"" + GitHubLink + "\">SC on GitHub</a>",
+            "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
+            "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:

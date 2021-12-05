@@ -376,7 +376,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// Compare the version number
 			/** Note that the plugin version may be different than what will be used in the version comparison. The plugin version will be displayed in possible error messages. */
-			const plugin_version = this.manifest.version;
+			const plugin_version = this.getPluginVersion();
 			const version_comparison = versionCompare(ShellCommandsPlugin.SettingsVersion, current_settings_version);
 			if (version_comparison === 0) {
 				// The versions are equal.
@@ -392,6 +392,10 @@ export default class ShellCommandsPlugin extends Plugin {
 			}
 
 		}
+	}
+
+	public getPluginVersion() {
+		return this.manifest.version;
 	}
 
 	async loadSettings() {
