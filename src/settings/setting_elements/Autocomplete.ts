@@ -90,6 +90,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
         className: "SC-autocomplete", // The component always has a class 'autocomplete', but add 'SC-autocomplete' so that SC's CSS can target 'SC-autocomplete', so it will not mess up stuff if Obsidian happens to have an element with class 'autocomplete'.
+        keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ] // Defined just to prevent ignoring left and right keys.
     });
 }
 

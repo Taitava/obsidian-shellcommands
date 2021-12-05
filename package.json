@@ -15,12 +15,11 @@
     "@rollup/plugin-node-resolve": "^11.2.1",
     "@rollup/plugin-typescript": "^8.2.1",
     "@types/node": "^14.14.37",
+    "autocompleter": "https://github.com/kraaden/autocomplete/tarball/master/1590fe09d347f7b6cb1466add5d8e5652bf9d1fb",
     "obsidian": "^0.12.11",
     "rollup": "^2.32.1",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4"
   },
-  "dependencies": {
-    "autocompleter": "^6.1.2"
-  }
+  "dependencies": {}
 }
