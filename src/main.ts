@@ -43,7 +43,13 @@ export default class ShellCommandsPlugin extends Plugin {
 	async onload() {
 		debugLog('loading plugin');
 
-		await this.loadSettings();
+		// Load settings
+		if (!await this.loadSettings()) {
+			// Loading the settings has failed due to an unsupported settings file version.
+			// The plugin should not be used, and it has actually disabled itself, but the code execution needs to be
+			// stopped manually.
+			return;
+		}
 
 		// Run possible configuration migrations
 		await RunMigrations(this);
@@ -384,7 +390,9 @@ export default class ShellCommandsPlugin extends Plugin {
 			new Notice("SHELL COMMANDS PLUGIN HAS DISABLED ITSELF in order to prevent misinterpreting settings / corrupting the settings file!", 120*1000);
 			new Notice(version_support as string, 120*1000);
 			await this.disablePlugin();
+			return false; // The plugin should not be used.
 		}
+		return true; // Settings are loaded and the plugin can be used.
 	}
 
 	async saveSettings() {
