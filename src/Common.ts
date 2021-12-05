@@ -78,6 +78,15 @@ export function cloneObject(object: Object) {
 }
 
 /**
+ * Merges two or more objects together. If they have same property names, former objects' properties get overwritten by later objects' properties.
+ *
+ * @param objects
+ */
+export function combineObjects(...objects: Object[]) {
+    return Object.assign({}, ...objects);
+}
+
+/**
  * Same as normalizePath(), but fixes these glitches:
  * - Leading forward slashes / backward slashes should not be removed.
  * - \ should not be converted to / if platform is Windows. In other words, / should be converted to \ if platform is Windows.
