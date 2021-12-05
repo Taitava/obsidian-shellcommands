@@ -16,6 +16,9 @@ Features that are in development, but are not released yet. Does not include stu
 - [Support ignoring error code 0 (#107)](https://github.com/Taitava/obsidian-shellcommands/issues/107)
 - [Internal: Save new main settings fields to file already during loading (#111)](https://github.com/Taitava/obsidian-shellcommands/issues/111).
 
+### To be Fixed
+- [Fixed: When an incompatible settings file is encountered, the plugin is unable to disable itself (#113)](https://github.com/Taitava/obsidian-shellcommands/issues/113).
+
 ## [0.7.0] - 2021-11-25
 
 **VERSION 0.7.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES, see below.**
