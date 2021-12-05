@@ -8,7 +8,7 @@ You can customise your commands with built-in variables that can provide the cur
 
 [A changelog is available in a separate file.](https://github.com/Taitava/obsidian-shellcommands/blob/main/CHANGELOG.md)
 
-**WARNING:** Be careful with system commands! Only use commands that you know and trust. If you are copy pasting commands from the internet or from files written by other people, you need to understand precisely what those commands do! Otherwise, you might lose your files, or screw up your system!
+**WARNING:** Be careful with system commands! Only use commands that you know and trust. If you are copying and pasting commands from the internet or from files written by other people, you need to understand precisely what those commands do! Otherwise, you might lose your files, or screw up your system!
 
 **The plugin is still in its early development stage.** And its developer is not yet very experienced in creating solid testing patterns to find out possible problems. Use at your own risk, and note that when you upgrade the plugin, things may break.
 
@@ -55,7 +55,7 @@ Not a single plugin can be great just by itself. And not a single plugin suits e
 - **[cMenu](https://github.com/chetachiezikeuzor/cMenu-Plugin)**: When you select text, this plugin opens a small modal of buttons for text formatting and other actions. You can add shell commands to the mix!
 - **[Customizable Sidebar](https://github.com/phibr0/obsidian-customizable-sidebar)**: Allows you to add new left side menu icons that fire what ever Obsidian command you want - including shell commands!
 - **[QuickAdd](https://github.com/chhoumann/quickadd)**: You can create macros that launch multiple commands at once. Sure, in *Shell commands*, you can have multiple terminal commands executed one after another (with `&&` operator for Linux and Mac, and `&` operator for Windows), but *QuickAdd* allows you to have macros that combine shell commands to other Obsidian commands.
-- **[Text Expander](https://github.com/konodyuk/obsidian-text-expander)**: If you want to write codeblocks in your markdown note files and execute them, then *Text Expander* is the solution for you. *Shell commands* focuses on bringing short, rarely changed terminal commands at your finger tips via hotkeys. You can run longer scripts with *Shell commands* too by writing them into a bash/batch file and executing that file as a command, but if you need to view the script before executing it, or make changes regularly, then *Shell commands* is not so optimal for your situation, and you might benefit more from *Text Expander*. But of course, you can also have both if you like.
+- **[Text Expander](https://github.com/konodyuk/obsidian-text-expander)**: If you want to write codeblocks in your markdown note files and execute them, then *Text Expander* is the solution for you. *Shell commands* focuses on bringing short, rarely changed terminal commands at your fingertips via hotkeys. You can run longer scripts with *Shell commands* too by writing them into a bash/batch file and executing that file as a command, but if you need to view the script before executing it, or make changes regularly, then *Shell commands* is not so optimal for your situation, and you might benefit more from *Text Expander*. But of course, you can also have both if you like.
 
 (Thanks [FelipeRearden](https://github.com/FelipeRearden) for telling me about many of these plugins!)
 
@@ -78,7 +78,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 | SC 0.1.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | macOS: 11.5.2<br>Obsidian: 0.12.5<br>Works, tested by [skipadu](https://github.com/skipadu), thank you! 🙂 |
 | SC 0.0.0 | Obsidian 0.12.12<br>Works | Obsidian 0.12.12<br>Works | |
 
-As I do not own a Mac, tests on Mac are performed by other people, and I cannot quarantee that every version will be tested on Mac. That's the reason why Mac might not appear on every row in the above table. If you notice that a newest SC version does not have a Mac test record in the table, you can help by [performing a Mac test yourself and submitting your freeform test result here](https://github.com/Taitava/obsidian-shellcommands/issues/1).
+As I do not own a Mac, tests on Mac are performed by other people, and I cannot guarantee that every version will be tested on Mac. That's the reason why Mac might not appear on every row in the above table. If you notice that the newest SC version does not have a Mac test record in the table, you can help by [performing a Mac test yourself and submitting your freeform test result here](https://github.com/Taitava/obsidian-shellcommands/issues/1).
 
 ## Ask for help
 
