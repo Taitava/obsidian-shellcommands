@@ -3,7 +3,7 @@ import ShellCommandsPlugin from "../../main";
 import {TShellCommand} from "../../TShellCommand";
 import {PlatformId, PlatformNames} from "../ShellCommandsPluginSettings";
 
-export function createPlatformSpecificShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, t_shell_command: TShellCommand, platform_id: PlatformId) {
+export function createPlatformSpecificShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, t_shell_command: TShellCommand, platform_id: PlatformId, show_autocomplete_menu: boolean) {
     const platform_name = PlatformNames[platform_id];
     const setting_group = CreateShellCommandFieldCore(
         plugin,
@@ -11,6 +11,7 @@ export function createPlatformSpecificShellCommandField(plugin: ShellCommandsPlu
         "Shell command on " + platform_name,
         t_shell_command.getPlatformSpecificShellCommands()[platform_id] ?? "",
         t_shell_command.getShell(),
+        show_autocomplete_menu,
         async (shell_command: string) => {
             if (shell_command.length) {
                 // shell_command is not empty, so it's a normal command.

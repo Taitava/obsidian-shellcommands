@@ -13,9 +13,9 @@ export interface ShellCommandsPluginSettings {
      */
     debug: boolean;
 
-    // Shell commands:
-    shell_commands: ShellCommandsConfiguration;
+    // Variables:
     preview_variables_in_command_palette: boolean;
+    show_autocomplete_menu: boolean;
 
     // Operating systems & shells:
     working_directory: string;
@@ -25,6 +25,9 @@ export interface ShellCommandsPluginSettings {
     error_message_duration: number;
     notification_message_duration: number;
     output_channel_clipboard_also_outputs_to_notification: boolean;
+
+    // Shell commands:
+    shell_commands: ShellCommandsConfiguration;
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -37,9 +40,9 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     settings_version: "prior-to-0.7.0", // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
     debug: false,
 
-    // Shell commands:
-    shell_commands: {},
+    // Variables:
     preview_variables_in_command_palette: true,
+    show_autocomplete_menu: true,
 
     // Operating systems and shells:
     working_directory: "",
@@ -49,6 +52,9 @@ export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
     error_message_duration: 20,
     notification_message_duration: 10,
     output_channel_clipboard_also_outputs_to_notification: true,
+
+    // Shell commands:
+    shell_commands: {},
 }
 
 /**

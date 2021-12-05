@@ -1,18 +1,7 @@
 import {ShellCommandVariable} from "./ShellCommandVariable";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
-import {ShellCommandVariable_Selection} from "./ShellCommandVariable_Selection";
-import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
-import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
-import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
-import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
-import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
-import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
-import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
-import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
-import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
-import {DEBUG_ON, debugLog} from "../Debug";
-import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
+import {debugLog} from "../Debug";
+import {getVariables} from "./VariableLists";
 
 /**
  * @param plugin
@@ -20,29 +9,11 @@ import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrou
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
 export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string): string | string[] {
-    let shell_variables: ShellCommandVariable[] = [
-        new ShellCommandVariable_Clipboard(plugin, shell),
-        new ShellCommandVariable_Date(plugin, shell),
-        new ShellCommandVariable_FileName(plugin, shell),
-        new ShellCommandVariable_FilePath(plugin, shell),
-        new ShellCommandVariable_FolderName(plugin, shell),
-        new ShellCommandVariable_FolderPath(plugin, shell),
-        new ShellCommandVariable_Selection(plugin, shell),
-        new ShellCommandVariable_Tags(plugin, shell),
-        new ShellCommandVariable_Title(plugin, shell),
-        new ShellCommandVariable_VaultPath(plugin, shell),
-        new ShellCommandVariable_Workspace(plugin, shell),
-    ];
-    if (DEBUG_ON) {
-        // Variables that are only designed for 'Shell commands test suite'.
-        shell_variables.push(
-            new ShellCommandVariable_Passthrough(plugin, shell),
-        );
-    }
+    const variables = getVariables(plugin, shell);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
-    for (let variable_index in shell_variables)
+    for (let variable_index in variables)
     {
-        let variable: ShellCommandVariable = shell_variables[variable_index];
+        let variable: ShellCommandVariable = variables[variable_index];
         let pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
         let _arguments: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.

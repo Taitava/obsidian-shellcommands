@@ -179,7 +179,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Platform specific shell commands
         let platform_id: PlatformId;
         for (platform_id in PlatformNames) {
-            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id);
+            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
         }
 
         // Platform specific shell selection
