@@ -318,8 +318,21 @@ export default class ShellCommandsPlugin extends Plugin {
 						handleShellCommandOutput(this, t_shell_command, stdout, stderr, error.code);
 					}
 				} else {
-					// No errors
-					debugLog("Command executed without errors.")
+					// Probably no errors, but do one more check.
+
+					// Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+					if (stderr.length > 0) {
+						// Check a special case: should error code 0 be ignored?
+						if (t_shell_command.getIgnoreErrorCodes().contains(0)) {
+							// Exit code 0 is on the ignore list, so suppress stderr output.
+							stderr = "";
+							debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+						} else {
+							debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+						}
+					} else {
+						debugLog("Shell command executed: No errors.");
+					}
 
 					// Handle output
 					handleShellCommandOutput(this, t_shell_command, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
