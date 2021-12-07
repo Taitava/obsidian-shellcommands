@@ -1,5 +1,6 @@
 // SETTINGS AND DEFAULT VALUES
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
+import ShellCommandsPlugin from "../main";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -34,27 +35,31 @@ export interface ShellCommandsPluginSettings {
     commands?: string[];
 }
 
-export const DEFAULT_SETTINGS: ShellCommandsPluginSettings = {
+export function getDefaultSettings(is_new_installation: boolean): ShellCommandsPluginSettings {
+    return {
+        // Common:
+        settings_version: is_new_installation
+            ? ShellCommandsPlugin.SettingsVersion // For new installations, a specific settings version number can be used, as migrations do not need to be taken into account.
+            : "prior-to-0.7.0"  // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
+        ,
+        debug: false,
 
-    // Common:
-    settings_version: "prior-to-0.7.0", // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
-    debug: false,
+        // Variables:
+        preview_variables_in_command_palette: true,
+        show_autocomplete_menu: true,
 
-    // Variables:
-    preview_variables_in_command_palette: true,
-    show_autocomplete_menu: true,
+        // Operating systems and shells:
+        working_directory: "",
+        default_shells: {},
 
-    // Operating systems and shells:
-    working_directory: "",
-    default_shells: {},
+        // Output:
+        error_message_duration: 20,
+        notification_message_duration: 10,
+        output_channel_clipboard_also_outputs_to_notification: true,
 
-    // Output:
-    error_message_duration: 20,
-    notification_message_duration: 10,
-    output_channel_clipboard_also_outputs_to_notification: true,
-
-    // Shell commands:
-    shell_commands: {},
+        // Shell commands:
+        shell_commands: {},
+    }
 }
 
 /**

@@ -7,7 +7,11 @@ import {
 	newShellCommandConfiguration,
 	ShellCommandsConfiguration
 } from "./settings/ShellCommandConfiguration";
-import {DEFAULT_SETTINGS, SettingsVersionString, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
+import {
+	getDefaultSettings,
+	SettingsVersionString,
+	ShellCommandsPluginSettings,
+} from "./settings/ShellCommandsPluginSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
@@ -399,8 +403,20 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	async loadSettings() {
+
+		// Try to read a settings file
+		let all_settings: ShellCommandsPluginSettings;
 		this.settings = await this.loadData(); // May have missing main settings fields, if the settings file is from an older version of SC. It will be migrated later.
-		const all_settings = combineObjects( DEFAULT_SETTINGS, this.settings); // This temporary settings object always has all fields defined (except sub fields, such as shell command specific fields, may still be missing, but they are not needed this early). This is used so that it's certain that the fields 'debug' and 'settings_version' exist.
+		if (null === this.settings) {
+			// The settings file does not exist.
+			// Use default settings
+			this.settings = getDefaultSettings(true);
+			all_settings = this.settings;
+		} else {
+			// Succeeded to load a settings file.
+			// In case the settings file does not have 'debug' or 'settings_version' fields, create them.
+			all_settings = combineObjects(getDefaultSettings(false), this.settings); // This temporary settings object always has all fields defined (except sub fields, such as shell command specific fields, may still be missing, but they are not needed this early). This is used so that it's certain that the fields 'debug' and 'settings_version' exist.
+		}
 
 		// Update debug status - before this line debugging is always OFF!
 		setDEBUG_ON(all_settings.debug);

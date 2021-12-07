@@ -4,7 +4,7 @@ import {debugLog} from "./Debug";
 import * as fs from "fs";
 import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
-import {DEFAULT_SETTINGS} from "./settings/ShellCommandsPluginSettings";
+import {getDefaultSettings} from "./settings/ShellCommandsPluginSettings";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
@@ -108,12 +108,13 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
 function EnsureMainFieldsExist(plugin: ShellCommandsPlugin) {
     let has_missing_fields = false;
     let settings = plugin.settings;
-    for (let property_name in DEFAULT_SETTINGS) {
+    const default_settings = getDefaultSettings(false);
+    for (let property_name in default_settings) {
         // @ts-ignore
         if (undefined === settings[property_name]) {
             // The settings object does not have this property.
             // @ts-ignore property_default_value can have (almost) whatever datatype
-            const property_default_value = DEFAULT_SETTINGS[property_name];
+            const property_default_value = default_settings[property_name];
             debugLog("EnsureMainFieldsExist(): Main settings does not have property '" + property_name + "'. Will later create the property and assign a default value '" + property_default_value + "'.");
             has_missing_fields = true;
         }
@@ -121,7 +122,7 @@ function EnsureMainFieldsExist(plugin: ShellCommandsPlugin) {
 
     if (has_missing_fields) {
         debugLog("EnsureMainFieldsExist(): Doing the above-mentioned new field creations...");
-        plugin.settings = combineObjects(DEFAULT_SETTINGS, plugin.settings);
+        plugin.settings = combineObjects(default_settings, plugin.settings);
         debugLog("EnsureMainFieldsExist(): Done.");
         return true; // Save the changes
     }
