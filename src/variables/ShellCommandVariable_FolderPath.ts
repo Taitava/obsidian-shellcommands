@@ -53,11 +53,13 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                 value: "{{" + this.variable_name + ":absolute}}",
                 help_text: "Gives path to the current file's parent folder, absolute from the root of the file system.",
                 group: "Variables",
+                type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault.",
                 group: "Variables",
+                type: "normal-variable",
             },
 
             // Unescaped variables
@@ -65,11 +67,13 @@ export class ShellCommandVariable_FolderPath extends ShellCommandVariable{
                 value: "{{!" + this.variable_name + ":absolute}}",
                 help_text: "Gives path to the current file's parent folder, absolute from the root of the file system.",
                 group: "Variables",
+                type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault.",
                 group: "Variables",
+                type: "unescaped-variable",
             },
         ];
     }
