@@ -92,6 +92,9 @@ Ideas, issues, feedback, pull requests etc. are all welcome! :)
 
 ## Author
 
+For all authors, see [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md).
+
+### Developer
 Jarkko Linnanvirta
 
 Contact:
