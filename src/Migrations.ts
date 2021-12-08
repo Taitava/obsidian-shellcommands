@@ -11,7 +11,7 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
         EnsureMainFieldsExist(plugin), // Do this early.
         MigrateCommandsToShellCommands(plugin),
         MigrateShellCommandToPlatforms(plugin),
-        EnsureShellCommandsHaveAllFields(plugin), // TODO: Also create a function that saves the settings file if the _root settings_ lack some fields. Currently the saving is only done after user changes settings, which then bypasses backup creation.
+        EnsureShellCommandsHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
     ];
     if (should_save.includes(true)) {
