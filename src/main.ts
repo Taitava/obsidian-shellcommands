@@ -1,13 +1,17 @@
 import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException, ExecOptions} from "child_process";
-import {getOperatingSystem, getVaultAbsolutePath} from "./Common";
+import {combineObjects, getOperatingSystem, getPluginAbsolutePath, getVaultAbsolutePath} from "./Common";
 import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
 import {
 	newShellCommandConfiguration,
 	ShellCommandsConfiguration
 } from "./settings/ShellCommandConfiguration";
-import {DEFAULT_SETTINGS, SettingsVersionString, ShellCommandsPluginSettings} from "./settings/ShellCommandsPluginSettings";
+import {
+	getDefaultSettings,
+	SettingsVersionString,
+	ShellCommandsPluginSettings,
+} from "./settings/ShellCommandsPluginSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
@@ -20,13 +24,14 @@ import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {TShellCommandTemporary} from "./TShellCommandTemporary";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
+import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
 
 export default class ShellCommandsPlugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.7.0";
+	public static SettingsVersion: SettingsVersionString = "0.8.0";
 
 	settings: ShellCommandsPluginSettings;
 	obsidian_commands: ObsidianCommandsContainer = {};
@@ -63,6 +68,9 @@ export default class ShellCommandsPlugin extends Plugin {
 			let t_shell_command = shell_commands[shell_command_id];
 			this.registerShellCommand(t_shell_command);
 		}
+
+		// Load a custom autocomplete list if it exists.
+		this.loadCustomAutocompleteList();
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
 	}
@@ -318,8 +326,21 @@ export default class ShellCommandsPlugin extends Plugin {
 						handleShellCommandOutput(this, t_shell_command, stdout, stderr, error.code);
 					}
 				} else {
-					// No errors
-					debugLog("Command executed without errors.")
+					// Probably no errors, but do one more check.
+
+					// Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+					if (stderr.length > 0) {
+						// Check a special case: should error code 0 be ignored?
+						if (t_shell_command.getIgnoreErrorCodes().contains(0)) {
+							// Exit code 0 is on the ignore list, so suppress stderr output.
+							stderr = "";
+							debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+						} else {
+							debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+						}
+					} else {
+						debugLog("Shell command executed: No errors.");
+					}
 
 					// Handle output
 					handleShellCommandOutput(this, t_shell_command, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
@@ -359,7 +380,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// Compare the version number
 			/** Note that the plugin version may be different than what will be used in the version comparison. The plugin version will be displayed in possible error messages. */
-			const plugin_version = this.manifest.version;
+			const plugin_version = this.getPluginVersion();
 			const version_comparison = versionCompare(ShellCommandsPlugin.SettingsVersion, current_settings_version);
 			if (version_comparison === 0) {
 				// The versions are equal.
@@ -377,14 +398,31 @@ export default class ShellCommandsPlugin extends Plugin {
 		}
 	}
 
+	public getPluginVersion() {
+		return this.manifest.version;
+	}
+
 	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+
+		// Try to read a settings file
+		let all_settings: ShellCommandsPluginSettings;
+		this.settings = await this.loadData(); // May have missing main settings fields, if the settings file is from an older version of SC. It will be migrated later.
+		if (null === this.settings) {
+			// The settings file does not exist.
+			// Use default settings
+			this.settings = getDefaultSettings(true);
+			all_settings = this.settings;
+		} else {
+			// Succeeded to load a settings file.
+			// In case the settings file does not have 'debug' or 'settings_version' fields, create them.
+			all_settings = combineObjects(getDefaultSettings(false), this.settings); // This temporary settings object always has all fields defined (except sub fields, such as shell command specific fields, may still be missing, but they are not needed this early). This is used so that it's certain that the fields 'debug' and 'settings_version' exist.
+		}
 
 		// Update debug status - before this line debugging is always OFF!
-		setDEBUG_ON(this.settings.debug);
+		setDEBUG_ON(all_settings.debug);
 
 		// Ensure that the loaded settings file is supported.
-		const version_support = this.isSettingsVersionSupported(this.settings.settings_version);
+		const version_support = this.isSettingsVersionSupported(all_settings.settings_version);
 		if (typeof version_support === "string") {
 			// The settings version is not supported.
 			new Notice("SHELL COMMANDS PLUGIN HAS DISABLED ITSELF in order to prevent misinterpreting settings / corrupting the settings file!", 120*1000);
@@ -401,6 +439,28 @@ export default class ShellCommandsPlugin extends Plugin {
 
 		// Write settings
 		await this.saveData(this.settings);
+	}
+
+	private loadCustomAutocompleteList() {
+		const custom_autocomplete_file_name = "autocomplete.yaml";
+		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this), custom_autocomplete_file_name);
+
+		if (fs.existsSync(custom_autocomplete_file_path)) {
+			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
+			const custom_autocomplete_content = fs.readFileSync(custom_autocomplete_file_path).toLocaleString();
+			const result = addCustomAutocompleteItems(custom_autocomplete_content)
+			if (true === result) {
+				// OK
+				debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " loaded.");
+			} else {
+				// An error has occurred.
+				debugLog("loadCustomAutocompleteList(): " + result);
+				this.newError("Shell commands: Unable to parse " + custom_autocomplete_file_name + ": " + result);
+			}
+		} else {
+			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " does not exists, so won't load it. This is perfectly ok.");
+		}
+
 	}
 
 	private async disablePlugin() {

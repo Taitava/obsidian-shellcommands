@@ -2,6 +2,8 @@ import ShellCommandsPlugin from "../../main";
 import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
+import {createAutocomplete} from "./Autocomplete";
+import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export function CreateShellCommandFieldCore(
     plugin: ShellCommandsPlugin,
@@ -9,10 +11,22 @@ export function CreateShellCommandFieldCore(
     setting_name: string,
     shell_command: string,
     shell: string,
-    on_change: (shell_command: string) => void,
+    show_autocomplete_menu: boolean,
+    extra_on_change: (shell_command: string) => void,
     shell_command_placeholder: string = "Enter your command"
     ) {
-    let setting_group: ShellCommandSettingGroup = {
+
+    let setting_group: ShellCommandSettingGroup;
+
+    function on_change(shell_command: string) {
+        // Update preview
+        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell));
+
+        // Let the caller extend this onChange, to preform saving the settings:
+        extra_on_change(shell_command);
+    }
+
+    setting_group = {
         name_setting:
             new Setting(container_element)
                 .setName(setting_name)
@@ -23,13 +37,7 @@ export function CreateShellCommandFieldCore(
                 .addText(text => text
                     .setPlaceholder(shell_command_placeholder)
                     .setValue(shell_command)
-                    .onChange((shell_command) => {
-                        // Update preview
-                        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell));
-
-                        // Let the caller extend this onChange, to preform saving the settings:
-                        on_change(shell_command);
-                    })
+                    .onChange(on_change)
                 )
                 .setClass("shell-commands-shell-command-setting")
         ,
@@ -39,6 +47,14 @@ export function CreateShellCommandFieldCore(
                 .setClass("shell-commands-preview-setting")
         ,
     };
+
+    // Autocomplete menu
+    if (show_autocomplete_menu) {
+        // @ts-ignore
+        const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
+        createAutocomplete(input_element, getVariableAutocompleteItems(), on_change);
+    }
+
     return setting_group;
 }
 

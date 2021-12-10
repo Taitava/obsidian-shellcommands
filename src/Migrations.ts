@@ -2,14 +2,16 @@ import ShellCommandsPlugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import {debugLog} from "./Debug";
 import * as fs from "fs";
-import {getPluginAbsolutePath} from "./Common";
+import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
+import {getDefaultSettings} from "./settings/ShellCommandsPluginSettings";
 
 export async function RunMigrations(plugin: ShellCommandsPlugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
+        EnsureMainFieldsExist(plugin), // Do this early.
         MigrateCommandsToShellCommands(plugin),
         MigrateShellCommandToPlatforms(plugin),
-        EnsureShellCommandsHaveAllFields(plugin), // TODO: Also create a function that saves the settings file if the _root settings_ lack some fields. Currently the saving is only done after user changes settings, which then bypasses backup creation.
+        EnsureShellCommandsHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
     ];
     if (should_save.includes(true)) {
@@ -95,6 +97,38 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
         }
     }
     return save;
+}
+
+/**
+ * This is a general migrator that adds new, missing properties to the main settings object. This is not tied to any specific version update, unlike MigrateCommandsToShellCommands().
+ *
+ * @param plugin
+ * @constructor
+ */
+function EnsureMainFieldsExist(plugin: ShellCommandsPlugin) {
+    let has_missing_fields = false;
+    let settings = plugin.settings;
+    const default_settings = getDefaultSettings(false);
+    for (let property_name in default_settings) {
+        // @ts-ignore
+        if (undefined === settings[property_name]) {
+            // The settings object does not have this property.
+            // @ts-ignore property_default_value can have (almost) whatever datatype
+            const property_default_value = default_settings[property_name];
+            debugLog("EnsureMainFieldsExist(): Main settings does not have property '" + property_name + "'. Will later create the property and assign a default value '" + property_default_value + "'.");
+            has_missing_fields = true;
+        }
+    }
+
+    if (has_missing_fields) {
+        debugLog("EnsureMainFieldsExist(): Doing the above-mentioned new field creations...");
+        plugin.settings = combineObjects(default_settings, plugin.settings);
+        debugLog("EnsureMainFieldsExist(): Done.");
+        return true; // Save the changes
+    }
+
+    debugLog("EnsureMainFieldsExist(): No new fields to create, all ok.");
+    return false; // Nothing to save.
 }
 
 /**

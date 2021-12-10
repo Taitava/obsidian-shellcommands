@@ -2,7 +2,9 @@ import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstruc
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Workspace extends ShellCommandVariable{
-    name = "workspace";
+    static variable_name = "workspace";
+    static help_text = "Gives the current workspace's name, if the Workspaces core plugin is enabled.";
+
     generateValue(): string {
 
         // Idea how to access the workspaces plugin is copied 2021-09-15 from https://github.com/Vinzent03/obsidian-advanced-uri/blob/f7ef80d5252481242e69496208e925874209f4aa/main.ts#L168-L179
@@ -29,5 +31,5 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{workspace}}",
-    "Gives the current workspace's name, if the Workspaces core plugin is enabled.",
+    ShellCommandVariable_Workspace.help_text,
 );

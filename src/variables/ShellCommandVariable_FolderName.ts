@@ -2,7 +2,9 @@ import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstruc
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FolderName extends ShellCommandVariable{
-    name = "folder_name";
+    static variable_name = "folder_name";
+    static help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
+
     generateValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
@@ -18,5 +20,5 @@ export class ShellCommandVariable_FolderName extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{folder_name}}",
-    "Gives the current file's parent folder name. No ancestor folders are included.",
+    ShellCommandVariable_FolderName.help_text,
 );

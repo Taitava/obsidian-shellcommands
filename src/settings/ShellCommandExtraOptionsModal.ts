@@ -139,7 +139,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Ignore errors field
         new Setting(container_element)
             .setName("Ignore error codes")
-            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 1. Anything else will be removed.")
+            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 0. Anything else will be removed.")
             .addText(text => text
                 .setValue(this.t_shell_command.getIgnoreErrorCodes().join(","))
                 .onChange(async (value) => {
@@ -150,7 +150,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                         let raw_error_code = raw_error_codes[i];
                         let error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
                         // Ensure that the error code is not NaN, 0 or a negative number.
-                        if (!isNaN(error_code_candidate) && error_code_candidate >= 1) {
+                        if (!isNaN(error_code_candidate) && error_code_candidate >= 0) {
                             // The candidate is legit.
                             ignore_error_codes.push(error_code_candidate);
                         }
@@ -179,7 +179,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Platform specific shell commands
         let platform_id: PlatformId;
         for (platform_id in PlatformNames) {
-            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id);
+            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
         }
 
         // Platform specific shell selection

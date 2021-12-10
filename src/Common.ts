@@ -4,6 +4,8 @@ import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
 import ShellCommandsPlugin from "./main";
+// @ts-ignore
+import {shell} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -76,6 +78,15 @@ export function cloneObject(object: Object) {
 }
 
 /**
+ * Merges two or more objects together. If they have same property names, former objects' properties get overwritten by later objects' properties.
+ *
+ * @param objects
+ */
+export function combineObjects(...objects: Object[]) {
+    return Object.assign({}, ...objects);
+}
+
+/**
  * Same as normalizePath(), but fixes these glitches:
  * - Leading forward slashes / backward slashes should not be removed.
  * - \ should not be converted to / if platform is Windows. In other words, / should be converted to \ if platform is Windows.
@@ -134,4 +145,12 @@ export function joinObjectProperties(object: {}, glue: string) {
  */
 export function uniqueArray(array: any[]) {
     return [...new Set(array)];
+}
+
+/**
+ * Opens a web browser in the specified URL.
+ * @param url
+ */
+export function gotoURL(url: string) {
+    shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }

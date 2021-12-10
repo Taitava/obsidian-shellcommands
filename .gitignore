@@ -12,3 +12,6 @@ main.js
 
 # obsidian (* ignores also backup settings files.)
 data*.json
+
+# Custom
+/autocomplete.yaml
