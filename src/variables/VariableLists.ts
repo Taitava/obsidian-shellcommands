@@ -1,5 +1,6 @@
 import {ShellCommandVariable} from "./ShellCommandVariable";
 import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
+import {ShellCommandVariable_CaretPosition} from "./ShellCommandVariable_CaretPosition";
 import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
 import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
 import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
@@ -17,6 +18,7 @@ import ShellCommandsPlugin from "../main";
 export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
     let shell_command_variables: ShellCommandVariable[] = [
         new ShellCommandVariable_Clipboard(plugin, shell),
+        new ShellCommandVariable_CaretPosition(plugin, shell),
         new ShellCommandVariable_Date(plugin, shell),
         new ShellCommandVariable_FileName(plugin, shell),
         new ShellCommandVariable_FilePath(plugin, shell),
@@ -40,6 +42,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
 export function getVariableClasses() {
     let shell_command_variables = [
         ShellCommandVariable_Clipboard,
+        ShellCommandVariable_CaretPosition,
         ShellCommandVariable_Date,
         ShellCommandVariable_FileName,
         ShellCommandVariable_FilePath,

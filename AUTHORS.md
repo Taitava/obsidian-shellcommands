@@ -11,6 +11,16 @@ Contact:
 
 TODO: Add FelipeRearden, skipadu and vrajur
 
+
+## Vinay Rajur
+ - Contributor
+ - Testing
+ - Documentation
+ - Ideas and Feedback
+
+Contact:
+ - https://github.com/vrajur
+
 <!-- ADDING YOURSELF AS AN AUTHOR:
 
 1. Add a new headline above this comment block: ## Firstname Lastname (or you can use a nick name if you wish).
