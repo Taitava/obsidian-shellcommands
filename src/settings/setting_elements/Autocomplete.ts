@@ -144,10 +144,22 @@ function find_starting_position(typed_text: string, supplement: string) {
 const CustomAutocompleteItems: IAutocompleteItem[] = [];
 
 export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
+
+    // Ensure the content is not empty
+    if (0 === custom_autocomplete_yaml.trim().length) {
+        return "The content is empty.";
+    }
+
     // Try to parse YAML syntax
-    const yaml = parseYaml(custom_autocomplete_yaml);
+    let yaml: any;
+    try {
+        yaml = parseYaml(custom_autocomplete_yaml);
+    } catch (error) {
+        // A syntax error has appeared.
+        return error.message;
+    }
     if (null === yaml || typeof yaml !== "object") {
-        return "Unable to parse the content."
+        return "Unable to parse the content due to unknown reason."
     }
 
     // Iterate autocomplete item groups
