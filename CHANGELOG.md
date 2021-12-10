@@ -7,15 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added (0.9.0)
+### To be Added
 
 - [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119).
 
-### To be Added
+## [0.8.0] - 2021-12-10
+
+### Added
 - [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33): When typing `{{` in a shell command field, a dropdown menu will open up, suggesting variables that match the input after `{{`. Variable help texts are also displayed. Extra: custom suggestions can be defined in an optional `autocomplete.yaml` file in the plugin's folder. It can contain e.g. all commands supported by a certain shell. TODO: Add documentation link here. The autocomplete feature is powered by [kraaden/autocomplete](https://github.com/kraaden/autocomplete).
 - [Show SC version number in settings, and a link to the changelog (#112)](https://github.com/Taitava/obsidian-shellcommands/issues/112).
 
-### To be Changed
+### Changed
 - [Settings: Variables are now located on their own tab (#110)](https://github.com/Taitava/obsidian-shellcommands/issues/110).
 - [Support ignoring error code 0 (#107)](https://github.com/Taitava/obsidian-shellcommands/issues/107)
 - [Internal: Save new main settings fields to file already during loading (#111)](https://github.com/Taitava/obsidian-shellcommands/issues/111).
@@ -159,7 +161,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...HEAD
+[0.8.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...0.7.0
 [0.6.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.0...0.6.1
