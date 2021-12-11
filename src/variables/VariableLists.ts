@@ -2,6 +2,7 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
 import {ShellCommandVariable_CaretPosition} from "./ShellCommandVariable_CaretPosition";
 import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
+import {ShellCommandVariable_FileExtension} from "./ShellCommandVariable_FileExtension";
 import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
 import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
 import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
@@ -22,6 +23,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
         new ShellCommandVariable_Clipboard(plugin, shell),
         new ShellCommandVariable_CaretPosition(plugin, shell),
         new ShellCommandVariable_Date(plugin, shell),
+        new ShellCommandVariable_FileExtension(plugin, shell),
         new ShellCommandVariable_FileName(plugin, shell),
         new ShellCommandVariable_FilePath(plugin, shell),
         new ShellCommandVariable_FolderName(plugin, shell),
@@ -48,6 +50,7 @@ export function getVariableClasses() {
         ShellCommandVariable_Clipboard,
         ShellCommandVariable_CaretPosition,
         ShellCommandVariable_Date,
+        ShellCommandVariable_FileExtension,
         ShellCommandVariable_FileName,
         ShellCommandVariable_FilePath,
         ShellCommandVariable_FolderName,
