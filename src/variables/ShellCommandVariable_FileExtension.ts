@@ -4,7 +4,7 @@ import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
     static variable_name = "file_extension";
-    static help_text = "Gives the current file name's ending. Use {{file_extension:dot}} to also include a preceding dot. If the extension is empty, no dot is added.";
+    static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {
@@ -72,6 +72,6 @@ export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
 
 }
 addShellCommandVariableInstructions(
-    "{{file_extension}} or {{file_extension:dot}}",
+    "{{file_extension:with-dot}} or {{file_extension:no-dot}}",
     ShellCommandVariable_FileExtension.help_text,
 );
