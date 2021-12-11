@@ -29,7 +29,7 @@ export abstract class ShellCommandVariable {
     readonly app: App;
     private error_messages: string[] = [];
     public static readonly variable_name: string;
-    private shell: string;
+    protected shell: string;
     public static readonly help_text: string;
 
     /**
@@ -170,9 +170,14 @@ export abstract class ShellCommandVariable {
     }
 
     public static getAutocompleteItems(): IAutocompleteItem[] {
+
+        // Check if the variable has at least one _mandatory_ parameter.
         let parameters = ""
         let parameter_indicator = "";
-        const parameter_names = Object.getOwnPropertyNames(this.parameters);
+        const parameter_names =
+            Object.getOwnPropertyNames(this.parameters)
+                .filter(parameter_name => this.parameters[parameter_name].required === true) // Only include mandatory parameters
+        ;
         if (parameter_names.length > 0) {
             parameters = this.parameter_separator + parameter_names.join(this.parameter_separator);
             parameter_indicator = this.parameter_separator; // When the variable name ends with a parameter separator character, it indicates to a user that an argument should be supplied.

@@ -1,11 +1,13 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
-import {isWindows} from "../Common";
 import {EOL} from "os";
+import {extractFileName} from "../Common";
 
 export class ShellCommandVariable_Newline extends ShellCommandVariable {
-    name = "newline";
-    protected readonly parameters: IParameters = {
+    static variable_name = "newline";
+    static help_text = "A literal linebreak specific to your operating system. Use an optional :count argument if you want more than one.";
+
+    protected static readonly parameters: IParameters = {
         count: {
             type: "integer",
             required: false,
@@ -16,36 +18,30 @@ export class ShellCommandVariable_Newline extends ShellCommandVariable {
         count: 1,
     }
 
-    getValue(): string {
-        let count = this.arguments.count;
-        if (undefined === count || count < 1) {
-            this.newErrorMessage("Argument 'count' must be at least 1.")
+    generateValue(): string {
+        // Ensure CMD is not used
+        const shell = extractFileName(this.shell.toLowerCase());
+        if ("cmd.exe" === shell) {
+            this.newErrorMessage("Newlines are not supported in CMD. Use e.g. PowerShell instead.");
             return null;
-        } else if (count > 100) {
+        }
+
+        // Ensure count is ok
+        if (this.arguments.count <= 0) {
+            // Incorrect count
+            this.newErrorMessage("Count must be at least 1.");
+            return null;
+        } else if (this.arguments.count > 100) {
             // Too big count can cause the application to go unstable.
             this.newErrorMessage("Argument 'count' cannot be over 100.")
             return null;
-        }
-
-        let newline: string;
-        if (isWindows()) {
-            // Windows
-            // CMD accepts escaping a CR+LF with ^
-            // TODO: When support for PowerShell is added, check which shell is used and use "`n" as a newline when PowerShell is used: https://stackoverflow.com/a/11876921/2754026 (Note that the SO answer says to use quotes around `n, but it works even without them)
-
-            // FIXME: This does not work:
-            // newline = "^" + EOL;
-
-            this.newErrorMessage("This variable does not currently work on Windows.")
-            return null;
         } else {
-            // Linux or Mac
-            newline = "\\n";
+            // Count is ok
+            return EOL.repeat(this.arguments.count); // Note that on Bash, Dash, Zsh etc. the newlines will be changed to \n or \r in ShEscaper class. On PowerShell no replacing will be done.
         }
-        return newline.repeat(count);
     }
 }
 addShellCommandVariableInstructions(
-    "{{newline:count}}",
-    "Gives an OS/shell specific newline marker. Count can be defined to get multiple newlines, or omitted if only one is needed.",
+    "{{newline}} or {{newline:count}}",
+    ShellCommandVariable_Newline.help_text,
 );
