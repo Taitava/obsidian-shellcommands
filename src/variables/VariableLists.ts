@@ -15,6 +15,7 @@ import {DEBUG_ON} from "../Debug";
 import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandVariable_Newline} from "./ShellCommandVariable_Newline";
+import {ShellCommandVariable_YAMLValue} from "./ShellCommandVariable_YAMLValue";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
     let shell_command_variables: ShellCommandVariable[] = [
@@ -31,6 +32,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
         new ShellCommandVariable_Title(plugin, shell),
         new ShellCommandVariable_VaultPath(plugin, shell),
         new ShellCommandVariable_Workspace(plugin, shell),
+        new ShellCommandVariable_YAMLValue(plugin, shell),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
@@ -56,6 +58,7 @@ export function getVariableClasses() {
         ShellCommandVariable_Title,
         ShellCommandVariable_VaultPath,
         ShellCommandVariable_Workspace,
+        ShellCommandVariable_YAMLValue,
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
