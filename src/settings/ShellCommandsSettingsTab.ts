@@ -1,15 +1,23 @@
-import {App, Hotkey, PluginSettingTab, setIcon, Setting} from "obsidian";
+import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
-import {getVaultAbsolutePath} from "../Common";
-import {newShellCommandConfiguration, ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {ShellCommandExtraOptionsModal} from "./ShellCommandExtraOptionsModal";
-import {ShellCommandDeleteModal} from "./ShellCommandDeleteModal";
+import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
-import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
-import {getHotkeysForShellCommand, HotkeyToString} from "../Hotkeys";
+import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
+import {createTabs, TabStructure} from "./setting_elements/Tabs";
+import {debugLog} from "../Debug";
+import {
+    DocumentationAutocompleteLink,
+    DocumentationMainLink,
+    DocumentationVariablesLink,
+    GitHubLink,
+    ChangelogLink,
+} from "../Documentation";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
+
+    private tab_structure: TabStructure;
 
     constructor(app: App, plugin: ShellCommandsPlugin) {
         super(app, plugin);
@@ -21,59 +29,79 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', {text: "Shell commands"});
+        this.tab_structure = createTabs(containerEl, {
+            "main-shell-commands": {
+                title: "Shell commands",
+                icon: "run-command",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabShellCommands(container_element);
+                },
+            },
+            "main-operating-systems-and-shells": {
+                title: "Operating systems & shells",
+                icon: "stacked-levels",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOperatingSystemsAndShells(container_element);
+                },
+            },
+            "main-output": {
+                title: "Output",
+                icon: "lines-of-text",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabOutput(container_element);
+                },
+            },
+            "main-variables": {
+                title: "Variables",
+                icon: "code-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabVariables(container_element);
+                },
+            },
+        });
 
-        // "Working directory" field
-        new Setting(containerEl)
-            .setName("Working directory")
-            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
-            .addText(text => text
-                .setPlaceholder(getVaultAbsolutePath(this.app))
-                .setValue(this.plugin.settings.working_directory)
-                .onChange(async (value) => {
-                    console.log("Changing working_directory to " + value);
-                    this.plugin.settings.working_directory = value;
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
+        // Documentation link & GitHub links
+        containerEl.createEl("p").insertAdjacentHTML("beforeend",
+            "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
+            "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
+            "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
+        );
 
+        // KEEP THIS AFTER CREATING ALL ELEMENTS:
+        this.rememberLastPosition(containerEl);
+    }
+
+    private tabShellCommands(container_element: HTMLElement) {
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
-        let command_fields_container = containerEl.createEl("div");
+        let command_fields_container = container_element.createEl("div");
 
         // Fields for modifying existing commands
-        for (let command_id in this.plugin.getShellCommands()) {
-            this.createCommandField(command_fields_container, command_id);
+        for (let command_id in this.plugin.getTShellCommands()) {
+            createShellCommandField(this.plugin, command_fields_container, command_id, this.plugin.settings.show_autocomplete_menu);
         }
 
         // "New command" button
-        new Setting(containerEl)
+        new Setting(container_element)
             .addButton(button => button
                 .setButtonText("New command")
                 .onClick(async () => {
-                    this.createCommandField(command_fields_container, "new");
-                    console.log("New empty command created.");
+                    createShellCommandField(this.plugin, command_fields_container, "new", this.plugin.settings.show_autocomplete_menu);
+                    debugLog("New empty command created.");
                 })
             )
         ;
+}
 
-        // "Error message duration" field
-        this.createNotificationDurationField(containerEl, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
-
-        // "Notification message duration" field
-        this.createNotificationDurationField(containerEl, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
-
-        // "Variables" section
-        containerEl.createEl("h2", {text: "Variables"});
-
+    private tabVariables(container_element: HTMLElement)
+    {
         // "Preview variables in command palette" field
-        new Setting(containerEl)
+        new Setting(container_element)
             .setName("Preview variables in command palette")
             .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette. A nice way to ensure your commands will use correct values.")
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.preview_variables_in_command_palette)
                 .onChange(async (value: boolean) => {
-                    console.log("Changing preview_variables_in_command_palette to " + value);
+                    debugLog("Changing preview_variables_in_command_palette to " + value);
                     this.plugin.settings.preview_variables_in_command_palette = value;
                     if (!value) {
                         // Variable previewing is turned from on to off.
@@ -87,160 +115,94 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             )
         ;
 
+        // "Show autocomplete menu" field
+        new Setting(container_element)
+            .setName("Show autocomplete menu")
+            .setDesc("If on, a dropdown menu shows up when you begin writing {{variable}} names, showing matching variables and their instructions. Also allows defining custom suggestions in autocomplete.yaml file - see the documentation.")
+            .addToggle(checkbox => checkbox
+                .setValue(this.plugin.settings.show_autocomplete_menu)
+                .onChange(async (value: boolean) => {
+                    debugLog("Changing show_autocomplete_menu to " + value);
+                    this.plugin.settings.show_autocomplete_menu = value;
+                    this.display(); // Re-render the whole settings view to apply the change.
+                    await this.plugin.saveSettings();
+                }),
+            )
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Autocomplete")
+                .onClick(() => {
+                    gotoURL(DocumentationAutocompleteLink)
+                }),
+            )
+        ;
+
         // Variable instructions
+
+        new Setting(container_element)
+            .setName("Variables")
+            .setHeading() // Make the "Variables" text bold.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Variables")
+                .onClick(() => {
+                    gotoURL(DocumentationVariablesLink)
+                }),
+            )
+        ;
+
         getShellCommandVariableInstructions().forEach((instructions) => {
-            let paragraph = containerEl.createEl("p");
+            let paragraph = container_element.createEl("p");
             // @ts-ignore
             paragraph.createEl("strong", {text: instructions.variable_name + " "});
             // @ts-ignore
             paragraph.createEl("span", {text: instructions.instructions});
         });
-        containerEl.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."})
-        containerEl.createEl("p", {text: "There is no way to escape variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."})
-        containerEl.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."})
+        container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."});
+        container_element.createEl("p", {text: "Special characters in variable values are tried to be escaped (except if you use CMD as the shell in Windows). This is to improve security so that a variable won't accidentally cause bad things to happen. If you want to use a raw, unescaped value, add an exclamation mark before the variable's name, e.g. {{!title}}, but be careful, it's dangerous!"});
+        container_element.createEl("p", {text: "There is no way to prevent variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."});
+        container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."});
     }
 
-    /**
-     *
-     * @param container_element
-     * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
-     */
-    createCommandField(container_element: HTMLElement, shell_command_id: string) {
-        let is_new = "new" === shell_command_id;
-        let shell_command_configuration: ShellCommandConfiguration;
-        if (is_new) {
-            // Create an empty command
-            shell_command_id = this.plugin.generateNewShellCommandID();
-            shell_command_configuration = newShellCommandConfiguration();
-            this.plugin.getShellCommands()[shell_command_id] = shell_command_configuration;
+    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
+        // "Working directory" field
+        new Setting(container_element)
+            .setName("Working directory")
+            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
+            .addText(text => text
+                .setPlaceholder(getVaultAbsolutePath(this.app))
+                .setValue(this.plugin.settings.working_directory)
+                .onChange(async (value) => {
+                    debugLog("Changing working_directory to " + value);
+                    this.plugin.settings.working_directory = value;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
 
-            // Register the empty shell command to Obsidian's command palette.
-            // Do it already now, because there are settings (e.g. Alias) that, when changed by the user, will try to modify the Obsidian command. Sometimes users edit these settings before writing the actual command. See issue #46: https://github.com/Taitava/obsidian-shellcommands/issues/46
-            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-        } else {
-            // Use an old shell command
-            shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-        }
-        console.log("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
-        let shell_command: string;
-        if (is_new) {
-            shell_command = "";
-        } else {
-            shell_command = shell_command_configuration.shell_command;
-        }
-        let setting_group: ShellCommandSettingGroup = {
-            name_setting:
-                new Setting(container_element)
-                .setName(this.generateCommandFieldName(shell_command_id, this.plugin.getShellCommands()[shell_command_id]))
-                .addExtraButton(button => button
-                    .setTooltip("Execute now")
-                    .setIcon("run-command")
-                    .onClick(() => {
-                        // Execute the shell command now (for trying it out in the settings)
-                        let shell_command_configuration = this.plugin.getShellCommands()[shell_command_id];
-                        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command_configuration.shell_command);
-                        if (Array.isArray(parsed_shell_command)) {
-                            this.plugin.newErrors(parsed_shell_command);
-                        } else {
-                            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, shell_command_configuration);
-                        }
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip(ShellCommandExtraOptionsModal.OPTIONS_SUMMARY)
-                    .onClick(async () => {
-                        // Open an extra options modal
-                        let modal = new ShellCommandExtraOptionsModal(this.app, this.plugin, shell_command_id, setting_group, this);
-                        modal.open();
-                    })
-                )
-                .addExtraButton(button => button
-                    .setTooltip("Delete this shell command")
-                    .setIcon("trash")
-                    .onClick(async () => {
-                        // Open a delete modal
-                        let modal = new ShellCommandDeleteModal(this.plugin, shell_command_id, setting_group, container_element);
-                        modal.open();
-                    })
-                )
-                .setClass("shell-commands-name-setting")
-            ,
-            shell_command_setting:
-                new Setting(container_element)
-                .addText(text => text
-                    .setPlaceholder("Enter your command")
-                    .setValue(shell_command)
-                    .onChange(async (field_value) => {
-                        let shell_command = field_value;
-                        setting_group.preview_setting.setDesc(this.getShellCommandPreview(shell_command));
+        // Platforms' default shells
+        createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+    }
 
-                        if (is_new) {
-                            console.log("Creating new command " + shell_command_id + ": " + shell_command);
-                        } else {
-                            console.log("Command " + shell_command_id + " gonna change to: " + shell_command);
-                        }
+    private tabOutput(container_element: HTMLElement) {
+        // "Error message duration" field
+        this.createNotificationDurationField(container_element, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
 
-                        // Do this in both cases, when creating a new command and when changing an old one:
-                        shell_command_configuration.shell_command = shell_command;
+        // "Notification message duration" field
+        this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
 
-                        if (is_new) {
-                            // Create a new command
-                            this.plugin.registerShellCommand(shell_command_id, shell_command_configuration);
-                            console.log("Command created.");
-                        } else {
-                            // Change an old command
-                            this.plugin.obsidian_commands[shell_command_id].name = this.plugin.generateObsidianCommandName(this.plugin.getShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
-                            console.log("Command changed.");
-                        }
-                        await this.plugin.saveSettings();
-                    })
-                )
-                .setClass("shell-commands-shell-command-setting")
-            ,
-            preview_setting:
-                new Setting(container_element)
-                    .setDesc(this.getShellCommandPreview(shell_command))
-                    .setClass("shell-commands-preview-setting")
-            ,
-        };
-
-        // Informational icons (= non-clickable)
-        let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
-
-        // "Ask confirmation" icon.
-        let confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
-        setIcon(confirm_execution_icon_container, "languages");
-        if (!shell_command_configuration.confirm_execution) {
-            // Do not display the icon for commands that do not use confirmation.
-            confirm_execution_icon_container.addClass("shell-commands-hide");
-        }
-
-        // "Ignored error codes" icon
-        let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": this.generateIgnoredErrorCodesIconTitle(shell_command_configuration.ignore_error_codes), class: "shell-commands-ignored-error-codes-icon-container"}});
-        setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
-        if (!shell_command_configuration.ignore_error_codes.length) {
-            // Do not display the icon for commands that do not ignore any errors.
-            ignored_error_codes_icon_container.addClass("shell-commands-hide");
-        }
-
-        // Add hotkey information
-        if (!is_new) {
-            let hotkeys = getHotkeysForShellCommand(this.plugin, shell_command_id);
-            if (hotkeys) {
-                let hotkeys_joined: string = "";
-                hotkeys.forEach((hotkey: Hotkey) => {
-                    if (hotkeys_joined) {
-                        hotkeys_joined += "<br>"
-                    }
-                    hotkeys_joined += HotkeyToString(hotkey);
-                });
-                let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
-                // Comment out the icon because it would look like a clickable button (as there are other clickable icons in the settings).
-                // setIcon(hotkey_div, "any-key", 22); // Hotkey icon
-                hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
-            }
-        }
-        console.log("Created.");
+        // "Output channel 'Clipboard' displays a notification message, too" field
+        new Setting(container_element)
+            .setName("Output channel 'Clipboard' displays a notification message, too")
+            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box on the top right corner. This helps to notice what was inserted into clipboard.")
+            .addToggle(checkbox => checkbox
+                .setValue(this.plugin.settings.output_channel_clipboard_also_outputs_to_notification)
+                .onChange(async (value: boolean) => {
+                    this.plugin.settings.output_channel_clipboard_also_outputs_to_notification = value;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
     }
 
     createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
@@ -252,10 +214,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .onChange(async (duration_string: string) => {
                     let duration: number = parseInt(duration_string);
                     if (duration >= 1 && duration <= 180) {
-                        console.log("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
+                        debugLog("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
                         this.plugin.settings[setting_name] = duration;
                         await this.plugin.saveSettings();
-                        console.log("Changed.");
+                        debugLog("Changed.");
                     }
                     // Don't show a notice if duration is not between 1 and 180, because this function is called every time a user types in this field, so the value might not be final.
                 })
@@ -263,36 +225,33 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
     }
 
-    getShellCommandPreview(shell_command: string) {
-        let parsed_shell_command = parseShellCommandVariables(this.plugin, shell_command); // false: disables notifications if variables have syntax errors.
-        if (Array.isArray(parsed_shell_command)) {
-            // Variable parsing failed.
-            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-            return parsed_shell_command[0];
-        }
-        // Variable parsing succeeded
-        return parsed_shell_command;
-    }
+    private last_position: {
+        scroll_position: number;
+        tab_name: string;
+    } = {
+        scroll_position: 0,
+        tab_name: "main-shell-commands",
+    };
+    private rememberLastPosition(container_element: HTMLElement) {
+        const last_position = this.last_position;
 
-    /**
-     * @param shell_command_id String like "0" or "1" etc.
-     * @param shell_command_configuration
-     * @public Public because ShellCommandExtraOptionsModal uses this too.
-     */
-    public generateCommandFieldName(shell_command_id: string, shell_command_configuration: ShellCommandConfiguration) {
-        if (shell_command_configuration.alias) {
-            return shell_command_configuration.alias;
-        }
-        return "Command #" + shell_command_id;
-    }
+        // Go to last position now
+        this.tab_structure.buttons[last_position.tab_name].click();
+        container_element.scrollTo({
+            top: this.last_position.scroll_position,
+            behavior: "auto",
+        });
 
-    /**
-     * @param ignored_error_codes
-     * @public Public because ShellCommandExtraOptionsModal uses this too.
-     */
-    public generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
-        let plural = ignored_error_codes.length !== 1 ? "s" : "";
-        return "Ignored error"+plural+": " + ignored_error_codes.join(",");
+        // Listen to changes
+        container_element.addEventListener("scroll", (event) => {
+            this.last_position.scroll_position = container_element.scrollTop;
+        });
+        for (let tab_name in this.tab_structure.buttons) {
+            let button = this.tab_structure.buttons[tab_name];
+            button.onClickEvent((event: MouseEvent) => {
+                last_position.tab_name = tab_name;
+            });
+        }
     }
 }
 

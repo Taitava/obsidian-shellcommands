@@ -1,15 +1,17 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
+// @ts-ignore "electron" is installed.
+import {clipboard} from "electron";
 
 export class ShellCommandVariable_Clipboard extends ShellCommandVariable {
-    name = "clipboard";
+    static variable_name = "clipboard";
+    static help_text = "Gives the content you last copied to your clipboard.";
 
-    getValue(): string {
-        let clipboard = require("electron").clipboard;
+    generateValue(): string {
         return clipboard.readText();
     }
 }
 addShellCommandVariableInstructions(
     "{{clipboard}}",
-    "Gives the content you last copied to your clipboard.",
+    ShellCommandVariable_Clipboard.help_text,
 );

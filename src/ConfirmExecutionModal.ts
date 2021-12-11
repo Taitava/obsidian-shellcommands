@@ -1,17 +1,18 @@
 import {Modal, Setting} from "obsidian";
 import ShellCommandsPlugin from "./main";
-import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
+import {TShellCommand} from "./TShellCommand";
+import {debugLog} from "./Debug";
 
 export class ConfirmExecutionModal extends Modal {
     private plugin: ShellCommandsPlugin;
     private readonly shell_command: string;
-    private shell_command_configuration: ShellCommandConfiguration;
+    private readonly t_shell_command: TShellCommand;
 
-    constructor(plugin: ShellCommandsPlugin, shell_command: string, shell_command_configuration: ShellCommandConfiguration) {
+    constructor(plugin: ShellCommandsPlugin, shell_command: string, t_shell_command: TShellCommand) {
         super(plugin.app);
         this.plugin = plugin;
         this.shell_command = shell_command;
-        this.shell_command_configuration = shell_command_configuration;
+        this.t_shell_command = t_shell_command;
     }
 
     open() {
@@ -19,8 +20,8 @@ export class ConfirmExecutionModal extends Modal {
 
         // Information about the shell command
         this.modalEl.createEl("h2", {text: this.shell_command, attr: {style: "margin-bottom: 0;"}});
-        if (this.shell_command_configuration.alias) {
-            let paragraph = this.modalEl.createEl("p", {text: "Alias: " + this.shell_command_configuration.alias, attr: {style: "margin-top: 0;"}});
+        if (this.t_shell_command.getAlias()) {
+            let paragraph = this.modalEl.createEl("p", {text: "Alias: " + this.t_shell_command.getAlias(), attr: {style: "margin-top: 0;"}});
         }
         this.modalEl.createEl("p", {text: "Execute this shell command?"});
 
@@ -29,8 +30,8 @@ export class ConfirmExecutionModal extends Modal {
             .addButton(button => button
                 .setButtonText("Yes, execute!")
                 .onClick(() => {
-                    console.log("User confirmed execution of shell command: " + this.shell_command);
-                    this.plugin.executeShellCommand(this.shell_command, this.shell_command_configuration);
+                    debugLog("User confirmed execution of shell command: " + this.shell_command);
+                    this.plugin.executeShellCommand(this.shell_command, this.t_shell_command);
                     this.close();
                 })
             )

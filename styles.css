@@ -6,6 +6,10 @@
     display: none;
 }
 
+.SC-scrollable {
+    overflow-y: auto;
+}
+
 
 /*
  * SHELL COMMAND SETTING CONTAINERS
@@ -57,4 +61,93 @@ div.shell-commands-hotkey-info svg {
 
 span.shell-commands-main-icon-container {
     margin-left: 10px;
+}
+
+
+/*
+ * Tab elements
+ * This CSS is copied 2021-10-21 from https://www.w3schools.com/howto/howto_js_tabs.asp
+ * Modifications:
+ *  - Renamed classes
+ *  - Added tab icons.
+ *  - Changed colors.
+ *  - Changed/removed borders.
+ *  - Removed button transition.
+ *  - Changed button border-radiuses
+ */
+
+/* Style the tab */
+.SC-tab-header {
+    border-bottom: 2px solid var(--background-modifier-border);
+    background-color: var(--background-secondary);
+}
+
+/* Style the buttons that are used to open the tab content */
+.SC-tab-header-button {
+    background-color: unset !important;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    border-radius: 10px 10px 0 0; /* 0 0 = No border-radius at bottom */
+}
+
+/* Create an active/current tablink class */
+.SC-tab-header-button.SC-tab-active,
+.SC-tab-header-button:hover {
+    background-color: var(--background-modifier-border) !important;
+}
+
+.SC-tab-header-button svg {
+    vertical-align: middle; /* Not middle but close enough. */
+}
+
+/* Style the tab content */
+.SC-tab-content {
+    display: none;
+    padding: 6px 12px;
+}
+
+.SC-tab-content.SC-tab-active {
+    display: block;
+}
+
+
+/*
+ * AUTOCOMPLETE
+ */
+
+.SC-autocomplete {
+    background-color: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    color: var(--text-normal);
+    z-index: 100; /* Otherwise the element will be behind everything = invisible. */
+    width: auto !important; /* Otherwise the element will be as wide as the text input field. */
+}
+
+.SC-autocomplete > div {
+    padding: 0 5px 2px 10px;
+}
+
+.SC-autocomplete > div > span.SC-autocomplete-value {
+    font-weight: bold;
+}
+
+.SC-autocomplete > div > span.SC-autocomplete-help-text {
+    font-size: 90%;
+    font-style: italic;
+}
+
+.SC-autocomplete > div.selected,
+.SC-autocomplete > div:hover:not(.group) {
+    cursor: pointer;
+    background-color: var(--text-selection);
+    color: var(--text-normal);
+}
+
+.SC-autocomplete > div.group {
+    background-color: var(--background-modifier-border);
+    padding-left: 5px;
+    font-size: 75%;
 }

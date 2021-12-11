@@ -10,5 +10,8 @@ package-lock.json
 main.js
 *.js.map
 
-# obsidian
-data.json
+# obsidian (* ignores also backup settings files.)
+data*.json
+
+# Custom
+/autocomplete.yaml

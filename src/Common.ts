@@ -1,4 +1,11 @@
 import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
+import {PlatformId} from "./settings/ShellCommandsPluginSettings";
+import {platform} from "os";
+import * as path from "path";
+import {debugLog} from "./Debug";
+import ShellCommandsPlugin from "./main";
+// @ts-ignore
+import {shell} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -10,6 +17,14 @@ export function getVaultAbsolutePath(app: App) {
     return null;
 }
 
+export function getPluginAbsolutePath(plugin: ShellCommandsPlugin) {
+    return normalizePath2(path.join(
+        getVaultAbsolutePath(plugin.app),
+        plugin.app.vault.configDir,
+        "plugins",
+        plugin.getPluginId()));
+}
+
 /**
  * For some reason there is no Platform.isWindows .
  */
@@ -17,10 +32,22 @@ export function isWindows() {
     return process.platform === "win32";
 }
 
+/**
+ * This is just a wrapper around platform() in order to cast the type to PlatformId.
+ * TODO: Consider renaming this to getPlatformId().
+ */
+export function getOperatingSystem(): PlatformId  {
+    // @ts-ignore In theory, platform() can return an OS name not included in OperatingSystemName. But as Obsidian
+    // currently does not support anything else than Windows, Mac and Linux (except mobile platforms, but they are
+    // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
+    // three.
+    return platform();
+}
+
 export function getView(app: App) {
     let view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
-        console.log("getView(): Could not get a view. Will return null.");
+        debugLog("getView(): Could not get a view. Will return null.");
         return null;
     }
     return view;
@@ -42,12 +69,21 @@ export function getEditor(app: App): Editor {
     }
 
     // Did not find an editor.
-    console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
+    debugLog("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
     return null;
 }
 
 export function cloneObject(object: Object) {
     return Object.assign({}, object);
+}
+
+/**
+ * Merges two or more objects together. If they have same property names, former objects' properties get overwritten by later objects' properties.
+ *
+ * @param objects
+ */
+export function combineObjects(...objects: Object[]) {
+    return Object.assign({}, ...objects);
 }
 
 /**
@@ -86,6 +122,10 @@ export function normalizePath2(path: string) {
     return path;
 }
 
+export function extractFileName(file_path: string) {
+    return path.parse(file_path).base;
+}
+
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
     for (let property_name in object) {
@@ -105,4 +145,12 @@ export function joinObjectProperties(object: {}, glue: string) {
  */
 export function uniqueArray(array: any[]) {
     return [...new Set(array)];
+}
+
+/**
+ * Opens a web browser in the specified URL.
+ * @param url
+ */
+export function gotoURL(url: string) {
+    shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }

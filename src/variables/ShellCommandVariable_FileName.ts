@@ -2,8 +2,10 @@ import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstruc
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_FileName extends ShellCommandVariable{
-    name = "file_name";
-    getValue(): string {
+    static variable_name = "file_name";
+    static help_text = "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.";
+
+    generateValue(): string {
         let file = this.app.workspace.getActiveFile();
         if (!file) {
             this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
@@ -14,5 +16,5 @@ export class ShellCommandVariable_FileName extends ShellCommandVariable{
 }
 addShellCommandVariableInstructions(
     "{{file_name}}",
-    "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.",
+    ShellCommandVariable_FileName.help_text,
 );

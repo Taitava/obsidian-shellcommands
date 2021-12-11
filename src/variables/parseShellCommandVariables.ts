@@ -1,42 +1,19 @@
 import {ShellCommandVariable} from "./ShellCommandVariable";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
-import {ShellCommandVariable_Selection} from "./ShellCommandVariable_Selection";
-import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
-import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
-import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
-import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
-import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
-import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
-import {ShellCommandVariable_Newline} from "./ShellCommandVariable_Newline";
-import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
-import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
-import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
+import {debugLog} from "../Debug";
+import {getVariables} from "./VariableLists";
 
 /**
  * @param plugin
  * @param command
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string): string | string[] {
-    let shell_variables: ShellCommandVariable[] = [
-        new ShellCommandVariable_Clipboard(plugin),
-        new ShellCommandVariable_Date(plugin),
-        new ShellCommandVariable_FileName(plugin),
-        new ShellCommandVariable_FilePath(plugin),
-        new ShellCommandVariable_FolderName(plugin),
-        new ShellCommandVariable_FolderPath(plugin),
-        new ShellCommandVariable_Newline(plugin),
-        new ShellCommandVariable_Selection(plugin),
-        new ShellCommandVariable_Tags(plugin),
-        new ShellCommandVariable_Title(plugin),
-        new ShellCommandVariable_VaultPath(plugin),
-        new ShellCommandVariable_Workspace(plugin),
-    ];
+export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string): string | string[] {
+    const variables = getVariables(plugin, shell);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
-    for (let variable_index in shell_variables)
+    for (let variable_index in variables)
     {
-        let variable: ShellCommandVariable = shell_variables[variable_index];
+        let variable: ShellCommandVariable = variables[variable_index];
         let pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
         let _arguments: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
@@ -60,16 +37,28 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
                 }
             }
 
+            // Should the variable's value be escaped? (Usually yes).
+            let escape = true;
+            if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
+                // The variable usage begins with {{! instead of {{
+                // This means the variable's value should NOT be escaped.
+                escape = false;
+            }
+
             // Render the variable
-            let variable_value = variable.getValue();
+            let variable_value = variable.getValue(escape);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
-                console.log("Parsing command " + command + " failed.");
+                debugLog("Parsing command " + command + " failed.");
                 return variable.getErrorMessages(); // Returning now prevents parsing rest of the variables.
             }
             else
             {
-                parsed_command = parsed_command.replace(substitute, variable_value);
+                parsed_command = parsed_command.replace(substitute, () => {
+                    // Do the replacing in a function in order to avoid a possible $ character to be interpreted by JavaScript to interact with the regex.
+                    // More information: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter (referenced 2021-11-02.)
+                    return variable_value;
+                });
             }
         }
     }
