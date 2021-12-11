@@ -37,13 +37,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                     this.tabShellCommands(container_element);
                 },
             },
-            "main-variables": {
-                title: "Variables",
-                icon: "code-glyph",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabVariables(container_element);
-                },
-            },
             "main-operating-systems-and-shells": {
                 title: "Operating systems & shells",
                 icon: "stacked-levels",
@@ -56,6 +49,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 icon: "lines-of-text",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOutput(container_element);
+                },
+            },
+            "main-variables": {
+                title: "Variables",
+                icon: "code-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabVariables(container_element);
                 },
             },
         });
