@@ -12,11 +12,14 @@ import {
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
+import {getSC_Events} from "../events/SC_EventList";
+import {SC_Event} from "../events/SC_Event";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
     static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
+    static EVENTS_SUMMARY = "Events";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -61,6 +64,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOperatingSystemsAndShells(container_element);
+                },
+            },
+            "extra-options-events": {
+                title: "Events",
+                icon: "dice",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabEvents(container_element);
                 },
             },
         });
@@ -184,6 +194,37 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
         // Platform specific shell selection
         createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+    }
+
+    private tabEvents(container_element: HTMLElement) {
+        // Events
+        new Setting(container_element)
+            .setName("Execute this shell command automatically on:")
+            .setHeading() // Make the name bold
+        ;
+        getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            new Setting(container_element)
+                .setName(sc_event.getTitle())
+                .addToggle(toggle => toggle
+                    .setValue(this.t_shell_command.isAssignedToSC_Event(sc_event.getName()))
+                    .onChange(async (enabled: boolean) => {
+                        const events_configuration = this.t_shell_command.getConfiguration().events;
+                        if (enabled) {
+                            if (!events_configuration.includes(sc_event.getName())) {
+                                // Enable the event assignment
+                                events_configuration.push(sc_event.getName());
+                            }
+                        } else {
+                            if (events_configuration.includes(sc_event.getName())) {
+                                // Disable the event assignment
+                                events_configuration.remove(sc_event.getName());
+                            }
+                        }
+                        await this.plugin.saveSettings();
+                    }),
+                )
+            ;
+        });
     }
 
     public activateTab(tab_id: string) {

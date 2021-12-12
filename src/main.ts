@@ -25,6 +25,7 @@ import {TShellCommandTemporary} from "./TShellCommandTemporary";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
+import {SC_Event} from "./events/SC_Event";
 
 export default class ShellCommandsPlugin extends Plugin {
 	/**
@@ -73,6 +74,9 @@ export default class ShellCommandsPlugin extends Plugin {
 		this.loadCustomAutocompleteList();
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
+
+		// Register SC_Events
+		SC_Event.registerSC_Events(this);
 	}
 
 	private loadTShellCommands() {

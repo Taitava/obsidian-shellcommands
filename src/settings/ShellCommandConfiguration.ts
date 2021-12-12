@@ -21,6 +21,7 @@ export interface ShellCommandConfiguration {
         stderr: OutputChannel,
     },
     output_channel_order: OutputChannelOrder;
+    events: string[];
 
     // LEGACY
     /** @deprecated Can only be used for migration. */
@@ -41,5 +42,6 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
             stderr: "notification",
         },
         output_channel_order: "stdout-first",
+        events: [],
     }
 }

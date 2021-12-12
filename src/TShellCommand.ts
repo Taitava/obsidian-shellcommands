@@ -101,4 +101,8 @@ export class TShellCommand {
     public getOutputChannels() {
         return this.configuration.output_channels;
     }
+
+    isAssignedToSC_Event(event_name: string) {
+        return this.configuration.events.includes(event_name);
+    }
 }
