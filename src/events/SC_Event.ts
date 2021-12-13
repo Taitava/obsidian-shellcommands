@@ -57,7 +57,14 @@ export abstract class SC_Event {
      */
     protected trigger(t_shell_command: TShellCommand) {
         // Parse variables
-        const parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell());
+        let parsed_shell_command;
+        if (this.plugin.preparsed_t_shell_commands[t_shell_command.getId()]) {
+            // A preparsed shell command exists, use it in order to use same values that were already shown to a user.
+            parsed_shell_command = this.plugin.preparsed_t_shell_commands[t_shell_command.getId()].getShellCommand();
+        } else {
+            // No preparsed shell command exists, so parse now.
+            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell());
+        }
 
         // Check the parsing result.
         if (Array.isArray(parsed_shell_command)) {

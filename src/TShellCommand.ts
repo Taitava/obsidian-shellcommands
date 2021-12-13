@@ -1,8 +1,10 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import ShellCommandsPlugin from "./main";
-import {getOperatingSystem} from "./Common";
+import {cloneObject, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
+import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
+import {debugLog} from "./Debug";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -244,5 +246,70 @@ export class TShellCommand {
      */
     public canShowInCommandPalette(): boolean {
         return this.getConfiguration().command_palette_availability === "enabled";
+    }
+
+    /**
+     * Parses variables in the shell command and stores them so that the values will be used if the shell command is later executed.
+     * Returns a temporary copy of the shell command that contains the changes.
+     */
+    public preparseVariables() {
+        const preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(this); // Clone t_shell_command so that we won't edit the original configuration.
+
+        // Parse variables in the actual shell command
+        const parsed_shell_command = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell());
+        if (Array.isArray(parsed_shell_command)) {
+            // Variable parsing failed, because an array was returned, which contains error messages.
+            debugLog("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
+            return false;
+        } else {
+            // Variable parsing succeeded.
+            // Use the parsed values.
+            preparsed_t_shell_command.getConfiguration().platform_specific_commands = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
+        }
+
+        // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
+        const parsed_alias = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell());
+        if (Array.isArray(parsed_alias)) {
+            // Variable parsing failed, because an array was returned, which contains error messages.
+            debugLog("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());
+            return false;
+        } else {
+            // Variable parsing succeeded.
+            // Use the parsed values.
+            preparsed_t_shell_command.getConfiguration().alias = parsed_alias;
+        }
+
+        // Store the preparsed shell command so that we can use exactly the same values if the command gets later executed.
+        this.plugin.preparsed_t_shell_commands[this.getId()] = preparsed_t_shell_command;
+
+        return preparsed_t_shell_command;
+    }
+}
+
+class TShellCommandTemporary extends TShellCommand {
+
+    /**
+     * @private Do not create new objects directly, use fromTShellCommand() instead.
+     * @param plugin
+     * @param shell_command_configuration
+     */
+    constructor(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration) {
+        super(plugin, null, shell_command_configuration);
+    }
+
+    public getId(): string {
+        throw Error("TShellCommandTemporary does not have an ID, because it is a clone of a real TShellCommand that should not be saved.");
+    }
+
+    /**
+     * Returns a TShellCommandTemporary instance, which contains configuration that is copied from the given TShellCommand.
+     * The clone can be used for altering the configuration temporarily. The clone cannot be saved, and it's ID cannot be
+     * accessed.
+     */
+    public static fromTShellCommand(t_shell_command: TShellCommand) {
+        return new TShellCommandTemporary(
+            t_shell_command.getPlugin(),
+            cloneObject(t_shell_command.getConfiguration()),
+        );
     }
 }
