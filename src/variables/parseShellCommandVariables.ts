@@ -6,10 +6,12 @@ import {getVariables} from "./VariableLists";
 /**
  * @param plugin
  * @param command
+ * @param shell
+ * @param extra_variables Variables that are only available in special cases, i.e. SC_Events
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string): string | string[] {
-    const variables = getVariables(plugin, shell);
+export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string, extra_variables: ShellCommandVariable[] = []): string | string[] {
+    const variables = getVariables(plugin, shell).concat(extra_variables);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (let variable_index in variables)
     {
