@@ -3,6 +3,8 @@ import {SC_Event_onLayoutReady} from "./SC_Event_onLayoutReady";
 import {SC_Event_onQuit} from "./SC_Event_onQuit";
 import {SC_Event_onActiveLeafChanged} from "./SC_Event_onActiveLeafChanged";
 import {SC_Event_EveryNSeconds} from "./SC_Event_EveryNSeconds";
+import {SC_Event_FileMenu} from "./SC_Event_FileMenu";
+import {SC_Event_FolderMenu} from "./SC_Event_FolderMenu";
 
 export function getSC_Events(plugin: ShellCommandsPlugin) {
     if (undefined === getSC_Events.events) {
@@ -12,6 +14,8 @@ export function getSC_Events(plugin: ShellCommandsPlugin) {
             new SC_Event_onQuit(plugin),
             new SC_Event_onActiveLeafChanged(plugin),
             new SC_Event_EveryNSeconds(plugin),
+            new SC_Event_FileMenu(plugin),
+            new SC_Event_FolderMenu(plugin),
         ];
     }
     return getSC_Events.events;
