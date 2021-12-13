@@ -3,6 +3,7 @@ import {App, EventRef} from "obsidian";
 import {TShellCommand} from "../TShellCommand";
 import {getSC_Events} from "./SC_EventList";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
+import {SC_EventConfiguration} from "./SC_EventConfiguration";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -53,7 +54,7 @@ export abstract class SC_Event {
         const shell_command_ids = Object.getOwnPropertyNames(this.plugin.getTShellCommands());
         shell_command_ids.forEach((t_shell_command_id: string) => {
             const t_shell_command = this.plugin.getTShellCommands()[t_shell_command_id];
-            if (t_shell_command.isAssignedToSC_Event(this.event_name)) {
+            if (t_shell_command.isSC_EventEnabled(this.event_name)) {
                 assigned_t_shell_commands.push(t_shell_command);
             }
         });
@@ -75,5 +76,16 @@ export abstract class SC_Event {
                 plugin.registerEvent(event_reference);
             }
         });
+    }
+
+    /**
+     * Can be overridden in child classes that need custom settings fields.
+     *
+     * @param enabled
+     */
+    public getDefaultConfiguration(enabled: boolean): SC_EventConfiguration {
+        return {
+            enabled: enabled,
+        };
     }
 }

@@ -206,20 +206,16 @@ export class ShellCommandExtraOptionsModal extends Modal {
             new Setting(container_element)
                 .setName(sc_event.getTitle())
                 .addToggle(toggle => toggle
-                    .setValue(this.t_shell_command.isAssignedToSC_Event(sc_event.getName()))
-                    .onChange(async (enabled: boolean) => {
-                        const events_configuration = this.t_shell_command.getConfiguration().events;
-                        if (enabled) {
-                            if (!events_configuration.includes(sc_event.getName())) {
-                                // Enable the event assignment
-                                events_configuration.push(sc_event.getName());
-                            }
+                    .setValue(this.t_shell_command.isSC_EventEnabled(sc_event.getName()))
+                    .onChange(async (enable: boolean) => {
+                        if (enable) {
+                            // Enable the event
+                            this.t_shell_command.enableSC_Event(sc_event);
                         } else {
-                            if (events_configuration.includes(sc_event.getName())) {
-                                // Disable the event assignment
-                                events_configuration.remove(sc_event.getName());
-                            }
+                            // Disable the event
+                            this.t_shell_command.disableSC_Event(sc_event);
                         }
+                        // Save
                         await this.plugin.saveSettings();
                     }),
                 )

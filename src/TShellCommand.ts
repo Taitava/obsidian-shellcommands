@@ -1,6 +1,7 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import ShellCommandsPlugin from "./main";
 import {getOperatingSystem} from "./Common";
+import {SC_Event} from "./events/SC_Event";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -102,7 +103,65 @@ export class TShellCommand {
         return this.configuration.output_channels;
     }
 
-    isAssignedToSC_Event(event_name: string) {
-        return this.configuration.events.includes(event_name);
+    public getEventsConfiguration() {
+        return this.configuration.events;
+    }
+
+    public isSC_EventEnabled(event_name: string) {
+        const events_configuration =  this.getEventsConfiguration();
+        if (undefined === events_configuration[event_name]) {
+            // Not enabled
+            return false;
+        } else {
+            // Maybe enabled
+            return events_configuration[event_name].enabled;
+        }
+    }
+
+    /**
+     * plugin.saveSettings() needs to be called after this!
+     *
+     * @param sc_event
+     */
+    public enableSC_Event(sc_event: SC_Event) {
+        const event_name = sc_event.getName();
+        const events_configuration =  this.getEventsConfiguration();
+        if (undefined === events_configuration[event_name]) {
+            // Not enabled
+            // Enable
+            events_configuration[event_name] = sc_event.getDefaultConfiguration(true);
+        } else {
+            // Maybe enabled
+            if (!events_configuration[event_name].enabled) {
+                events_configuration[event_name].enabled = true;
+            }
+        }
+    }
+
+    /**
+     * plugin.saveSettings() needs to be called after this!
+     *
+     * @param sc_event
+     */
+    public disableSC_Event(sc_event: SC_Event) {
+        const event_name = sc_event.getName();
+        const events_configuration =  this.getEventsConfiguration();
+        if (undefined !== events_configuration[event_name]) {
+            // Maybe enabled
+            if (events_configuration[event_name].enabled) {
+                // Is enabled.
+                // Disable.
+                const configuration_property_names = Object.getOwnPropertyNames(events_configuration[event_name]);
+                if (configuration_property_names.length > 1) {
+                    // There's more settings than just 'enable'.
+                    // Disable by setting 'enable' to false, don't flush the settings, they can be useful if the event gets re-enabled.
+                    events_configuration[event_name].enabled = false;
+                } else {
+                    // 'enabled' is the only setting.
+                    // Disable by removing the configuration object completely to make the settings file cleaner.
+                    delete events_configuration[event_name];
+                }
+            }
+        }
     }
 }
