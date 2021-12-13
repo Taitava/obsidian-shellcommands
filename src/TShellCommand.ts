@@ -2,6 +2,7 @@ import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import ShellCommandsPlugin from "./main";
 import {getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
+import {getSC_Events} from "./events/SC_EventList";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -136,6 +137,7 @@ export class TShellCommand {
                 events_configuration[event_name].enabled = true;
             }
         }
+        this.registerSC_Event(sc_event)
     }
 
     /**
@@ -163,5 +165,50 @@ export class TShellCommand {
                 }
             }
         }
+        this.unregisterSC_Event(sc_event);
+    }
+
+    /**
+     * Returns all SC_Events that are enabled fro this shell command.
+     *
+     * Private as it's currently only used domestically, but can be changed to public if needed.
+     */
+    private getSC_Events(): SC_Event[] {
+        const enabled_sc_events: SC_Event[] = [];
+        getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            if (this.isSC_EventEnabled(sc_event.getName())) {
+                enabled_sc_events.push(sc_event);
+            }
+        });
+        return enabled_sc_events;
+    }
+
+    /**
+     * Private, if you need access from outside, use enableSC_Event().
+     *
+     * @param sc_event
+     * @private
+     */
+    private registerSC_Event(sc_event: SC_Event) {
+        sc_event.register(this);
+    }
+
+    /**
+     * Private, if you need access from outside, use disableSC_Event().
+     *
+     * @param sc_event
+     * @private
+     */
+    private unregisterSC_Event(sc_event: SC_Event) {
+        sc_event.unregister(this);
+    }
+
+    /**
+     * Set's up all events that are enabled for this shell command.
+     */
+    public registerSC_Events() {
+        this.getSC_Events().forEach((sc_event: SC_Event) => {
+            this.registerSC_Event(sc_event);
+        });
     }
 }

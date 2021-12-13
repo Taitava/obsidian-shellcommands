@@ -63,20 +63,20 @@ export default class ShellCommandsPlugin extends Plugin {
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
 
-		// Make all defined shell commands to appear in the Obsidian command list
-		let shell_commands = this.getTShellCommands();
+		// Shell command registrations:
+		//  - Make all defined shell commands to appear in the Obsidian command palette.
+		//  - Perform event registrations.
+		const shell_commands = this.getTShellCommands();
 		for (let shell_command_id in shell_commands) {
-			let t_shell_command = shell_commands[shell_command_id];
+			const t_shell_command = shell_commands[shell_command_id];
 			this.registerShellCommand(t_shell_command);
+			t_shell_command.registerSC_Events();
 		}
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
 
 		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
-
-		// Register SC_Events
-		SC_Event.registerSC_Events(this);
 	}
 
 	private loadTShellCommands() {
