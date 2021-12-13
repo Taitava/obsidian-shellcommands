@@ -108,6 +108,10 @@ export class TShellCommand {
         return this.configuration.events;
     }
 
+    public getEventConfiguration(sc_event: SC_Event) {
+        return this.getEventsConfiguration()[sc_event.getName()] || sc_event.getDefaultConfiguration(false);
+    }
+
     public isSC_EventEnabled(event_name: string) {
         const events_configuration =  this.getEventsConfiguration();
         if (undefined === events_configuration[event_name]) {

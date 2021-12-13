@@ -203,23 +203,31 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setHeading() // Make the name bold
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.getName());
             new Setting(container_element)
                 .setName(sc_event.getTitle())
                 .addToggle(toggle => toggle
-                    .setValue(this.t_shell_command.isSC_EventEnabled(sc_event.getName()))
+                    .setValue(is_event_enabled)
                     .onChange(async (enable: boolean) => {
                         if (enable) {
                             // Enable the event
                             this.t_shell_command.enableSC_Event(sc_event);
+                            extra_settings_container.style.display = "block"; // Show extra settings
                         } else {
                             // Disable the event
                             this.t_shell_command.disableSC_Event(sc_event);
+                            extra_settings_container.style.display = "none"; // Hide extra settings
                         }
                         // Save
                         await this.plugin.saveSettings();
                     }),
                 )
             ;
+
+            // Extra settings
+            const extra_settings_container = container_element.createDiv();
+            extra_settings_container.style.display = is_event_enabled ? "block" : "none";
+            sc_event.createExtraSettingsFields(extra_settings_container, this.t_shell_command);
         });
     }
 

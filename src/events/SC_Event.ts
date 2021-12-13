@@ -3,6 +3,7 @@ import {App, EventRef} from "obsidian";
 import {TShellCommand} from "../TShellCommand";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
+import {cloneObject} from "../Common";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -15,6 +16,9 @@ export abstract class SC_Event {
     private event_registrations: {
         [key: string]: EventRef, // key: t_shell_command id
     } = {};
+    protected default_configuration: SC_EventConfiguration = {
+        enabled: false,
+    };
 
     public constructor(plugin: ShellCommandsPlugin) {
         this.plugin = plugin;
@@ -80,8 +84,21 @@ export abstract class SC_Event {
      * @param enabled
      */
     public getDefaultConfiguration(enabled: boolean): SC_EventConfiguration {
-        return {
-            enabled: enabled,
-        };
+        const configuration = cloneObject(this.default_configuration);
+        configuration.enabled = enabled;
+        return configuration
+    }
+
+    protected getConfiguration(t_shell_command: TShellCommand) {
+        return t_shell_command.getEventConfiguration(this);
+    }
+
+    /**
+     * Can be overridden in child classes to provide custom configuration fields for ShellCommandsExtraOptionsModal.
+     *
+     * @param extra_settings_container
+     */
+    public createExtraSettingsFields(extra_settings_container: HTMLDivElement, t_shell_command: TShellCommand): void {
+        // Most classes do not define custom settings, so for those classes this method does not need to do anything.
     }
 }
