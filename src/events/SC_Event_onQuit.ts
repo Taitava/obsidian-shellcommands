@@ -7,11 +7,4 @@ export class SC_Event_onQuit extends SC_Event {
     protected register() {
         return this.app.workspace.on("quit", () => this.trigger());
     }
-
-    /**
-     * Need to have this wrapper method, because this.trigger() is protected.
-     */
-    public onUnload() {
-        this.trigger();
-    }
 }
