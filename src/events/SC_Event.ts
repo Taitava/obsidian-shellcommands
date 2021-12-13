@@ -4,6 +4,7 @@ import {TShellCommand} from "../TShellCommand";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
+import {ShellCommandVariable} from "../variables/ShellCommandVariable";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -63,7 +64,8 @@ export abstract class SC_Event {
             parsed_shell_command = this.plugin.preparsed_t_shell_commands[t_shell_command.getId()].getShellCommand();
         } else {
             // No preparsed shell command exists, so parse now.
-            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell());
+            const extra_variables = this.declareExtraVariables(t_shell_command);
+            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell(), extra_variables);
         }
 
         // Check the parsing result.
@@ -83,6 +85,24 @@ export abstract class SC_Event {
 
     public getTitle() {
         return this.event_title;
+    }
+
+    /**
+     * Child classes can override this to declare custom variables.
+     *
+     * @param t_shell_command
+     * @protected
+     */
+    protected declareExtraVariables(t_shell_command: TShellCommand): ShellCommandVariable[] {
+        return [];
+    }
+
+    public getSummaryOfExtraVariables(t_shell_command: TShellCommand): string {
+        const variable_names: string[] = [];
+        this.declareExtraVariables(t_shell_command).forEach((variable: ShellCommandVariable) => {
+            variable_names.push("{{" + variable.getVariableName() + "}}");
+        });
+        return variable_names.join(", ");
     }
 
     /**
