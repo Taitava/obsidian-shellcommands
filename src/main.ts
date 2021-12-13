@@ -68,7 +68,9 @@ export default class ShellCommandsPlugin extends Plugin {
 		const shell_commands = this.getTShellCommands();
 		for (let shell_command_id in shell_commands) {
 			const t_shell_command = shell_commands[shell_command_id];
-			this.registerShellCommand(t_shell_command);
+			if (t_shell_command.canAddToCommandPalette()) {
+				this.registerShellCommand(t_shell_command);
+			}
 			t_shell_command.registerSC_Events();
 		}
 
@@ -103,15 +105,20 @@ export default class ShellCommandsPlugin extends Plugin {
 		const shell_command_id = this.generateNewShellCommandID();
 		const shell_command_configuration = newShellCommandConfiguration();
 		this.settings.shell_commands[shell_command_id] = shell_command_configuration;
-		this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configuration);
-		this.registerShellCommand(this.t_shell_commands[shell_command_id]);
-		return this.t_shell_commands[shell_command_id];
+		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_id, shell_command_configuration);
+		this.t_shell_commands[shell_command_id] = t_shell_command;
+		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
+			this.registerShellCommand(t_shell_command);
+		}
+		return t_shell_command;
 	}
 
 	/**
+	 * TODO: Move to TShellCommand.registerToCommandPalette(), but split to multiple methods.
+	 *
 	 * @param t_shell_command
 	 */
-	private registerShellCommand(t_shell_command: TShellCommand) {
+	public registerShellCommand(t_shell_command: TShellCommand) {
 		let shell_command_id = t_shell_command.getId();
 		debugLog("Registering shell command #" + shell_command_id + "...");
 		let obsidian_command: Command = {
@@ -121,6 +128,14 @@ export default class ShellCommandsPlugin extends Plugin {
 			checkCallback: (is_opening_command_palette) => {
 				if (is_opening_command_palette) {
 					// The user is currently opening the command palette.
+
+					// Check can the shell command be shown in command palette
+					if (!t_shell_command.canShowInCommandPalette()) {
+						// Cancel preview and deny showing in command palette.
+						debugLog("Shell command #" + t_shell_command.getId() + " won't be shown in command palette.");
+						return false;
+					}
+
 					// Do not execute the command yet, but parse variables for preview, if enabled in the settings.
 					debugLog("Getting command palette preview for shell command #" + t_shell_command.getId());
 					if (this.settings.preview_variables_in_command_palette) {

@@ -4,7 +4,7 @@ import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommand
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
-import {PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
+import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
     generateIgnoredErrorCodesIconTitle,
@@ -197,6 +197,32 @@ export class ShellCommandExtraOptionsModal extends Modal {
     }
 
     private tabEvents(container_element: HTMLElement) {
+        // Command palette
+        new Setting(container_element)
+            .setName("Availability in Obsidian's command palette")
+            .addDropdown(dropdown => dropdown
+                .addOptions(CommandPaletteOptions)
+                .setValue(this.t_shell_command.getConfiguration().command_palette_availability)
+                .onChange(async (value: keyof ICommandPaletteOptions) => {
+
+                    // Store value
+                    this.t_shell_command.getConfiguration().command_palette_availability = value;
+
+                    // Update command palette
+                    if (this.t_shell_command.canAddToCommandPalette()) {
+                        // Register to command palette
+                        this.t_shell_command.registerToCommandPalette();
+                    } else {
+                        // Unregister from command palette
+                        this.t_shell_command.unregisterFromCommandPalette();
+                    }
+
+                    // Save
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
         // Events
         new Setting(container_element)
             .setName("Execute this shell command automatically on:")

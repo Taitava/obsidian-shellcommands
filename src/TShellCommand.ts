@@ -215,4 +215,34 @@ export class TShellCommand {
             this.registerSC_Event(sc_event);
         });
     }
+
+    public registerToCommandPalette(): void {
+        // TODO: Move the logic from plugin.registerShellCommand() to here, but split to multiple methods.
+        this.plugin.registerShellCommand(this);
+    }
+
+    public unregisterFromCommandPalette(): void {
+        // FIXME: I think the unregistering does not work.
+        delete this.plugin.obsidian_commands[this.getId()];
+    }
+
+    /**
+     * Checks the configuration for command_palette_availability and returns:
+     *  - true, if the value is "enabled" or "unlisted"
+     *  - false, if the value is "disabled"
+     *
+     * Adding to command palette also enables hotkeys, which is why adding can be permitted, but showing denied, if a shell command should only be available via hotkeys.
+     */
+    public canAddToCommandPalette(): boolean {
+        return this.getConfiguration().command_palette_availability !== "disabled";
+    }
+
+    /**
+     * Checks the configuration for command_palette_availability and returns:
+     *  - true, if the value is "enabled"
+     *  - false, if the value is "disabled" or "unlisted"
+     */
+    public canShowInCommandPalette(): boolean {
+        return this.getConfiguration().command_palette_availability === "enabled";
+    }
 }
