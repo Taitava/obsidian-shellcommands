@@ -11,8 +11,8 @@ import {cloneObject} from "../Common";
 export abstract class SC_Event {
     protected readonly plugin: ShellCommandsPlugin;
     protected readonly app: App;
-    protected readonly event_name: string;
-    protected readonly event_title: string;
+    protected abstract readonly event_name: string;
+    protected abstract readonly event_title: string;
     private event_registrations: {
         [key: string]: EventRef, // key: t_shell_command id
     } = {};
