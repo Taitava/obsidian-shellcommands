@@ -5,6 +5,7 @@ import {SC_Event_onActiveLeafChanged} from "./SC_Event_onActiveLeafChanged";
 import {SC_Event_EveryNSeconds} from "./SC_Event_EveryNSeconds";
 import {SC_Event_FileMenu} from "./SC_Event_FileMenu";
 import {SC_Event_FolderMenu} from "./SC_Event_FolderMenu";
+import {SC_Event_EditorMenu} from "./SC_Event_EditorMenu";
 
 export function getSC_Events(plugin: ShellCommandsPlugin) {
     if (undefined === getSC_Events.events) {
@@ -16,6 +17,7 @@ export function getSC_Events(plugin: ShellCommandsPlugin) {
             new SC_Event_EveryNSeconds(plugin),
             new SC_Event_FileMenu(plugin),
             new SC_Event_FolderMenu(plugin),
+            new SC_Event_EditorMenu(plugin),
         ];
     }
     return getSC_Events.events;
