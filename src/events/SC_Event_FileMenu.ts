@@ -5,6 +5,7 @@ import {Variable_EventFileName} from "../variables/event_variables/Variable_Even
 import {Variable_EventFilePath} from "../variables/event_variables/Variable_EventFilePath";
 import {Variable_EventFolderName} from "../variables/event_variables/Variable_EventFolderName";
 import {Variable_EventFolderPath} from "../variables/event_variables/Variable_EventFolderPath";
+import {Variable_EventTitle} from "../variables/event_variables/Variable_EventTitle";
 
 export class SC_Event_FileMenu extends SC_AbstractFileMenuEvent {
     protected readonly event_name = "file-menu";
@@ -17,6 +18,7 @@ export class SC_Event_FileMenu extends SC_AbstractFileMenuEvent {
             new Variable_EventFilePath(this.plugin, t_shell_command.getShell()).setFile(this.file),
             new Variable_EventFolderName(this.plugin, t_shell_command.getShell()).setFile(this.file),
             new Variable_EventFolderPath(this.plugin, t_shell_command.getShell()).setFile(this.file),
+            new Variable_EventTitle(this.plugin, t_shell_command.getShell()).setFile(this.file),
         ];
     }
 }
