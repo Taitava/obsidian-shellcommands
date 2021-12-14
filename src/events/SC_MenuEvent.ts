@@ -7,9 +7,11 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
     protected addTShellCommandToMenu(original_t_shell_command: TShellCommand, menu: Menu) {
         // Parse shell command variables and get a title
         let use_t_shell_command = original_t_shell_command
-        const preparsed_t_shell_command = original_t_shell_command.preparseVariables(this.declareExtraVariables(use_t_shell_command));
-        if (preparsed_t_shell_command) {
-            use_t_shell_command = preparsed_t_shell_command;
+        if (this.plugin.settings.preview_variables_in_command_palette) {
+            const preparsed_t_shell_command = original_t_shell_command.preparseVariables(this.declareExtraVariables(use_t_shell_command));
+            if (preparsed_t_shell_command) {
+                use_t_shell_command = preparsed_t_shell_command;
+            }
         }
 
         // Add a menu item.

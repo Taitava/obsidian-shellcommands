@@ -96,8 +96,8 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     {
         // "Preview variables in command palette" field
         new Setting(container_element)
-            .setName("Preview variables in command palette")
-            .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette. A nice way to ensure your commands will use correct values.")
+            .setName("Preview variables in command palette and menus")
+            .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette and right click context menus (if used). A nice way to ensure your commands will use correct values.")
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.preview_variables_in_command_palette)
                 .onChange(async (value: boolean) => {
