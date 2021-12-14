@@ -3,7 +3,7 @@ import {TShellCommand} from "../TShellCommand";
 
 export class SC_Event_onLayoutReady extends SC_Event {
     protected readonly event_name = "on-layout-ready";
-    protected readonly event_title = "After Obsidian has loaded";
+    protected readonly event_title = "After Obsidian starts";
 
     protected _register(t_shell_command: TShellCommand) {
         this.app.workspace.onLayoutReady(() => this.trigger(t_shell_command));
