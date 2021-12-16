@@ -93,6 +93,18 @@ export class ShellCommandExtraOptionsModal extends Modal {
             )
         ;
 
+        // Use selection as stdin?
+        new Setting(this.modalEl)
+            .setName("Use selection as stdin")
+            .setDesc("Use the current selection as the command's stdin stream. If nothing is selected, use the current editor line.")
+            .addToggle(toggle => toggle
+                .setValue(this.shell_command_configuration.selection_as_stdin)
+                .onChange(async (value) => {
+                    this.shell_command_configuration.selection_as_stdin = value;
+                })
+            )
+        ;
+
         // Ignore errors field
         new Setting(this.modalEl)
             .setName("Ignore error codes")

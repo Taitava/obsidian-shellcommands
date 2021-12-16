@@ -12,7 +12,8 @@ export interface ShellCommandConfiguration {
     output_channels: {
         stdout: OutputChannel,
         stderr: OutputChannel,
-    },
+    };
+    selection_as_stdin: boolean;
     output_channel_order: OutputChannelOrder;
 }
 
@@ -26,6 +27,7 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
             stdout: "ignore",
             stderr: "notification",
         },
+        selection_as_stdin: false,
         output_channel_order: "stdout-first",
     }
 }

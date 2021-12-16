@@ -1,5 +1,5 @@
 import {Command, Notice, Plugin} from 'obsidian';
-import {exec, ExecException} from "child_process";
+import {exec, spawn, ChildProcess, ExecException} from "child_process";
 import {cloneObject, getVaultAbsolutePath} from "./Common";
 import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
 import {RunMigrations} from "./Migrations";
@@ -14,6 +14,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
+import {Readable} from 'stream';
 
 export default class ShellCommandsPlugin extends Plugin {
 	settings: ShellCommandsPluginSettings;
@@ -226,42 +227,108 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Working directory is OK
 			// Execute the shell command
 			console.log("Executing command " + shell_command + " in " + working_directory + "...");
-			exec(shell_command, {
-				"cwd": working_directory
-			}, (error: ExecException|null, stdout: string, stderr: string) => {
-				if (null !== error) {
-					// Some error occurred
-					console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+			let child_process = spawn(shell_command, {
+				"shell": true,
+				"stdio": "pipe"
+			});
+			let output = "";
+			let error_output = "";
 
-					// Check if this error should be displayed to the user or not
-					if (shell_command_configuration.ignore_error_codes.contains(error.code)) {
-						// The user has ignored this error.
-						console.log("User has ignored this error, so won't display it.");
+			let stream = new Readable();
+			stream.pipe(child_process.stdin);
 
-						// Handle only stdout output stream
-						handleShellCommandOutput(this, shell_command_configuration, stdout, "", null);
-					} else {
-						// Show the error.
-						console.log("Will display the error to user.");
-
-						// Check that stderr actually contains an error message
-						if (!stderr.length) {
-							// Stderr is empty, so the error message is probably given by Node.js's child_process.
-							// Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
-							stderr = error.message;
-						}
-
-						// Handle both stdout and stderr output streams
-						handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error.code);
-					}
+			if (shell_command_configuration.selection_as_stdin) {
+				if (getSelection().toString() == "") {
+					console.log(getSelection());
+					console.log("sending foo");
+					// child_process.stdin.write("case 1");
 				} else {
-					// No errors
-					console.log("Command executed without errors.")
+					console.log(getSelection());
+					console.log("sending selection");
+					stream.push("case 2");
+					// child_process.stdin.write(getSelection().toString());
+				}
+			} else {
+				console.log(getSelection());
+				console.log("sending foo");
+				stream.push("case 3");
+			}
+			stream.push(null);
 
-					// Handle output
-					handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+			child_process.stdout.on("data", (data) => output = output + data);
+			child_process.stderr.on("data", (data) => error_output = error_output + data);
+			child_process.on("exit", (code, signal) => {
+				if (code != 0) {
+					// some error occurred
+					 console.log("Command executed and failed. Error number: " + code + ". Message: " + signal);
+
+					 // Check if this error should be displayed to the user or not
+					 if (shell_command_configuration.ignore_error_codes.contains(code)) {
+						   // The user has ignored this error.
+						   console.log("User has ignored this error, so won't display it.");
+
+						   // Handle only stdout output stream
+						   handleShellCommandOutput(this, shell_command_configuration, output, "", null);
+					 } else {
+						   // Show the error.
+						   console.log("Will display the error to user.");
+
+						   // Check that stderr actually contains an error message
+						   if (!error_output.length) {
+								 // Stderr is empty, so the error message is probably given by Node.js's child_process.
+								 // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
+								 error_output = signal;
+						   }
+
+						   // Handle both stdout and stderr output streams
+						   handleShellCommandOutput(this, shell_command_configuration, output, error_output, code);
+					 }
+				} else {
+					 // No errors
+					 console.log("Command executed without errors.")
+
+					 // Handle output
+					 handleShellCommandOutput(this, shell_command_configuration, output, error_output, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
 				}
 			});
+			// let child_process = exec(shell_command, {
+			// 	"cwd": working_directory,
+			// 	"windowsHide": true
+			// }, (error: ExecException|null, stdout: string, stderr: string) => {
+			// 	if (null !== error) {
+			// 		// Some error occurred
+			// 		console.log("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+			//
+			// 		// Check if this error should be displayed to the user or not
+			// 		if (shell_command_configuration.ignore_error_codes.contains(error.code)) {
+			// 			// The user has ignored this error.
+			// 			console.log("User has ignored this error, so won't display it.");
+			//
+			// 			// Handle only stdout output stream
+			// 			handleShellCommandOutput(this, shell_command_configuration, stdout, "", null);
+			// 		} else {
+			// 			// Show the error.
+			// 			console.log("Will display the error to user.");
+			//
+			// 			// Check that stderr actually contains an error message
+			// 			if (!stderr.length) {
+			// 				// Stderr is empty, so the error message is probably given by Node.js's child_process.
+			// 				// Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
+			// 				stderr = error.message;
+			// 			}
+			//
+			// 			// Handle both stdout and stderr output streams
+			// 			handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, error.code);
+			// 		}
+			// 	} else {
+			// 		// No errors
+			// 		console.log("Command executed without errors.")
+			//
+			// 		// Handle output
+			// 		handleShellCommandOutput(this, shell_command_configuration, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+			// 	}
+			// });
+
 		}
 	}
 
