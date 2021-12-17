@@ -5,7 +5,7 @@ import {extractFileName} from "../Common";
 
 export class ShellCommandVariable_Newline extends ShellCommandVariable {
     static variable_name = "newline";
-    static help_text = "A literal linebreak specific to your operating system. Use an optional :count argument if you want more than one.";
+    static help_text = "A literal linebreak specific to your operating system. Use an optional :count argument if you want more than one. PowerShell: This variable works more reliably if used within \" quotes \" .";
 
     protected static readonly parameters: IParameters = {
         count: {
