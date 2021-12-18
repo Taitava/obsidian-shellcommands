@@ -12,7 +12,6 @@ Features that are in development, but are not released yet. Does not include stu
 - [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119).
 - [`{{yaml_value}}` variable (#120)](https://github.com/Taitava/obsidian-shellcommands/issues/120).
 - [`{{file_extension}}` variable (#122)](https://github.com/Taitava/obsidian-shellcommands/issues/122).
-- [`{{newline}}` variable (#72)](https://github.com/Taitava/obsidian-shellcommands/issues/72).
 
 ### To be Fixed
 - [Fix: Autocomplete suggests variables when typing right after a closing }} pair (#129)](https://github.com/Taitava/obsidian-shellcommands/issues/129).
