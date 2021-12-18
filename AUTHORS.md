@@ -37,7 +37,8 @@ Contact:
 
 
 ## Vinay Rajur
- - Contributor
+ - Contributor:
+   - Created a new variable {{caret_position}} ([#114](https://github.com/Taitava/obsidian-shellcommands/discussions/114) / [#119](https://github.com/Taitava/obsidian-shellcommands/issues/119)).
  - Testing
  - Documentation
  - Ideas and Feedback
