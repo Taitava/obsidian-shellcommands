@@ -5,14 +5,15 @@ import {EOL} from "os";
 
 export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
     protected readonly title = "Status bar";
+    protected accepts_empty_output = true;
 
     private status_bar_element: HTMLElement;
 
-    public handle(output: OutputStreams) {
+    public _handle(output: OutputStreams) {
         const status_bar_element = this.getStatusBarElement();
 
         // Combine stdout and stderr (in case both of them happen to be present).
-        let stdout_and_stderr = joinObjectProperties(output, EOL + EOL).trim();
+        const stdout_and_stderr = joinObjectProperties(output, EOL + EOL).trim(); // Will be an empty string if 'output' is an empty object (i.e. no 'stdout' nor 'stderr').
 
         // Full output (shown when hovering with mouse)
         status_bar_element.setAttr("aria-label", stdout_and_stderr);
