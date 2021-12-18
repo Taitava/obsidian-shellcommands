@@ -7,13 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
+- Nothing at the moment.
+
+## [0.9.0] - 2021-12-18
+
+### Added
 
 - [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119).
 - [`{{yaml_value}}` variable (#120)](https://github.com/Taitava/obsidian-shellcommands/issues/120).
 - [`{{file_extension}}` variable (#122)](https://github.com/Taitava/obsidian-shellcommands/issues/122).
 
-### To be Fixed
+### Fixed
 - [Fix: Autocomplete suggests variables when typing right after a closing }} pair (#129)](https://github.com/Taitava/obsidian-shellcommands/issues/129).
 
 ## [0.8.0] - 2021-12-10
@@ -166,7 +170,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...0.7.0
