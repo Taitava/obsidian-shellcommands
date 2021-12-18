@@ -15,7 +15,6 @@ import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
 import {DEBUG_ON} from "../Debug";
 import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandVariable_Newline} from "./ShellCommandVariable_Newline";
 import {ShellCommandVariable_YAMLValue} from "./ShellCommandVariable_YAMLValue";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
@@ -28,7 +27,6 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
         new ShellCommandVariable_FilePath(plugin, shell),
         new ShellCommandVariable_FolderName(plugin, shell),
         new ShellCommandVariable_FolderPath(plugin, shell),
-        new ShellCommandVariable_Newline(plugin, shell),
         new ShellCommandVariable_Selection(plugin, shell),
         new ShellCommandVariable_Tags(plugin, shell),
         new ShellCommandVariable_Title(plugin, shell),
@@ -55,7 +53,6 @@ export function getVariableClasses() {
         ShellCommandVariable_FilePath,
         ShellCommandVariable_FolderName,
         ShellCommandVariable_FolderPath,
-        ShellCommandVariable_Newline,
         ShellCommandVariable_Selection,
         ShellCommandVariable_Tags,
         ShellCommandVariable_Title,
