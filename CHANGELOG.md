@@ -17,7 +17,7 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.8.0] - 2021-12-10
 
 ### Added
-- [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33): When typing `{{` in a shell command field, a dropdown menu will open up, suggesting variables that match the input after `{{`. Variable help texts are also displayed. Extra: custom suggestions can be defined in an optional `autocomplete.yaml` file in the plugin's folder. It can contain e.g. all commands supported by a certain shell. TODO: Add documentation link here. The autocomplete feature is powered by [kraaden/autocomplete](https://github.com/kraaden/autocomplete).
+- [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33): When typing `{{` in a shell command field, a dropdown menu will open up, suggesting variables that match the input after `{{`. Variable help texts are also displayed. Extra: custom suggestions can be defined in an optional `autocomplete.yaml` file in the plugin's folder. It can contain e.g. all commands supported by a certain shell. [Documentation for autocomplete](https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete). The autocomplete feature is powered by [kraaden/autocomplete](https://github.com/kraaden/autocomplete). Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!
 - [Show SC version number in settings, and a link to the changelog (#112)](https://github.com/Taitava/obsidian-shellcommands/issues/112).
 
 ### Changed
