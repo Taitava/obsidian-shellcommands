@@ -7,17 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
+- Nothing at the moment.
 
-- [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119).
+## [0.9.0] - 2021-12-18
+
+### Added
+
+- [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119). Thank you [vrajur](https://github.com/vrajur) for this contribution!
 - [`{{yaml_value}}` variable (#120)](https://github.com/Taitava/obsidian-shellcommands/issues/120).
 - [`{{file_extension}}` variable (#122)](https://github.com/Taitava/obsidian-shellcommands/issues/122).
-- [`{{newline}}` variable (#72)](https://github.com/Taitava/obsidian-shellcommands/issues/72).
+
+### Fixed
+- [Fix: Autocomplete suggests variables when typing right after a closing }} pair (#129)](https://github.com/Taitava/obsidian-shellcommands/issues/129).
 
 ## [0.8.0] - 2021-12-10
 
 ### Added
-- [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33): When typing `{{` in a shell command field, a dropdown menu will open up, suggesting variables that match the input after `{{`. Variable help texts are also displayed. Extra: custom suggestions can be defined in an optional `autocomplete.yaml` file in the plugin's folder. It can contain e.g. all commands supported by a certain shell. TODO: Add documentation link here. The autocomplete feature is powered by [kraaden/autocomplete](https://github.com/kraaden/autocomplete).
+- [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33): When typing `{{` in a shell command field, a dropdown menu will open up, suggesting variables that match the input after `{{`. Variable help texts are also displayed. Extra: custom suggestions can be defined in an optional `autocomplete.yaml` file in the plugin's folder. It can contain e.g. all commands supported by a certain shell. [Documentation for autocomplete](https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete). The autocomplete feature is powered by [kraaden/autocomplete](https://github.com/kraaden/autocomplete). Thank you [FelipeRearden](https://github.com/FelipeRearden) for this idea!
 - [Show SC version number in settings, and a link to the changelog (#112)](https://github.com/Taitava/obsidian-shellcommands/issues/112).
 
 ### Changed
@@ -164,7 +170,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...HEAD
+[0.9.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.0...0.7.1
 [0.7.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.6.1...0.7.0

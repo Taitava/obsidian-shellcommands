@@ -248,6 +248,11 @@ function get_search_query(typed_text: string): IAutocompleteSearchQuery {
     let search_text = typed_text.match(/\S*?$/)[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
     let search_type: AutocompleteSearchQueryType = "other"; // May be overwritten.
 
+    if (search_text.contains("}}")) {
+        // The query happens right after a {{variable}}.
+        // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
+        search_text = search_text.replace(/.+}}/, "");
+    }
     if (search_text.contains("{{")) {
         // A {{variable}} is being queried.
         // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
@@ -259,11 +264,6 @@ function get_search_query(typed_text: string): IAutocompleteSearchQuery {
             // A normal variable is searched for.
             search_type = "normal-variable";
         }
-    }
-    if (search_text.contains("}}")) {
-        // The query happens right after a {{variable}}.
-        // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
-        search_text = search_text.replace(/.+}}/, "");
     }
     return {
         search_text: search_text,

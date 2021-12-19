@@ -9,7 +9,42 @@ Contact:
  - https://github.com/Taitava
  - https://forum.obsidian.md/u/jare/
 
-TODO: Add FelipeRearden, skipadu and vrajur
+## Felipe Rearden
+ - Testing on macOS
+ - Ideas and feedback:
+   - [Alias names for commands (#6)](https://github.com/Taitava/obsidian-shellcommands/issues/6)
+   - [{{workspace}} variable (#14)](https://github.com/Taitava/obsidian-shellcommands/issues/14)
+   - [A new variable {{tags}}(#51)](https://github.com/Taitava/obsidian-shellcommands/issues/51)
+   - [Autocompletion menu for variables in shell command fields (#33)](https://github.com/Taitava/obsidian-shellcommands/issues/33)
+   <!-- Not implemented yet: - [Output channel: Insert output to another note](https://github.com/Taitava/obsidian-shellcommands/discussions/16#discussioncomment-1342069) --> 
+   <!-- Not implemented yet: - [Output channel: Store output into a custom variable](https://github.com/Taitava/obsidian-shellcommands/discussions/127) --> 
+
+Contact:
+ - https://github.com/FelipeRearden
+
+## skipadu
+ - Testing on macOS
+
+Contact:
+ - https://github.com/skipadu
+
+## Troberg
+ - Ideas and feedback:
+   - [Output channel: Output to current note, caret position](https://github.com/Taitava/obsidian-shellcommands/discussions/16#discussioncomment-1390353)
+
+Contact:
+ - https://github.com/Troberg
+
+
+## Vinay Rajur
+ - Contributor:
+   - Created a new variable {{caret_position}} ([#114](https://github.com/Taitava/obsidian-shellcommands/discussions/114) / [#119](https://github.com/Taitava/obsidian-shellcommands/issues/119)).
+ - Testing
+ - Documentation
+ - Ideas and Feedback
+
+Contact:
+ - https://github.com/vrajur
 
 <!-- ADDING YOURSELF AS AN AUTHOR:
 

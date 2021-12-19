@@ -1,6 +1,8 @@
 import {ShellCommandVariable} from "./ShellCommandVariable";
 import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
+import {ShellCommandVariable_CaretPosition} from "./ShellCommandVariable_CaretPosition";
 import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
+import {ShellCommandVariable_FileExtension} from "./ShellCommandVariable_FileExtension";
 import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
 import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
 import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
@@ -13,11 +15,14 @@ import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
 import {DEBUG_ON} from "../Debug";
 import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
 import ShellCommandsPlugin from "../main";
+import {ShellCommandVariable_YAMLValue} from "./ShellCommandVariable_YAMLValue";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
     let shell_command_variables: ShellCommandVariable[] = [
         new ShellCommandVariable_Clipboard(plugin, shell),
+        new ShellCommandVariable_CaretPosition(plugin, shell),
         new ShellCommandVariable_Date(plugin, shell),
+        new ShellCommandVariable_FileExtension(plugin, shell),
         new ShellCommandVariable_FileName(plugin, shell),
         new ShellCommandVariable_FilePath(plugin, shell),
         new ShellCommandVariable_FolderName(plugin, shell),
@@ -27,6 +32,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
         new ShellCommandVariable_Title(plugin, shell),
         new ShellCommandVariable_VaultPath(plugin, shell),
         new ShellCommandVariable_Workspace(plugin, shell),
+        new ShellCommandVariable_YAMLValue(plugin, shell),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
@@ -40,7 +46,9 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
 export function getVariableClasses() {
     let shell_command_variables = [
         ShellCommandVariable_Clipboard,
+        ShellCommandVariable_CaretPosition,
         ShellCommandVariable_Date,
+        ShellCommandVariable_FileExtension,
         ShellCommandVariable_FileName,
         ShellCommandVariable_FilePath,
         ShellCommandVariable_FolderName,
@@ -50,6 +58,7 @@ export function getVariableClasses() {
         ShellCommandVariable_Title,
         ShellCommandVariable_VaultPath,
         ShellCommandVariable_Workspace,
+        ShellCommandVariable_YAMLValue,
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.

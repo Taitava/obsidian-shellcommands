@@ -6,7 +6,7 @@ import {debugLog} from "../Debug";
 
 export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
 
-    public handle(output: OutputStreams) {
+    protected _handle(output: OutputStreams) {
         let editor = getEditor(this.app);
         let view = getView(this.app);
 

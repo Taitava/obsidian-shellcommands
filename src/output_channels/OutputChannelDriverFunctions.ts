@@ -63,8 +63,10 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
         };
     } else {
         // Neither stdout nor stderr have content
-        // Do nothing
-        return;
+        // Provide empty output, some output channels will process it, while other will just ignore it.
+        output = {
+            "stdout": "",
+        };
     }
 
     // Should stderr be processed same time with stdout?
