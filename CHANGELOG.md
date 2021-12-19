@@ -13,7 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### Added
 
-- [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119).
+- [`{{caret_position}}` variable (#119)](https://github.com/Taitava/obsidian-shellcommands/issues/119). Thank you [vrajur](https://github.com/vrajur) for this contribution!
 - [`{{yaml_value}}` variable (#120)](https://github.com/Taitava/obsidian-shellcommands/issues/120).
 - [`{{file_extension}}` variable (#122)](https://github.com/Taitava/obsidian-shellcommands/issues/122).
 
