@@ -112,17 +112,17 @@ export class TShellCommand {
     }
 
     public getEventConfiguration(sc_event: SC_Event) {
-        return this.getEventsConfiguration()[sc_event.getName()] || sc_event.getDefaultConfiguration(false);
+        return this.getEventsConfiguration()[sc_event.getCode()] || sc_event.getDefaultConfiguration(false);
     }
 
-    public isSC_EventEnabled(event_name: string) {
+    public isSC_EventEnabled(event_code: string) {
         const events_configuration =  this.getEventsConfiguration();
-        if (undefined === events_configuration[event_name]) {
+        if (undefined === events_configuration[event_code]) {
             // Not enabled
             return false;
         } else {
             // Maybe enabled
-            return events_configuration[event_name].enabled;
+            return events_configuration[event_code].enabled;
         }
     }
 
@@ -133,16 +133,16 @@ export class TShellCommand {
      * @param sc_event
      */
     public enableSC_Event(sc_event: SC_Event) {
-        const event_name = sc_event.getName();
+        const event_code = sc_event.getCode();
         const events_configuration =  this.getEventsConfiguration();
-        if (undefined === events_configuration[event_name]) {
+        if (undefined === events_configuration[event_code]) {
             // Not enabled
             // Enable
-            events_configuration[event_name] = sc_event.getDefaultConfiguration(true);
+            events_configuration[event_code] = sc_event.getDefaultConfiguration(true);
         } else {
             // Maybe enabled
-            if (!events_configuration[event_name].enabled) {
-                events_configuration[event_name].enabled = true;
+            if (!events_configuration[event_code].enabled) {
+                events_configuration[event_code].enabled = true;
             }
         }
         if (sc_event.canRegisterAfterChangingSettings()) {
@@ -157,22 +157,22 @@ export class TShellCommand {
      * @param sc_event
      */
     public disableSC_Event(sc_event: SC_Event) {
-        const event_name = sc_event.getName();
+        const event_code = sc_event.getCode();
         const events_configuration =  this.getEventsConfiguration();
-        if (undefined !== events_configuration[event_name]) {
+        if (undefined !== events_configuration[event_code]) {
             // Maybe enabled
-            if (events_configuration[event_name].enabled) {
+            if (events_configuration[event_code].enabled) {
                 // Is enabled.
                 // Disable.
-                const configuration_property_names = Object.getOwnPropertyNames(events_configuration[event_name]);
+                const configuration_property_names = Object.getOwnPropertyNames(events_configuration[event_code]);
                 if (configuration_property_names.length > 1) {
                     // There's more settings than just 'enable'.
                     // Disable by setting 'enable' to false, don't flush the settings, they can be useful if the event gets re-enabled.
-                    events_configuration[event_name].enabled = false;
+                    events_configuration[event_code].enabled = false;
                 } else {
                     // 'enabled' is the only setting.
                     // Disable by removing the configuration object completely to make the settings file cleaner.
-                    delete events_configuration[event_name];
+                    delete events_configuration[event_code];
                 }
             }
         }
@@ -189,7 +189,7 @@ export class TShellCommand {
     private getSC_Events(): SC_Event[] {
         const enabled_sc_events: SC_Event[] = [];
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
-            if (this.isSC_EventEnabled(sc_event.getName())) {
+            if (this.isSC_EventEnabled(sc_event.getCode())) {
                 enabled_sc_events.push(sc_event);
             }
         });

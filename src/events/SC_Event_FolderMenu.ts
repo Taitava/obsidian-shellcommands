@@ -5,7 +5,7 @@ import {Variable_EventFolderName} from "../variables/event_variables/Variable_Ev
 import {Variable_EventFolderPath} from "../variables/event_variables/Variable_EventFolderPath";
 
 export class SC_Event_FolderMenu extends SC_AbstractFileMenuEvent {
-    protected readonly event_name = "folder-menu";
+    protected readonly event_code = "folder-menu";
     protected readonly event_title = "Folder menu";
     protected file_or_folder: "folder" = "folder";
 

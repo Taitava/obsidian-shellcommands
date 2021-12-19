@@ -5,7 +5,7 @@ import {Notice, Setting} from "obsidian";
 
 
 export class SC_Event_EveryNSeconds extends SC_Event {
-    protected readonly event_name = "every-n-seconds";
+    protected readonly event_code = "every-n-seconds";
     protected readonly event_title = "Every n seconds";
     protected default_configuration: Configuration = {
         enabled: false,

@@ -229,7 +229,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setHeading() // Make the name bold
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
-            const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.getName());
+            const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.getCode());
             const summary_of_extra_variables = sc_event.getSummaryOfExtraVariables(this.t_shell_command);
             new Setting(container_element)
                 .setName(sc_event.getTitle())

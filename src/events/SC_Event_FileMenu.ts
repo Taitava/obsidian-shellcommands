@@ -8,7 +8,7 @@ import {Variable_EventFolderPath} from "../variables/event_variables/Variable_Ev
 import {Variable_EventTitle} from "../variables/event_variables/Variable_EventTitle";
 
 export class SC_Event_FileMenu extends SC_AbstractFileMenuEvent {
-    protected readonly event_name = "file-menu";
+    protected readonly event_code = "file-menu";
     protected readonly event_title = "File menu";
     protected file_or_folder: "file" = "file";
 

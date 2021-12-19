@@ -12,7 +12,7 @@ import {ShellCommandVariable} from "../variables/ShellCommandVariable";
 export abstract class SC_Event {
     protected readonly plugin: ShellCommandsPlugin;
     protected readonly app: App;
-    protected abstract readonly event_name: string;
+    protected abstract readonly event_code: string;
     protected abstract readonly event_title: string;
 
     /**
@@ -93,8 +93,8 @@ export abstract class SC_Event {
         }
     }
 
-    public getName() {
-        return this.event_name;
+    public getCode() {
+        return this.event_code;
     }
 
     public getTitle() {
