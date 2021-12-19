@@ -14,6 +14,16 @@ export abstract class SC_Event {
     protected readonly app: App;
     protected abstract readonly event_name: string;
     protected abstract readonly event_title: string;
+
+    /**
+     * If true, changing the enabled/disabled status of the event permits registering the event immediately, so it can activate
+     * anytime. Usually true, but can be set to false if immediate registering tends to trigger the event unnecessarily.
+     *
+     * Events are always registered when loading the plugin, regardless of this property.
+     * @protected
+     */
+    protected register_after_changing_settings = true;
+
     private event_registrations: {
         [key: string]: EventRef, // key: t_shell_command id
     } = {};
@@ -24,6 +34,10 @@ export abstract class SC_Event {
     public constructor(plugin: ShellCommandsPlugin) {
         this.plugin = plugin;
         this.app = plugin.app;
+    }
+
+    public canRegisterAfterChangingSettings(): boolean {
+        return this.register_after_changing_settings;
     }
 
     public register(t_shell_command: TShellCommand) {

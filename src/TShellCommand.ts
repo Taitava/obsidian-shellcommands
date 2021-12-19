@@ -127,6 +127,7 @@ export class TShellCommand {
     }
 
     /**
+     * Called when changing event settings in ShellCommandExtraOptionsModal.
      * plugin.saveSettings() needs to be called after this!
      *
      * @param sc_event
@@ -144,10 +145,13 @@ export class TShellCommand {
                 events_configuration[event_name].enabled = true;
             }
         }
-        this.registerSC_Event(sc_event)
+        if (sc_event.canRegisterAfterChangingSettings()) {
+            this.registerSC_Event(sc_event);
+        }
     }
 
     /**
+     * Called when changing event settings in ShellCommandExtraOptionsModal.
      * plugin.saveSettings() needs to be called after this!
      *
      * @param sc_event
@@ -172,7 +176,9 @@ export class TShellCommand {
                 }
             }
         }
-        this.unregisterSC_Event(sc_event);
+        if (sc_event.canRegisterAfterChangingSettings()) {
+            this.unregisterSC_Event(sc_event);
+        }
     }
 
     /**
