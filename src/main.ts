@@ -61,17 +61,17 @@ export default class ShellCommandsPlugin extends Plugin {
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
 
-		// Shell command registrations:
-		//  - Make all defined shell commands to appear in the Obsidian command palette.
-		//  - Perform event registrations.
+		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
 		for (let shell_command_id in shell_commands) {
 			const t_shell_command = shell_commands[shell_command_id];
 			if (t_shell_command.canAddToCommandPalette()) {
 				this.registerShellCommand(t_shell_command);
 			}
-			t_shell_command.registerSC_Events();
 		}
+
+		// Perform event registrations.
+		this.registerSC_Events();
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
@@ -185,6 +185,22 @@ export default class ShellCommandsPlugin extends Plugin {
 		this.addCommand(obsidian_command)
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
 		debugLog("Registered.")
+	}
+
+	private registerSC_Events() {
+		// Make sure that Obsidian is fully loaded before allowing any events to trigger.
+		this.app.workspace.onLayoutReady(() => {
+			// Even after Obsidian is fully loaded, wait a while in order to prevent SC_Event_onActiveLeafChanged triggering right after start-up.
+			// At least on Obsidian 0.12.19 it's not enough to delay until onLayoutReady, need to wait a bit more in order to avoid the miss-triggering.
+			window.setTimeout(() => { // setTimeout() should not need registering to Obsidian API, I guess.
+				// Iterate all shell commands and register possible events.
+				const shell_commands = this.getTShellCommands();
+				for (const shell_command_id in shell_commands) {
+					const t_shell_command = shell_commands[shell_command_id];
+					t_shell_command.registerSC_Events();
+				}
+			}, 0); // 0 means to call the callback on "the next event cycle", according to window.setTimeout() documentation. It should be a long enough delay. But if SC_Event_onActiveLeafChanged still gets triggered during start-up, this value can be raised to for example 1000 (= one second).
+		});
 	}
 
 	/**
