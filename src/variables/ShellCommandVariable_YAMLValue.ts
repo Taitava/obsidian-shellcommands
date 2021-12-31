@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_YAMLValue extends ShellCommandVariable {
@@ -117,8 +116,3 @@ export class ShellCommandVariable_YAMLValue extends ShellCommandVariable {
     }
 
 }
-
-addShellCommandVariableInstructions(
-    "{{yaml_value}}",
-    ShellCommandVariable_YAMLValue.help_text,
-);

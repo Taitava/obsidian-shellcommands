@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {getFileExtension} from "./VariableHelpers";
@@ -60,8 +59,7 @@ export class ShellCommandVariable_FileExtension extends ShellCommandFileVariable
         ];
     }
 
+    public getHelpName(): string {
+        return "<strong>{{file_extension:with-dot}}</strong> or <strong>{{file_extension:no-dot}}</strong>";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{file_extension:with-dot}} or {{file_extension:no-dot}}",
-    ShellCommandVariable_FileExtension.help_text,
-);

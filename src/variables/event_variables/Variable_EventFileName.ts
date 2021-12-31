@@ -1,6 +1,5 @@
 import {EventVariable} from "./EventVariable";
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 
 export class Variable_EventFileName extends EventVariable {
     static variable_name = "event_file_name";
@@ -18,7 +17,3 @@ export class Variable_EventFileName extends EventVariable {
         return (this.sc_event as SC_Event_FileMenu).getFile().name;
     }
 }
-addShellCommandVariableInstructions(
-    "{{event_file_name}}",
-    Variable_EventFileName.help_text,
-);

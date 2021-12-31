@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {moment} from "obsidian";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 
@@ -21,7 +20,3 @@ export class ShellCommandVariable_Date extends ShellCommandVariable {
         return moment().format(this.arguments.format);
     }
 }
-addShellCommandVariableInstructions(
-    "{{date:format}}",
-    ShellCommandVariable_Date.help_text,
-);

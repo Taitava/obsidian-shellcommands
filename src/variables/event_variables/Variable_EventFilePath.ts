@@ -3,7 +3,6 @@ import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {getFilePath} from "../VariableHelpers";
 import {TFile} from "obsidian";
 import {IParameters} from "../ShellCommandVariable";
-import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFilePath extends EventVariable {
@@ -65,8 +64,8 @@ export class Variable_EventFilePath extends EventVariable {
             },
         ];
     }
+
+    public getHelpName(): string {
+        return "<strong>{{event_file_path:relative}}</strong> or <strong>{{event_file_path:absolute}}</strong>";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{event_file_path:relative}} or {{event_file_path:absolute}}",
-    Variable_EventFilePath.help_text,
-);

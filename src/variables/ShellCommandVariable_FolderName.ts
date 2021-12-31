@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandFolderVariable} from "./ShellCommandFolderVariable";
 
 export class ShellCommandVariable_FolderName extends ShellCommandFolderVariable {
@@ -13,7 +12,3 @@ export class ShellCommandVariable_FolderName extends ShellCommandFolderVariable 
         return folder.name;
     }
 }
-addShellCommandVariableInstructions(
-    "{{folder_name}}",
-    ShellCommandVariable_FolderName.help_text,
-);

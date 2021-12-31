@@ -1,6 +1,4 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
-import {DEBUG_ON} from "../Debug";
 
 export class ShellCommandVariable_Passthrough extends ShellCommandVariable {
     static variable_name = "passthrough";
@@ -21,12 +19,4 @@ export class ShellCommandVariable_Passthrough extends ShellCommandVariable {
         // Simply return the argument that was received.
         return this.arguments.value;
     }
-}
-if (DEBUG_ON) {
-    // FIXME: Adding instructions does not work because DEBUG_ON is false before settings are loaded.
-    // Fix by refactoring variables so that the instruction definition is a method in the variable class.
-    addShellCommandVariableInstructions(
-        "{{passthrough:value}}",
-        ShellCommandVariable_Passthrough.help_text,
-    );
 }

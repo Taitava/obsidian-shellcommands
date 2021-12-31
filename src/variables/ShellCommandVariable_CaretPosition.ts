@@ -1,5 +1,4 @@
 import {getEditor} from "../Common";
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
@@ -90,9 +89,8 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
             },
         ];
     }
-}
 
-addShellCommandVariableInstructions(
-    "{{caret_position}}, {{caret_position:line}} or {{caret_position:column}}",
-    ShellCommandVariable_CaretPosition.help_text,
-);
+    public getHelpName(): string {
+        return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
+    }
+}

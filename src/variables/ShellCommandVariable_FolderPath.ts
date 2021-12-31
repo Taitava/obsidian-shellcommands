@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {ShellCommandFolderVariable} from "./ShellCommandFolderVariable";
@@ -59,8 +58,8 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
             },
         ];
     }
+
+    public getHelpName(): string {
+        return "<strong>{{folder_path:relative}}</strong> or <strong>{{folder_path:absolute}}</strong>";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{folder_path:relative}} or {{folder_path:absolute}}",
-    ShellCommandVariable_FolderPath.help_text,
-);

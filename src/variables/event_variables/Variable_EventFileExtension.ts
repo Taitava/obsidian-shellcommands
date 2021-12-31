@@ -3,7 +3,6 @@ import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {getFileExtension} from "../VariableHelpers";
 import {IParameters} from "../ShellCommandVariable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
-import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 
 export class Variable_EventFileExtension extends EventVariable {
     static variable_name = "event_file_extension";
@@ -64,8 +63,9 @@ export class Variable_EventFileExtension extends EventVariable {
             },
         ];
     }
+
+    public getHelpName(): string {
+        return "<strong>{{event_file_extension:with-dot}}</strong> or <strong>{{event_file_extension:no-dot}}</strong>";
+    }
+
 }
-addShellCommandVariableInstructions(
-    "{{event_file_extension:with-dot}} or {{event_file_extension:no-dot}}",
-    Variable_EventFileExtension.help_text,
-);

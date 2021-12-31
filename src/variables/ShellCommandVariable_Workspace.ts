@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
 export class ShellCommandVariable_Workspace extends ShellCommandVariable{
@@ -29,7 +28,3 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
         return workspace_name;
     }
 }
-addShellCommandVariableInstructions(
-    "{{workspace}}",
-    ShellCommandVariable_Workspace.help_text,
-);

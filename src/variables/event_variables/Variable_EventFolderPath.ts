@@ -4,7 +4,6 @@ import {EventVariable} from "./EventVariable";
 import {getFolderPath} from "../VariableHelpers";
 import {IParameters} from "../ShellCommandVariable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
-import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 
 export class Variable_EventFolderPath extends EventVariable {
     static variable_name = "event_folder_path";
@@ -66,8 +65,8 @@ export class Variable_EventFolderPath extends EventVariable {
             },
         ];
     }
+
+    public getHelpName(): string {
+        return "<strong>{{event_folder_path:relative}}</strong> or <strong>{{event_folder_path:absolute}}</strong>";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{event_folder_path:relative}} or {{event_folder_path:absolute}}",
-    Variable_EventFolderPath.help_text,
-);

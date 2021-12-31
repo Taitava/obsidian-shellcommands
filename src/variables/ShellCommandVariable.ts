@@ -201,4 +201,13 @@ export abstract class ShellCommandVariable {
             },
         ];
     }
+
+    public getHelpName() {
+        return "<strong>{{" + this.getVariableName() + "}}</strong>";
+    }
+
+    public getHelpText() {
+        const child_class = this.constructor as typeof ShellCommandVariable;
+        return child_class.help_text;
+    }
 }

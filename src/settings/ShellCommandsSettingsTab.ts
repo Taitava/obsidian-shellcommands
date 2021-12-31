@@ -1,7 +1,6 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
-import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
@@ -13,6 +12,8 @@ import {
     GitHubLink,
     ChangelogLink,
 } from "../Documentation";
+import {getVariables} from "../variables/VariableLists";
+import {ShellCommandVariable} from "../variables/ShellCommandVariable";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -151,13 +152,15 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             )
         ;
 
-        getShellCommandVariableInstructions().forEach((instructions) => {
-            let paragraph = container_element.createEl("p");
-            // @ts-ignore
-            paragraph.createEl("strong", {text: instructions.variable_name + " "});
-            // @ts-ignore
-            paragraph.createEl("span", {text: instructions.instructions});
+        const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
+        const table = container_element.createEl("table");
+        const table_body = table.createTBody();
+        variables.forEach((variable: ShellCommandVariable) => {
+            const table_row = table_body.createEl("tr");
+            const table_cell_description = table_row.createEl("td");
+            table_cell_description.insertAdjacentHTML("afterbegin", variable.getHelpName() + "<br>" + variable.getHelpText());
         });
+
         container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."});
         container_element.createEl("p", {text: "Special characters in variable values are tried to be escaped (except if you use CMD as the shell in Windows). This is to improve security so that a variable won't accidentally cause bad things to happen. If you want to use a raw, unescaped value, add an exclamation mark before the variable's name, e.g. {{!title}}, but be careful, it's dangerous!"});
         container_element.createEl("p", {text: "There is no way to prevent variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."});

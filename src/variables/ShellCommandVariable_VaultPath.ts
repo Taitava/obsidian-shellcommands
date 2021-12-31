@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {getVaultAbsolutePath} from "../Common";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 
@@ -10,7 +9,3 @@ export class ShellCommandVariable_VaultPath extends ShellCommandVariable{
         return getVaultAbsolutePath(this.app);
     }
 }
-addShellCommandVariableInstructions(
-    "{{vault_path}}",
-    ShellCommandVariable_VaultPath.help_text,
-);

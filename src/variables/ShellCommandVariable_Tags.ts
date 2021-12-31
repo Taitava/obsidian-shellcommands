@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
 import {getAllTags} from "obsidian";
 import {uniqueArray} from "../Common";
@@ -38,7 +37,3 @@ export class ShellCommandVariable_Tags extends ShellCommandVariable {
         }
     }
 }
-addShellCommandVariableInstructions(
-    "{{tags:separator}}",
-    ShellCommandVariable_Tags.help_text,
-);

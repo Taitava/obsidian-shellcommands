@@ -1,5 +1,4 @@
 import {getEditor, getView} from "../Common";
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandVariable} from "./ShellCommandVariable";
 import {debugLog} from "../Debug";
 
@@ -48,7 +47,3 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
         }
     }
 }
-addShellCommandVariableInstructions(
-    "{{selection}}",
-    ShellCommandVariable_Selection.help_text,
-);

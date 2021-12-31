@@ -1,4 +1,3 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
 import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
 
 export class ShellCommandVariable_FileName extends ShellCommandFileVariable {
@@ -13,7 +12,3 @@ export class ShellCommandVariable_FileName extends ShellCommandFileVariable {
         return file.name;
     }
 }
-addShellCommandVariableInstructions(
-    "{{file_name}}",
-    ShellCommandVariable_FileName.help_text,
-);

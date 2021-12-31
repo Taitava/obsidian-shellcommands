@@ -1,7 +1,6 @@
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {SC_Event_FolderMenu} from "../../events/SC_Event_FolderMenu";
 import {EventVariable} from "./EventVariable";
-import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 
 export class Variable_EventFolderName extends EventVariable {
     static variable_name = "event_folder_name";
@@ -21,7 +20,3 @@ export class Variable_EventFolderName extends EventVariable {
         return folder.name;
     }
 }
-addShellCommandVariableInstructions(
-    "{{event_folder_name}}",
-    Variable_EventFolderName.help_text,
-);
