@@ -68,7 +68,7 @@ export abstract class SC_Event {
     protected abstract _unregister(event_reference: EventRef): void;
 
     /**
-     * Executes all shell commands that are assigned to this event.
+     * Executes a shell command.
      */
     protected trigger(t_shell_command: TShellCommand) {
         // Parse variables
