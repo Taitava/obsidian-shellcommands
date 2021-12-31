@@ -210,4 +210,11 @@ export abstract class ShellCommandVariable {
         const child_class = this.constructor as typeof ShellCommandVariable;
         return child_class.help_text;
     }
+
+    /**
+     * For variables that are always available, returns an empty string.
+     */
+    public getAvailabilityText() {
+        return "";
+    }
 }

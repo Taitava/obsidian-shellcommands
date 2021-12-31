@@ -4,7 +4,7 @@ import {debugLog} from "../Debug";
 
 export class ShellCommandVariable_Selection extends ShellCommandVariable{
     static variable_name = "selection";
-    static help_text = "Gives the currently selected text. Atm only works in editing mode, not in preview mode!";
+    static help_text = "Gives the currently selected text.";
 
     generateValue(): string {
 
@@ -45,5 +45,9 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
                 Error("ShellCommandVariable_Selection: Unrecognised view mode: "+view_mode);
                 break;
         }
+    }
+
+    public getAvailabilityText(): string {
+        return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
     }
 }

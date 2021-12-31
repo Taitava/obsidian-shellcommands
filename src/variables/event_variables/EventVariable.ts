@@ -28,13 +28,13 @@ export abstract class EventVariable extends ShellCommandVariable {
     protected checkSC_EventSupport(): boolean{
         // 1. Check generally that an event is happening.
         if (!this.sc_event) {
-            this.newErrorMessage("This variable can only be used during events. " + this.getSummaryOfSupportedEvents());
+            this.newErrorMessage("This variable can only be used during events. Supported events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
 
         // 2. Check particularly which event it is.
         if (!this.supportsSC_Event(this.sc_event.getClass())) {
-            this.newErrorMessage("This variable does not support event '" + this.sc_event.getTitle() + "'. " + this.getSummaryOfSupportedEvents());
+            this.newErrorMessage("This variable does not support event '" + this.sc_event.getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
         return true;
@@ -49,6 +49,10 @@ export abstract class EventVariable extends ShellCommandVariable {
         this.supported_sc_events.forEach((sc_event_class: typeof SC_Event) => {
             sc_event_titles.push(getSC_Event(this.plugin,sc_event_class).getTitle());
         });
-        return "Supported events: " + sc_event_titles.join(", ");
+        return sc_event_titles.join(", ");
+    }
+
+    public getAvailabilityText(): string {
+        return "<strong>Only available</strong> in events: " + this.getSummaryOfSupportedEvents() + ".";
     }
 }

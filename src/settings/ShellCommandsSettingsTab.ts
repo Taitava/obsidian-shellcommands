@@ -153,12 +153,17 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
-        const table = container_element.createEl("table");
-        const table_body = table.createTBody();
         variables.forEach((variable: ShellCommandVariable) => {
-            const table_row = table_body.createEl("tr");
-            const table_cell_description = table_row.createEl("td");
-            table_cell_description.insertAdjacentHTML("afterbegin", variable.getHelpName() + "<br>" + variable.getHelpText());
+            const paragraph = container_element.createEl("p");
+            paragraph.insertAdjacentHTML("afterbegin",
+                variable.getHelpName() +
+                "<br>" +
+                variable.getHelpText()
+            );
+            const availability_text: string = variable.getAvailabilityText();
+            if (availability_text) {
+                paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+            }
         });
 
         container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."});
