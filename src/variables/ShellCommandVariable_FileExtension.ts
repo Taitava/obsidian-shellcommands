@@ -1,8 +1,10 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {getFileExtension} from "./VariableHelpers";
+import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
 
-export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
+export class ShellCommandVariable_FileExtension extends ShellCommandFileVariable {
     static variable_name = "file_extension";
     static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
@@ -18,24 +20,12 @@ export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
     }
 
     generateValue(): string {
-        let file = this.app.workspace.getActiveFile();
+        const file = this.getFile();
         if (!file) {
-            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
-        const file_extension = file.extension;
 
-        // Should the extension be given with or without a dot?
-        if (this.arguments.dot === "with-dot") {
-            // A preceding dot must be included.
-            if (file_extension.length > 0) {
-                // But only if the extension is not empty.
-                return "." + file_extension;
-            }
-        }
-
-        // No dot should be included, or the extension is empty
-        return file_extension;
+        return getFileExtension(file, this.arguments.dot === "with-dot");
     }
 
     public static getAutocompleteItems() {

@@ -39,3 +39,25 @@ export function getFilePath(app: App, file: TFile, mode: "absolute" | "relative"
             return normalizePath2(file.path); // Normalize to get a correct slash depending on platform. On Windows it should be \ .
     }
 }
+
+
+/**
+ * TODO: Consider creating a decorator class for TFile and moving this function to be a method in it.
+ * @param file
+ * @param with_dot
+ */
+export function getFileExtension(file: TFile, with_dot: boolean) {
+    const file_extension = file.extension;
+
+    // Should the extension be given with or without a dot?
+    if (with_dot) {
+        // A preceding dot must be included.
+        if (file_extension.length > 0) {
+            // But only if the extension is not empty.
+            return "." + file_extension;
+        }
+    }
+
+    // No dot should be included, or the extension is empty
+    return file_extension;
+}

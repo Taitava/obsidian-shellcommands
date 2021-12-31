@@ -22,6 +22,7 @@ import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
 import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
 import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPath";
 import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
+import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
     let shell_command_variables: ShellCommandVariable[] = [
@@ -42,6 +43,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
         new ShellCommandVariable_YAMLValue(plugin, shell),
 
         // Event variables
+        new Variable_EventFileExtension(plugin, shell, sc_event),
         new Variable_EventFileName(plugin, shell, sc_event),
         new Variable_EventFilePath(plugin, shell, sc_event),
         new Variable_EventFolderName(plugin, shell, sc_event),
