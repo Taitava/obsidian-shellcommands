@@ -61,6 +61,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
 
 export function getVariableClasses() {
     let shell_command_variables = [
+        // Normal variables
         ShellCommandVariable_Clipboard,
         ShellCommandVariable_CaretPosition,
         ShellCommandVariable_Date,
@@ -75,6 +76,14 @@ export function getVariableClasses() {
         ShellCommandVariable_VaultPath,
         ShellCommandVariable_Workspace,
         ShellCommandVariable_YAMLValue,
+
+        // Event variables
+        Variable_EventFileExtension,
+        Variable_EventFileName,
+        Variable_EventFilePath,
+        Variable_EventFolderName,
+        Variable_EventFolderPath,
+        Variable_EventTitle,
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.

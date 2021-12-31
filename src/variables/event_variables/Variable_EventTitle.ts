@@ -1,8 +1,10 @@
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {EventVariable} from "./EventVariable";
+import {addShellCommandVariableInstructions} from "../ShellCommandVariableInstructions";
 
 export class Variable_EventTitle extends EventVariable {
     static variable_name = "event_title";
+    static help_text = "Gives the current file name without a file extension. If you need it with the extension, use {{event_file_name}} instead.";
 
     protected supported_sc_events = [
         SC_Event_FileMenu,
@@ -16,3 +18,7 @@ export class Variable_EventTitle extends EventVariable {
         return (this.sc_event as SC_Event_FileMenu).getFile().basename;
     }
 }
+addShellCommandVariableInstructions(
+    "{{event_title}}",
+    Variable_EventTitle.help_text,
+);
