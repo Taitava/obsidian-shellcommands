@@ -1,6 +1,7 @@
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters} from "./ShellCommandVariable";
+import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
 
-export class ShellCommandVariable_YAMLValue extends ShellCommandVariable {
+export class ShellCommandVariable_YAMLValue extends ShellCommandFileVariable {
     static variable_name = "yaml_value";
     static help_text = "Reads a single value from the current file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
 
@@ -30,7 +31,7 @@ export class ShellCommandVariable_YAMLValue extends ShellCommandVariable {
             return null;
         }
 
-        const active_file = this.app.workspace.getActiveFile();
+        const active_file = this.getFile();
         if (active_file) {
             // We do have an active file
             const frontmatter = this.app.metadataCache.getFileCache(active_file)?.frontmatter;
@@ -46,7 +47,6 @@ export class ShellCommandVariable_YAMLValue extends ShellCommandVariable {
             }
         } else {
             // No file is active at the moment
-            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
 
