@@ -27,8 +27,8 @@ import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileE
 export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
     let shell_command_variables: ShellCommandVariable[] = [
         // Normal variables
-        new ShellCommandVariable_Clipboard(plugin, shell),
         new ShellCommandVariable_CaretPosition(plugin, shell),
+        new ShellCommandVariable_Clipboard(plugin, shell),
         new ShellCommandVariable_Date(plugin, shell),
         new ShellCommandVariable_FileExtension(plugin, shell),
         new ShellCommandVariable_FileName(plugin, shell),
@@ -62,8 +62,8 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
 export function getVariableClasses() {
     let shell_command_variables = [
         // Normal variables
-        ShellCommandVariable_Clipboard,
         ShellCommandVariable_CaretPosition,
+        ShellCommandVariable_Clipboard,
         ShellCommandVariable_Date,
         ShellCommandVariable_FileExtension,
         ShellCommandVariable_FileName,
