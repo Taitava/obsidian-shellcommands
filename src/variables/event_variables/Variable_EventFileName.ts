@@ -1,5 +1,18 @@
-import {ShellCommandVariable_FileName} from "../ShellCommandVariable_FileName";
+import {EventVariable} from "./EventVariable";
+import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 
-export class Variable_EventFileName extends ShellCommandVariable_FileName {
+export class Variable_EventFileName extends EventVariable {
     static variable_name = "event_file_name";
+
+    protected supported_sc_events = [
+        SC_Event_FileMenu,
+    ];
+
+    protected generateValue(): string | null {
+        if (!this.checkSC_EventSupport()) {
+            return null;
+        }
+
+        return (this.sc_event as SC_Event_FileMenu).getFile().name;
+    }
 }

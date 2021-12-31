@@ -2,16 +2,17 @@ import {ShellCommandVariable} from "./ShellCommandVariable";
 import ShellCommandsPlugin from "../main";
 import {debugLog} from "../Debug";
 import {getVariables} from "./VariableLists";
+import {SC_Event} from "../events/SC_Event";
 
 /**
  * @param plugin
  * @param command
  * @param shell
- * @param extra_variables Variables that are only available in special cases, i.e. SC_Events
+ * @param sc_event Use undefined, if parsing is not happening during an event.
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string, extra_variables: ShellCommandVariable[] = []): string | string[] {
-    const variables = getVariables(plugin, shell).concat(extra_variables);
+export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
+    const variables = getVariables(plugin, shell, sc_event);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (let variable_index in variables)
     {

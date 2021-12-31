@@ -1,8 +1,8 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath, normalizePath2} from "../Common";
 import {IParameters} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {getFilePath} from "./VariableHelpers";
 
 export class ShellCommandVariable_FilePath extends ShellCommandFileVariable{
     static variable_name = "file_path";
@@ -16,18 +16,13 @@ export class ShellCommandVariable_FilePath extends ShellCommandFileVariable{
     };
 
     protected arguments: {
-        mode: string;
+        mode: "absolute" | "relative";
     }
 
     generateValue(): string|null {
         let active_file = this.getFile();
         if (active_file) {
-            switch (this.arguments.mode.toLowerCase()) {
-                case "absolute":
-                    return normalizePath2(getVaultAbsolutePath(this.app) + "/" + active_file.path);
-                case "relative":
-                    return normalizePath2(active_file.path); // Normalize to get a correct slash depending on platform. On Windows it should be \ .
-            }
+            return getFilePath(this.app, active_file, this.arguments.mode);
         } else {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }

@@ -16,9 +16,16 @@ import {DEBUG_ON} from "../Debug";
 import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
 import ShellCommandsPlugin from "../main";
 import {ShellCommandVariable_YAMLValue} from "./ShellCommandVariable_YAMLValue";
+import {SC_Event} from "../events/SC_Event";
+import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
+import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
+import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
+import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPath";
+import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 
-export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
+export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
     let shell_command_variables: ShellCommandVariable[] = [
+        // Normal variables
         new ShellCommandVariable_Clipboard(plugin, shell),
         new ShellCommandVariable_CaretPosition(plugin, shell),
         new ShellCommandVariable_Date(plugin, shell),
@@ -33,6 +40,13 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
         new ShellCommandVariable_VaultPath(plugin, shell),
         new ShellCommandVariable_Workspace(plugin, shell),
         new ShellCommandVariable_YAMLValue(plugin, shell),
+
+        // Event variables
+        new Variable_EventFileName(plugin, shell, sc_event),
+        new Variable_EventFilePath(plugin, shell, sc_event),
+        new Variable_EventFolderName(plugin, shell, sc_event),
+        new Variable_EventFolderPath(plugin, shell, sc_event),
+        new Variable_EventTitle(plugin, shell, sc_event),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.

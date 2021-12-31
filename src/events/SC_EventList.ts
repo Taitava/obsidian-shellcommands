@@ -6,6 +6,7 @@ import {SC_Event_EveryNSeconds} from "./SC_Event_EveryNSeconds";
 import {SC_Event_FileMenu} from "./SC_Event_FileMenu";
 import {SC_Event_FolderMenu} from "./SC_Event_FolderMenu";
 import {SC_Event_EditorMenu} from "./SC_Event_EditorMenu";
+import {SC_Event} from "./SC_Event";
 
 export function getSC_Events(plugin: ShellCommandsPlugin) {
     if (undefined === getSC_Events.events) {
@@ -23,3 +24,13 @@ export function getSC_Events(plugin: ShellCommandsPlugin) {
     return getSC_Events.events;
 }
 getSC_Events.events = undefined;
+
+export function getSC_Event(plugin: ShellCommandsPlugin, sc_event_class: typeof SC_Event) {
+    let found_sc_event: SC_Event = undefined;
+    getSC_Events(plugin).forEach((sc_event: SC_Event) => {
+        if (sc_event instanceof sc_event_class) {
+            found_sc_event = sc_event;
+        }
+    });
+    return found_sc_event;
+}

@@ -5,7 +5,6 @@ import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
 import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
 import {debugLog} from "./Debug";
-import {ShellCommandVariable} from "./variables/ShellCommandVariable";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -259,11 +258,11 @@ export class TShellCommand {
      * Parses variables in the shell command and stores them so that the values will be used if the shell command is later executed.
      * Returns a temporary copy of the shell command that contains the changes.
      */
-    public preparseVariables(extra_variables: ShellCommandVariable[] = []) {
+    public preparseVariables(sc_event?: SC_Event) {
         const preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(this); // Clone t_shell_command so that we won't edit the original configuration.
 
         // Parse variables in the actual shell command
-        const parsed_shell_command = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell(), extra_variables);
+        const parsed_shell_command = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell(), sc_event);
         if (Array.isArray(parsed_shell_command)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
             debugLog("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
@@ -275,7 +274,7 @@ export class TShellCommand {
         }
 
         // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const parsed_alias = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell(), extra_variables);
+        const parsed_alias = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell(), sc_event);
         if (Array.isArray(parsed_alias)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
             debugLog("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());

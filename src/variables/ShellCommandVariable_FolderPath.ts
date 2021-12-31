@@ -1,8 +1,8 @@
 import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {getVaultAbsolutePath, normalizePath2} from "../Common";
 import {IParameters} from "./ShellCommandVariable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {ShellCommandFolderVariable} from "./ShellCommandFolderVariable";
+import {getFolderPath} from "./VariableHelpers";
 
 export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable {
     static variable_name = "folder_path";
@@ -16,25 +16,13 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
     };
 
     protected arguments: {
-        mode: string;
+        mode: "absolute" | "relative";
     }
 
     generateValue(): string|null {
         const folder = this.getFolder();
         if (folder) {
-            switch (this.arguments.mode.toLowerCase()) {
-                case "absolute":
-                    return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder.path);
-                case "relative":
-                    if (folder.isRoot()) {
-                        // Obsidian API does not give a correct folder.path value for the vault's root folder.
-                        // TODO: See this discussion and apply possible changes if something will come up: https://forum.obsidian.md/t/vault-root-folders-relative-path-gives/24857
-                        return ".";
-                    } else {
-                        // This is a normal subfolder
-                        return normalizePath2(folder.path); // Normalize to get a correct slash between directories depending on platform. On Windows it should be \ .
-                    }
-            }
+            return getFolderPath(this.app, folder, this.arguments.mode);
         } else {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }

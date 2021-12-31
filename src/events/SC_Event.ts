@@ -5,6 +5,8 @@ import {parseShellCommandVariables} from "../variables/parseShellCommandVariable
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {ShellCommandVariable} from "../variables/ShellCommandVariable";
+import {getVariables} from "../variables/VariableLists";
+import {EventVariable} from "../variables/event_variables/EventVariable";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -34,6 +36,18 @@ export abstract class SC_Event {
     public constructor(plugin: ShellCommandsPlugin) {
         this.plugin = plugin;
         this.app = plugin.app;
+
+        this.subclass_instance = this; // Stores a subclass reference, not a base class reference.
+    }
+
+    /**
+     * Contains a version of 'this' variable that refers to the actual subclass, not this base class.
+     * TODO: Perhaps move to a new class that will become a parent of this class?
+     * @private
+     */
+    private subclass_instance: this;
+    public getClass() {
+        return this.subclass_instance.constructor as typeof SC_Event
     }
 
     public canRegisterAfterChangingSettings(): boolean {
@@ -78,8 +92,7 @@ export abstract class SC_Event {
             parsed_shell_command = this.plugin.preparsed_t_shell_commands[t_shell_command.getId()].getShellCommand();
         } else {
             // No preparsed shell command exists, so parse now.
-            const extra_variables = this.declareExtraVariables(t_shell_command);
-            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell(), extra_variables);
+            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell(), this);
         }
 
         // Check the parsing result.
@@ -102,21 +115,30 @@ export abstract class SC_Event {
     }
 
     /**
-     * Child classes can override this to declare custom variables.
-     *
-     * @param t_shell_command
-     * @protected
+     * @param shell Needed just for being able to instantiate variables.
      */
-    protected declareExtraVariables(t_shell_command: TShellCommand): ShellCommandVariable[] {
-        return [];
-    }
-
-    public getSummaryOfExtraVariables(t_shell_command: TShellCommand): string {
+    public getSummaryOfEventVariables(shell: string): string {
         const variable_names: string[] = [];
-        this.declareExtraVariables(t_shell_command).forEach((variable: ShellCommandVariable) => {
+        this.getEventVariables(shell).forEach((variable: ShellCommandVariable) => {
             variable_names.push("{{" + variable.getVariableName() + "}}");
         });
         return variable_names.join(", ");
+    }
+
+    private getEventVariables(shell: string) {
+        const event_variables: EventVariable[] = [];
+        getVariables(this.plugin, shell).forEach((variable: ShellCommandVariable) => {
+            // Check if the variable is an EventVariable
+            if (variable instanceof EventVariable) {
+                // Yes it is.
+                // Check if the variable supports this particular event.
+                if (variable.supportsSC_Event(this.getClass())) {
+                    // Yes it supports.
+                    event_variables.push(variable);
+                }
+            }
+        });
+        return event_variables;
     }
 
     /**
