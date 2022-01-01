@@ -214,7 +214,14 @@ export abstract class ShellCommandVariable {
     /**
      * For variables that are always available, returns an empty string.
      */
-    public getAvailabilityText() {
+    public static getAvailabilityText() {
         return "";
+    }
+
+    /**
+     * Return type needs to be 'any' so that child classes can return a child type.
+     */
+    public static(): any {
+        return this.constructor as typeof ShellCommandVariable;
     }
 }

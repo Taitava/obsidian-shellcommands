@@ -14,8 +14,18 @@ import {EventVariable} from "../variables/event_variables/EventVariable";
 export abstract class SC_Event {
     protected readonly plugin: ShellCommandsPlugin;
     protected readonly app: App;
-    protected abstract readonly event_code: string;
-    protected abstract readonly event_title: string;
+
+    /**
+     * @protected
+     * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
+     */
+    protected static readonly event_code: string;
+
+    /**
+     * @protected
+     * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
+     */
+    protected static readonly event_title: string;
 
     /**
      * If true, changing the enabled/disabled status of the event permits registering the event immediately, so it can activate
@@ -106,11 +116,11 @@ export abstract class SC_Event {
         }
     }
 
-    public getCode() {
+    public static getCode() {
         return this.event_code;
     }
 
-    public getTitle() {
+    public static getTitle() {
         return this.event_title;
     }
 
@@ -132,7 +142,7 @@ export abstract class SC_Event {
             if (variable instanceof EventVariable) {
                 // Yes it is.
                 // Check if the variable supports this particular event.
-                if (variable.supportsSC_Event(this.getClass())) {
+                if (variable.static().supportsSC_Event(this.getClass())) {
                     // Yes it supports.
                     event_variables.push(variable);
                 }
@@ -163,5 +173,9 @@ export abstract class SC_Event {
      */
     public createExtraSettingsFields(extra_settings_container: HTMLDivElement, t_shell_command: TShellCommand): void {
         // Most classes do not define custom settings, so for those classes this method does not need to do anything.
+    }
+
+    public static() {
+        return this.constructor as typeof SC_Event;
     }
 }

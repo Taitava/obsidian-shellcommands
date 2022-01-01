@@ -111,7 +111,7 @@ export class TShellCommand {
     }
 
     public getEventConfiguration(sc_event: SC_Event) {
-        return this.getEventsConfiguration()[sc_event.getCode()] || sc_event.getDefaultConfiguration(false);
+        return this.getEventsConfiguration()[sc_event.static().getCode()] || sc_event.getDefaultConfiguration(false);
     }
 
     public isSC_EventEnabled(event_code: string) {
@@ -132,7 +132,7 @@ export class TShellCommand {
      * @param sc_event
      */
     public enableSC_Event(sc_event: SC_Event) {
-        const event_code = sc_event.getCode();
+        const event_code = sc_event.static().getCode();
         const events_configuration =  this.getEventsConfiguration();
         if (undefined === events_configuration[event_code]) {
             // Not enabled
@@ -156,7 +156,7 @@ export class TShellCommand {
      * @param sc_event
      */
     public disableSC_Event(sc_event: SC_Event) {
-        const event_code = sc_event.getCode();
+        const event_code = sc_event.static().getCode();
         const events_configuration =  this.getEventsConfiguration();
         if (undefined !== events_configuration[event_code]) {
             // Maybe enabled
@@ -188,7 +188,7 @@ export class TShellCommand {
     private getSC_Events(): SC_Event[] {
         const enabled_sc_events: SC_Event[] = [];
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
-            if (this.isSC_EventEnabled(sc_event.getCode())) {
+            if (this.isSC_EventEnabled(sc_event.static().getCode())) {
                 enabled_sc_events.push(sc_event);
             }
         });

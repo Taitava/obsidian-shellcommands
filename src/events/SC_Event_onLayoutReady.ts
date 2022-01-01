@@ -2,8 +2,8 @@ import {SC_Event} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
 export class SC_Event_onLayoutReady extends SC_Event {
-    protected readonly event_code = "on-layout-ready";
-    protected readonly event_title = "After Obsidian starts";
+    protected static readonly event_code = "on-layout-ready";
+    protected static readonly event_title = "After Obsidian starts";
     protected register_after_changing_settings = false;
 
     protected _register(t_shell_command: TShellCommand) {

@@ -5,7 +5,7 @@ export class Variable_EventTitle extends EventVariable {
     static variable_name = "event_title";
     static help_text = "Gives the current file name without a file extension. If you need it with the extension, use {{event_file_name}} instead.";
 
-    protected supported_sc_events = [
+    protected static supported_sc_events = [
         SC_Event_FileMenu,
     ];
 

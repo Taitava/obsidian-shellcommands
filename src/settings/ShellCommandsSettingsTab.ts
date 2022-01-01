@@ -160,7 +160,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 "<br>" +
                 variable.getHelpText()
             );
-            const availability_text: string = variable.getAvailabilityText();
+            const availability_text: string = variable.static().getAvailabilityText();
             if (availability_text) {
                 paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
             }

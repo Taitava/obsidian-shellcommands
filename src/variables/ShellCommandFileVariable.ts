@@ -11,7 +11,7 @@ export abstract class ShellCommandFileVariable extends ShellCommandVariable {
         return current_file;
     }
 
-    public getAvailabilityText(): string {
+    public static getAvailabilityText(): string {
         return "<strong>Only available</strong> when the active pane contains a file, not in graph view or other non-file view.";
     }
 }

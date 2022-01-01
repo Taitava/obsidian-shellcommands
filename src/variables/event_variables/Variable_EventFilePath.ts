@@ -20,7 +20,7 @@ export class Variable_EventFilePath extends EventVariable {
         mode: "absolute" | "relative";
     }
 
-    protected supported_sc_events = [
+    protected static supported_sc_events = [
         SC_Event_FileMenu,
     ];
 

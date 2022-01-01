@@ -19,7 +19,7 @@ export class Variable_EventFileExtension extends EventVariable {
         "dot": "with-dot" | "no-dot",
     }
 
-    protected supported_sc_events = [
+    protected static supported_sc_events = [
         SC_Event_FileMenu,
     ];
 

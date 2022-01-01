@@ -47,7 +47,7 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
         }
     }
 
-    public getAvailabilityText(): string {
+    public static getAvailabilityText(): string {
         return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
     }
 }

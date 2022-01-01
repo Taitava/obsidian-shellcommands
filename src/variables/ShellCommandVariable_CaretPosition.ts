@@ -94,7 +94,7 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
     }
 
-    public getAvailabilityText(): string {
+    public static getAvailabilityText(): string {
         return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
     }
 }

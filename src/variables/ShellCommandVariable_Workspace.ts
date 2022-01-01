@@ -28,7 +28,7 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
         return workspace_name;
     }
 
-    public getAvailabilityText(): string {
+    public static getAvailabilityText(): string {
         return "<strong>Only available</strong> when the Workspaces core plugin is enabled.";
     }
 }
