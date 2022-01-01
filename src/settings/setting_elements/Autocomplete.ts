@@ -85,7 +85,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             const div_element = document.createElement("div");
             div_element.createSpan({text: item.value, attr: {class: "SC-autocomplete-value"}});
             div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
-            div_element.createSpan({text: item.help_text, attr: {class: "SC-autocomplete-help-text"}});
+            div_element.createSpan({attr: {class: "SC-autocomplete-help-text"}}).insertAdjacentHTML("beforeend", item.help_text);
             return div_element;
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.

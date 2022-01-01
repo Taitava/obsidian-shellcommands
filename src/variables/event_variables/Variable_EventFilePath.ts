@@ -38,13 +38,13 @@ export class Variable_EventFilePath extends EventVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the selected file, absolute from the root of the file system.",
+                help_text: "Gives path to the selected file, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the selected file, relative from the root of the Obsidian vault.",
+                help_text: "Gives path to the selected file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -52,13 +52,13 @@ export class Variable_EventFilePath extends EventVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the selected file, absolute from the root of the file system.",
+                help_text: "Gives path to the selected file, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the selected file, relative from the root of the Obsidian vault.",
+                help_text: "Gives path to the selected file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

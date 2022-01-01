@@ -39,13 +39,13 @@ export class Variable_EventFolderPath extends EventVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
-                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is absolute from the root of the file system.",
+                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
-                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is relative from the root of the Obsidian vault.",
+                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -53,13 +53,13 @@ export class Variable_EventFolderPath extends EventVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":absolute}}",
-                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is absolute from the root of the file system.",
+                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
-                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is relative from the root of the Obsidian vault.",
+                help_text: "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

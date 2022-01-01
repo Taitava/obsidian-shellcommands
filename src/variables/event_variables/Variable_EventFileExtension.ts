@@ -37,13 +37,13 @@ export class Variable_EventFileExtension extends EventVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the selected file name's ending without a preceding dot. ",
+                help_text: "Gives the selected file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included.",
+                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -51,13 +51,13 @@ export class Variable_EventFileExtension extends EventVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the selected file name's ending without a preceding dot.",
+                help_text: "Gives the selected file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included.",
+                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

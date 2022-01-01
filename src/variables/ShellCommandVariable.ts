@@ -187,7 +187,7 @@ export abstract class ShellCommandVariable {
             // Normal variable
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text,
+                help_text: this.help_text + " " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -195,7 +195,7 @@ export abstract class ShellCommandVariable {
             // Unescaped version of the variable
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text,
+                help_text: this.help_text + " " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

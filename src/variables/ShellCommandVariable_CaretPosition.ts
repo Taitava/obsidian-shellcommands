@@ -51,19 +51,19 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + "}}",
-                help_text: "Gives the line number and column position of the current caret position as 'line:column'.",
+                help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":line}}",
-                help_text: "Gives the line number of the current caret position.",
+                help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":column}}",
-                help_text: "Gives the column number of the current caret position.",
+                help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
@@ -71,19 +71,19 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + "}}",
-                help_text: "Gives the line number and column position of the current caret position as 'line:column'.",
+                help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":line}}",
-                help_text: "Gives the line number of the current caret position.",
+                help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":column}}",
-                help_text: "Gives the column number of the current caret position.",
+                help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
