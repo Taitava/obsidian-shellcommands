@@ -1,7 +1,7 @@
-import {IParameters} from "./ShellCommandVariable";
-import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {IParameters} from "./Variable";
+import {FileVariable} from "./FileVariable";
 
-export class ShellCommandVariable_YAMLValue extends ShellCommandFileVariable {
+export class Variable_YAMLValue extends FileVariable {
     static variable_name = "yaml_value";
     static help_text = "Reads a single value from the current file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
 
@@ -50,7 +50,7 @@ export class ShellCommandVariable_YAMLValue extends ShellCommandFileVariable {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
 
-        function nested_read(property_path: string[], yaml_object: { [key: string]: string | number | object }, _this: ShellCommandVariable_YAMLValue): string | null {
+        function nested_read(property_path: string[], yaml_object: { [key: string]: string | number | object }, _this: Variable_YAMLValue): string | null {
             let property_name: string = property_path.shift();
 
             // Check if the property name is a negative numeric index.

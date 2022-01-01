@@ -1,6 +1,6 @@
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {Variable} from "./Variable";
 
-export class ShellCommandVariable_Workspace extends ShellCommandVariable{
+export class Variable_Workspace extends Variable{
     static variable_name = "workspace";
     static help_text = "Gives the current workspace's name.";
 

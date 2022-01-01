@@ -1,9 +1,9 @@
-import {IParameters} from "./ShellCommandVariable";
+import {IParameters} from "./Variable";
 import {getAllTags} from "obsidian";
 import {uniqueArray} from "../Common";
-import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {FileVariable} from "./FileVariable";
 
-export class ShellCommandVariable_Tags extends ShellCommandFileVariable {
+export class Variable_Tags extends FileVariable {
     static variable_name = "tags";
     static help_text = "Gives all tags defined in the current note. Replace the \"separator\" part with a comma, space or whatever characters you want to use as a separator between tags. A separator is always needed to be defined.";
 

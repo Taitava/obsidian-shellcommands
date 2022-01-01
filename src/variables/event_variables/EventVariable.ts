@@ -1,8 +1,8 @@
-import {ShellCommandVariable} from "../ShellCommandVariable";
+import {Variable} from "../Variable";
 import ShellCommandsPlugin from "../../main";
 import {SC_Event} from "../../events/SC_Event";
 
-export abstract class EventVariable extends ShellCommandVariable {
+export abstract class EventVariable extends Variable {
     /**
      * If sc_event is not set, then the variable is tried to be read in a situation where no event has happened - which should be denied.
      * @protected

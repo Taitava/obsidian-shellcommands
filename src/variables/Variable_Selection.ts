@@ -1,8 +1,8 @@
 import {getEditor, getView} from "../Common";
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {Variable} from "./Variable";
 import {debugLog} from "../Debug";
 
-export class ShellCommandVariable_Selection extends ShellCommandVariable{
+export class Variable_Selection extends Variable{
     static variable_name = "selection";
     static help_text = "Gives the currently selected text.";
 

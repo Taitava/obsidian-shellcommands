@@ -1,7 +1,7 @@
 import {moment} from "obsidian";
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters, Variable} from "./Variable";
 
-export class ShellCommandVariable_Date extends ShellCommandVariable {
+export class Variable_Date extends Variable {
     static variable_name = "date";
     static help_text = "Gives a date/time stamp as per your liking. The \"format\" part can be customized and is mandatory. Formatting options: https://momentjs.com/docs/#/displaying/format/";
 

@@ -13,7 +13,7 @@ import {
     ChangelogLink,
 } from "../Documentation";
 import {getVariables} from "../variables/VariableLists";
-import {ShellCommandVariable} from "../variables/ShellCommandVariable";
+import {Variable} from "../variables/Variable";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -153,7 +153,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
 
         const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
-        variables.forEach((variable: ShellCommandVariable) => {
+        variables.forEach((variable: Variable) => {
             const paragraph = container_element.createEl("p");
             paragraph.insertAdjacentHTML("afterbegin",
                 variable.getHelpName() +

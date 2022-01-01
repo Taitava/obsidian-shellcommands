@@ -1,6 +1,6 @@
-import {ShellCommandFolderVariable} from "./ShellCommandFolderVariable";
+import {FolderVariable} from "./FolderVariable";
 
-export class ShellCommandVariable_FolderName extends ShellCommandFolderVariable {
+export class Variable_FolderName extends FolderVariable {
     static variable_name = "folder_name";
     static help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
 

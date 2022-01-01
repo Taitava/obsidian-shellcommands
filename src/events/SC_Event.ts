@@ -4,7 +4,7 @@ import {TShellCommand} from "../TShellCommand";
 import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
-import {ShellCommandVariable} from "../variables/ShellCommandVariable";
+import {Variable} from "../variables/Variable";
 import {getVariables} from "../variables/VariableLists";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 
@@ -129,7 +129,7 @@ export abstract class SC_Event {
      */
     public getSummaryOfEventVariables(shell: string): string {
         const variable_names: string[] = [];
-        this.getEventVariables(shell).forEach((variable: ShellCommandVariable) => {
+        this.getEventVariables(shell).forEach((variable: Variable) => {
             variable_names.push("{{" + variable.getVariableName() + "}}");
         });
         return variable_names.join(", ");
@@ -137,7 +137,7 @@ export abstract class SC_Event {
 
     private getEventVariables(shell: string) {
         const event_variables: EventVariable[] = [];
-        getVariables(this.plugin, shell).forEach((variable: ShellCommandVariable) => {
+        getVariables(this.plugin, shell).forEach((variable: Variable) => {
             // Check if the variable is an EventVariable
             if (variable instanceof EventVariable) {
                 // Yes it is.

@@ -1,8 +1,8 @@
 import {getEditor} from "../Common";
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters, Variable} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
-export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
+export class Variable_CaretPosition extends Variable {
     static variable_name = "caret_position";
     static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 

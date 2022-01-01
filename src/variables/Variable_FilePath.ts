@@ -1,17 +1,17 @@
-import {IParameters} from "./ShellCommandVariable";
+import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
-import {ShellCommandFolderVariable} from "./ShellCommandFolderVariable";
-import {getFolderPath} from "./VariableHelpers";
+import {FileVariable} from "./FileVariable";
+import {getFilePath} from "./VariableHelpers";
 
-export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable {
-    static variable_name = "folder_path";
-    static help_text = "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+export class Variable_FilePath extends FileVariable{
+    static variable_name = "file_path";
+    static help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
             options: ["absolute", "relative"],
             required: true,
-        }
+        },
     };
 
     protected arguments: {
@@ -19,9 +19,9 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
     }
 
     generateValue(): string|null {
-        const folder = this.getFolder();
-        if (folder) {
-            return getFolderPath(this.app, folder, this.arguments.mode);
+        let active_file = this.getFile();
+        if (active_file) {
+            return getFilePath(this.app, active_file, this.arguments.mode);
         } else {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
@@ -32,13 +32,13 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the current file's parent folder, absolute from the root of the file system. " + this.getAvailabilityText(),
+                help_text: "Gives path to the current file, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                help_text: "Gives path to the current file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -46,13 +46,13 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the current file's parent folder, absolute from the root of the file system. " + this.getAvailabilityText(),
+                help_text: "Gives path to the current file, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                help_text: "Gives path to the current file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
@@ -60,6 +60,6 @@ export class ShellCommandVariable_FolderPath extends ShellCommandFolderVariable 
     }
 
     public getHelpName(): string {
-        return "<strong>{{folder_path:relative}}</strong> or <strong>{{folder_path:absolute}}</strong>";
+        return "<strong>{{file_path:relative}}</strong> or <strong>{{file_path:absolute}}</strong>";
     }
 }

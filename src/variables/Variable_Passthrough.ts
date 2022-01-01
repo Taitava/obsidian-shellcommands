@@ -1,6 +1,6 @@
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters, Variable} from "./Variable";
 
-export class ShellCommandVariable_Passthrough extends ShellCommandVariable {
+export class Variable_Passthrough extends Variable {
     static variable_name = "passthrough";
     static help_text = "Gives the same value that is passed as an argument. Used for testing special characters' escaping.";
 

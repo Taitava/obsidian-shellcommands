@@ -1,6 +1,6 @@
-import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {FileVariable} from "./FileVariable";
 
-export class ShellCommandVariable_FileName extends ShellCommandFileVariable {
+export class Variable_FileName extends FileVariable {
     static variable_name = "file_name";
     static help_text = "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.";
 

@@ -22,8 +22,10 @@ export interface IParameters {
     };
 }
 
-
-export abstract class ShellCommandVariable {
+/**
+ * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
+ */
+export abstract class Variable {
     private static readonly parameter_separator = ":";
     readonly plugin: ShellCommandsPlugin;
     readonly app: App;
@@ -74,17 +76,17 @@ export abstract class ShellCommandVariable {
     protected abstract generateValue(): string|null;
 
     public getVariableName() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.variable_name;
     }
 
     protected getParameters() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.parameters;
     }
 
     private getParameterSeparator() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.parameter_separator;
     }
 
@@ -207,7 +209,7 @@ export abstract class ShellCommandVariable {
     }
 
     public getHelpText() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.help_text;
     }
 
@@ -222,6 +224,6 @@ export abstract class ShellCommandVariable {
      * Return type needs to be 'any' so that child classes can return a child type.
      */
     public static(): any {
-        return this.constructor as typeof ShellCommandVariable;
+        return this.constructor as typeof Variable;
     }
 }

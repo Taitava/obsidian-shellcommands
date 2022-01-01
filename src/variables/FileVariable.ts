@@ -1,6 +1,6 @@
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {Variable} from "./Variable";
 
-export abstract class ShellCommandFileVariable extends ShellCommandVariable {
+export abstract class FileVariable extends Variable {
 
     protected getFile() {
         const current_file = this.app.workspace.getActiveFile();

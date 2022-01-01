@@ -1,6 +1,6 @@
-import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {FileVariable} from "./FileVariable";
 
-export abstract class ShellCommandFolderVariable extends ShellCommandFileVariable {
+export abstract class FolderVariable extends FileVariable {
 
     protected getFolder() {
         // Get current file's parent folder.

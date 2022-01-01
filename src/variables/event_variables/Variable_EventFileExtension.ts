@@ -1,7 +1,7 @@
 import {EventVariable} from "./EventVariable";
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {getFileExtension} from "../VariableHelpers";
-import {IParameters} from "../ShellCommandVariable";
+import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFileExtension extends EventVariable {

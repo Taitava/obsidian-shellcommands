@@ -1,9 +1,9 @@
-import {IParameters} from "./ShellCommandVariable";
+import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {getFileExtension} from "./VariableHelpers";
-import {ShellCommandFileVariable} from "./ShellCommandFileVariable";
+import {FileVariable} from "./FileVariable";
 
-export class ShellCommandVariable_FileExtension extends ShellCommandFileVariable {
+export class Variable_FileExtension extends FileVariable {
     static variable_name = "file_extension";
     static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
