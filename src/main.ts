@@ -21,7 +21,6 @@ import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFun
 import {BaseEncodingOptions} from "fs";
 import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
-import {TShellCommandTemporary} from "./TShellCommandTemporary";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
@@ -43,7 +42,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 *
 	 * @private
 	 */
-	private preparsed_t_shell_commands: TShellCommandContainer = {};
+	public preparsed_t_shell_commands: TShellCommandContainer = {};
 
 	async onload() {
 		debugLog('loading plugin');
@@ -62,12 +61,17 @@ export default class ShellCommandsPlugin extends Plugin {
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
 
-		// Make all defined shell commands to appear in the Obsidian command list
-		let shell_commands = this.getTShellCommands();
+		// Make all defined shell commands to appear in the Obsidian command palette.
+		const shell_commands = this.getTShellCommands();
 		for (let shell_command_id in shell_commands) {
-			let t_shell_command = shell_commands[shell_command_id];
-			this.registerShellCommand(t_shell_command);
+			const t_shell_command = shell_commands[shell_command_id];
+			if (t_shell_command.canAddToCommandPalette()) {
+				this.registerShellCommand(t_shell_command);
+			}
 		}
+
+		// Perform event registrations.
+		this.registerSC_Events();
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
@@ -100,15 +104,20 @@ export default class ShellCommandsPlugin extends Plugin {
 		const shell_command_id = this.generateNewShellCommandID();
 		const shell_command_configuration = newShellCommandConfiguration();
 		this.settings.shell_commands[shell_command_id] = shell_command_configuration;
-		this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configuration);
-		this.registerShellCommand(this.t_shell_commands[shell_command_id]);
-		return this.t_shell_commands[shell_command_id];
+		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_id, shell_command_configuration);
+		this.t_shell_commands[shell_command_id] = t_shell_command;
+		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
+			this.registerShellCommand(t_shell_command);
+		}
+		return t_shell_command;
 	}
 
 	/**
+	 * TODO: Move to TShellCommand.registerToCommandPalette(), but split to multiple methods.
+	 *
 	 * @param t_shell_command
 	 */
-	private registerShellCommand(t_shell_command: TShellCommand) {
+	public registerShellCommand(t_shell_command: TShellCommand) {
 		let shell_command_id = t_shell_command.getId();
 		debugLog("Registering shell command #" + shell_command_id + "...");
 		let obsidian_command: Command = {
@@ -118,43 +127,27 @@ export default class ShellCommandsPlugin extends Plugin {
 			checkCallback: (is_opening_command_palette) => {
 				if (is_opening_command_palette) {
 					// The user is currently opening the command palette.
+
+					// Check can the shell command be shown in command palette
+					if (!t_shell_command.canShowInCommandPalette()) {
+						// Cancel preview and deny showing in command palette.
+						debugLog("Shell command #" + t_shell_command.getId() + " won't be shown in command palette.");
+						return false;
+					}
+
 					// Do not execute the command yet, but parse variables for preview, if enabled in the settings.
 					debugLog("Getting command palette preview for shell command #" + t_shell_command.getId());
 					if (this.settings.preview_variables_in_command_palette) {
-						let preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(t_shell_command); // Clone t_shell_command so that we won't edit the original configuration.
-
-						// Parse variables in the actual shell command
-						let parsed_shell_command = parseShellCommandVariables(this, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell());
-						if (Array.isArray(parsed_shell_command)) {
-							// Variable parsing failed, because an array was returned, which contains error messages.
-							// Just cancel the preview, the command will be shown with variable names. Discard the error messages.
-							debugLog("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
+						const preparsed_t_shell_command = t_shell_command.preparseVariables();
+						if (false === preparsed_t_shell_command) {
+							// Parsing failed
+							// Return true so that the shell command will still show up in the command palette.
 							return true;
-						} else {
-							// Variable parsing succeeded.
-							// Use the parsed values.
-							preparsed_t_shell_command.getConfiguration().platform_specific_commands = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
-						}
-
-						// Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-						let parsed_alias = parseShellCommandVariables(this, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell());
-						if (Array.isArray(parsed_alias)) {
-							// Variable parsing failed, because an array was returned, which contains error messages.
-							// Just cancel the preview, the alias will be shown with variable names. Discard the error messages.
-							debugLog("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());
-							return true;
-						} else {
-							// Variable parsing succeeded.
-							// Use the parsed values.
-							preparsed_t_shell_command.getConfiguration().alias = parsed_alias;
 						}
 
 						// Rename the command in command palette
 						let prefix = this.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
 						obsidian_command.name = prefix + this.generateObsidianCommandName(preparsed_t_shell_command);
-
-						// Store the preparsed shell command so that we can use exactly the same values if the command gets later executed.
-						this.preparsed_t_shell_commands[shell_command_id] = preparsed_t_shell_command;
 					}
 					return true; // Need to return true, otherwise the command would be left out from the command palette.
 
@@ -192,6 +185,22 @@ export default class ShellCommandsPlugin extends Plugin {
 		this.addCommand(obsidian_command)
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
 		debugLog("Registered.")
+	}
+
+	private registerSC_Events() {
+		// Make sure that Obsidian is fully loaded before allowing any events to trigger.
+		this.app.workspace.onLayoutReady(() => {
+			// Even after Obsidian is fully loaded, wait a while in order to prevent SC_Event_onActiveLeafChanged triggering right after start-up.
+			// At least on Obsidian 0.12.19 it's not enough to delay until onLayoutReady, need to wait a bit more in order to avoid the miss-triggering.
+			window.setTimeout(() => { // setTimeout() should not need registering to Obsidian API, I guess.
+				// Iterate all shell commands and register possible events.
+				const shell_commands = this.getTShellCommands();
+				for (const shell_command_id in shell_commands) {
+					const t_shell_command = shell_commands[shell_command_id];
+					t_shell_command.registerSC_Events();
+				}
+			}, 0); // 0 means to call the callback on "the next event cycle", according to window.setTimeout() documentation. It should be a long enough delay. But if SC_Event_onActiveLeafChanged still gets triggered during start-up, this value can be raised to for example 1000 (= one second).
+		});
 	}
 
 	/**

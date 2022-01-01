@@ -1,5 +1,10 @@
 import {OutputChannel, OutputChannelOrder} from "../output_channels/OutputChannel";
-import {IPlatformSpecificString, IPlatformSpecificStringWithDefault} from "./ShellCommandsPluginSettings";
+import {
+    ICommandPaletteOptions,
+    IPlatformSpecificString,
+    IPlatformSpecificStringWithDefault,
+} from "./ShellCommandsPluginSettings";
+import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
 
 export interface ShellCommandsConfiguration {
     [key: string]: ShellCommandConfiguration;
@@ -21,6 +26,8 @@ export interface ShellCommandConfiguration {
         stderr: OutputChannel,
     },
     output_channel_order: OutputChannelOrder;
+    events: SC_EventConfigurations;
+    command_palette_availability: keyof ICommandPaletteOptions;
 
     // LEGACY
     /** @deprecated Can only be used for migration. */
@@ -41,5 +48,7 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
             stderr: "notification",
         },
         output_channel_order: "stdout-first",
+        events: {},
+        command_palette_availability: "enabled",
     }
 }

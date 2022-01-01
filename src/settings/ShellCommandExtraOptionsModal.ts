@@ -4,7 +4,7 @@ import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommand
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
-import {PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
+import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
     generateIgnoredErrorCodesIconTitle,
@@ -12,11 +12,14 @@ import {
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
+import {getSC_Events} from "../events/SC_EventList";
+import {SC_Event} from "../events/SC_Event";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
     static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
+    static EVENTS_SUMMARY = "Events";
 
     private plugin: ShellCommandsPlugin;
     private readonly shell_command_id: string;
@@ -61,6 +64,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOperatingSystemsAndShells(container_element);
+                },
+            },
+            "extra-options-events": {
+                title: "Events",
+                icon: "dice",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabEvents(container_element);
                 },
             },
         });
@@ -184,6 +194,69 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
         // Platform specific shell selection
         createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+    }
+
+    private tabEvents(container_element: HTMLElement) {
+        // Command palette
+        new Setting(container_element)
+            .setName("Availability in Obsidian's command palette")
+            .addDropdown(dropdown => dropdown
+                .addOptions(CommandPaletteOptions)
+                .setValue(this.t_shell_command.getConfiguration().command_palette_availability)
+                .onChange(async (value: keyof ICommandPaletteOptions) => {
+
+                    // Store value
+                    this.t_shell_command.getConfiguration().command_palette_availability = value;
+
+                    // Update command palette
+                    if (this.t_shell_command.canAddToCommandPalette()) {
+                        // Register to command palette
+                        this.t_shell_command.registerToCommandPalette();
+                    } else {
+                        // Unregister from command palette
+                        this.t_shell_command.unregisterFromCommandPalette();
+                    }
+
+                    // Save
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
+        // Events
+        new Setting(container_element)
+            .setName("Execute this shell command automatically on:")
+            .setHeading() // Make the name bold
+        ;
+        getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.static().getCode());
+            const summary_of_extra_variables = sc_event.getSummaryOfEventVariables(this.t_shell_command.getShell());
+            new Setting(container_element)
+                .setName(sc_event.static().getTitle())
+                .setDesc(summary_of_extra_variables ? "Additional variables: " + summary_of_extra_variables : "")
+                .addToggle(toggle => toggle
+                    .setValue(is_event_enabled)
+                    .onChange(async (enable: boolean) => {
+                        if (enable) {
+                            // Enable the event
+                            this.t_shell_command.enableSC_Event(sc_event);
+                            extra_settings_container.style.display = "block"; // Show extra settings
+                        } else {
+                            // Disable the event
+                            this.t_shell_command.disableSC_Event(sc_event);
+                            extra_settings_container.style.display = "none"; // Hide extra settings
+                        }
+                        // Save
+                        await this.plugin.saveSettings();
+                    }),
+                )
+            ;
+
+            // Extra settings
+            const extra_settings_container = container_element.createDiv();
+            extra_settings_container.style.display = is_event_enabled ? "block" : "none";
+            sc_event.createExtraSettingsFields(extra_settings_container, this.t_shell_command);
+        });
     }
 
     public activateTab(tab_id: string) {

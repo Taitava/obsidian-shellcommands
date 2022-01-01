@@ -22,8 +22,10 @@ export interface IParameters {
     };
 }
 
-
-export abstract class ShellCommandVariable {
+/**
+ * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
+ */
+export abstract class Variable {
     private static readonly parameter_separator = ":";
     readonly plugin: ShellCommandsPlugin;
     readonly app: App;
@@ -74,17 +76,17 @@ export abstract class ShellCommandVariable {
     protected abstract generateValue(): string|null;
 
     public getVariableName() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.variable_name;
     }
 
     protected getParameters() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.parameters;
     }
 
     private getParameterSeparator() {
-        const child_class = this.constructor as typeof ShellCommandVariable;
+        const child_class = this.constructor as typeof Variable;
         return child_class.parameter_separator;
     }
 
@@ -169,6 +171,12 @@ export abstract class ShellCommandVariable {
         this.error_messages.push(prefix + message);
     }
 
+    protected newErrorMessages(messages: string[]) {
+        messages.forEach((message: string) => {
+            this.newErrorMessage(message);
+        });
+    }
+
     public static getAutocompleteItems(): IAutocompleteItem[] {
 
         // Check if the variable has at least one _mandatory_ parameter.
@@ -187,7 +195,7 @@ export abstract class ShellCommandVariable {
             // Normal variable
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text,
+                help_text: this.help_text + " " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -195,10 +203,33 @@ export abstract class ShellCommandVariable {
             // Unescaped version of the variable
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text,
+                help_text: this.help_text + " " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
         ];
+    }
+
+    public getHelpName() {
+        return "<strong>{{" + this.getVariableName() + "}}</strong>";
+    }
+
+    public getHelpText() {
+        const child_class = this.constructor as typeof Variable;
+        return child_class.help_text;
+    }
+
+    /**
+     * For variables that are always available, returns an empty string.
+     */
+    public static getAvailabilityText() {
+        return "";
+    }
+
+    /**
+     * Return type needs to be 'any' so that child classes can return a child type.
+     */
+    public static(): any {
+        return this.constructor as typeof Variable;
     }
 }

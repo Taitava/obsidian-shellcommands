@@ -1,11 +1,10 @@
 import {getEditor, getView} from "../Common";
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {Variable} from "./Variable";
 import {debugLog} from "../Debug";
 
-export class ShellCommandVariable_Selection extends ShellCommandVariable{
+export class Variable_Selection extends Variable{
     static variable_name = "selection";
-    static help_text = "Gives the currently selected text. Atm only works in editing mode, not in preview mode!";
+    static help_text = "Gives the currently selected text.";
 
     generateValue(): string {
 
@@ -47,8 +46,8 @@ export class ShellCommandVariable_Selection extends ShellCommandVariable{
                 break;
         }
     }
+
+    public static getAvailabilityText(): string {
+        return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{selection}}",
-    ShellCommandVariable_Selection.help_text,
-);

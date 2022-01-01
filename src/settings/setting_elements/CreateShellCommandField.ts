@@ -110,6 +110,16 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             })
         )
         .addExtraButton(button => button
+            .setTooltip(ShellCommandExtraOptionsModal.EVENTS_SUMMARY)
+            .setIcon("dice")
+            .onClick(async () => {
+                // Open an extra options modal: Operating systems and shells tab
+                const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                modal.open();
+                modal.activateTab("extra-options-events");
+            })
+        )
+        .addExtraButton(button => button
             .setTooltip("Delete this shell command")
             .setIcon("trash")
             .onClick(async () => {

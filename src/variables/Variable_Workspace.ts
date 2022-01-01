@@ -1,9 +1,8 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {ShellCommandVariable} from "./ShellCommandVariable";
+import {Variable} from "./Variable";
 
-export class ShellCommandVariable_Workspace extends ShellCommandVariable{
+export class Variable_Workspace extends Variable{
     static variable_name = "workspace";
-    static help_text = "Gives the current workspace's name, if the Workspaces core plugin is enabled.";
+    static help_text = "Gives the current workspace's name.";
 
     generateValue(): string {
 
@@ -28,8 +27,8 @@ export class ShellCommandVariable_Workspace extends ShellCommandVariable{
         // All ok
         return workspace_name;
     }
+
+    public static getAvailabilityText(): string {
+        return "<strong>Only available</strong> when the Workspaces core plugin is enabled.";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{workspace}}",
-    ShellCommandVariable_Workspace.help_text,
-);
