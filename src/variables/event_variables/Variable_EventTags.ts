@@ -28,12 +28,6 @@ export class Variable_EventTags extends EventVariable {
         }
 
         const file = (this.sc_event as SC_Event_FileMenu).getFile();
-        if (file) {
-            // We do have an active file
-            return getFileTags(this.app, file).join(this.arguments.separator);
-        } else {
-            // No file is active at the moment
-            return null; // null indicates that getting a value has failed and the command should not be executed.
-        }
+        return getFileTags(this.app, file).join(this.arguments.separator);
     }
 }
