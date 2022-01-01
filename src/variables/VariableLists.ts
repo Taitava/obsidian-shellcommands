@@ -24,6 +24,7 @@ import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPa
 import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
+import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
     let shell_command_variables: Variable[] = [
@@ -51,6 +52,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
         new Variable_EventFolderPath(plugin, shell, sc_event),
         new Variable_EventTags(plugin, shell, sc_event),
         new Variable_EventTitle(plugin, shell, sc_event),
+        new Variable_EventYAMLValue(plugin, shell, sc_event),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
@@ -87,6 +89,7 @@ export function getVariableClasses() {
         Variable_EventFolderPath,
         Variable_EventTags,
         Variable_EventTitle,
+        Variable_EventYAMLValue,
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.

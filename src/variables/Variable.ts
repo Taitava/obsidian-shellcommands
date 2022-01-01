@@ -171,6 +171,12 @@ export abstract class Variable {
         this.error_messages.push(prefix + message);
     }
 
+    protected newErrorMessages(messages: string[]) {
+        messages.forEach((message: string) => {
+            this.newErrorMessage(message);
+        });
+    }
+
     public static getAutocompleteItems(): IAutocompleteItem[] {
 
         // Check if the variable has at least one _mandatory_ parameter.
