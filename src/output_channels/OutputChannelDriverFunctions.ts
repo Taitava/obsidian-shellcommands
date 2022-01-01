@@ -75,7 +75,6 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
         // Make one handling call.
         handle_stream(
             plugin,
-            shell_command_configuration,
             shell_command_configuration.output_channels.stdout,
             output,
             error_code,
@@ -91,7 +90,6 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
             separated_output[output_stream_name] = output_message;
             handle_stream(
                 plugin,
-                shell_command_configuration,
                 output_channel_name,
                 separated_output,
                 error_code,
@@ -103,7 +101,6 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
 
 function handle_stream(
         plugin: ShellCommandsPlugin,
-        shell_command_configuration: ShellCommandConfiguration,
         output_channel_name: OutputChannel,
         output: OutputStreams,
         error_code: number|null
