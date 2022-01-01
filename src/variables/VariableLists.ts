@@ -23,6 +23,7 @@ import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderNa
 import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPath";
 import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
+import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
     let shell_command_variables: Variable[] = [
@@ -48,6 +49,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
         new Variable_EventFilePath(plugin, shell, sc_event),
         new Variable_EventFolderName(plugin, shell, sc_event),
         new Variable_EventFolderPath(plugin, shell, sc_event),
+        new Variable_EventTags(plugin, shell, sc_event),
         new Variable_EventTitle(plugin, shell, sc_event),
     ];
     if (DEBUG_ON) {
@@ -83,6 +85,7 @@ export function getVariableClasses() {
         Variable_EventFilePath,
         Variable_EventFolderName,
         Variable_EventFolderPath,
+        Variable_EventTags,
         Variable_EventTitle,
     ];
     if (DEBUG_ON) {

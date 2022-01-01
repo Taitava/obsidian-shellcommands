@@ -1,5 +1,5 @@
-import {getVaultAbsolutePath, normalizePath2} from "../Common";
-import {App, TFile, TFolder} from "obsidian";
+import {getVaultAbsolutePath, normalizePath2, uniqueArray} from "../Common";
+import {App, getAllTags, TFile, TFolder} from "obsidian";
 
 /**
  * TODO: Consider creating a decorator class for TFolder and moving this function to be a method in it.
@@ -60,4 +60,15 @@ export function getFileExtension(file: TFile, with_dot: boolean) {
 
     // No dot should be included, or the extension is empty
     return file_extension;
+}
+
+export function getFileTags(app: App, file: TFile) {
+    let cache = app.metadataCache.getFileCache(file);
+    let tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
+
+    // Remove preceding hash characters. E.g. #tag becomes tag
+    tags.forEach((tag: string, index) => {
+        tags[index] = tag.replace("#", "");
+    });
+    return tags;
 }
