@@ -7,6 +7,7 @@ import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
 import {getVariables} from "../variables/VariableLists";
 import {EventVariable} from "../variables/event_variables/EventVariable";
+import {DocumentationEventsFolderLink} from "../Documentation";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -186,5 +187,9 @@ export abstract class SC_Event {
      */
     public onAfterEnabling(t_shell_command: TShellCommand): void {
         // If an SC_Event does not override this hook method, do nothing.
+    }
+
+    public static getDocumentationLink(): string {
+        return DocumentationEventsFolderLink + encodeURIComponent(this.event_title);
     }
 }
