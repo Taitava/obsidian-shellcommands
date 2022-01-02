@@ -147,6 +147,7 @@ export class TShellCommand {
         if (sc_event.canRegisterAfterChangingSettings()) {
             this.registerSC_Event(sc_event);
         }
+        sc_event.onAfterEnabling(this);
     }
 
     /**

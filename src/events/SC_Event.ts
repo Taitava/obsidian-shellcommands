@@ -178,4 +178,13 @@ export abstract class SC_Event {
     public static() {
         return this.constructor as typeof SC_Event;
     }
+
+    /**
+     * Child classes can override this to hook into a situation where a user has enabled an event in settings.
+     *
+     * @param t_shell_command The TShellCommand instance for which this SC_Event was enabled for.
+     */
+    public onAfterEnabling(t_shell_command: TShellCommand): void {
+        // If an SC_Event does not override this hook method, do nothing.
+    }
 }
