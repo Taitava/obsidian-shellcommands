@@ -31,7 +31,7 @@ export abstract class EventVariable extends Variable {
     protected checkSC_EventSupport(): boolean{
         // 1. Check generally that an event is happening.
         if (!this.sc_event) {
-            this.newErrorMessage("This variable can only be used during events. Supported events: " + this.static().getSummaryOfSupportedEvents());
+            this.newErrorMessage("This variable can only be used during events: " + this.static().getSummaryOfSupportedEvents());
             return false;
         }
 
