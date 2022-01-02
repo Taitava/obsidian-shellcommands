@@ -75,6 +75,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
         // Make one handling call.
         handle_stream(
             plugin,
+            t_shell_command,
             shell_command_configuration.output_channels.stdout,
             output,
             error_code,
@@ -90,6 +91,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
             separated_output[output_stream_name] = output_message;
             handle_stream(
                 plugin,
+                t_shell_command,
                 output_channel_name,
                 separated_output,
                 error_code,
@@ -101,6 +103,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
 
 function handle_stream(
         plugin: ShellCommandsPlugin,
+        t_shell_command: TShellCommand,
         output_channel_name: OutputChannel,
         output: OutputStreams,
         error_code: number|null
@@ -117,7 +120,7 @@ function handle_stream(
         let driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
 
         // Perform handling the output
-        driver.initialize(plugin);
+        driver.initialize(plugin, t_shell_command);
         driver.handle(output, error_code);
     }
 }
