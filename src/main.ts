@@ -1,7 +1,12 @@
 import {Command, Notice, Plugin} from 'obsidian';
 import {exec, ExecException, ExecOptions} from "child_process";
-import {combineObjects, getOperatingSystem, getPluginAbsolutePath, getVaultAbsolutePath} from "./Common";
-import {parseShellCommandVariables} from "./variables/parseShellCommandVariables";
+import {
+	combineObjects,
+	generateObsidianCommandName,
+	getOperatingSystem,
+	getPluginAbsolutePath,
+	getVaultAbsolutePath,
+} from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
 	newShellCommandConfiguration,
@@ -19,7 +24,7 @@ import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {ShellCommandParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
@@ -37,12 +42,17 @@ export default class ShellCommandsPlugin extends Plugin {
 	private t_shell_commands: TShellCommandContainer = {};
 
 	/**
-	 * Temporary holder for ShellCommandConfigurations whose variables are already parsed before the actual execution during command palette preview.
-	 * This array gets emptied after every shell command execution.
+	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
+	 * palette preview. This array gets emptied after every time a shell command is executed via the command palette.
+	 *
+	 * This is only used for command palette, not when executing a shell command from the settings panel, nor when
+	 * executing shell commands via SC_Events.
 	 *
 	 * @private
 	 */
-	public preparsed_t_shell_commands: TShellCommandContainer = {};
+	private cached_parsing_results: {
+		[key: string]: ShellCommandParsingResult,
+	} = {};
 
 	async onload() {
 		debugLog('loading plugin');
@@ -120,9 +130,26 @@ export default class ShellCommandsPlugin extends Plugin {
 	public registerShellCommand(t_shell_command: TShellCommand) {
 		let shell_command_id = t_shell_command.getId();
 		debugLog("Registering shell command #" + shell_command_id + "...");
+
+		// Define a function for executing the shell command.
+		const executor = (parsing_result: ShellCommandParsingResult | undefined) => {
+			if (undefined === parsing_result) {
+				parsing_result = t_shell_command.parseVariables();
+			}
+			if (parsing_result.succeeded) {
+				// The command was parsed correctly.
+				this.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+			} else {
+				// The command could not be parsed correctly.
+				// Display error messages
+				this.newErrors(parsing_result.error_messages);
+			}
+		}
+
+		// Register an Obsidian command
 		let obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: this.generateObsidianCommandName(t_shell_command),
+			name: generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette) => {
 				if (is_opening_command_palette) {
@@ -138,52 +165,47 @@ export default class ShellCommandsPlugin extends Plugin {
 					// Do not execute the command yet, but parse variables for preview, if enabled in the settings.
 					debugLog("Getting command palette preview for shell command #" + t_shell_command.getId());
 					if (this.settings.preview_variables_in_command_palette) {
-						const preparsed_t_shell_command = t_shell_command.preparseVariables();
-						if (false === preparsed_t_shell_command) {
-							// Parsing failed
-							// Return true so that the shell command will still show up in the command palette.
+						// Preparse variables
+						const parsing_result = t_shell_command.parseVariables();
+						if (parsing_result.succeeded) {
+							// Parsing succeeded
+
+							// Rename Obsidian command
+							t_shell_command.renameObsidianCommand(parsing_result.shell_command, parsing_result.alias);
+
+							// Store the preparsed variables so that they will be used if this shell command gets executed.
+							this.cached_parsing_results[t_shell_command.getId()] = parsing_result;
+
+							// All done now
 							return true;
 						}
-
-						// Rename the command in command palette
-						let prefix = this.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
-						obsidian_command.name = prefix + this.generateObsidianCommandName(preparsed_t_shell_command);
 					}
-					return true; // Need to return true, otherwise the command would be left out from the command palette.
+
+					// If parsing failed (or was disabled), then use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
+					t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+					this.cached_parsing_results[t_shell_command.getId()] = undefined;
+					return true;
 
 				} else {
 					// The user has instructed to execute the command.
-					// Check if we happen to have a preparsed command (= variables parsed at the time of opening the command palette)
-					if (undefined === this.preparsed_t_shell_commands[shell_command_id]) {
-						// No preparsed command. Execute a standard version of the command, and do variable parsing now.
-						let parsed_shell_command = parseShellCommandVariables(this, t_shell_command.getShellCommand(), t_shell_command.getShell());
-						if (Array.isArray(parsed_shell_command)) {
-							// The command could not be parsed correctly.
-							// Display error messages
-							this.newErrors(parsed_shell_command);
-						} else {
-							// The command was parsed correctly.
-							this.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
-						}
-
-					} else {
-						// We do have a preparsed version of this command.
-						// No need to check if the parsing had previously succeeded, because if it would have failed, the command would not be in the preparsed commands' array.
-						this.confirmAndExecuteShellCommand(this.preparsed_t_shell_commands[shell_command_id].getShellCommand(), t_shell_command);
-					}
+					executor(
+						this.cached_parsing_results[t_shell_command.getId()] // Can be undefined, if no preparsing was done. executor() will handle parsing then.
+					);
 
 					// Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
 					// palette might generate multiple preparsed commands in the array, but as the user selects and executes only one command, all these temporary
-					// commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings. We do not want to
-					// execute obsolete commands accidentally. This deletion also needs to be done even if the executed command was not a preparsed command, because
-					// even when preparsing is turned on in the settings, singular commands may fail to parse and therefore they would not be in this array, but other
+					// commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings, or executes commands via hotkeys. We do not want to
+					// execute obsolete commands accidentally.
+					// This deletion also needs to be done even if the executed command was not a preparsed command, because
+					// even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
 					// commands might be.
-					this.resetPreparsedShellCommandConfigurations();
+					this.cached_parsing_results = {}; // Removes obsolete preparsed variables from all shell commands.
 				}
 			}
 		};
 		this.addCommand(obsidian_command)
-		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed.
+		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.
+		t_shell_command.setObsidianCommand(obsidian_command);
 		debugLog("Registered.")
 	}
 
@@ -203,56 +225,29 @@ export default class ShellCommandsPlugin extends Plugin {
 		});
 	}
 
-	/**
-	 * Called when it's known that preparsed shell command variables have old data and should not be used later.
-	 */
-	resetPreparsedShellCommandConfigurations() {
-		this.preparsed_t_shell_commands = {};
-	}
-
-	/**
-	 * Called after turning "Preview variables in command palette" setting off, to make sure that all shell commands have {{variable}} names visible instead of their values.
-	 */
-	resetCommandPaletteNames() {
-		let shell_commands = this.getTShellCommands();
-		for (let shell_command_id in shell_commands) {
-			let t_shell_command = shell_commands[shell_command_id];
-			this.obsidian_commands[shell_command_id].name = this.generateObsidianCommandName(t_shell_command);
-		}
-	}
-
 	generateObsidianCommandId(shell_command_id: string) {
 		return "shell-command-" + shell_command_id;
 	}
 
-	generateObsidianCommandName(t_shell_command: TShellCommand) {
-		let prefix = "Execute: ";
-		if (t_shell_command.getAlias()) {
-			// If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
-			return prefix + t_shell_command.getAlias();
-		}
-		return prefix + t_shell_command.getShellCommand();
-	}
-
 	/**
 	 *
-	 * @param shell_command The actual shell command that will be executed.
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
+	 * @param shell_command_parsing_result The actual shell command that will be executed.
 	 */
-	confirmAndExecuteShellCommand(shell_command: string, t_shell_command: TShellCommand) {
+	confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
 
 		// Check if the command needs confirmation before execution
 		if (t_shell_command.getConfirmExecution()) {
 			// Yes, a confirmation is needed.
 			// Open a confirmation modal.
-			new ConfirmExecutionModal(this, shell_command, t_shell_command)
+			new ConfirmExecutionModal(this, shell_command_parsing_result, t_shell_command)
 				.open()
 			;
 			return; // Do not execute now. The modal will call executeShellCommand() later if needed.
 		} else {
 			// No need to confirm.
 			// Execute.
-			this.executeShellCommand(shell_command, t_shell_command);
+			this.executeShellCommand(t_shell_command, shell_command_parsing_result);
 		}
 	}
 
@@ -260,14 +255,14 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * Does not ask for confirmation before execution. This should only be called if: a) a confirmation is already asked from a user, or b) this command is defined not to need a confirmation.
 	 * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
 	 *
-	 * @param shell_command The actual shell command that will be executed.
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
+	 * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
 	 */
-	executeShellCommand(shell_command: string, t_shell_command: TShellCommand) {
+	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
 		let working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
-		shell_command = shell_command.trim();
+		const shell_command = shell_command_parsing_result.shell_command.trim();
 		if (!shell_command.length) {
 			// It is empty
 			debugLog("The shell command is empty. :(");
@@ -310,9 +305,6 @@ export default class ShellCommandsPlugin extends Plugin {
 			debugLog("Executing command " + shell_command + " in " + working_directory + "...");
 			exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 
-				// Cache the executed shell command so that some output channels can show it if needed.
-				t_shell_command.executed.shell_command = shell_command;
-
 				// Did the shell command execute successfully?
 				if (null !== error) {
 					// Some error occurred
@@ -324,7 +316,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						debugLog("User has ignored this error, so won't display it.");
 
 						// Handle only stdout output stream
-						handleShellCommandOutput(this, t_shell_command, stdout, "", null);
+						handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, "", null);
 					} else {
 						// Show the error.
 						debugLog("Will display the error to user.");
@@ -337,7 +329,7 @@ export default class ShellCommandsPlugin extends Plugin {
 						}
 
 						// Handle both stdout and stderr output streams
-						handleShellCommandOutput(this, t_shell_command, stdout, stderr, error.code);
+						handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
 					}
 				} else {
 					// Probably no errors, but do one more check.
@@ -357,7 +349,7 @@ export default class ShellCommandsPlugin extends Plugin {
 					}
 
 					// Handle output
-					handleShellCommandOutput(this, t_shell_command, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+					handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
 				}
 			});
 		}

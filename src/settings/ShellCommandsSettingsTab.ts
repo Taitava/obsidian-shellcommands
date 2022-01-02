@@ -104,13 +104,6 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 .onChange(async (value: boolean) => {
                     debugLog("Changing preview_variables_in_command_palette to " + value);
                     this.plugin.settings.preview_variables_in_command_palette = value;
-                    if (!value) {
-                        // Variable previewing is turned from on to off.
-                        // This means that the command palette may have old, stale variable data in it (if a user has opened the palette, but closed it without executing anything).
-                        // Remove old, preparsed variable data and reset shell commands' names in the command palette.
-                        this.plugin.resetPreparsedShellCommandConfigurations();
-                        this.plugin.resetCommandPaletteNames();
-                    }
                     await this.plugin.saveSettings();
                 })
             )

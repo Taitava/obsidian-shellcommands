@@ -8,7 +8,7 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
-import {TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
 
 export interface OutputStreams {
@@ -29,7 +29,7 @@ registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_Curre
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
-export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, stdout: string, stderr: string, error_code: number|null) {
+export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
     let shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
@@ -78,6 +78,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
         handle_stream(
             plugin,
             t_shell_command,
+            shell_command_parsing_result,
             shell_command_configuration.output_channels.stdout,
             output,
             error_code,
@@ -94,6 +95,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
             handle_stream(
                 plugin,
                 t_shell_command,
+                shell_command_parsing_result,
                 output_channel_name,
                 separated_output,
                 error_code,
@@ -106,6 +108,7 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
 function handle_stream(
         plugin: ShellCommandsPlugin,
         t_shell_command: TShellCommand,
+        shell_command_parsing_result: ShellCommandParsingResult,
         output_channel_name: OutputChannel,
         output: OutputStreams,
         error_code: number|null
@@ -122,7 +125,7 @@ function handle_stream(
         let driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
 
         // Perform handling the output
-        driver.initialize(plugin, t_shell_command);
+        driver.initialize(plugin, t_shell_command, shell_command_parsing_result);
         driver.handle(output, error_code);
     }
 }

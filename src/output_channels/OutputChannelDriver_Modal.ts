@@ -6,14 +6,14 @@ import {
 import {Modal, Setting, TextAreaComponent} from "obsidian";
 import {OutputChannel, OutputStream} from "./OutputChannel";
 import ShellCommandsPlugin from "../main";
-import {TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Modal";
 
     protected _handle(outputs: OutputStreams, error_code: number | null): void {
         // Initialize a modal and pass outputs
-        const modal = new OutputModal(this.plugin, outputs, this.t_shell_command);
+        const modal = new OutputModal(this.plugin, outputs, this.t_shell_command, this.shell_command_parsing_result);
 
         // Define a possible error code to be shown on the modal.
         if (error_code !== null) {
@@ -31,14 +31,16 @@ class OutputModal extends Modal {
     private readonly plugin: ShellCommandsPlugin;
     private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
+    private readonly shell_command_parsing_result: ShellCommandParsingResult;
     private exit_code: number = null;
 
-    constructor(plugin: ShellCommandsPlugin, outputs: OutputStreams, t_shell_command: TShellCommand) {
+    constructor(plugin: ShellCommandsPlugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         super(plugin.app);
 
         this.plugin = plugin;
         this.outputs = outputs;
         this.t_shell_command = t_shell_command;
+        this.shell_command_parsing_result = shell_command_parsing_result;
     }
 
     public onOpen(): void {
@@ -47,11 +49,11 @@ class OutputModal extends Modal {
         this.modalEl.addClass("SC-scrollable"); // TODO: Maybe make a common parent class for all SC's modals and do this there?
 
         // Heading
-        const heading = this.t_shell_command.getAlias(); // Possible variables in the alias are not parsed. TODO: During shell command parsing, inject also the alias to t_shell_command.executed.alias and then use it here.
+        const heading = this.shell_command_parsing_result.alias;
         this.titleEl.innerText = heading ? heading : "Shell command output";
 
         // Shell command preview
-        this.modalEl.createEl("pre", {text: this.t_shell_command.executed.shell_command, attr: {class: "SC-no-margin"}}); // no margin so that exit code will be close.
+        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin"}}); // no margin so that exit code will be close.
 
         // Exit code
         if (this.exit_code !== null) {
@@ -105,7 +107,7 @@ class OutputModal extends Modal {
                         // Redirect output to the selected driver
                         const output_streams: OutputStreams = {};
                         output_streams[output_stream] = output_textarea.getValue();
-                        output_channel_driver.initialize(this.plugin, this.t_shell_command);
+                        output_channel_driver.initialize(this.plugin, this.t_shell_command, this.shell_command_parsing_result);
                         output_channel_driver.handle(output_streams, this.exit_code);
                     }),
                 );

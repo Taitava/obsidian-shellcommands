@@ -14,6 +14,7 @@ import {createPlatformSpecificShellCommandField} from "./setting_elements/Create
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
+import {generateObsidianCommandName} from "../Common";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
@@ -90,7 +91,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     this.t_shell_command.getConfiguration().alias = value;
 
                     // Update Obsidian command palette
-                    this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.t_shell_command);
+                    this.plugin.obsidian_commands[this.shell_command_id].name = generateObsidianCommandName(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
 
                     // UpdateShell commands settings panel
                     this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));

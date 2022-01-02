@@ -1,10 +1,11 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import ShellCommandsPlugin from "./main";
-import {cloneObject, getOperatingSystem} from "./Common";
+import {generateObsidianCommandName, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
 import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
 import {debugLog} from "./Debug";
+import {Command} from "obsidian";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -15,14 +16,7 @@ export class TShellCommand {
     private readonly id: string;
     private plugin: ShellCommandsPlugin;
     private configuration: ShellCommandConfiguration;
-
-    public executed: {
-        shell_command: string,
-        alias: string, // TODO: This is not yet set anywhere, nor read.
-    } = {
-        shell_command: undefined,
-        alias: undefined, // TODO: This is not yet set anywhere (= not updated), nor read.
-    };
+    private obsidian_command: Command;
 
     constructor (plugin: ShellCommandsPlugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
         this.plugin = plugin;
@@ -262,68 +256,63 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
-    /**
-     * Parses variables in the shell command and stores them so that the values will be used if the shell command is later executed.
-     * Returns a temporary copy of the shell command that contains the changes.
-     */
-    public preparseVariables(sc_event?: SC_Event) {
-        const preparsed_t_shell_command: TShellCommandTemporary = TShellCommandTemporary.fromTShellCommand(this); // Clone t_shell_command so that we won't edit the original configuration.
-
+    public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
         // Parse variables in the actual shell command
-        const parsed_shell_command = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getShellCommand(), preparsed_t_shell_command.getShell(), sc_event);
+        const parsing_result: ShellCommandParsingResult = {
+            shell_command: "",
+            alias: "",
+            succeeded: false,
+            error_messages: [],
+        };
+
+        const parsed_shell_command = parseShellCommandVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
+
         if (Array.isArray(parsed_shell_command)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for shell command " + preparsed_t_shell_command.getShellCommand());
-            return false;
+            debugLog("Shell command preview: Variable parsing failed for shell command " + this.getShellCommand());
+            parsing_result.succeeded = false;
+            parsing_result.error_messages = parsed_shell_command;
+            return parsing_result;
         } else {
             // Variable parsing succeeded.
             // Use the parsed values.
-            preparsed_t_shell_command.getConfiguration().platform_specific_commands = {default: parsed_shell_command}; // Overrides all possible OS specific shell command versions.
+            parsing_result.shell_command = parsed_shell_command;
         }
 
         // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const parsed_alias = parseShellCommandVariables(this.plugin, preparsed_t_shell_command.getAlias(), preparsed_t_shell_command.getShell(), sc_event);
+        const parsed_alias = parseShellCommandVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
         if (Array.isArray(parsed_alias)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for alias " + preparsed_t_shell_command.getAlias());
-            return false;
+            debugLog("Shell command preview: Variable parsing failed for alias " + this.getAlias());
+            parsing_result.succeeded = false;
+            parsing_result.error_messages = parsed_alias;
+            return parsing_result;
         } else {
             // Variable parsing succeeded.
             // Use the parsed values.
-            preparsed_t_shell_command.getConfiguration().alias = parsed_alias;
+            parsing_result.alias = parsed_alias;
         }
 
-        // Store the preparsed shell command so that we can use exactly the same values if the command gets later executed.
-        this.plugin.preparsed_t_shell_commands[this.getId()] = preparsed_t_shell_command;
+        // All ok
+        parsing_result.succeeded = true;
+        return parsing_result;
+    }
 
-        return preparsed_t_shell_command;
+    public setObsidianCommand(obsidian_command: Command) {
+        this.obsidian_command = obsidian_command;
+    }
+
+    public renameObsidianCommand(shell_command: string, alias: string) {
+        // Rename the command in command palette
+        const prefix = this.plugin.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
+        this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
+        return true; // Need to return true, otherwise the command would be left out from the command palette.
     }
 }
 
-class TShellCommandTemporary extends TShellCommand {
-
-    /**
-     * @private Do not create new objects directly, use fromTShellCommand() instead.
-     * @param plugin
-     * @param shell_command_configuration
-     */
-    constructor(plugin: ShellCommandsPlugin, shell_command_configuration: ShellCommandConfiguration) {
-        super(plugin, null, shell_command_configuration);
-    }
-
-    public getId(): string {
-        throw Error("TShellCommandTemporary does not have an ID, because it is a clone of a real TShellCommand that should not be saved.");
-    }
-
-    /**
-     * Returns a TShellCommandTemporary instance, which contains configuration that is copied from the given TShellCommand.
-     * The clone can be used for altering the configuration temporarily. The clone cannot be saved, and it's ID cannot be
-     * accessed.
-     */
-    public static fromTShellCommand(t_shell_command: TShellCommand) {
-        return new TShellCommandTemporary(
-            t_shell_command.getPlugin(),
-            cloneObject(t_shell_command.getConfiguration()),
-        );
-    }
+export interface ShellCommandParsingResult {
+    shell_command: string;
+    alias: string;
+    succeeded: boolean;
+    error_messages: string[];
 }

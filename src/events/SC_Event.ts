@@ -1,7 +1,6 @@
 import ShellCommandsPlugin from "../main";
 import {App, EventRef} from "obsidian";
-import {TShellCommand} from "../TShellCommand";
-import {parseShellCommandVariables} from "../variables/parseShellCommandVariables";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
@@ -94,26 +93,22 @@ export abstract class SC_Event {
     /**
      * Executes a shell command.
      */
-    protected trigger(t_shell_command: TShellCommand) {
-        // Parse variables
-        let parsed_shell_command;
-        if (this.plugin.preparsed_t_shell_commands[t_shell_command.getId()]) {
-            // A preparsed shell command exists, use it in order to use same values that were already shown to a user.
-            parsed_shell_command = this.plugin.preparsed_t_shell_commands[t_shell_command.getId()].getShellCommand();
-        } else {
+    protected trigger(t_shell_command: TShellCommand, parsing_result: ShellCommandParsingResult | undefined = undefined) {
+        // Check if variables are not yet parsed. (They might be parsed already by SC_MenuEvent).
+        if (undefined === parsing_result) {
             // No preparsed shell command exists, so parse now.
-            parsed_shell_command = parseShellCommandVariables(this.plugin, t_shell_command.getShellCommand(), t_shell_command.getShell(), this);
+            parsing_result = t_shell_command.parseVariables(this);
+
+            // Check the parsing result.
+            if (!parsing_result.succeeded) {
+                // Errors occurred when parsing variables.
+                this.plugin.newErrors(parsing_result.error_messages);
+                return;
+            }
         }
 
-        // Check the parsing result.
-        if (Array.isArray(parsed_shell_command)) {
-            // Errors occurred when parsing variables.
-            this.plugin.newErrors(parsed_shell_command);
-        } else {
-            // Variables were parsed ok.
-            // Execute the shell command.
-            this.plugin.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
-        }
+        // Execute the shell command.
+        this.plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
     }
 
     public static getCode() {

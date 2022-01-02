@@ -1,12 +1,12 @@
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
-import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
 import {ShellCommandExtraOptionsModal} from "../ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "../ShellCommandDeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import ShellCommandsPlugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
+import {generateObsidianCommandName} from "../../Common";
 
 /**
  *
@@ -37,7 +37,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     const setting_group = CreateShellCommandFieldCore(
         plugin,
         container_element,
-        generateShellCommandFieldName(shell_command_id, plugin.getTShellCommands()[shell_command_id]),
+        generateShellCommandFieldName(shell_command_id, t_shell_command),
         shell_command,
         t_shell_command.getShell(),
         show_autocomplete_menu,
@@ -57,7 +57,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                plugin.obsidian_commands[shell_command_id].name = plugin.generateObsidianCommandName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                plugin.obsidian_commands[shell_command_id].name = generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();
@@ -72,11 +72,11 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             .onClick(() => {
                 // Execute the shell command now (for trying it out in the settings)
                 let t_shell_command = plugin.getTShellCommands()[shell_command_id];
-                let parsed_shell_command = parseShellCommandVariables(plugin, t_shell_command.getShellCommand(), t_shell_command.getShell());
-                if (Array.isArray(parsed_shell_command)) {
-                    plugin.newErrors(parsed_shell_command);
+                const parsing_result = t_shell_command.parseVariables();
+                if (parsing_result.succeeded) {
+                    plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
                 } else {
-                    plugin.confirmAndExecuteShellCommand(parsed_shell_command, t_shell_command);
+                    plugin.newErrors(parsing_result.error_messages);
                 }
             })
         )

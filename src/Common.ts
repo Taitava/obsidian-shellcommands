@@ -154,3 +154,12 @@ export function uniqueArray(array: any[]) {
 export function gotoURL(url: string) {
     shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }
+
+export function generateObsidianCommandName(shell_command: string, alias: string) {
+    let prefix = "Execute: ";
+    if (alias) {
+        // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
+        return prefix + alias;
+    }
+    return prefix + shell_command;
+}
