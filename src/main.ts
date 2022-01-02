@@ -309,6 +309,11 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Execute the shell command
 			debugLog("Executing command " + shell_command + " in " + working_directory + "...");
 			exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
+
+				// Cache the executed shell command so that some output channels can show it if needed.
+				t_shell_command.executed.shell_command = shell_command;
+
+				// Did the shell command execute successfully?
 				if (null !== error) {
 					// Some error occurred
 					debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);

@@ -16,6 +16,14 @@ export class TShellCommand {
     private plugin: ShellCommandsPlugin;
     private configuration: ShellCommandConfiguration;
 
+    public executed: {
+        shell_command: string,
+        alias: string, // TODO: This is not yet set anywhere, nor read.
+    } = {
+        shell_command: undefined,
+        alias: undefined, // TODO: This is not yet set anywhere (= not updated), nor read.
+    };
+
     constructor (plugin: ShellCommandsPlugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
         this.plugin = plugin;
         this.id = shell_command_id;
