@@ -176,6 +176,21 @@ export abstract class SC_Event {
         // Most classes do not define custom settings, so for those classes this method does not need to do anything.
     }
 
+    /**
+     * Returns all the TShellCommand instances that have enabled this event.
+     */
+    public getTShellCommands(): TShellCommand[] {
+        const enabled_t_shell_commands: TShellCommand[] = [];
+        Object.values(this.plugin.getTShellCommands()).forEach((t_shell_command: TShellCommand) => {
+            // Check if this event has been enabled for the shell command.
+            if (t_shell_command.isSC_EventEnabled(this.static().event_code)) {
+                // Yes, it's enabled.
+                enabled_t_shell_commands.push(t_shell_command);
+            }
+        });
+        return enabled_t_shell_commands;
+    }
+
     public static() {
         return this.constructor as typeof SC_Event;
     }

@@ -90,6 +90,13 @@ export class TShellCommand {
         return this.configuration.alias;
     }
 
+    /**
+     * TODO: Use this method in all places where similar logic is needed.
+     */
+    public getAliasOrShellCommand(): string {
+        return this.configuration.alias || this.getShellCommand();
+    }
+
     public getConfirmExecution() {
         return this.configuration.confirm_execution;
     }
