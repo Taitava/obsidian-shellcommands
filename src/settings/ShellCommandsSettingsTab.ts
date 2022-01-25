@@ -117,6 +117,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 event_enabled_t_shell_commands.forEach((t_shell_command: TShellCommand) => {
                     list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()})
                 });
+                found_enabled_event = true;
             }
         });
         if (!found_enabled_event) {
