@@ -6,6 +6,7 @@ import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
 import {getVariables} from "../variables/VariableLists";
 import {EventVariable} from "../variables/event_variables/EventVariable";
+import {DocumentationEventsFolderLink} from "../Documentation";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -170,7 +171,35 @@ export abstract class SC_Event {
         // Most classes do not define custom settings, so for those classes this method does not need to do anything.
     }
 
+    /**
+     * Returns all the TShellCommand instances that have enabled this event.
+     */
+    public getTShellCommands(): TShellCommand[] {
+        const enabled_t_shell_commands: TShellCommand[] = [];
+        Object.values(this.plugin.getTShellCommands()).forEach((t_shell_command: TShellCommand) => {
+            // Check if this event has been enabled for the shell command.
+            if (t_shell_command.isSC_EventEnabled(this.static().event_code)) {
+                // Yes, it's enabled.
+                enabled_t_shell_commands.push(t_shell_command);
+            }
+        });
+        return enabled_t_shell_commands;
+    }
+
     public static() {
         return this.constructor as typeof SC_Event;
+    }
+
+    /**
+     * Child classes can override this to hook into a situation where a user has enabled an event in settings.
+     *
+     * @param t_shell_command The TShellCommand instance for which this SC_Event was enabled for.
+     */
+    public onAfterEnabling(t_shell_command: TShellCommand): void {
+        // If an SC_Event does not override this hook method, do nothing.
+    }
+
+    public static getDocumentationLink(): string {
+        return DocumentationEventsFolderLink + encodeURIComponent(this.event_title);
     }
 }

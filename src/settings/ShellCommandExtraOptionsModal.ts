@@ -15,6 +15,7 @@ import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {generateObsidianCommandName} from "../Common";
+import {gotoURL} from "../Common";
 
 export class ShellCommandExtraOptionsModal extends Modal {
     static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
@@ -250,6 +251,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
                         // Save
                         await this.plugin.saveSettings();
                     }),
+                )
+
+                // Documentation icon
+                .addExtraButton(icon => icon
+                    .setIcon("help")
+                    .onClick(() => gotoURL(sc_event.static().getDocumentationLink()))
+                    .setTooltip("Documentation: " + sc_event.static().getTitle() + " event"),
                 )
             ;
 

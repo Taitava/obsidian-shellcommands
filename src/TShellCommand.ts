@@ -92,6 +92,13 @@ export class TShellCommand {
         return this.configuration.alias;
     }
 
+    /**
+     * TODO: Use this method in all places where similar logic is needed.
+     */
+    public getAliasOrShellCommand(): string {
+        return this.configuration.alias || this.getShellCommand();
+    }
+
     public getConfirmExecution() {
         return this.configuration.confirm_execution;
     }
@@ -149,6 +156,7 @@ export class TShellCommand {
         if (sc_event.canRegisterAfterChangingSettings()) {
             this.registerSC_Event(sc_event);
         }
+        sc_event.onAfterEnabling(this);
     }
 
     /**

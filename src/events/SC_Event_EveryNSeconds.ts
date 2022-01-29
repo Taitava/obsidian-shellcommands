@@ -71,12 +71,20 @@ export class SC_Event_EveryNSeconds extends SC_Event {
                         this.register(t_shell_command);
 
                         // Done
-                        new Notice("The shell command will run every " + apply_seconds + " seconds");
+                        this.noticeAboutEnabling(t_shell_command);
                     }
 
                 }),
             )
         ;
+    }
+
+    public onAfterEnabling(t_shell_command: TShellCommand): void {
+        this.noticeAboutEnabling(t_shell_command);
+    }
+
+    private noticeAboutEnabling(t_shell_command: TShellCommand) {
+        new Notice("The shell command will run every " + this.getConfiguration(t_shell_command).seconds + " seconds");
     }
 }
 

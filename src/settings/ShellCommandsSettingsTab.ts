@@ -14,6 +14,9 @@ import {
 } from "../Documentation";
 import {getVariables} from "../variables/VariableLists";
 import {Variable} from "../variables/Variable";
+import {getSC_Events} from "../events/SC_EventList";
+import {SC_Event} from "../events/SC_Event";
+import {TShellCommand} from "../TShellCommand";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -50,6 +53,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 icon: "lines-of-text",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOutput(container_element);
+                },
+            },
+            "main-events": {
+                title: "Events",
+                icon: "dice",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabEvents(container_element);
                 },
             },
             "main-variables": {
@@ -91,7 +101,29 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 })
             )
         ;
-}
+    }
+
+    private tabEvents(container_element: HTMLElement) {
+        container_element.createEl("p", {text: "This tab gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
+        let found_enabled_event = false;
+        getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            const event_enabled_t_shell_commands = sc_event.getTShellCommands();
+            // Has the event been enabled for any shell commands?
+            if (event_enabled_t_shell_commands.length) {
+                // Yes, it's enabled.
+                // Show a list of shell commands
+                const paragraph_element = container_element.createEl("p", {text: sc_event.static().getTitle()});
+                const list_element = paragraph_element.createEl("ul");
+                event_enabled_t_shell_commands.forEach((t_shell_command: TShellCommand) => {
+                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()})
+                });
+                found_enabled_event = true;
+            }
+        });
+        if (!found_enabled_event) {
+            container_element.createEl("p", {text: "No events are enabled for any shell commands."});
+        }
+    }
 
     private tabVariables(container_element: HTMLElement)
     {
