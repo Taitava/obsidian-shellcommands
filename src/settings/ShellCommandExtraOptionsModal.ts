@@ -91,7 +91,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     this.t_shell_command.getConfiguration().alias = value;
 
                     // Update Obsidian command palette
-                    this.plugin.obsidian_commands[this.shell_command_id].name = this.plugin.generateObsidianCommandName(this.t_shell_command);
+                    this.plugin.updateCommandPaletteName(this.t_shell_command);
 
                     // UpdateShell commands settings panel
                     this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));

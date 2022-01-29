@@ -217,8 +217,24 @@ export default class ShellCommandsPlugin extends Plugin {
 		let shell_commands = this.getTShellCommands();
 		for (let shell_command_id in shell_commands) {
 			let t_shell_command = shell_commands[shell_command_id];
-			this.obsidian_commands[shell_command_id].name = this.generateObsidianCommandName(t_shell_command);
+			this.updateCommandPaletteName(t_shell_command);
 		}
+	}
+
+	/**
+	 * After a shell command's alias has been changed, this reflects the updated alias in Obsidian's command palette.
+	 * No updating is done if the shell command is excluded from the command palette.
+	 *
+	 * @param t_shell_command
+	 */
+	updateCommandPaletteName(t_shell_command: TShellCommand) {
+		// Check that the shell command is actually registered to Obsidian's command palette.
+		if (undefined !== this.obsidian_commands[t_shell_command.getId()]) {
+			// Yes, the shell command is registered in Obsidian's command palette.
+			// Update the command palette name.
+			this.obsidian_commands[t_shell_command.getId()].name = this.generateObsidianCommandName(t_shell_command);
+		}
+		// If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_commands and so the command palette name does not need updating.
 	}
 
 	generateObsidianCommandId(shell_command_id: string) {

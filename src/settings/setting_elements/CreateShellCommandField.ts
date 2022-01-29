@@ -57,7 +57,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                plugin.obsidian_commands[shell_command_id].name = plugin.generateObsidianCommandName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
+                plugin.updateCommandPaletteName(plugin.getTShellCommands()[shell_command_id]); // Change the command's name in Obsidian's command palette.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();
