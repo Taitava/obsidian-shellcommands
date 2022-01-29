@@ -310,11 +310,20 @@ export class TShellCommand {
         this.obsidian_command = obsidian_command;
     }
 
+    /**
+     * No renaming is done if the shell command is excluded from the command palette.
+     */
     public renameObsidianCommand(shell_command: string, alias: string) {
         // Rename the command in command palette
         const prefix = this.plugin.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
-        this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
-        return true; // Need to return true, otherwise the command would be left out from the command palette.
+
+        // Check that the shell command is actually registered to Obsidian's command palette.
+        if (undefined !== this.obsidian_command) {
+            // Yes, the shell command is registered in Obsidian's command palette.
+            // Update the command palette name.
+            this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
+        }
+        // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
 }
 

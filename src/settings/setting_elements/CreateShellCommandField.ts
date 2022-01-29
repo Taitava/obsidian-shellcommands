@@ -6,7 +6,6 @@ import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import ShellCommandsPlugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
-import {generateObsidianCommandName} from "../../Common";
 
 /**
  *
@@ -57,7 +56,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                plugin.obsidian_commands[shell_command_id].name = generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
+                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();
