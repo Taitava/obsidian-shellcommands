@@ -23,6 +23,9 @@ Features that are in development, but are not released yet. Does not include stu
 - [`{{yaml_value}}` variable (#120)](https://github.com/Taitava/obsidian-shellcommands/issues/120).
 - [`{{file_extension}}` variable (#122)](https://github.com/Taitava/obsidian-shellcommands/issues/122).
 
+### Changed
+- [Output to status bar: Don't ignore empty output (#124)](https://github.com/Taitava/obsidian-shellcommands/issues/124).
+
 ### Fixed
 - [Fix: Autocomplete suggests variables when typing right after a closing }} pair (#129)](https://github.com/Taitava/obsidian-shellcommands/issues/129).
 
