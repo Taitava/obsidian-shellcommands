@@ -1,13 +1,11 @@
 ---
-name: Custom issue template
-about: Describe this issue template's purpose here.
+name: New issues are meant to be created by the maintainer only
+about: Click the green _Get started_ button to see instructions on how to proceed with your proposal.
 title: ''
 labels: ''
 assignees: ''
 
 ---
-
-# New issues are meant to be created by the maintainer only
 
 Please start a new discussion instead of creating a new issue. I will then create an issue if needed. The idea is that we can have a longer discussion, and after a solution has been found and decisions made, an issue will be created that contains just a summary and most important decisions from the discussion.
 
