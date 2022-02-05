@@ -135,7 +135,11 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (let name in output_channel_drivers) {
-        list[name] = output_channel_drivers[name].getTitle(output_stream);
+        const output_channel_driver: any = output_channel_drivers[name];
+        // Check that the stream is suitable for the channel
+        if (output_channel_driver.acceptsOutputStream(output_stream)) {
+            list[name] = output_channel_driver.getTitle(output_stream);
+        }
     }
     return list;
 }
