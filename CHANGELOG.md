@@ -10,6 +10,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
 - [Events: Execute shell commands automatically when something happens (#123)](https://github.com/Taitava/obsidian-shellcommands/issues/123).
 - [Output channel: Ask after execution (#134)](https://github.com/Taitava/obsidian-shellcommands/issues/134): Allows to direct shell command output to a modal where it can be edited and manually redirected to other channels, i.e. to clipboard, file or status bar.
+- [Ability to hide shell commands from the command palette (#125)](https://github.com/Taitava/obsidian-shellcommands/issues/125)
 - [Settings: Add availability information to the list of variables (#132)](https://github.com/Taitava/obsidian-shellcommands/issues/132).
 
 ### To be Changed
