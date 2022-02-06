@@ -15,6 +15,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
 - [Internal: Cleaner caching for preparsed shell commands (#135)](https://github.com/Taitava/obsidian-shellcommands/issues/135).
 
+### To be Fixed
+- [Fix automatically focusing on Alias field when opening the extra options modal (#144)](https://github.com/Taitava/obsidian-shellcommands/issues/144).
+
 ## [0.9.0] - 2021-12-18
 
 ### Added
