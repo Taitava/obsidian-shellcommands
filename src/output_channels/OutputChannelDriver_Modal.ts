@@ -9,7 +9,7 @@ import ShellCommandsPlugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
-    protected readonly title = "Modal";
+    protected readonly title = "Ask after execution";
 
     protected _handle(outputs: OutputStreams, error_code: number | null): void {
         // Initialize a modal and pass outputs
