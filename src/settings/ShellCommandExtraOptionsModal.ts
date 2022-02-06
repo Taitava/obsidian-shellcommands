@@ -192,8 +192,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
     private tabOperatingSystemsAndShells(container_element: HTMLElement) {
         // Platform specific shell commands
         let platform_id: PlatformId;
+        let is_first = true;
         for (platform_id in PlatformNames) {
-            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
+            const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
+            if (is_first) {
+                // Focus on the first OS specific shell command field
+                setting_group.shell_command_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening");
+            }
         }
 
         // Platform specific shell selection

@@ -25,4 +25,5 @@ export function createPlatformSpecificShellCommandField(plugin: ShellCommandsPlu
         t_shell_command.getDefaultShellCommand(),
     );
     setting_group.name_setting.setDesc("If empty, the default shell command will be used on " + platform_name + ".");
+    return setting_group;
 }
