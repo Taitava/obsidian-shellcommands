@@ -1,6 +1,6 @@
 {
   "name": "obsidian-shellcommands",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "description": "You can predefine system commands that you want to run frequently, and assign hotkeys for them. For example open external applications.://obsidian.md)",
   "main": "main.js",
   "scripts": {
