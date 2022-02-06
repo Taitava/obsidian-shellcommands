@@ -207,7 +207,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private tabEvents(container_element: HTMLElement) {
         // Command palette
-        new Setting(container_element)
+        const command_palette_availability_setting = new Setting(container_element)
             .setName("Availability in Obsidian's command palette")
             .addDropdown(dropdown => dropdown
                 .addOptions(CommandPaletteOptions)
@@ -231,6 +231,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 }),
             )
         ;
+
+        // Focus on the command palette availability field
+        command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
 
         // Events
         new Setting(container_element)
