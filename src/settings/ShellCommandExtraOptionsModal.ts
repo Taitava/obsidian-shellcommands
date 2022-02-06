@@ -129,7 +129,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private tabOutput(container_element: HTMLElement) {
         // Output channeling
-        this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
+        const stdout_channel_setting = this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
         this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
         new Setting(container_element)
             .setName("Order of stdout/stderr output")
@@ -146,6 +146,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+
+        // Focus on the stdout channel dropdown field
+        stdout_channel_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
 
         // Ignore errors field
         new Setting(container_element)
@@ -276,7 +279,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
         let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
-        new Setting(container_element)
+        return new Setting(container_element)
             .setName(title)
             .setDesc(description)
             .addDropdown(dropdown => dropdown
