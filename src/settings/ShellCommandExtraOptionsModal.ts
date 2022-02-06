@@ -198,6 +198,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             if (is_first) {
                 // Focus on the first OS specific shell command field
                 setting_group.shell_command_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening");
+                is_first = false;
             }
         }
 
