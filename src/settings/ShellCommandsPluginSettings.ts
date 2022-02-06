@@ -97,3 +97,15 @@ export interface IPlatformSpecificString {
 export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
     default: string,
 }
+
+export type ICommandPaletteOptions = {
+    enabled: string;
+    unlisted: string;
+    disabled: string;
+}
+
+export const CommandPaletteOptions: ICommandPaletteOptions = {
+    enabled: "Command palette & hotkeys",
+    unlisted: "Hotkeys only",
+    disabled: "Excluded",
+}

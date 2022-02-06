@@ -3,6 +3,7 @@ import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
 import {debugLog} from "../Debug";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export abstract class OutputChannelDriver {
     /**
@@ -12,6 +13,8 @@ export abstract class OutputChannelDriver {
 
     protected plugin: ShellCommandsPlugin;
     protected app: App;
+    protected shell_command_parsing_result: ShellCommandParsingResult;
+    protected t_shell_command: TShellCommand;
     protected accepts_empty_output = false;
 
     /**
@@ -22,9 +25,11 @@ export abstract class OutputChannelDriver {
         return this.title;
     }
 
-    public initialize(plugin: ShellCommandsPlugin) {
+    public initialize(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         this.plugin = plugin;
         this.app = plugin.app;
+        this.t_shell_command = t_shell_command;
+        this.shell_command_parsing_result = shell_command_parsing_result;
     }
 
     protected abstract _handle(output: OutputStreams, error_code: number | null): void;

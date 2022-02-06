@@ -1,8 +1,9 @@
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {getFileExtension} from "./VariableHelpers";
+import {FileVariable} from "./FileVariable";
 
-export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
+export class Variable_FileExtension extends FileVariable {
     static variable_name = "file_extension";
     static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
@@ -18,24 +19,12 @@ export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
     }
 
     generateValue(): string {
-        let file = this.app.workspace.getActiveFile();
+        const file = this.getFile();
         if (!file) {
-            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
-        const file_extension = file.extension;
 
-        // Should the extension be given with or without a dot?
-        if (this.arguments.dot === "with-dot") {
-            // A preceding dot must be included.
-            if (file_extension.length > 0) {
-                // But only if the extension is not empty.
-                return "." + file_extension;
-            }
-        }
-
-        // No dot should be included, or the extension is empty
-        return file_extension;
+        return getFileExtension(file, this.arguments.dot === "with-dot");
     }
 
     public static getAutocompleteItems() {
@@ -43,13 +32,13 @@ export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the current file name's ending without a preceding dot.",
+                help_text: "Gives the current file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included.",
+                help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -57,21 +46,20 @@ export class ShellCommandVariable_FileExtension extends ShellCommandVariable{
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the current file name's ending without a preceding dot.",
+                help_text: "Gives the current file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included.",
+                help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
         ];
     }
 
+    public getHelpName(): string {
+        return "<strong>{{file_extension:with-dot}}</strong> or <strong>{{file_extension:no-dot}}</strong>";
+    }
 }
-addShellCommandVariableInstructions(
-    "{{file_extension:with-dot}} or {{file_extension:no-dot}}",
-    ShellCommandVariable_FileExtension.help_text,
-);

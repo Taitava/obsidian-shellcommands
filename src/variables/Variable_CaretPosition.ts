@@ -1,9 +1,8 @@
 import {getEditor} from "../Common";
-import {addShellCommandVariableInstructions} from "./ShellCommandVariableInstructions";
-import {IParameters, ShellCommandVariable} from "./ShellCommandVariable";
+import {IParameters, Variable} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
-export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
+export class Variable_CaretPosition extends Variable {
     static variable_name = "caret_position";
     static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 
@@ -52,19 +51,19 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + "}}",
-                help_text: "Gives the line number and column position of the current caret position as 'line:column'.",
+                help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":line}}",
-                help_text: "Gives the line number of the current caret position.",
+                help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":column}}",
-                help_text: "Gives the column number of the current caret position.",
+                help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable"
             },
@@ -72,27 +71,30 @@ export class ShellCommandVariable_CaretPosition extends ShellCommandVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + "}}",
-                help_text: "Gives the line number and column position of the current caret position as 'line:column'.",
+                help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":line}}",
-                help_text: "Gives the line number of the current caret position.",
+                help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":column}}",
-                help_text: "Gives the column number of the current caret position.",
+                help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
         ];
     }
-}
 
-addShellCommandVariableInstructions(
-    "{{caret_position}}, {{caret_position:line}} or {{caret_position:column}}",
-    ShellCommandVariable_CaretPosition.help_text,
-);
+    public getHelpName(): string {
+        return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
+    }
+
+    public static getAvailabilityText(): string {
+        return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
+    }
+}

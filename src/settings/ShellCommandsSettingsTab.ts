@@ -1,7 +1,6 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
 import ShellCommandsPlugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
-import {getShellCommandVariableInstructions} from "../variables/ShellCommandVariableInstructions";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
@@ -13,6 +12,11 @@ import {
     GitHubLink,
     ChangelogLink,
 } from "../Documentation";
+import {getVariables} from "../variables/VariableLists";
+import {Variable} from "../variables/Variable";
+import {getSC_Events} from "../events/SC_EventList";
+import {SC_Event} from "../events/SC_Event";
+import {TShellCommand} from "../TShellCommand";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
     plugin: ShellCommandsPlugin;
@@ -49,6 +53,13 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 icon: "lines-of-text",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOutput(container_element);
+                },
+            },
+            "main-events": {
+                title: "Events",
+                icon: "dice",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabEvents(container_element);
                 },
             },
             "main-variables": {
@@ -90,26 +101,41 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
                 })
             )
         ;
-}
+    }
+
+    private tabEvents(container_element: HTMLElement) {
+        container_element.createEl("p", {text: "This tab gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
+        let found_enabled_event = false;
+        getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
+            const event_enabled_t_shell_commands = sc_event.getTShellCommands();
+            // Has the event been enabled for any shell commands?
+            if (event_enabled_t_shell_commands.length) {
+                // Yes, it's enabled.
+                // Show a list of shell commands
+                const paragraph_element = container_element.createEl("p", {text: sc_event.static().getTitle()});
+                const list_element = paragraph_element.createEl("ul");
+                event_enabled_t_shell_commands.forEach((t_shell_command: TShellCommand) => {
+                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()})
+                });
+                found_enabled_event = true;
+            }
+        });
+        if (!found_enabled_event) {
+            container_element.createEl("p", {text: "No events are enabled for any shell commands."});
+        }
+    }
 
     private tabVariables(container_element: HTMLElement)
     {
         // "Preview variables in command palette" field
         new Setting(container_element)
-            .setName("Preview variables in command palette")
-            .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette. A nice way to ensure your commands will use correct values.")
+            .setName("Preview variables in command palette and menus")
+            .setDesc("If on, variable names are substituted with their realtime values when you view your commands in the command palette and right click context menus (if used). A nice way to ensure your commands will use correct values.")
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.preview_variables_in_command_palette)
                 .onChange(async (value: boolean) => {
                     debugLog("Changing preview_variables_in_command_palette to " + value);
                     this.plugin.settings.preview_variables_in_command_palette = value;
-                    if (!value) {
-                        // Variable previewing is turned from on to off.
-                        // This means that the command palette may have old, stale variable data in it (if a user has opened the palette, but closed it without executing anything).
-                        // Remove old, preparsed variable data and reset shell commands' names in the command palette.
-                        this.plugin.resetPreparsedShellCommandConfigurations();
-                        this.plugin.resetCommandPaletteNames();
-                    }
                     await this.plugin.saveSettings();
                 })
             )
@@ -151,13 +177,20 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             )
         ;
 
-        getShellCommandVariableInstructions().forEach((instructions) => {
-            let paragraph = container_element.createEl("p");
-            // @ts-ignore
-            paragraph.createEl("strong", {text: instructions.variable_name + " "});
-            // @ts-ignore
-            paragraph.createEl("span", {text: instructions.instructions});
+        const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
+        variables.forEach((variable: Variable) => {
+            const paragraph = container_element.createEl("p");
+            paragraph.insertAdjacentHTML("afterbegin",
+                variable.getHelpName() +
+                "<br>" +
+                variable.getHelpText()
+            );
+            const availability_text: string = variable.static().getAvailabilityText();
+            if (availability_text) {
+                paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+            }
         });
+
         container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."});
         container_element.createEl("p", {text: "Special characters in variable values are tried to be escaped (except if you use CMD as the shell in Windows). This is to improve security so that a variable won't accidentally cause bad things to happen. If you want to use a raw, unescaped value, add an exclamation mark before the variable's name, e.g. {{!title}}, but be careful, it's dangerous!"});
         container_element.createEl("p", {text: "There is no way to prevent variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please raise an issue in GitHub."});

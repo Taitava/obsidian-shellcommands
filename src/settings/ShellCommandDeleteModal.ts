@@ -30,9 +30,9 @@ export class ShellCommandDeleteModal extends Modal {
         delete_button.onclick = async () => {
             // Remove the command
             debugLog("Command " + this.shell_command_id + " gonna be removed.");
+            this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.
             delete this.plugin.getTShellCommands()[this.shell_command_id]; // Remove the TShellCommand object.
             delete this.plugin.settings.shell_commands[this.shell_command_id]; // Remove from the plugin's settings.
-            delete this.plugin.obsidian_commands[this.shell_command_id]; // Remove from the command palette.
 
             // Remove the setting fields
             this.container_element.removeChild(this.setting_group.name_setting.settingEl);

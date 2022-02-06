@@ -1,43 +1,63 @@
-import {ShellCommandVariable} from "./ShellCommandVariable";
-import {ShellCommandVariable_Clipboard} from "./ShellCommandVariable_Clipboard";
-import {ShellCommandVariable_CaretPosition} from "./ShellCommandVariable_CaretPosition";
-import {ShellCommandVariable_Date} from "./ShellCommandVariable_Date";
-import {ShellCommandVariable_FileExtension} from "./ShellCommandVariable_FileExtension";
-import {ShellCommandVariable_FileName} from "./ShellCommandVariable_FileName";
-import {ShellCommandVariable_FilePath} from "./ShellCommandVariable_FilePath";
-import {ShellCommandVariable_FolderName} from "./ShellCommandVariable_FolderName";
-import {ShellCommandVariable_FolderPath} from "./ShellCommandVariable_FolderPath";
-import {ShellCommandVariable_Selection} from "./ShellCommandVariable_Selection";
-import {ShellCommandVariable_Tags} from "./ShellCommandVariable_Tags";
-import {ShellCommandVariable_Title} from "./ShellCommandVariable_Title";
-import {ShellCommandVariable_VaultPath} from "./ShellCommandVariable_VaultPath";
-import {ShellCommandVariable_Workspace} from "./ShellCommandVariable_Workspace";
+import {Variable} from "./Variable";
+import {Variable_Clipboard} from "./Variable_Clipboard";
+import {Variable_CaretPosition} from "./Variable_CaretPosition";
+import {Variable_Date} from "./Variable_Date";
+import {Variable_FileExtension} from "./Variable_FileExtension";
+import {Variable_FileName} from "./Variable_FileName";
+import {Variable_FilePath} from "./Variable_FilePath";
+import {Variable_FolderName} from "./Variable_FolderName";
+import {Variable_FolderPath} from "./Variable_FolderPath";
+import {Variable_Selection} from "./Variable_Selection";
+import {Variable_Tags} from "./Variable_Tags";
+import {Variable_Title} from "./Variable_Title";
+import {Variable_VaultPath} from "./Variable_VaultPath";
+import {Variable_Workspace} from "./Variable_Workspace";
 import {DEBUG_ON} from "../Debug";
-import {ShellCommandVariable_Passthrough} from "./ShellCommandVariable_Passthrough";
+import {Variable_Passthrough} from "./Variable_Passthrough";
 import ShellCommandsPlugin from "../main";
-import {ShellCommandVariable_YAMLValue} from "./ShellCommandVariable_YAMLValue";
+import {Variable_YAMLValue} from "./Variable_YAMLValue";
+import {SC_Event} from "../events/SC_Event";
+import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
+import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
+import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
+import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPath";
+import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
+import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
+import {Variable_EventTags} from "./event_variables/Variable_EventTags";
+import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 
-export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
-    let shell_command_variables: ShellCommandVariable[] = [
-        new ShellCommandVariable_Clipboard(plugin, shell),
-        new ShellCommandVariable_CaretPosition(plugin, shell),
-        new ShellCommandVariable_Date(plugin, shell),
-        new ShellCommandVariable_FileExtension(plugin, shell),
-        new ShellCommandVariable_FileName(plugin, shell),
-        new ShellCommandVariable_FilePath(plugin, shell),
-        new ShellCommandVariable_FolderName(plugin, shell),
-        new ShellCommandVariable_FolderPath(plugin, shell),
-        new ShellCommandVariable_Selection(plugin, shell),
-        new ShellCommandVariable_Tags(plugin, shell),
-        new ShellCommandVariable_Title(plugin, shell),
-        new ShellCommandVariable_VaultPath(plugin, shell),
-        new ShellCommandVariable_Workspace(plugin, shell),
-        new ShellCommandVariable_YAMLValue(plugin, shell),
+export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
+    let shell_command_variables: Variable[] = [
+        // Normal variables
+        new Variable_CaretPosition(plugin, shell),
+        new Variable_Clipboard(plugin, shell),
+        new Variable_Date(plugin, shell),
+        new Variable_FileExtension(plugin, shell),
+        new Variable_FileName(plugin, shell),
+        new Variable_FilePath(plugin, shell),
+        new Variable_FolderName(plugin, shell),
+        new Variable_FolderPath(plugin, shell),
+        new Variable_Selection(plugin, shell),
+        new Variable_Tags(plugin, shell),
+        new Variable_Title(plugin, shell),
+        new Variable_VaultPath(plugin, shell),
+        new Variable_Workspace(plugin, shell),
+        new Variable_YAMLValue(plugin, shell),
+
+        // Event variables
+        new Variable_EventFileExtension(plugin, shell, sc_event),
+        new Variable_EventFileName(plugin, shell, sc_event),
+        new Variable_EventFilePath(plugin, shell, sc_event),
+        new Variable_EventFolderName(plugin, shell, sc_event),
+        new Variable_EventFolderPath(plugin, shell, sc_event),
+        new Variable_EventTags(plugin, shell, sc_event),
+        new Variable_EventTitle(plugin, shell, sc_event),
+        new Variable_EventYAMLValue(plugin, shell, sc_event),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
         shell_command_variables.push(
-            new ShellCommandVariable_Passthrough(plugin, shell),
+            new Variable_Passthrough(plugin, shell),
         );
     }
     return shell_command_variables;
@@ -45,25 +65,36 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string) {
 
 export function getVariableClasses() {
     let shell_command_variables = [
-        ShellCommandVariable_Clipboard,
-        ShellCommandVariable_CaretPosition,
-        ShellCommandVariable_Date,
-        ShellCommandVariable_FileExtension,
-        ShellCommandVariable_FileName,
-        ShellCommandVariable_FilePath,
-        ShellCommandVariable_FolderName,
-        ShellCommandVariable_FolderPath,
-        ShellCommandVariable_Selection,
-        ShellCommandVariable_Tags,
-        ShellCommandVariable_Title,
-        ShellCommandVariable_VaultPath,
-        ShellCommandVariable_Workspace,
-        ShellCommandVariable_YAMLValue,
+        // Normal variables
+        Variable_CaretPosition,
+        Variable_Clipboard,
+        Variable_Date,
+        Variable_FileExtension,
+        Variable_FileName,
+        Variable_FilePath,
+        Variable_FolderName,
+        Variable_FolderPath,
+        Variable_Selection,
+        Variable_Tags,
+        Variable_Title,
+        Variable_VaultPath,
+        Variable_Workspace,
+        Variable_YAMLValue,
+
+        // Event variables
+        Variable_EventFileExtension,
+        Variable_EventFileName,
+        Variable_EventFilePath,
+        Variable_EventFolderName,
+        Variable_EventFolderPath,
+        Variable_EventTags,
+        Variable_EventTitle,
+        Variable_EventYAMLValue,
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
         shell_command_variables.push(
-            ShellCommandVariable_Passthrough,
+            Variable_Passthrough,
         );
     }
     return shell_command_variables;
