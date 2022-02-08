@@ -1,7 +1,7 @@
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
 import {ShellCommandExtraOptionsModal} from "../ShellCommandExtraOptionsModal";
-import {ShellCommandDeleteModal} from "../ShellCommandDeleteModal";
+import {DeleteModal} from "../DeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
@@ -123,7 +123,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("trash")
             .onClick(async () => {
                 // Open a delete modal
-                const modal = new ShellCommandDeleteModal(plugin, shell_command_id, setting_group, container_element);
+                const modal = new DeleteModal(plugin, shell_command_id, setting_group, container_element);
                 modal.open();
             })
         )

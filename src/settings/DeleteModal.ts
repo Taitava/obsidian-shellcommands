@@ -4,7 +4,7 @@ import {ShellCommandSettingGroup} from "./SC_MainSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 
-export class ShellCommandDeleteModal extends Modal {
+export class DeleteModal extends Modal {
     private plugin: SC_Plugin;
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
