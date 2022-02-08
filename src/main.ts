@@ -242,15 +242,14 @@ export default class SC_Plugin extends Plugin {
 
 		// Perform preactions before execution
 		const preactions = t_shell_command.getPreactions(shell_command_parsing_result);
-		const preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
+		let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
 		preactions.forEach((preaction: Preaction) => {
-			preaction_pipeline.then(() => {
+			preaction_pipeline = preaction_pipeline.then(() => {
 				return preaction.perform();
 			});
 		});
 		preaction_pipeline.then(() => {
 			// Execute
-			// FIXME: Bug: The shell command gets executed even while preactions are still being performed.
 
 			// TODO: This confirmation check should be migrated into a Preaction. We should go now directly to the execution part.
 			// Check if the command needs confirmation before execution
