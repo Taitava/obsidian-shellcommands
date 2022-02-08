@@ -1,5 +1,5 @@
 import SC_Plugin from "../../main";
-import {ShellCommandSettingGroup} from "../SC_MainSettingsTab";
+import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
 import {createAutocomplete} from "./Autocomplete";
@@ -16,7 +16,7 @@ export function CreateShellCommandFieldCore(
     shell_command_placeholder: string = "Enter your command"
     ) {
 
-    let setting_group: ShellCommandSettingGroup;
+    let setting_group: SettingFieldGroup;
 
     function on_change(shell_command: string) {
         // Update preview

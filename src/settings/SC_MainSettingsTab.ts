@@ -288,7 +288,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     }
 }
 
-export interface ShellCommandSettingGroup {
+export interface SettingFieldGroup {
     name_setting: Setting;
     shell_command_setting: Setting;
     preview_setting: Setting;
