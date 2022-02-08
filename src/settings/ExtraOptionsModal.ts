@@ -38,10 +38,9 @@ export class ExtraOptionsModal extends SC_Modal {
     }
 
     public onOpen() {
-        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
+        super.onOpen();
 
-        // Make the modal scrollable if it has more content than what fits in the screen.
-        this.modalEl.addClass("SC-scrollable");
+        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
 
         // Tabs
         this.tab_structure = createTabs(this.modalEl, {

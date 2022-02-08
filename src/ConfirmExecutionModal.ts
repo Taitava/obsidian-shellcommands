@@ -15,8 +15,8 @@ export class ConfirmExecutionModal extends SC_Modal {
         this.t_shell_command = t_shell_command;
     }
 
-    public open() {
-        super.open();
+    public onOpen() {
+        super.onOpen();
 
         // Information about the shell command
         this.modalEl.createEl("h2", {text: this.shell_command_parsing_result.shell_command, attr: {style: "margin-bottom: 0;"}});

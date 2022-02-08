@@ -9,4 +9,11 @@ export abstract class SC_Modal extends Modal {
         super(plugin.app);
     }
 
+    public onOpen(): void {
+
+        // Make the modal scrollable if it has more content than what fits in the screen.
+        this.modalEl.addClass("SC-scrollable");
+
+    }
+
 }

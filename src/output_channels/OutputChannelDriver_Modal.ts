@@ -43,9 +43,7 @@ class OutputModal extends SC_Modal {
     }
 
     public onOpen(): void {
-
-        // Make the modal scrollable if it has more content than what fits in the screen.
-        this.modalEl.addClass("SC-scrollable"); // TODO: Maybe make a common parent class for all SC's modals and do this there?
+        super.onOpen();
 
         // Heading
         const heading = this.shell_command_parsing_result.alias;
