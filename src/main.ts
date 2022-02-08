@@ -29,6 +29,7 @@ import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
+import {Preaction} from "./imports";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -230,25 +231,48 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	/**
+	 * Performs preactions, and if they all give resolved Promises, executes the shell command.
+	 *
+	 * TODO: Change the name of this method to reflect the new behavior.
 	 *
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed.
 	 */
 	public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 
-		// Check if the command needs confirmation before execution
-		if (t_shell_command.getConfirmExecution()) {
-			// Yes, a confirmation is needed.
-			// Open a confirmation modal.
-			new ConfirmExecutionModal(this, shell_command_parsing_result, t_shell_command)
-				.open()
-			;
-			return; // Do not execute now. The modal will call executeShellCommand() later if needed.
-		} else {
-			// No need to confirm.
-			// Execute.
-			this.executeShellCommand(t_shell_command, shell_command_parsing_result);
-		}
+		// Perform preactions before execution
+		const preactions = t_shell_command.getPreactions(shell_command_parsing_result);
+		const preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
+		preactions.forEach((preaction: Preaction) => {
+			preaction_pipeline.then(() => {
+				return preaction.perform();
+			});
+		});
+		preaction_pipeline.then(() => {
+			// Execute
+			// FIXME: Bug: The shell command gets executed even while preactions are still being performed.
+
+			// TODO: This confirmation check should be migrated into a Preaction. We should go now directly to the execution part.
+			// Check if the command needs confirmation before execution
+			if (t_shell_command.getConfirmExecution()) {
+				// Yes, a confirmation is needed.
+				// Open a confirmation modal.
+				new ConfirmExecutionModal(this, shell_command_parsing_result, t_shell_command)
+					.open()
+				;
+				return; // Do not execute now. The modal will call executeShellCommand() later if needed.
+				// TODO: This confirmation check should be migrated into a Preaction.
+			} else {
+				// No need to confirm.
+				// Execute.
+				this.executeShellCommand(t_shell_command, shell_command_parsing_result);
+			}
+		}).catch(() => {
+			// Cancel execution
+			debugLog("Shell command execution cancelled.")
+		});
+
+
 	}
 
 	/**

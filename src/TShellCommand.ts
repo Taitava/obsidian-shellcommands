@@ -6,6 +6,11 @@ import {getSC_Events} from "./events/SC_EventList";
 import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
+import {
+    createPreaction,
+    Preaction,
+    PreactionConfiguration
+} from "./imports";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -324,6 +329,19 @@ export class TShellCommand {
             this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
         }
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
+    }
+
+    public getPreactions(shell_command_parsing_result: ParsingResult): Preaction[] {
+        const preactions: Preaction[] = [];
+        this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
+            // Only create the preaction if it's enabled.
+            if (preaction_configuration.enabled) {
+                // Yes, it's enabled.
+                // Instantiate the preaction.
+                preactions.push(createPreaction(this.plugin, preaction_configuration, shell_command_parsing_result));
+            }
+        });
+        return preactions;
     }
 }
 

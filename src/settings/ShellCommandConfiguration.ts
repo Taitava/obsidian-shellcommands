@@ -5,6 +5,9 @@ import {
     IPlatformSpecificStringWithDefault,
 } from "./SC_MainSettings";
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
+import {
+    PreactionConfiguration
+} from "../imports";
 
 export interface ShellCommandsConfiguration {
     [key: string]: ShellCommandConfiguration;
@@ -28,6 +31,7 @@ export interface ShellCommandConfiguration {
     output_channel_order: OutputChannelOrder;
     events: SC_EventConfigurations;
     command_palette_availability: keyof ICommandPaletteOptions;
+    preactions: PreactionConfiguration[];
 
     // LEGACY
     /** @deprecated Can only be used for migration. */
@@ -50,5 +54,6 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
         output_channel_order: "stdout-first",
         events: {},
         command_palette_availability: "enabled",
+        preactions: [],
     }
 }

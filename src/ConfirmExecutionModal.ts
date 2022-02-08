@@ -4,6 +4,9 @@ import {ParsingResult, TShellCommand} from "./TShellCommand";
 import {debugLog} from "./Debug";
 import {SC_Modal} from "./SC_Modal";
 
+/**
+ * TODO: Fusion this modal into the new PromptModal
+ */
 export class ConfirmExecutionModal extends SC_Modal {
 
     private readonly shell_command_parsing_result: ParsingResult;
