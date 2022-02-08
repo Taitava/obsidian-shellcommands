@@ -1,6 +1,6 @@
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
-import {ShellCommandExtraOptionsModal} from "../ShellCommandExtraOptionsModal";
+import {ExtraOptionsModal} from "../ExtraOptionsModal";
 import {DeleteModal} from "../DeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
@@ -80,40 +80,40 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ShellCommandExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ShellCommandExtraOptionsModal.OUTPUT_OPTIONS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.OUTPUT_OPTIONS_SUMMARY)
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ShellCommandExtraOptionsModal.OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY)
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Operating systems and shells tab
-                const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-operating-systems-and-shells");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ShellCommandExtraOptionsModal.EVENTS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.EVENTS_SUMMARY)
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Operating systems and shells tab
-                const modal = new ShellCommandExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })

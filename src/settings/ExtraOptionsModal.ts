@@ -16,7 +16,7 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
 
-export class ShellCommandExtraOptionsModal extends Modal {
+export class ExtraOptionsModal extends Modal {
     static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
     static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
