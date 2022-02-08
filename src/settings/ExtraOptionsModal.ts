@@ -17,10 +17,10 @@ import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
 
 export class ExtraOptionsModal extends Modal {
-    static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
-    static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
-    static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
-    static EVENTS_SUMMARY = "Events";
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
+    public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
+    public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
+    public static EVENTS_SUMMARY = "Events";
 
     private plugin: SC_Plugin;
     private readonly shell_command_id: string;
@@ -38,7 +38,7 @@ export class ExtraOptionsModal extends Modal {
         this.setting_tab = setting_tab;
     }
 
-    onOpen() {
+    public onOpen() {
         this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
 
         // Make the modal scrollable if it has more content than what fits in the screen.

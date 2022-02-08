@@ -15,7 +15,7 @@ export class ConfirmExecutionModal extends Modal {
         this.t_shell_command = t_shell_command;
     }
 
-    open() {
+    public open() {
         super.open();
 
         // Information about the shell command

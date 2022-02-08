@@ -37,8 +37,8 @@ export default class SC_Plugin extends Plugin {
 	 */
 	public static SettingsVersion: SettingsVersionString = "0.10.0";
 
-	settings: SC_MainSettings;
-	obsidian_commands: ObsidianCommandsContainer = {};
+	public settings: SC_MainSettings; // TODO: Make private and add a getter.
+	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 
 	/**
@@ -54,7 +54,7 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ParsingResult,
 	} = {};
 
-	async onload() {
+	public async onload() {
 		debugLog('loading plugin');
 
 		// Load settings
@@ -98,7 +98,7 @@ export default class SC_Plugin extends Plugin {
 		}
 	}
 
-	getTShellCommands() {
+	public getTShellCommands() {
 		return this.t_shell_commands;
 	}
 
@@ -225,7 +225,7 @@ export default class SC_Plugin extends Plugin {
 		});
 	}
 
-	generateObsidianCommandId(shell_command_id: string) {
+	public generateObsidianCommandId(shell_command_id: string) {
 		return "shell-command-" + shell_command_id;
 	}
 
@@ -234,7 +234,7 @@ export default class SC_Plugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed.
 	 */
-	confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+	public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 
 		// Check if the command needs confirmation before execution
 		if (t_shell_command.getConfirmExecution()) {
@@ -258,7 +258,7 @@ export default class SC_Plugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
 	 */
-	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+	public executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 		const working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
@@ -355,7 +355,7 @@ export default class SC_Plugin extends Plugin {
 		}
 	}
 
-	getWorkingDirectory() {
+	private getWorkingDirectory() {
 		// Returns either a user defined working directory, or an automatically detected one.
 		const working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
@@ -369,7 +369,7 @@ export default class SC_Plugin extends Plugin {
 		return working_directory;
 	}
 
-	onunload() {
+	public onunload() {
 		debugLog('unloading plugin');
 	}
 
@@ -408,7 +408,7 @@ export default class SC_Plugin extends Plugin {
 		return this.manifest.version;
 	}
 
-	async loadSettings() {
+	private async loadSettings() {
 
 		// Try to read a settings file
 		let all_settings: SC_MainSettings;
@@ -439,7 +439,7 @@ export default class SC_Plugin extends Plugin {
 		return true; // Settings are loaded and the plugin can be used.
 	}
 
-	async saveSettings() {
+	public async saveSettings() {
 		// Update settings version in case it's old.
 		this.settings.settings_version = SC_Plugin.SettingsVersion;
 
@@ -478,7 +478,7 @@ export default class SC_Plugin extends Plugin {
 	/**
 	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
 	 */
-	generateNewShellCommandID() {
+	private generateNewShellCommandID() {
 		const existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
 		let new_id = 0;
 		for (const i in existing_ids) {
@@ -490,25 +490,25 @@ export default class SC_Plugin extends Plugin {
 		return String(new_id);
 	}
 
-	getPluginId() {
+	public getPluginId() {
 		return this.manifest.id;
 	}
 
-	getPluginName() {
+	public getPluginName() {
 		return this.manifest.name;
 	}
 
-	newError(message: string) {
+	public newError(message: string) {
 		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
 
-	newErrors(messages: string[]) {
+	public newErrors(messages: string[]) {
 		messages.forEach((message: string) => {
 			this.newError(message);
 		});
 	}
 
-	newNotification(message: string) {
+	public newNotification(message: string) {
 		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
 

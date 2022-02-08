@@ -27,8 +27,8 @@ export interface IParameters {
  */
 export abstract class Variable {
     private static readonly parameter_separator = ":";
-    readonly plugin: SC_Plugin;
-    readonly app: App;
+    protected readonly plugin: SC_Plugin;
+    protected readonly app: App;
     private error_messages: string[] = [];
     public static readonly variable_name: string;
     protected shell: string;
@@ -90,7 +90,7 @@ export abstract class Variable {
         return child_class.parameter_separator;
     }
 
-    getPattern() {
+    public getPattern() {
         const error_prefix = this.getVariableName() + ".getPattern(): ";
         let pattern = '\{\{\!?' + this.getVariableName();
         for (const parameter_name in this.getParameters()) {
@@ -162,7 +162,7 @@ export abstract class Variable {
     /**
      * Note that error messages can only exist after getValue() is called!
      */
-    getErrorMessages() {
+    public getErrorMessages() {
         return this.error_messages;
     }
 

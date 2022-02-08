@@ -3,10 +3,10 @@ import {Variable} from "./Variable";
 import {debugLog} from "../Debug";
 
 export class Variable_Selection extends Variable{
-    static variable_name = "selection";
-    static help_text = "Gives the currently selected text.";
+    public static variable_name = "selection";
+    public static help_text = "Gives the currently selected text.";
 
-    generateValue(): string {
+    protected generateValue(): string {
 
         // Check that we are able to get a view
         const view = getView(this.app);

@@ -3,8 +3,8 @@ import {FileVariable} from "./FileVariable";
 import {getFileYAMLValue} from "./VariableHelpers";
 
 export class Variable_YAMLValue extends FileVariable {
-    static variable_name = "yaml_value";
-    static help_text = "Reads a single value from the current file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
+    public static variable_name = "yaml_value";
+    public static help_text = "Reads a single value from the current file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
 
     protected static readonly parameters: IParameters = {
         property_name: {
@@ -17,7 +17,7 @@ export class Variable_YAMLValue extends FileVariable {
         property_name: string;
     }
 
-    generateValue(): string {
+    protected generateValue(): string {
         const active_file = this.getFile();
         if (active_file) {
             // We do have an active file

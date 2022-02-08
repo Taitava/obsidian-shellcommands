@@ -19,7 +19,7 @@ import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
-    plugin: SC_Plugin;
+    private readonly plugin: SC_Plugin;
 
     private tab_structure: TabStructure;
 
@@ -28,7 +28,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
-    display(): void {
+    public display(): void {
         const {containerEl} = this;
 
         containerEl.empty();
@@ -238,7 +238,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
     }
 
-    createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
+    private createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
         new Setting(container_element)
             .setName(title)
             .setDesc(description + " In seconds, between 1 and 180.")
