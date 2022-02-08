@@ -91,7 +91,7 @@ class OutputModal extends Modal {
                 .setValue(output)
             )
         ;
-        textarea_setting.infoEl.addClass("shell-commands-hide"); // Make room for the textarea by hiding the left column.
+        textarea_setting.infoEl.addClass("SC-hide"); // Make room for the textarea by hiding the left column.
         textarea_setting.settingEl.addClass("SC-output-channel-modal-textarea-container", "SC-no-top-border");
 
         // Add controls for redirecting the output to another channel.

@@ -81,7 +81,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Alias field
         new Setting(container_element)
             .setName("Alias")
-            .setClass("shell-commands-name-setting")
+            .setClass("SC-name-setting")
         ;
         const alias_setting = new Setting(container_element)
             .addText(text => text
@@ -100,7 +100,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     await this.plugin.saveSettings();
                 })
             )
-            .setClass("shell-commands-shell-command-setting")
+            .setClass("SC-shell-command-setting")
         ;
         alias_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
         container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
@@ -116,10 +116,10 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     const icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
                     if (this.t_shell_command.getConfirmExecution()) {
                         // Show icon
-                        icon_container.removeClass("shell-commands-hide");
+                        icon_container.removeClass("SC-hide");
                     } else {
                         // Hide icon
-                        icon_container.addClass("shell-commands-hide");
+                        icon_container.addClass("SC-hide");
                     }
                     await this.plugin.saveSettings();
                 })
@@ -179,10 +179,10 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     if (this.t_shell_command.getIgnoreErrorCodes().length) {
                         // Show icon
                         icon_container.setAttr("aria-label", generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
-                        icon_container.removeClass("shell-commands-hide");
+                        icon_container.removeClass("SC-hide");
                     } else {
                         // Hide icon
-                        icon_container.addClass("shell-commands-hide");
+                        icon_container.addClass("SC-hide");
                     }
                 })
             )

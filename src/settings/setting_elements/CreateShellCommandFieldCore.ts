@@ -30,7 +30,7 @@ export function CreateShellCommandFieldCore(
         name_setting:
             new Setting(container_element)
                 .setName(setting_name)
-                .setClass("shell-commands-name-setting")
+                .setClass("SC-name-setting")
         ,
         shell_command_setting:
             new Setting(container_element)
@@ -39,12 +39,12 @@ export function CreateShellCommandFieldCore(
                     .setValue(shell_command)
                     .onChange(on_change)
                 )
-                .setClass("shell-commands-shell-command-setting")
+                .setClass("SC-shell-command-setting")
         ,
         preview_setting:
             new Setting(container_element)
                 .setDesc(getShellCommandPreview(plugin,shell_command, shell))
-                .setClass("shell-commands-preview-setting")
+                .setClass("SC-preview-setting")
         ,
     };
 

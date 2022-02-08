@@ -130,14 +130,14 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     ;
 
     // Informational icons (= non-clickable)
-    const icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
+    const icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "SC-main-icon-container"}});
 
     // "Ask confirmation" icon.
     const confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
     setIcon(confirm_execution_icon_container, "languages");
     if (!t_shell_command.getConfirmExecution()) {
         // Do not display the icon for commands that do not use confirmation.
-        confirm_execution_icon_container.addClass("shell-commands-hide");
+        confirm_execution_icon_container.addClass("SC-hide");
     }
 
     // "Ignored error codes" icon
@@ -145,7 +145,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
     if (!t_shell_command.getIgnoreErrorCodes().length) {
         // Do not display the icon for commands that do not ignore any errors.
-        ignored_error_codes_icon_container.addClass("shell-commands-hide");
+        ignored_error_codes_icon_container.addClass("SC-hide");
     }
 
     // Add hotkey information
@@ -159,7 +159,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
                 }
                 hotkeys_joined += HotkeyToString(hotkey);
             });
-            const hotkey_div = setting_group.preview_setting.controlEl.createEl("div", {attr: {class: "setting-item-description shell-commands-hotkey-info"}});
+            const hotkey_div = setting_group.preview_setting.controlEl.createEl("div", {attr: {class: "setting-item-description SC-hotkey-info"}});
             // Comment out the icon because it would look like a clickable button (as there are other clickable icons in the settings).
             // setIcon(hotkey_div, "any-key", 22); // Hotkey icon
             hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
