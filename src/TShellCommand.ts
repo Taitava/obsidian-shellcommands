@@ -264,9 +264,9 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
-    public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
+    public parseVariables(sc_event?: SC_Event): ParsingResult {
         // Parse variables in the actual shell command
-        const parsing_result: ShellCommandParsingResult = {
+        const parsing_result: ParsingResult = {
             shell_command: "",
             alias: "",
             succeeded: false,
@@ -327,7 +327,7 @@ export class TShellCommand {
     }
 }
 
-export interface ShellCommandParsingResult {
+export interface ParsingResult {
     shell_command: string;
     alias: string;
     succeeded: boolean;

@@ -6,7 +6,7 @@ import {
 import {Modal, Setting, TextAreaComponent} from "obsidian";
 import {OutputChannel, OutputStream} from "./OutputChannel";
 import SC_Plugin from "../main";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ParsingResult, TShellCommand} from "../TShellCommand";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Ask after execution";
@@ -31,10 +31,10 @@ class OutputModal extends Modal {
     private readonly plugin: SC_Plugin;
     private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
-    private readonly shell_command_parsing_result: ShellCommandParsingResult;
+    private readonly shell_command_parsing_result: ParsingResult;
     private exit_code: number = null;
 
-    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
         super(plugin.app);
 
         this.plugin = plugin;

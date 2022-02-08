@@ -8,7 +8,7 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
 
 export interface OutputStreams {
@@ -29,7 +29,7 @@ registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_Curre
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
-export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
+export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult, stdout: string, stderr: string, error_code: number | null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
     const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
@@ -108,7 +108,7 @@ export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TSh
 function handle_stream(
         plugin: SC_Plugin,
         t_shell_command: TShellCommand,
-        shell_command_parsing_result: ShellCommandParsingResult,
+        shell_command_parsing_result: ParsingResult,
         output_channel_name: OutputChannel,
         output: OutputStreams,
         error_code: number|null

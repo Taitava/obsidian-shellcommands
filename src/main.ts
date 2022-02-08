@@ -24,7 +24,7 @@ import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {ShellCommandParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {ParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
@@ -51,7 +51,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private cached_parsing_results: {
-		[key: string]: ShellCommandParsingResult,
+		[key: string]: ParsingResult,
 	} = {};
 
 	async onload() {
@@ -132,7 +132,7 @@ export default class SC_Plugin extends Plugin {
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
-		const executor = (parsing_result: ShellCommandParsingResult | undefined) => {
+		const executor = (parsing_result: ParsingResult | undefined) => {
 			if (undefined === parsing_result) {
 				parsing_result = t_shell_command.parseVariables();
 			}
@@ -234,7 +234,7 @@ export default class SC_Plugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed.
 	 */
-	confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+	confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 
 		// Check if the command needs confirmation before execution
 		if (t_shell_command.getConfirmExecution()) {
@@ -258,7 +258,7 @@ export default class SC_Plugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
 	 */
-	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 		const working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
