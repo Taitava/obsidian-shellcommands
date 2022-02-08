@@ -1,19 +1,18 @@
-import {Modal} from "obsidian";
+import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
 import {SettingFieldGroup} from "./SC_MainSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 
-export class DeleteModal extends Modal {
-    private plugin: SC_Plugin;
+export class DeleteModal extends SC_Modal {
+
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private setting_group: SettingFieldGroup;
     private container_element: HTMLElement;
 
     constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, container_element: HTMLElement) {
-        super(plugin.app);
-        this.plugin = plugin;
+        super(plugin);
         this.shell_command_id = shell_command_id;
         this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
         this.setting_group = setting_group;

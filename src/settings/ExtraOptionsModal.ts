@@ -1,4 +1,4 @@
-import {App, Modal, setIcon, Setting} from "obsidian";
+import {Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
@@ -15,23 +15,22 @@ import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
+import {SC_Modal} from "../SC_Modal";
 
-export class ExtraOptionsModal extends Modal {
+export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
     public static EVENTS_SUMMARY = "Events";
 
-    private plugin: SC_Plugin;
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private name_setting: Setting;
     private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
-    constructor(app: App, plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, setting_tab: SC_MainSettingsTab) {
-        super(app);
-        this.plugin = plugin;
+    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, setting_tab: SC_MainSettingsTab) {
+        super(plugin);
         this.shell_command_id = shell_command_id;
         this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
         this.name_setting = setting_group.name_setting;

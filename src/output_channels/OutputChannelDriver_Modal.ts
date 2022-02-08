@@ -3,10 +3,11 @@ import {
     getOutputChannelDrivers,
     OutputStreams,
 } from "./OutputChannelDriverFunctions";
-import {Modal, Setting, TextAreaComponent} from "obsidian";
+import {Setting, TextAreaComponent} from "obsidian";
 import {OutputChannel, OutputStream} from "./OutputChannel";
 import SC_Plugin from "../main";
 import {ParsingResult, TShellCommand} from "../TShellCommand";
+import {SC_Modal} from "../SC_Modal";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Ask after execution";
@@ -26,18 +27,16 @@ export class OutputChannelDriver_Modal extends OutputChannelDriver {
 
 }
 
-class OutputModal extends Modal {
+class OutputModal extends SC_Modal {
 
-    private readonly plugin: SC_Plugin;
     private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
     private readonly shell_command_parsing_result: ParsingResult;
     private exit_code: number = null;
 
     constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
-        super(plugin.app);
+        super(plugin);
 
-        this.plugin = plugin;
         this.outputs = outputs;
         this.t_shell_command = t_shell_command;
         this.shell_command_parsing_result = shell_command_parsing_result;

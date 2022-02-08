@@ -83,7 +83,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
@@ -93,7 +93,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
@@ -103,7 +103,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Operating systems and shells tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-operating-systems-and-shells");
             })
@@ -113,7 +113,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Operating systems and shells tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
