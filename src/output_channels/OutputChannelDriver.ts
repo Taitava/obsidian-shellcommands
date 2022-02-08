@@ -1,4 +1,4 @@
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
@@ -11,7 +11,7 @@ export abstract class OutputChannelDriver {
      */
     protected abstract readonly title: string;
 
-    protected plugin: ShellCommandsPlugin;
+    protected plugin: SC_Plugin;
     protected app: App;
     protected shell_command_parsing_result: ShellCommandParsingResult;
     protected t_shell_command: TShellCommand;
@@ -25,7 +25,7 @@ export abstract class OutputChannelDriver {
         return this.title;
     }
 
-    public initialize(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+    public initialize(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         this.plugin = plugin;
         this.app = plugin.app;
         this.t_shell_command = t_shell_command;

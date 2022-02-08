@@ -1,11 +1,11 @@
 import {Hotkey, Modifier, Platform} from "obsidian";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 import {debugLog} from "./Debug";
 
 /**
  * TODO: Move this to TShellCommand.
  */
-export function getHotkeysForShellCommand(plugin: ShellCommandsPlugin, shell_command_id: string): Hotkey[] {
+export function getHotkeysForShellCommand(plugin: SC_Plugin, shell_command_id: string): Hotkey[] {
     // Retrieve all hotkeys set by user.
     // @ts-ignore
     const app_custom_hotkeys = plugin.app.hotkeyManager?.customKeys;

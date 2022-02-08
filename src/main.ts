@@ -30,7 +30,7 @@ import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
 
-export default class ShellCommandsPlugin extends Plugin {
+export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
@@ -387,7 +387,7 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Compare the version number
 			/** Note that the plugin version may be different than what will be used in the version comparison. The plugin version will be displayed in possible error messages. */
 			const plugin_version = this.getPluginVersion();
-			const version_comparison = versionCompare(ShellCommandsPlugin.SettingsVersion, current_settings_version);
+			const version_comparison = versionCompare(SC_Plugin.SettingsVersion, current_settings_version);
 			if (version_comparison === 0) {
 				// The versions are equal.
 				// Supported.
@@ -441,7 +441,7 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	async saveSettings() {
 		// Update settings version in case it's old.
-		this.settings.settings_version = ShellCommandsPlugin.SettingsVersion;
+		this.settings.settings_version = SC_Plugin.SettingsVersion;
 
 		// Write settings
 		await this.saveData(this.settings);

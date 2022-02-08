@@ -1,5 +1,5 @@
 import {Variable} from "../Variable";
-import ShellCommandsPlugin from "../../main";
+import SC_Plugin from "../../main";
 import {SC_Event} from "../../events/SC_Event";
 
 export abstract class EventVariable extends Variable {
@@ -15,7 +15,7 @@ export abstract class EventVariable extends Variable {
      */
     protected static supported_sc_events: typeof SC_Event[];
 
-    public constructor(plugin: ShellCommandsPlugin, shell: string, sc_event: SC_Event) {
+    public constructor(plugin: SC_Plugin, shell: string, sc_event: SC_Event) {
         super(plugin, shell);
         this.sc_event = sc_event;
     }

@@ -1,17 +1,17 @@
 import {Modal} from "obsidian";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {ShellCommandSettingGroup} from "./ShellCommandsSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 
 export class ShellCommandDeleteModal extends Modal {
-    private plugin: ShellCommandsPlugin;
+    private plugin: SC_Plugin;
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private setting_group: ShellCommandSettingGroup;
     private container_element: HTMLElement;
 
-    constructor(plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, container_element: HTMLElement) {
+    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, container_element: HTMLElement) {
         super(plugin.app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;

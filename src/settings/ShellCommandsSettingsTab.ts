@@ -1,5 +1,5 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
@@ -19,11 +19,11 @@ import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
 export class ShellCommandsSettingsTab extends PluginSettingTab {
-    plugin: ShellCommandsPlugin;
+    plugin: SC_Plugin;
 
     private tab_structure: TabStructure;
 
-    constructor(app: App, plugin: ShellCommandsPlugin) {
+    constructor(app: App, plugin: SC_Plugin) {
         super(app, plugin);
         this.plugin = plugin;
     }

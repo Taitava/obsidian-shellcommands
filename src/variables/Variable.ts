@@ -1,5 +1,5 @@
 import {App} from "obsidian";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {escapeValue} from "./escapers/EscapeValue";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
@@ -27,7 +27,7 @@ export interface IParameters {
  */
 export abstract class Variable {
     private static readonly parameter_separator = ":";
-    readonly plugin: ShellCommandsPlugin;
+    readonly plugin: SC_Plugin;
     readonly app: App;
     private error_messages: string[] = [];
     public static readonly variable_name: string;
@@ -51,7 +51,7 @@ export abstract class Variable {
      * @param plugin
      * @param shell Used to determine what kind of escaping should be used.
      */
-    constructor(plugin: ShellCommandsPlugin, shell: string) {
+    constructor(plugin: SC_Plugin, shell: string) {
         this.plugin = plugin
         this.app = plugin.app;
         this.shell = shell;

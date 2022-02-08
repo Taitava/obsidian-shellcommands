@@ -1,4 +1,4 @@
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {App, EventRef} from "obsidian";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
@@ -12,7 +12,7 @@ import {DocumentationEventsFolderLink} from "../Documentation";
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
  */
 export abstract class SC_Event {
-    protected readonly plugin: ShellCommandsPlugin;
+    protected readonly plugin: SC_Plugin;
     protected readonly app: App;
 
     /**
@@ -43,7 +43,7 @@ export abstract class SC_Event {
         enabled: false,
     };
 
-    public constructor(plugin: ShellCommandsPlugin) {
+    public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;
         this.app = plugin.app;
 

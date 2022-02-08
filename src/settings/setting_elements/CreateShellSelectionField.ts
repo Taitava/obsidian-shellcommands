@@ -2,9 +2,9 @@ import {IPlatformSpecificString, PlatformId, PlatformNames} from "../ShellComman
 import {extractFileName, getOperatingSystem} from "../../Common";
 import {getUsersDefaultShell, PlatformShells} from "../../Shell";
 import {Setting} from "obsidian";
-import ShellCommandsPlugin from "../../main";
+import SC_Plugin from "../../main";
 
-export function createShellSelectionField(plugin: ShellCommandsPlugin, container_element: HTMLElement, shells: IPlatformSpecificString, is_global_settings: boolean) {
+export function createShellSelectionField(plugin: SC_Plugin, container_element: HTMLElement, shells: IPlatformSpecificString, is_global_settings: boolean) {
     let platform_id: PlatformId;
     for (platform_id in PlatformNames) {
         const platform_name = PlatformNames[platform_id];

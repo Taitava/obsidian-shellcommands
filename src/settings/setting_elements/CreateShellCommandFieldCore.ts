@@ -1,4 +1,4 @@
-import ShellCommandsPlugin from "../../main";
+import SC_Plugin from "../../main";
 import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
@@ -6,7 +6,7 @@ import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export function CreateShellCommandFieldCore(
-    plugin: ShellCommandsPlugin,
+    plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_name: string,
     shell_command: string,
@@ -64,7 +64,7 @@ export function CreateShellCommandFieldCore(
  * @param shell_command
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string, shell: string) {
+export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string) {
     const parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell);
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.

@@ -1,6 +1,6 @@
 // SETTINGS AND DEFAULT VALUES
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -39,7 +39,7 @@ export function getDefaultSettings(is_new_installation: boolean): ShellCommandsP
     return {
         // Common:
         settings_version: is_new_installation
-            ? ShellCommandsPlugin.SettingsVersion // For new installations, a specific settings version number can be used, as migrations do not need to be taken into account.
+            ? SC_Plugin.SettingsVersion // For new installations, a specific settings version number can be used, as migrations do not need to be taken into account.
             : "prior-to-0.7.0"  // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
         ,
         debug: false,

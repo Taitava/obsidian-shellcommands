@@ -3,7 +3,7 @@ import {PlatformId} from "./settings/ShellCommandsPluginSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 // @ts-ignore
 import {shell} from "electron";
 
@@ -17,7 +17,7 @@ export function getVaultAbsolutePath(app: App) {
     return null;
 }
 
-export function getPluginAbsolutePath(plugin: ShellCommandsPlugin) {
+export function getPluginAbsolutePath(plugin: SC_Plugin) {
     return normalizePath2(path.join(
         getVaultAbsolutePath(plugin.app),
         plugin.app.vault.configDir,

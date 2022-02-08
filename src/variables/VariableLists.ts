@@ -14,7 +14,7 @@ import {Variable_VaultPath} from "./Variable_VaultPath";
 import {Variable_Workspace} from "./Variable_Workspace";
 import {DEBUG_ON} from "../Debug";
 import {Variable_Passthrough} from "./Variable_Passthrough";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {Variable_YAMLValue} from "./Variable_YAMLValue";
 import {SC_Event} from "../events/SC_Event";
 import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
@@ -26,7 +26,7 @@ import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileE
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 
-export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
+export function getVariables(plugin: SC_Plugin, shell: string, sc_event?: SC_Event) {
     const shell_command_variables: Variable[] = [
         // Normal variables
         new Variable_CaretPosition(plugin, shell),

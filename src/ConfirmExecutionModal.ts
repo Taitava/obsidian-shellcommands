@@ -1,14 +1,14 @@
 import {Modal, Setting} from "obsidian";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 import {ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {debugLog} from "./Debug";
 
 export class ConfirmExecutionModal extends Modal {
-    private plugin: ShellCommandsPlugin;
+    private plugin: SC_Plugin;
     private readonly shell_command_parsing_result: ShellCommandParsingResult;
     private readonly t_shell_command: TShellCommand;
 
-    constructor(plugin: ShellCommandsPlugin, shell_command_parsing_result: ShellCommandParsingResult, t_shell_command: TShellCommand) {
+    constructor(plugin: SC_Plugin, shell_command_parsing_result: ShellCommandParsingResult, t_shell_command: TShellCommand) {
         super(plugin.app);
         this.plugin = plugin;
         this.shell_command_parsing_result = shell_command_parsing_result;

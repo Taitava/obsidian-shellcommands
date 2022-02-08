@@ -5,7 +5,7 @@ import {
 } from "./OutputChannelDriverFunctions";
 import {Modal, Setting, TextAreaComponent} from "obsidian";
 import {OutputChannel, OutputStream} from "./OutputChannel";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
@@ -28,13 +28,13 @@ export class OutputChannelDriver_Modal extends OutputChannelDriver {
 
 class OutputModal extends Modal {
 
-    private readonly plugin: ShellCommandsPlugin;
+    private readonly plugin: SC_Plugin;
     private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
     private readonly shell_command_parsing_result: ShellCommandParsingResult;
     private exit_code: number = null;
 
-    constructor(plugin: ShellCommandsPlugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         super(plugin.app);
 
         this.plugin = plugin;

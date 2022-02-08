@@ -3,7 +3,7 @@ import {Hotkey, setIcon} from "obsidian";
 import {ShellCommandExtraOptionsModal} from "../ShellCommandExtraOptionsModal";
 import {ShellCommandDeleteModal} from "../ShellCommandDeleteModal";
 import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
-import ShellCommandsPlugin from "../../main";
+import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
 
@@ -14,7 +14,7 @@ import {debugLog} from "../../Debug";
  * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
  */
-export function createShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, shell_command_id: string, show_autocomplete_menu: boolean) {
+export function createShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, shell_command_id: string, show_autocomplete_menu: boolean) {
     const is_new = "new" === shell_command_id;
     let t_shell_command: TShellCommand;
     if (is_new) {

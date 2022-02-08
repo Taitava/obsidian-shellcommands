@@ -1,4 +1,4 @@
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import {debugLog} from "./Debug";
 import * as fs from "fs";
@@ -6,7 +6,7 @@ import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
 import {getDefaultSettings} from "./settings/ShellCommandsPluginSettings";
 
-export async function RunMigrations(plugin: ShellCommandsPlugin) {
+export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
         EnsureMainFieldsExist(plugin), // Do this early.
         MigrateCommandsToShellCommands(plugin),
@@ -29,7 +29,7 @@ export async function RunMigrations(plugin: ShellCommandsPlugin) {
  * @param plugin
  * @constructor
  */
-function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
+function MigrateCommandsToShellCommands(plugin: SC_Plugin) {
     if (undefined === plugin.settings.commands) {
         return false;
     }
@@ -75,7 +75,7 @@ function MigrateCommandsToShellCommands(plugin: ShellCommandsPlugin) {
  * @param plugin
  * @constructor
  */
-function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
+function EnsureShellCommandsHaveAllFields(plugin: SC_Plugin) {
     let save = false;
     const shell_command_default_configuration = newShellCommandConfiguration();
     let shell_command_id: string;
@@ -105,7 +105,7 @@ function EnsureShellCommandsHaveAllFields(plugin: ShellCommandsPlugin) {
  * @param plugin
  * @constructor
  */
-function EnsureMainFieldsExist(plugin: ShellCommandsPlugin) {
+function EnsureMainFieldsExist(plugin: SC_Plugin) {
     let has_missing_fields = false;
     const settings = plugin.settings;
     const default_settings = getDefaultSettings(false);
@@ -137,7 +137,7 @@ function EnsureMainFieldsExist(plugin: ShellCommandsPlugin) {
  * @param plugin
  * @constructor
  */
-function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
+function MigrateShellCommandToPlatforms(plugin: SC_Plugin) {
     let save = false;
     for (const shell_command_id in plugin.settings.shell_commands) {
         const shell_command_configuration: ShellCommandConfiguration = plugin.settings.shell_commands[shell_command_id];
@@ -164,7 +164,7 @@ function MigrateShellCommandToPlatforms(plugin: ShellCommandsPlugin) {
  * @param plugin
  * @constructor
  */
-function DeleteEmptyCommandsField(plugin: ShellCommandsPlugin) {
+function DeleteEmptyCommandsField(plugin: SC_Plugin) {
     let save = false;
     if (undefined !== plugin.settings.commands) {
         if (plugin.settings.commands.length === 0) {
@@ -180,13 +180,13 @@ function DeleteEmptyCommandsField(plugin: ShellCommandsPlugin) {
  *
  * @param plugin
  */
-function backupSettingsFile(plugin: ShellCommandsPlugin) {
+function backupSettingsFile(plugin: SC_Plugin) {
     // plugin.app.fileManager.
     // @ts-ignore
     const current_settings_version = (plugin.settings.settings_version === "prior-to-0.7.0") ? "0.x" : plugin.settings.settings_version;
     const plugin_path = getPluginAbsolutePath(plugin);
     const settings_file_path = path.join(plugin_path, "data.json");
-    const backup_file_path_without_extension = path.join(plugin_path, "data-backup-version-" + current_settings_version + "-before-upgrading-to-" + ShellCommandsPlugin.SettingsVersion);
+    const backup_file_path_without_extension = path.join(plugin_path, "data-backup-version-" + current_settings_version + "-before-upgrading-to-" + SC_Plugin.SettingsVersion);
 
     // Check that the current settings file can be found.
     if (!fs.existsSync(settings_file_path)) {

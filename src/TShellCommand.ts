@@ -1,5 +1,5 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 import {generateObsidianCommandName, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
@@ -14,11 +14,11 @@ export interface TShellCommandContainer {
 export class TShellCommand {
 
     private readonly id: string;
-    private plugin: ShellCommandsPlugin;
+    private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
-    constructor (plugin: ShellCommandsPlugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
+    constructor (plugin: SC_Plugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
         this.plugin = plugin;
         this.id = shell_command_id;
         this.configuration = configuration;
