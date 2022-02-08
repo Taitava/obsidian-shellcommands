@@ -18,7 +18,7 @@ import {
 	SC_MainSettings,
 } from "./settings/SC_MainSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
-import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
+import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
@@ -86,7 +86,7 @@ export default class SC_Plugin extends Plugin {
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
 
-		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
+		this.addSettingTab(new SC_MainSettingsTab(this.app, this));
 	}
 
 	private loadTShellCommands() {

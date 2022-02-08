@@ -1,6 +1,6 @@
 import {Modal} from "obsidian";
 import SC_Plugin from "../main";
-import {ShellCommandSettingGroup} from "./ShellCommandsSettingsTab";
+import {ShellCommandSettingGroup} from "./SC_MainSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 

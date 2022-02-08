@@ -1,5 +1,5 @@
 import SC_Plugin from "../../main";
-import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
+import {ShellCommandSettingGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
 import {createAutocomplete} from "./Autocomplete";

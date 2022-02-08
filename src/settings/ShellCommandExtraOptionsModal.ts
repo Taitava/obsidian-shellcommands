@@ -1,6 +1,6 @@
 import {App, Modal, setIcon, Setting} from "obsidian";
 import SC_Plugin from "../main";
-import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+import {ShellCommandSettingGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
@@ -26,10 +26,10 @@ export class ShellCommandExtraOptionsModal extends Modal {
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private name_setting: Setting;
-    private setting_tab: ShellCommandsSettingsTab;
+    private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
-    constructor(app: App, plugin: SC_Plugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, setting_tab: ShellCommandsSettingsTab) {
+    constructor(app: App, plugin: SC_Plugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, setting_tab: SC_MainSettingsTab) {
         super(app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;

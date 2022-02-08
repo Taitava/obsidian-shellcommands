@@ -18,7 +18,7 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
-export class ShellCommandsSettingsTab extends PluginSettingTab {
+export class SC_MainSettingsTab extends PluginSettingTab {
     plugin: SC_Plugin;
 
     private tab_structure: TabStructure;
