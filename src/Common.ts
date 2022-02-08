@@ -1,5 +1,5 @@
 import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
-import {PlatformId} from "./settings/ShellCommandsPluginSettings";
+import {PlatformId} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";

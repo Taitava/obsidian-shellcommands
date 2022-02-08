@@ -15,8 +15,8 @@ import {
 import {
 	getDefaultSettings,
 	SettingsVersionString,
-	ShellCommandsPluginSettings,
-} from "./settings/ShellCommandsPluginSettings";
+	SC_MainSettings,
+} from "./settings/SC_MainSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
 import * as path from "path";
@@ -37,7 +37,7 @@ export default class SC_Plugin extends Plugin {
 	 */
 	public static SettingsVersion: SettingsVersionString = "0.10.0";
 
-	settings: ShellCommandsPluginSettings;
+	settings: SC_MainSettings;
 	obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 
@@ -411,7 +411,7 @@ export default class SC_Plugin extends Plugin {
 	async loadSettings() {
 
 		// Try to read a settings file
-		let all_settings: ShellCommandsPluginSettings;
+		let all_settings: SC_MainSettings;
 		this.settings = await this.loadData(); // May have missing main settings fields, if the settings file is from an older version of SC. It will be migrated later.
 		if (null === this.settings) {
 			// The settings file does not exist.

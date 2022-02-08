@@ -4,7 +4,7 @@ import {debugLog} from "./Debug";
 import * as fs from "fs";
 import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
-import {getDefaultSettings} from "./settings/ShellCommandsPluginSettings";
+import {getDefaultSettings} from "./settings/SC_MainSettings";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.

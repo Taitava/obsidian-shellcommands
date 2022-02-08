@@ -4,7 +4,7 @@ import SC_Plugin from "../main";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
-export interface ShellCommandsPluginSettings {
+export interface SC_MainSettings {
 
     // Common:
     settings_version: SettingsVersionString;
@@ -35,7 +35,7 @@ export interface ShellCommandsPluginSettings {
     commands?: string[];
 }
 
-export function getDefaultSettings(is_new_installation: boolean): ShellCommandsPluginSettings {
+export function getDefaultSettings(is_new_installation: boolean): SC_MainSettings {
     return {
         // Common:
         settings_version: is_new_installation
