@@ -63,8 +63,8 @@ export function getFileExtension(file: TFile, with_dot: boolean) {
 }
 
 export function getFileTags(app: App, file: TFile) {
-    let cache = app.metadataCache.getFileCache(file);
-    let tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
+    const cache = app.metadataCache.getFileCache(file);
+    const tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
 
     // Remove preceding hash characters. E.g. #tag becomes tag
     tags.forEach((tag: string, index) => {

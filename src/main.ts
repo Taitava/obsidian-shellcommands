@@ -73,7 +73,7 @@ export default class ShellCommandsPlugin extends Plugin {
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
-		for (let shell_command_id in shell_commands) {
+		for (const shell_command_id in shell_commands) {
 			const t_shell_command = shell_commands[shell_command_id];
 			if (t_shell_command.canAddToCommandPalette()) {
 				this.registerShellCommand(t_shell_command);
@@ -91,9 +91,9 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	private loadTShellCommands() {
 		this.t_shell_commands = {};
-		let shell_command_configurations = this.getShellCommandConfigurations();
+		const shell_command_configurations = this.getShellCommandConfigurations();
 
-		for (let shell_command_id in shell_command_configurations) {
+		for (const shell_command_id in shell_command_configurations) {
 			this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configurations[shell_command_id]);
 		}
 	}
@@ -128,7 +128,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param t_shell_command
 	 */
 	public registerShellCommand(t_shell_command: TShellCommand) {
-		let shell_command_id = t_shell_command.getId();
+		const shell_command_id = t_shell_command.getId();
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
@@ -147,7 +147,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		}
 
 		// Register an Obsidian command
-		let obsidian_command: Command = {
+		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
 			name: generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
@@ -259,7 +259,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
 	 */
 	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
-		let working_directory = this.getWorkingDirectory();
+		const working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
 		const shell_command = shell_command_parsing_result.shell_command.trim();
@@ -296,7 +296,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// Working directory is OK
 			// Prepare execution options
-			let options: BaseEncodingOptions & ExecOptions = {
+			const options: BaseEncodingOptions & ExecOptions = {
 				"cwd": working_directory,
 				"shell": shell,
 			};
@@ -357,7 +357,7 @@ export default class ShellCommandsPlugin extends Plugin {
 
 	getWorkingDirectory() {
 		// Returns either a user defined working directory, or an automatically detected one.
-		let working_directory = this.settings.working_directory;
+		const working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
 			// No working directory specified, so use the vault directory.
 			return getVaultAbsolutePath(this.app);
@@ -479,10 +479,10 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
 	 */
 	generateNewShellCommandID() {
-		let existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
+		const existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
 		let new_id = 0;
-		for (let i in existing_ids) {
-			let existing_id = parseInt(existing_ids[i]);
+		for (const i in existing_ids) {
+			const existing_id = parseInt(existing_ids[i]);
 			if (existing_id >= new_id) {
 				new_id = existing_id + 1;
 			}
@@ -513,7 +513,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	}
 
 	public getDefaultShell(): string {
-		let operating_system = getOperatingSystem()
+		const operating_system = getOperatingSystem();
 		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
 		if (undefined === shell_name) {
 			shell_name = getUsersDefaultShell();

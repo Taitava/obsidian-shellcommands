@@ -7,12 +7,12 @@ import {debugLog} from "../Debug";
 export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
 
     protected _handle(output: OutputStreams) {
-        let editor = getEditor(this.app);
-        let view = getView(this.app);
+        const editor = getEditor(this.app);
+        const view = getView(this.app);
 
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
         // will be joined together with " " as a separator.
-        let output_message = joinObjectProperties(output, " ");
+        const output_message = joinObjectProperties(output, " ");
 
         if (null === editor) {
             // For some reason it's not possible to get an editor.

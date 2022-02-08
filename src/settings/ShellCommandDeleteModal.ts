@@ -26,7 +26,7 @@ export class ShellCommandDeleteModal extends Modal {
             this.modalEl.createEl("p", {text: "Alias: " + this.t_shell_command.getAlias()});
         }
         this.modalEl.createEl("p", {text: "Are you sure you want to delete this shell command?"});
-        let delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
+        const delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
         delete_button.onclick = async () => {
             // Remove the command
             debugLog("Command " + this.shell_command_id + " gonna be removed.");

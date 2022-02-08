@@ -29,7 +29,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     }
 
     display(): void {
-        let {containerEl} = this;
+        const {containerEl} = this;
 
         containerEl.empty();
 
@@ -84,10 +84,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
     private tabShellCommands(container_element: HTMLElement) {
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
-        let command_fields_container = container_element.createEl("div");
+        const command_fields_container = container_element.createEl("div");
 
         // Fields for modifying existing commands
-        for (let command_id in this.plugin.getTShellCommands()) {
+        for (const command_id in this.plugin.getTShellCommands()) {
             createShellCommandField(this.plugin, command_fields_container, command_id, this.plugin.settings.show_autocomplete_menu);
         }
 
@@ -245,7 +245,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
             .addText(field => field
                 .setValue(String(this.plugin.settings[setting_name]))
                 .onChange(async (duration_string: string) => {
-                    let duration: number = parseInt(duration_string);
+                    const duration: number = parseInt(duration_string);
                     if (duration >= 1 && duration <= 180) {
                         debugLog("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
                         this.plugin.settings[setting_name] = duration;
@@ -279,8 +279,8 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         container_element.addEventListener("scroll", (event) => {
             this.last_position.scroll_position = container_element.scrollTop;
         });
-        for (let tab_name in this.tab_structure.buttons) {
-            let button = this.tab_structure.buttons[tab_name];
+        for (const tab_name in this.tab_structure.buttons) {
+            const button = this.tab_structure.buttons[tab_name];
             button.onClickEvent((event: MouseEvent) => {
                 last_position.tab_name = tab_name;
             });

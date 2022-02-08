@@ -19,7 +19,7 @@ export class Variable_FilePath extends FileVariable{
     }
 
     generateValue(): string|null {
-        let active_file = this.getFile();
+        const active_file = this.getFile();
         if (active_file) {
             return getFilePath(this.app, active_file, this.arguments.mode);
         } else {

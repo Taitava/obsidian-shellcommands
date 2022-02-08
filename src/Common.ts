@@ -10,7 +10,7 @@ import {shell} from "electron";
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
     // But the code has been rewritten 2021-08-27 as per https://github.com/obsidianmd/obsidian-releases/pull/433#issuecomment-906087095
-    let adapter = app.vault.adapter;
+    const adapter = app.vault.adapter;
     if (adapter instanceof FileSystemAdapter) {
         return adapter.getBasePath();
     }
@@ -45,7 +45,7 @@ export function getOperatingSystem(): PlatformId  {
 }
 
 export function getView(app: App) {
-    let view = app.workspace.getActiveViewOfType(MarkdownView);
+    const view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
         debugLog("getView(): Could not get a view. Will return null.");
         return null;
@@ -55,7 +55,7 @@ export function getView(app: App) {
 
 export function getEditor(app: App): Editor {
 
-    let view = getView(app);
+    const view = getView(app);
     if (null === view) {
         // Could not get a view.
         return null;
@@ -96,7 +96,7 @@ export function combineObjects(...objects: Object[]) {
 export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
-    let leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
+    const leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
     let leading_slashes = leading_slashes_regexp.exec(path)[0];
 
     // 2. Run the original normalizePath()
@@ -128,7 +128,7 @@ export function extractFileName(file_path: string) {
 
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
-    for (let property_name in object) {
+    for (const property_name in object) {
         if (result.length) {
             result += glue;
         }
@@ -156,7 +156,7 @@ export function gotoURL(url: string) {
 }
 
 export function generateObsidianCommandName(shell_command: string, alias: string) {
-    let prefix = "Execute: ";
+    const prefix = "Execute: ";
     if (alias) {
         // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
         return prefix + alias;

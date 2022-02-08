@@ -40,7 +40,7 @@ export class TShellCommand {
     }
 
     public getShell(): string {
-        let operating_system = getOperatingSystem();
+        const operating_system = getOperatingSystem();
 
         // Check if the shell command has defined a specific shell.
         if (undefined === this.configuration.shells[operating_system]) {
@@ -62,7 +62,7 @@ export class TShellCommand {
      * command does not have an explicit version for the current OS.
      */
     public getShellCommand(): string {
-        let operating_system = getOperatingSystem();
+        const operating_system = getOperatingSystem();
 
         // Check if the shell command has defined a specific command for this operating system.
         if (undefined === this.configuration.platform_specific_commands[operating_system]) {

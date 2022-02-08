@@ -33,11 +33,16 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
     const tab_content_containers: TabContentContainers = {};
     const tab_buttons: TabButtons = {};
     let first_button: HTMLElement;
-    for (let tab_id in tabs) {
-        let tab = tabs[tab_id];
+    for (const tab_id in tabs) {
+        const tab = tabs[tab_id];
 
         // Create button
-        let button = tab_header.createEl("button", {attr: {class: "SC-tab-header-button", activateTab: "SC-tab-" + tab_id}});
+        const button = tab_header.createEl("button", {
+            attr: {
+                class: "SC-tab-header-button",
+                activateTab: "SC-tab-" + tab_id,
+            },
+        });
         button.onclick = tab_button_clicked;
         setIcon(button, tab.icon);
         button.insertAdjacentText("beforeend", " " + tab.title);
@@ -99,7 +104,7 @@ function tab_button_clicked(event: MouseEvent) {
 
     // Remove active status from all buttons
     const adjacent_tab_buttons = tab_header.findAll(".SC-tab-header-button"); // Do not get all tab buttons that exist, because there might be multiple tab systems open at the same time.
-    for (let index in adjacent_tab_buttons) {
+    for (const index in adjacent_tab_buttons) {
         let tab_button = adjacent_tab_buttons[index];
         tab_button.removeClass("SC-tab-active");
     }

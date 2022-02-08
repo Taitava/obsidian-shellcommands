@@ -5,7 +5,7 @@ export class Variable_FileName extends FileVariable {
     static help_text = "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.";
 
     generateValue(): string {
-        let file = this.getFile();
+        const file = this.getFile();
         if (!file) {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }

@@ -15,7 +15,7 @@ import {debugLog} from "../../Debug";
  * @param show_autocomplete_menu
  */
 export function createShellCommandField(plugin: ShellCommandsPlugin, container_element: HTMLElement, shell_command_id: string, show_autocomplete_menu: boolean) {
-    let is_new = "new" === shell_command_id;
+    const is_new = "new" === shell_command_id;
     let t_shell_command: TShellCommand;
     if (is_new) {
         // Create an empty command
@@ -70,7 +70,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             .setIcon("run-command")
             .onClick(() => {
                 // Execute the shell command now (for trying it out in the settings)
-                let t_shell_command = plugin.getTShellCommands()[shell_command_id];
+                const t_shell_command = plugin.getTShellCommands()[shell_command_id]; // TODO: Is this redundant? Could the t_shell_command defined in lines 22 / 26 (near 'const is_new') be used?
                 const parsing_result = t_shell_command.parseVariables();
                 if (parsing_result.succeeded) {
                     plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
@@ -123,17 +123,17 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
             .setIcon("trash")
             .onClick(async () => {
                 // Open a delete modal
-                let modal = new ShellCommandDeleteModal(plugin, shell_command_id, setting_group, container_element);
+                const modal = new ShellCommandDeleteModal(plugin, shell_command_id, setting_group, container_element);
                 modal.open();
             })
         )
     ;
 
     // Informational icons (= non-clickable)
-    let icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
+    const icon_container = setting_group.name_setting.nameEl.createEl("span", {attr: {class: "shell-commands-main-icon-container"}});
 
     // "Ask confirmation" icon.
-    let confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
+    const confirm_execution_icon_container = icon_container.createEl("span", {attr: {"aria-label": "Asks confirmation before execution.", class: "shell-commands-confirm-execution-icon-container"}});
     setIcon(confirm_execution_icon_container, "languages");
     if (!t_shell_command.getConfirmExecution()) {
         // Do not display the icon for commands that do not use confirmation.
@@ -141,7 +141,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
     }
 
     // "Ignored error codes" icon
-    let ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": generateIgnoredErrorCodesIconTitle(t_shell_command.getIgnoreErrorCodes()), class: "shell-commands-ignored-error-codes-icon-container"}});
+    const ignored_error_codes_icon_container = icon_container.createEl("span", {attr: {"aria-label": generateIgnoredErrorCodesIconTitle(t_shell_command.getIgnoreErrorCodes()), class: "shell-commands-ignored-error-codes-icon-container"}});
     setIcon(ignored_error_codes_icon_container, "strikethrough-glyph");
     if (!t_shell_command.getIgnoreErrorCodes().length) {
         // Do not display the icon for commands that do not ignore any errors.
@@ -150,7 +150,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
 
     // Add hotkey information
     if (!is_new) {
-        let hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);
+        const hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);
         if (hotkeys) {
             let hotkeys_joined: string = "";
             hotkeys.forEach((hotkey: Hotkey) => {
@@ -159,7 +159,7 @@ export function createShellCommandField(plugin: ShellCommandsPlugin, container_e
                 }
                 hotkeys_joined += HotkeyToString(hotkey);
             });
-            let hotkey_div = setting_group.preview_setting.controlEl.createEl("div", { attr: {class: "setting-item-description shell-commands-hotkey-info"}});
+            const hotkey_div = setting_group.preview_setting.controlEl.createEl("div", {attr: {class: "setting-item-description shell-commands-hotkey-info"}});
             // Comment out the icon because it would look like a clickable button (as there are other clickable icons in the settings).
             // setIcon(hotkey_div, "any-key", 22); // Hotkey icon
             hotkey_div.insertAdjacentHTML("beforeend", " " + hotkeys_joined);
@@ -185,6 +185,6 @@ export function generateShellCommandFieldName(shell_command_id: string, t_shell_
  * @public Exported because ShellCommandExtraOptionsModal uses this too.
  */
 export function generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
-    let plural = ignored_error_codes.length !== 1 ? "s" : "";
+    const plural = ignored_error_codes.length !== 1 ? "s" : "";
     return "Ignored error"+plural+": " + ignored_error_codes.join(",");
 }

@@ -65,7 +65,7 @@ export function CreateShellCommandFieldCore(
  * @public Exported because createShellCommandField uses this.
  */
 export function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string, shell: string) {
-    let parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell); // false: disables notifications if variables have syntax errors.
+    const parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell);
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.

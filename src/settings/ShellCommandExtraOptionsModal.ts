@@ -83,7 +83,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             .setName("Alias")
             .setClass("shell-commands-name-setting")
         ;
-        let alias_setting = new Setting(container_element)
+        const alias_setting = new Setting(container_element)
             .addText(text => text
                 .setValue(this.t_shell_command.getAlias())
                 .onChange(async (value) => {
@@ -113,7 +113,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 .setValue(this.t_shell_command.getConfirmExecution())
                 .onChange(async (value) => {
                     this.t_shell_command.getConfiguration().confirm_execution = value;
-                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
+                    const icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
                     if (this.t_shell_command.getConfirmExecution()) {
                         // Show icon
                         icon_container.removeClass("shell-commands-hide");
@@ -158,11 +158,11 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 .setValue(this.t_shell_command.getIgnoreErrorCodes().join(","))
                 .onChange(async (value) => {
                     // Parse the string of comma separated numbers
-                    let ignore_error_codes: number[] = [];
-                    let raw_error_codes = value.split(",");
-                    for (let i in raw_error_codes) {
-                        let raw_error_code = raw_error_codes[i];
-                        let error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
+                    const ignore_error_codes: number[] = [];
+                    const raw_error_codes = value.split(",");
+                    for (const i in raw_error_codes) {
+                        const raw_error_code = raw_error_codes[i];
+                        const error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
                         // Ensure that the error code is not NaN, 0 or a negative number.
                         if (!isNaN(error_code_candidate) && error_code_candidate >= 0) {
                             // The candidate is legit.
@@ -175,7 +175,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     await this.plugin.saveSettings();
 
                     // Update icon
-                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
+                    const icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
                     if (this.t_shell_command.getIgnoreErrorCodes().length) {
                         // Show icon
                         icon_container.setAttr("aria-label", generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
@@ -287,7 +287,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
     }
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
-        let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
+        const output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
         return new Setting(container_element)
             .setName(title)
             .setDesc(description)

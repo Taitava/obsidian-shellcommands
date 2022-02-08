@@ -9,7 +9,7 @@ export class Variable_Selection extends Variable{
     generateValue(): string {
 
         // Check that we are able to get a view
-        let view = getView(this.app);
+        const view = getView(this.app);
         if (null === view) {
             // Nope.
             this.newErrorMessage("Could not get a view instance! Please raise an issue in GitHub.");
@@ -17,7 +17,7 @@ export class Variable_Selection extends Variable{
         }
 
         // Check that we are able to get an editor
-        let editor = getEditor(this.app);
+        const editor = getEditor(this.app);
         if (null === editor) {
             // Nope.
             this.newErrorMessage("Could not get an editor instance! Please raise an issue in GitHub.");
@@ -25,7 +25,7 @@ export class Variable_Selection extends Variable{
         }
 
         // Check the view mode
-        let view_mode = view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
+        const view_mode = view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
         switch (view_mode) {
             case "preview":
                 // The leaf is in preview mode, which makes things difficult.

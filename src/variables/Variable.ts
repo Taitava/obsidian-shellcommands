@@ -58,7 +58,7 @@ export abstract class Variable {
     }
 
     public getValue(escape: boolean) {
-        let raw_value = this.generateValue();
+        const raw_value = this.generateValue();
         if (null === raw_value) {
             // Some error(s) has occurred when generating the variable's value.
             // Prevent passing null to escapeValue().
@@ -93,7 +93,7 @@ export abstract class Variable {
     getPattern() {
         const error_prefix = this.getVariableName() + ".getPattern(): ";
         let pattern = '\{\{\!?' + this.getVariableName();
-        for (let parameter_name in this.getParameters()) {
+        for (const parameter_name in this.getParameters()) {
             const parameter = this.getParameters()[parameter_name];
             let parameter_type_pattern: string = this.getParameterSeparator();  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
 
@@ -167,7 +167,7 @@ export abstract class Variable {
     }
 
     protected newErrorMessage(message: string) {
-        let prefix = "{{" + this.getVariableName() + "}}: ";
+        const prefix = "{{" + this.getVariableName() + "}}: ";
         this.error_messages.push(prefix + message);
     }
 

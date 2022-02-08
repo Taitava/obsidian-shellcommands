@@ -21,7 +21,7 @@ export class ConfirmExecutionModal extends Modal {
         // Information about the shell command
         this.modalEl.createEl("h2", {text: this.shell_command_parsing_result.shell_command, attr: {style: "margin-bottom: 0;"}});
         if (this.shell_command_parsing_result.alias) {
-            let paragraph = this.modalEl.createEl("p", {text: "Alias: " + this.shell_command_parsing_result.alias, attr: {style: "margin-top: 0;"}});
+            this.modalEl.createEl("p", {text: "Alias: " + this.shell_command_parsing_result.alias, attr: {style: "margin-top: 0;"}});
         }
         this.modalEl.createEl("p", {text: "Execute this shell command?"});
 

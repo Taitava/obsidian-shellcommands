@@ -14,10 +14,10 @@ import {SC_Event} from "../events/SC_Event";
 export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
     const variables = getVariables(plugin, shell, sc_event);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
-    for (let variable_index in variables)
+    for (const variable_index in variables)
     {
-        let variable: Variable = variables[variable_index];
-        let pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
+        const variable: Variable = variables[variable_index];
+        const pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
         let _arguments: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
         while ((_arguments = pattern.exec(command)) !== null) {
@@ -30,7 +30,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
             delete _arguments["input"];
 
             // Iterate all arguments
-            for (let i in _arguments) {
+            for (const i in _arguments) {
                 // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
                 if (undefined !== _arguments[i]) {
                     // The argument is present.
@@ -49,7 +49,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
             }
 
             // Render the variable
-            let variable_value = variable.getValue(escape);
+            const variable_value = variable.getValue(escape);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 debugLog("Parsing command " + command + " failed.");

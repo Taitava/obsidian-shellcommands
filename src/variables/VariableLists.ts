@@ -27,7 +27,7 @@ import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 
 export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
-    let shell_command_variables: Variable[] = [
+    const shell_command_variables: Variable[] = [
         // Normal variables
         new Variable_CaretPosition(plugin, shell),
         new Variable_Clipboard(plugin, shell),
@@ -64,7 +64,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
 }
 
 export function getVariableClasses() {
-    let shell_command_variables = [
+    const shell_command_variables = [
         // Normal variables
         Variable_CaretPosition,
         Variable_Clipboard,

@@ -26,7 +26,7 @@ export class OutputChannelDriver_Notification extends OutputChannelDriver {
         // notifications will be created.
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            let output_message = output[output_stream_name];
+            const output_message = output[output_stream_name];
             switch (output_stream_name) {
                 case "stdout":
                     // Normal output
