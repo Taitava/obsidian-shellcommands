@@ -25,4 +25,4 @@ export * from "./prompt/PromptFunctions";
 export * from "./prompt/PromptModal";
 
 // Settings
-export * from "./settings/setting_elements/createPromptField";
+export * from "./settings/setting_elements/createPromptSettingsField";

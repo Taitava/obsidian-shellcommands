@@ -18,7 +18,7 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {
-    createPromptField,
+    createPromptSettingsField,
     getPrompts,
     newPrompt,
     Prompt,
@@ -239,7 +239,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
         const prompts_container_element = container_element.createDiv();
         getPrompts().forEach((prompt: Prompt) => {
-            createPromptField(prompts_container_element, prompt);
+            createPromptSettingsField(prompts_container_element, prompt);
         });
         new Setting(container_element)
             .addButton(button => button
@@ -247,7 +247,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .onClick(async () => {
                     const prompt = newPrompt(this.plugin);
                     await this.plugin.saveSettings();
-                    createPromptField(prompts_container_element, prompt);
+                    createPromptSettingsField(prompts_container_element, prompt);
                 }),
             )
         ;

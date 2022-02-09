@@ -3,7 +3,7 @@ import {
     Prompt
 } from "../../imports";
 
-export function createPromptField(container_element: HTMLElement, prompt: Prompt) {
+export function createPromptSettingsField(container_element: HTMLElement, prompt: Prompt) {
     new Setting(container_element)
         .setName(prompt.getTitle())
         .addButton(button => button
