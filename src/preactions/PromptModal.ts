@@ -17,6 +17,9 @@ export class PromptModal extends SC_Modal {
         plugin: SC_Plugin,
         private readonly content_container_element: HTMLElement,
         private readonly shell_command_parsing_result: ParsingResult,
+
+        /** A function that is called when a user clicks the execution button. This function should check the form elements' validity and return false if there are unfilled fields. */
+        private readonly validator: () => boolean,
     ) {
         super(plugin);
         this.promise = new Promise<void>((resolve, reject) => {
@@ -42,9 +45,15 @@ export class PromptModal extends SC_Modal {
             .addButton(button => button
                 .setButtonText("Execute")
                 .onClick(() => {
-                    this.resolve_promise();
-                    this.user_confirmed_ok = true;
-                    this.close();
+                    if (this.validator()) {
+                        // The form fields are filled ok
+                        this.resolve_promise();
+                        this.user_confirmed_ok = true;
+                        this.close();
+                    } else {
+                        // Some mandatory fields are not filled
+                        this.plugin.newError("A mandatory field is missing a value.");
+                    }
                 })
             )
         ;
