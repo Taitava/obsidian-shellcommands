@@ -8,6 +8,9 @@
 
 // SECTIONS - Keep in alphabetical order!
 
+// Miscellaneous files in the same folder as imports.ts
+export * from "./IDGenerator";
+
 // Preactions
 export * from "./preactions/Preaction";
 export * from "./preactions/Preaction_Prompt";
@@ -20,3 +23,6 @@ export * from "./prompt/prompt_fields/PromptFieldConfiguration";
 export * from "./prompt/Prompt";
 export * from "./prompt/PromptFunctions";
 export * from "./prompt/PromptModal";
+
+// Settings
+export * from "./settings/setting_elements/createPromptField";

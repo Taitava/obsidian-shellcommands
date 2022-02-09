@@ -17,6 +17,12 @@ import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
+import {
+    createPromptField,
+    getPrompts,
+    newPrompt,
+    Prompt,
+} from "../imports";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -46,6 +52,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabOperatingSystemsAndShells(container_element);
+                },
+            },
+            "main-preactions": {
+                title: "Preactions",
+                icon: "note-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabPreactions(container_element);
                 },
             },
             "main-output": {
@@ -215,6 +228,30 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Platforms' default shells
         createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+    }
+
+    private tabPreactions(container_element: HTMLElement) {
+
+        // Prompts
+        new Setting(container_element)
+            .setName("Prompts")
+            .setHeading() // Make the "Prompts" text to appear as a heading.
+        ;
+        const prompts_container_element = container_element.createDiv();
+        getPrompts().forEach((prompt: Prompt) => {
+            createPromptField(prompts_container_element, prompt);
+        });
+        new Setting(container_element)
+            .addButton(button => button
+                .setButtonText("New Prompt")
+                .onClick(async () => {
+                    const prompt = newPrompt(this.plugin);
+                    await this.plugin.saveSettings();
+                    createPromptField(prompts_container_element, prompt);
+                }),
+            )
+        ;
+
     }
 
     private tabOutput(container_element: HTMLElement) {

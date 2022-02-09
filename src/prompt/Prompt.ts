@@ -16,6 +16,14 @@ export class Prompt {
         private configuration: PromptConfiguration,
     ) {}
 
+    public getID() {
+        return this.configuration.id;
+    }
+
+    public getTitle() {
+        return this.configuration.title;
+    }
+
     public openPrompt(): Promise<void> {
         const fields_container_element = document.createElement("div");
         this.createFields(fields_container_element);
