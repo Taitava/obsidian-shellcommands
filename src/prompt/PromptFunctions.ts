@@ -40,6 +40,7 @@ export function newPrompt(plugin: SC_Plugin): Prompt {
     const prompt_configuration: PromptConfiguration = {
         id: prompt_id_generator.generateID(),
         title: "",
+        preview_shell_command: false,
         fields: [],
     };
 

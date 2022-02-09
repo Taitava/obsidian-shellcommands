@@ -71,5 +71,6 @@ export class Prompt {
 export interface PromptConfiguration {
     id: string;
     title: string;
+    preview_shell_command: boolean;
     fields: PromptFieldConfiguration[];
 }

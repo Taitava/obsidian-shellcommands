@@ -18,6 +18,7 @@ export class PromptSettingsModal extends SC_Modal {
         super.onOpen();
         const container_element = this.modalEl;
 
+        // Title
         new Setting(container_element)
             .setName("Prompt title")
             .addText(text => text
@@ -30,6 +31,19 @@ export class PromptSettingsModal extends SC_Modal {
 
             // Focus on the text field
             .controlEl.find("input").focus()
+        ;
+
+        // Preview shell command
+        new Setting(container_element)
+            .setName("Preview shell command in prompt")
+            .setDesc("If this is on, the prompt will display the executable shell command with variable names in it, and highlight the variable(s) that will be affected by the values inputted in the prompt.")
+            .addToggle(toggle => toggle
+                .setValue(this.prompt.getConfiguration().preview_shell_command)
+                .onChange(async (new_value: boolean) => {
+                    this.prompt.getConfiguration().preview_shell_command = new_value;
+                    await this.plugin.saveSettings();
+                }),
+            )
         ;
     }
 }
