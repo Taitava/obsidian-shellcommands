@@ -248,6 +248,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     const prompt = newPrompt(this.plugin);
                     await this.plugin.saveSettings();
                     createPromptSettingsField(prompts_container_element, prompt);
+                    prompt.openSettingsModal(); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
                 }),
             )
         ;

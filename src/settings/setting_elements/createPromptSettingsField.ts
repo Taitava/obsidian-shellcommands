@@ -9,7 +9,7 @@ export function createPromptSettingsField(container_element: HTMLElement, prompt
         .addButton(button => button
             .setButtonText("Configure")
             .onClick(() => {
-                // TODO
+                prompt.openSettingsModal();
             }),
         )
     ;

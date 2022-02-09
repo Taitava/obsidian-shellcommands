@@ -5,6 +5,7 @@ import {
     PromptField,
     PromptFieldConfiguration,
     PromptModal,
+    PromptSettingsModal,
 } from "../imports";
 
 export class Prompt {
@@ -24,6 +25,10 @@ export class Prompt {
         return this.configuration.title;
     }
 
+    public getConfiguration() {
+        return this.configuration;
+    }
+
     public openPrompt(): Promise<void> {
         const fields_container_element = document.createElement("div");
         this.createFields(fields_container_element);
@@ -35,6 +40,11 @@ export class Prompt {
         );
         modal.open();
         return modal.promise;
+    }
+
+    public openSettingsModal() {
+        const modal = new PromptSettingsModal(this.plugin, this);
+        modal.open();
     }
 
     private createFields(container_element: HTMLElement) {
