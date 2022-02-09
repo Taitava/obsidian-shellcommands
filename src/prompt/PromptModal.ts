@@ -3,9 +3,6 @@ import {ParsingResult} from "../TShellCommand";
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
 
-/**
- * TODO: Fusion ConfirmExecutionModal into this modal.
- */
 export class PromptModal extends SC_Modal {
 
     public promise: Promise<void>;
