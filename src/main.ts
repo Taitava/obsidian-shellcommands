@@ -29,7 +29,10 @@ import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
-import {Preaction} from "./imports";
+import {
+	loadPrompts,
+	Preaction,
+} from "./imports";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -459,6 +462,10 @@ export default class SC_Plugin extends Plugin {
 			await this.disablePlugin();
 			return false; // The plugin should not be used.
 		}
+
+		// Load Prompts
+		loadPrompts(this, this.settings.prompts);
+
 		return true; // Settings are loaded and the plugin can be used.
 	}
 

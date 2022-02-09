@@ -1,6 +1,9 @@
 // SETTINGS AND DEFAULT VALUES
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 import SC_Plugin from "../main";
+import {
+    PromptConfiguration,
+} from "../imports";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -29,6 +32,9 @@ export interface SC_MainSettings {
 
     // Shell commands:
     shell_commands: ShellCommandsConfiguration;
+
+    // Prompts:
+    prompts: PromptConfiguration[];
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -59,6 +65,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Shell commands:
         shell_commands: {},
+
+        // Prompts:
+        prompts: [],
     }
 }
 
