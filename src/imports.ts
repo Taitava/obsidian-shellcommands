@@ -9,7 +9,10 @@
 // SECTIONS - Keep in alphabetical order!
 
 // Preactions
+export * from "./prompt/prompt_fields/createPromptField";
+export * from "./prompt/prompt_fields/PromptField";
+export * from "./prompt/prompt_fields/PromptField_Text";
+export * from "./prompt/prompt_fields/PromptFieldConfiguration";
 export * from "./preactions/Preaction";
 export * from "./preactions/Preaction_Prompt";
-export * from "./preactions/PromptField";
 export * from "./preactions/PromptModal";
