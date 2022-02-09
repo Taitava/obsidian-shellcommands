@@ -1,6 +1,8 @@
-import {PromptField_Text} from "./PromptField_Text";
-import {PromptField} from "./PromptField";
-import {PromptFieldConfiguration} from "./PromptFieldConfiguration";
+import {
+    PromptField,
+    PromptField_Text,
+    PromptFieldConfiguration,
+} from "../../imports";
 
 export function createPrompField(container_element: HTMLElement, field_configuration: PromptFieldConfiguration): PromptField {
     switch (field_configuration.type) {

@@ -1,4 +1,6 @@
-import {PromptFieldConfiguration} from "./PromptFieldConfiguration";
+import {
+    PromptFieldConfiguration,
+} from "../../imports";
 
 export abstract class PromptField {
 
