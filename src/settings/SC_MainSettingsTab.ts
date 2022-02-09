@@ -243,7 +243,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         });
         new Setting(container_element)
             .addButton(button => button
-                .setButtonText("New Prompt")
+                .setButtonText("New prompt")
                 .onClick(async () => {
                     const prompt = newPrompt(this.plugin);
                     await this.plugin.saveSettings();
