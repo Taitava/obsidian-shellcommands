@@ -110,6 +110,9 @@ function tab_button_clicked(event: MouseEvent) {
     const tab_content = document.getElementById(activate_tab_id);
     tab_content.addClass("SC-tab-active");
 
+    // Focus an element (if a focusable element is present)
+    tab_content.find(".SC-focus-element-on-tab-opening")?.focus() // ? = If not found, do nothing.
+
     // Apply the max dimensions to this tab
     // But don't do it if this is the main settings modal
     if (!is_main_settings_modal) {

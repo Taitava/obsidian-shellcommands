@@ -9,7 +9,7 @@ import ShellCommandsPlugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
-    protected readonly title = "Modal";
+    protected readonly title = "Ask after execution";
 
     protected _handle(outputs: OutputStreams, error_code: number | null): void {
         // Initialize a modal and pass outputs
@@ -61,8 +61,15 @@ class OutputModal extends Modal {
         }
 
         // Outputs
+        let is_first = true;
         Object.getOwnPropertyNames(this.outputs).forEach((output_stream: OutputStream) => {
-            this.createOutputField(output_stream, this.outputs[output_stream]);
+            const output_setting = this.createOutputField(output_stream, this.outputs[output_stream]);
+
+            // Focus on the first output field
+            if (is_first) {
+                output_setting.controlEl.find("textarea").focus();
+                is_first = false;
+            }
         });
     }
 
@@ -113,6 +120,8 @@ class OutputModal extends Modal {
                 );
             }
         });
+
+        return textarea_setting;
     }
 
     /**

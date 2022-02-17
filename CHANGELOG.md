@@ -7,13 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
+- Nothing at the moment.
+
+## [0.10.0] - 2022-02-06
+
+### Added
 - [Events: Execute shell commands automatically when something happens (#123)](https://github.com/Taitava/obsidian-shellcommands/issues/123).
-- [Output channel: modal (#134)](https://github.com/Taitava/obsidian-shellcommands/issues/134): Allows to direct shell command output to a modal where it can be edited and manually redirected to other channels, i.e. to clipboard, file or status bar.
+- [Output channel: Ask after execution (#134)](https://github.com/Taitava/obsidian-shellcommands/issues/134): Allows to direct shell command output to a modal where it can be edited and manually redirected to other channels, i.e. to clipboard, file or status bar.
+- [Ability to hide shell commands from the command palette (#125)](https://github.com/Taitava/obsidian-shellcommands/issues/125)
 - [Settings: Add availability information to the list of variables (#132)](https://github.com/Taitava/obsidian-shellcommands/issues/132).
 
-### To be Changed
+### Changed
 - [Internal: Cleaner caching for preparsed shell commands (#135)](https://github.com/Taitava/obsidian-shellcommands/issues/135).
+
+### Fixed
+- [Fix automatically focusing on Alias field when opening the extra options modal (#144)](https://github.com/Taitava/obsidian-shellcommands/issues/144).
 
 ## [0.9.0] - 2021-12-18
 
@@ -179,7 +187,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...HEAD
+[0.10.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...0.8.0
 [0.7.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.0...0.7.1

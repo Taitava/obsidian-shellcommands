@@ -102,7 +102,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
             )
             .setClass("shell-commands-shell-command-setting")
         ;
-        alias_setting.controlEl.find("input").focus(); // Focus without a need to click the field.
+        alias_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
         container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
         container_element.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
 
@@ -129,7 +129,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private tabOutput(container_element: HTMLElement) {
         // Output channeling
-        this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
+        const stdout_channel_setting = this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
         this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
         new Setting(container_element)
             .setName("Order of stdout/stderr output")
@@ -146,6 +146,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 })
             )
         ;
+
+        // Focus on the stdout channel dropdown field
+        stdout_channel_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
 
         // Ignore errors field
         new Setting(container_element)
@@ -189,8 +192,14 @@ export class ShellCommandExtraOptionsModal extends Modal {
     private tabOperatingSystemsAndShells(container_element: HTMLElement) {
         // Platform specific shell commands
         let platform_id: PlatformId;
+        let is_first = true;
         for (platform_id in PlatformNames) {
-            createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
+            const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
+            if (is_first) {
+                // Focus on the first OS specific shell command field
+                setting_group.shell_command_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening");
+                is_first = false;
+            }
         }
 
         // Platform specific shell selection
@@ -199,7 +208,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private tabEvents(container_element: HTMLElement) {
         // Command palette
-        new Setting(container_element)
+        const command_palette_availability_setting = new Setting(container_element)
             .setName("Availability in Obsidian's command palette")
             .addDropdown(dropdown => dropdown
                 .addOptions(CommandPaletteOptions)
@@ -223,6 +232,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 }),
             )
         ;
+
+        // Focus on the command palette availability field
+        command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
 
         // Events
         new Setting(container_element)
@@ -276,7 +288,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
         let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
-        new Setting(container_element)
+        return new Setting(container_element)
             .setName(title)
             .setDesc(description)
             .addDropdown(dropdown => dropdown
