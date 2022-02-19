@@ -67,10 +67,17 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                     // Check, did we have a caret position available. If not, do nothing.
                     if (caret_position) {
                         // Yes, a caret position was defined in the output.
-                        const editor = getEditor(this.app)
-                        if (editor) {
-                            editor.setCursor(caret_position);
-                        }
+                        // Even though the file is already loaded, rendering it may take some time, thus the height of the content may increase.
+                        // For this reason, there needs to be a tiny delay before setting the caret position. If the caret position is set immediately,
+                        // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
+                        // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
+                        // Use a delay of 0 milliseconds, i.e. it will happen very soon.
+                        window.setTimeout(() => {
+                            const editor = getEditor(this.app)
+                            if (editor) {
+                                editor.setCursor(caret_position);
+                            }
+                        }, 0)
                     }
                 });
             }else {
