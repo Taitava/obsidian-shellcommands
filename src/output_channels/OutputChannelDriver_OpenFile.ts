@@ -71,13 +71,12 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                         // For this reason, there needs to be a tiny delay before setting the caret position. If the caret position is set immediately,
                         // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
                         // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
-                        // Use a delay of 0 milliseconds, i.e. it will happen very soon.
                         window.setTimeout(() => {
                             const editor = getEditor(this.app)
                             if (editor) {
                                 editor.setCursor(caret_position);
                             }
-                        }, 0)
+                        }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime.
                     }
                 });
             }else {
