@@ -163,3 +163,11 @@ export function generateObsidianCommandName(shell_command: string, alias: string
     }
     return prefix + shell_command;
 }
+
+/**
+ * TODO: Add a parameter: allow_minus
+ * @param value
+ */
+export function isInteger(value: string): boolean {
+    return !!value.match(/^\d+$/);
+}

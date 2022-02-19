@@ -1,8 +1,14 @@
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
-import {EditorPosition, getLinkpath, normalizePath} from "obsidian";
-import {getEditor, getVaultAbsolutePath, normalizePath2} from "../Common";
+import {
+    normalizePath,
+} from "obsidian";
+import {
+    getEditor,
+    getVaultAbsolutePath,
+    isInteger,
+} from "../Common";
 import * as path from "path";
 
 export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
@@ -17,26 +23,42 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
     protected _handle(output: OutputStreams, error_code: number | null): void {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            const file_path_and_caret_position = output[output_stream_name].trim(); // Contains at least a file name, and MAYBE a caret position, too.
-            const caret_position_pattern = /:(\d+)(:(\d+))?$/;
+            // Get parts that define different details about how the file should be opened
+            const file_definition = output[output_stream_name].trim(); // Contains at least a file name, and MAYBE: a caret position, new pane option, and view state
+            const file_definition_parts = file_definition.split(":");
 
-            let open_file_path: string;
-            let caret_position: EditorPosition;
+            // The first part is always the file path
+            let open_file_path = file_definition_parts.shift();
 
-            // Check if the output contains a caret position, too.
-            let caret_position_match = file_path_and_caret_position.match(caret_position_pattern);
-            if (caret_position_match) {
-                // Yes, it contains a caret position
-                caret_position = {
-                    line: Math.max(0, parseInt(caret_position_match[1]) - 1), // Editor position is zero-indexed, line numbers are 1-indexed
-                    ch: caret_position_match[3] ? Math.max(0, parseInt(caret_position_match[3]) - 1) : 0, // Editor position is zero-indexed, column positions are 1-indexed
-                };
+            // Special features
+            const caret_position: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column.
+            let new_pane: boolean = false;
+            let can_create_file: boolean = false;
+            let file_definition_interpreting_failed = false;
 
-                // Remove the caret position from the file name
-                open_file_path = file_path_and_caret_position.replace(caret_position_pattern, "");
-            } else {
-                // No, there's no caret position
-                open_file_path = file_path_and_caret_position;
+            file_definition_parts.forEach((file_definition_part: string) => {
+                file_definition_part = file_definition_part.toLocaleLowerCase();
+
+                // Determine the part type
+                if (isInteger(file_definition_part)) {
+                    // This is a number, so consider it as a caret position part.
+                    caret_position.push(Math.max(0, parseInt(file_definition_part) - 1)); // Editor position is zero-indexed, line numbers/columns are 1-indexed.
+                } else {
+                    switch (file_definition_part) {
+                        case "new-pane":
+                            new_pane = true;
+                            break;
+                        case "can-create-file":
+                            can_create_file = true;
+                            break;
+                        default:
+                            this.plugin.newError("Cannot open file: Unrecognised definition part: " + file_definition_part + " in " + file_definition);
+                            file_definition_interpreting_failed = true;
+                    }
+                }
+            });
+            if (file_definition_interpreting_failed) {
+                return;
             }
 
             // Ensure the path is relative
@@ -57,35 +79,39 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
             // Clean up the file path
             open_file_path = normalizePath(open_file_path); // normalizePath() is used on purpose, instead of normalizePath2(), because backslashes \ should be converted to forward slashes /
 
+            this.openFileInTab(open_file_path,  new_pane, can_create_file).then(() => {
+                // The file is now open
+                // Check, did we have a caret position available. If not, do nothing.
+                if (caret_position.length > 0) {
+                    // Yes, a caret position was defined in the output.
+                    // Even though the file is already loaded, rendering it may take some time, thus the height of the content may increase.
+                    // For this reason, there needs to be a tiny delay before setting the caret position. If the caret position is set immediately,
+                    // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
+                    // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
+                    window.setTimeout(() => {
+                        const editor = getEditor(this.app)
+                        if (editor) {
+                            editor.setCursor({
+                                line: caret_position[0],
+                                ch: caret_position[1] ?? 0,
+                            });
+                        }
+                    }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime.
+                }
+            });
+        }
+    }
 
-            // Ensure that the file exists
-            const source_path = ""; // TODO: When adding an option for creating new files, read this documentation from Obsidian API's getNewFileParent(): "sourcePath – The path to the current open/focused file, used when the user wants new files to be created “in the same folder”. Use an empty string if there is no active file."
-            if (null !== this.app.metadataCache.getFirstLinkpathDest(open_file_path, source_path)) {
-                // Yes, the file exists
-                this.app.workspace.openLinkText(open_file_path, source_path).then(() => {
-                    // The file is now open
-                    // Check, did we have a caret position available. If not, do nothing.
-                    if (caret_position) {
-                        // Yes, a caret position was defined in the output.
-                        // Even though the file is already loaded, rendering it may take some time, thus the height of the content may increase.
-                        // For this reason, there needs to be a tiny delay before setting the caret position. If the caret position is set immediately,
-                        // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
-                        // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
-                        window.setTimeout(() => {
-                            const editor = getEditor(this.app)
-                            if (editor) {
-                                editor.setCursor(caret_position);
-                            }
-                        }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime.
-                    }
-                });
-            }else {
-                // No, the file does not exist
-                this.plugin.newErrors([
-                    "Cannot open file '" + open_file_path + "', as it does not exist.",
-                    "The Shell commands plugin does not currently offer a way to create a new file in this kind of situation, but an option for this might be added later.",
-                ]);
-            }
+    private openFileInTab(file_path: string, new_pane: boolean, can_create_file: boolean): Promise<void> {
+        // Ensure that the file exists (or can be created)
+        const source_path = ""; // TODO: When adding an option for creating new files, read this documentation from Obsidian API's getNewFileParent(): "sourcePath – The path to the current open/focused file, used when the user wants new files to be created “in the same folder”. Use an empty string if there is no active file."
+        const file_exists_or_can_be_created = can_create_file || null !== this.app.metadataCache.getFirstLinkpathDest(file_path, source_path);
+        if (file_exists_or_can_be_created) {
+            // Yes, the file exists (or can be created)
+            return this.app.workspace.openLinkText(file_path, source_path, new_pane);
+        } else {
+            // No, the file does not exist, and it may not be created.
+            this.plugin.newError("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
         }
     }
 
