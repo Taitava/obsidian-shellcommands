@@ -9,6 +9,7 @@ import {
     getEditor,
     getVaultAbsolutePath,
     isInteger,
+    isWindows,
     prepareEditorPosition,
 } from "../Common";
 import * as path from "path";
@@ -32,6 +33,16 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
 
             // The first part is always the file path
             let open_file_path = file_definition_parts.shift();
+
+            // On Windows: Check if an absolute path was split incorrectly. (E.g. a path starting with "C:\...").
+            if (isWindows() && file_definition_parts.length > 0) {
+                const combined_path = open_file_path + ":" + file_definition_parts[0];
+                if (path.isAbsolute(combined_path)) {
+                    // Yes, the first two parts do form an absolute path together, so they should not be split.
+                    open_file_path = combined_path;
+                    file_definition_parts.shift(); // Remove the second part so that it won't be accidentally processed in the 'Special features' part.
+                }
+            }
 
             // Special features
             const caret_parts: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column. If more parts are present, they will be used for making selections.
