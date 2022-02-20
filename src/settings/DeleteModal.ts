@@ -4,6 +4,9 @@ import {SettingFieldGroup} from "./SC_MainSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 
+/**
+ * TODO: Rename to DeleteShellCommandModal
+ */
 export class DeleteModal extends SC_Modal {
 
     private readonly shell_command_id: string;
@@ -22,7 +25,7 @@ export class DeleteModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.modalEl.createEl("h2", {text: "Delete: " + this.t_shell_command.getShellCommand()});
+        this.modalEl.createEl("h2", {text: "Delete: " + this.t_shell_command.getShellCommand()}); // TODO: Use this.setTitle() instead.
         if (this.t_shell_command.getAlias()) {
             this.modalEl.createEl("p", {text: "Alias: " + this.t_shell_command.getAlias()});
         }

@@ -16,4 +16,8 @@ export abstract class SC_Modal extends Modal {
 
     }
 
+    protected setTitle(title: string) {
+        this.titleEl.innerText = title;
+    }
+
 }

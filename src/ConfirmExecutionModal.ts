@@ -19,7 +19,7 @@ export class ConfirmExecutionModal extends SC_Modal {
         super.onOpen();
 
         // Information about the shell command
-        this.modalEl.createEl("h2", {text: this.shell_command_parsing_result.shell_command, attr: {style: "margin-bottom: 0;"}});
+        this.modalEl.createEl("h2", {text: this.shell_command_parsing_result.shell_command, attr: {style: "margin-bottom: 0;"}}); // TODO: Use this.setTitle() instead.
         if (this.shell_command_parsing_result.alias) {
             this.modalEl.createEl("p", {text: "Alias: " + this.shell_command_parsing_result.alias, attr: {style: "margin-top: 0;"}});
         }

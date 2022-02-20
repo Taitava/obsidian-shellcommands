@@ -40,7 +40,7 @@ export class ExtraOptionsModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
+        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});  // TODO: Use this.setTitle() instead.
 
         // Tabs
         this.tab_structure = createTabs(this.modalEl, {

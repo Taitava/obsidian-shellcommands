@@ -47,7 +47,7 @@ class OutputModal extends SC_Modal {
 
         // Heading
         const heading = this.shell_command_parsing_result.alias;
-        this.titleEl.innerText = heading ? heading : "Shell command output";
+        this.titleEl.innerText = heading ? heading : "Shell command output";  // TODO: Use this.setTitle() instead.
 
         // Shell command preview
         this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin"}}); // no margin so that exit code will be close.
