@@ -2,7 +2,10 @@ import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
 import {
+    createPromptFieldSettingField,
+    getDefaultPrompFieldConfiguration,
     Prompt,
+    PromptFieldConfiguration,
 } from "../imports";
 
 export class PromptSettingsModal extends SC_Modal {
@@ -42,6 +45,27 @@ export class PromptSettingsModal extends SC_Modal {
                 .onChange(async (new_value: boolean) => {
                     this.prompt.getConfiguration().preview_shell_command = new_value;
                     await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
+        // Fields
+        const fields_container = container_element.createDiv();
+        this.prompt.getConfiguration().fields.forEach((prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number) => {
+            createPromptFieldSettingField(this.plugin, fields_container, this.prompt, prompt_field_index, prompt_field_configuration);
+        });
+
+        // New field button
+        new Setting(container_element)
+            .addButton(button => button
+                .setButtonText("New field")
+                .onClick(async () => {
+                    // Create a new prompt field
+                    const prompt_field_configuration = getDefaultPrompFieldConfiguration();
+                    this.prompt.getConfiguration().fields.push(prompt_field_configuration);
+                    await this.plugin.saveSettings();
+                    const prompt_field_index = this.prompt.getConfiguration().fields.length - 1;
+                    createPromptFieldSettingField(this.plugin, fields_container, this.prompt, prompt_field_index, prompt_field_configuration);
                 }),
             )
         ;

@@ -25,6 +25,8 @@ export * from "./prompt/PromptFunctions";
 export * from "./prompt/PromptModal";
 
 // Settings
+export * from "./settings/setting_elements/createPromptFieldSettingField";
 export * from "./settings/setting_elements/createPromptSettingsField";
+export * from "./settings/DeletePromptFieldModal";
 export * from "./settings/DeletePromptModal";
 export * from "./settings/PromptSettingsModal";
