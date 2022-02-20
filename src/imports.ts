@@ -26,4 +26,5 @@ export * from "./prompt/PromptModal";
 
 // Settings
 export * from "./settings/setting_elements/createPromptSettingsField";
+export * from "./settings/DeletePromptModal";
 export * from "./settings/PromptSettingsModal";

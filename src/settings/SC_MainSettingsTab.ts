@@ -239,7 +239,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
         const prompts_container_element = container_element.createDiv();
         getPrompts().forEach((prompt: Prompt) => {
-            createPromptSettingsField(prompts_container_element, prompt);
+            createPromptSettingsField(this.plugin, prompts_container_element, prompt);
         });
         new Setting(container_element)
             .addButton(button => button
@@ -247,7 +247,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .onClick(async () => {
                     const prompt = newPrompt(this.plugin);
                     await this.plugin.saveSettings();
-                    createPromptSettingsField(prompts_container_element, prompt);
+                    createPromptSettingsField(this.plugin, prompts_container_element, prompt);
                     prompt.openSettingsModal(); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
                 }),
             )
