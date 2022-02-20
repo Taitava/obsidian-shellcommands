@@ -2,14 +2,17 @@ import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
 import {
+    EditorSelectionOrCaret,
     normalizePath,
 } from "obsidian";
 import {
     getEditor,
     getVaultAbsolutePath,
     isInteger,
+    prepareEditorPosition,
 } from "../Common";
 import * as path from "path";
+import {EOL} from "os";
 
 export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
     protected readonly title = "Open a file defined in the output";
@@ -31,7 +34,7 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
             let open_file_path = file_definition_parts.shift();
 
             // Special features
-            const caret_position: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column.
+            const caret_parts: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column. If more parts are present, they will be used for making selections.
             let new_pane: boolean = false;
             let can_create_file: boolean = false;
             let file_definition_interpreting_failed = false;
@@ -42,7 +45,7 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                 // Determine the part type
                 if (isInteger(file_definition_part, true)) {
                     // This is a number, so consider it as a caret position part.
-                    caret_position.push(parseInt(file_definition_part));
+                    caret_parts.push(parseInt(file_definition_part));
                 } else {
                     switch (file_definition_part) {
                         case "new-pane":
@@ -82,8 +85,28 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
             this.openFileInTab(open_file_path,  new_pane, can_create_file).then(() => {
                 // The file is now open
                 // Check, did we have a caret position available. If not, do nothing.
-                if (caret_position.length > 0) {
+                let count_caret_parts: number = caret_parts.length;
+                if (count_caret_parts > 0) {
                     // Yes, a caret position was defined in the output.
+
+                    // Ensure the correct amount of caret position parts.
+                    // 0 parts: no caret positioning needs to be done (but in this part of code the amount of parts is always greater than 0).
+                    // 1 part: caret line is defined, no column.
+                    // 2 parts: caret line and column are defined.
+                    // 3 parts: NOT ALLOWED.
+                    // 4 parts: selection starting position (line, column) and selection end position (line, column) are defined.
+                    // 5 parts or more: NOT ALLOWED. Exception: any number of sets of four parts is allowed, i.e. 8 parts, 12 parts, 16 parts etc. are allowed as they can define multiple selections.
+                    const error_message_base: string = "File opened, but caret cannot be positioned due to an incorrect amount (" + count_caret_parts + ") of numeric values in the output: " + file_definition + EOL + EOL;
+                    if (count_caret_parts == 3) {
+                        // Incorrect amount of caret parts
+                        this.plugin.newError(error_message_base + "Three numeric parts is an incorrect amount, correct would be 1,2 or 4 parts.");
+                        return;
+                    } else if (count_caret_parts > 4 && count_caret_parts % 4 !== 0) {
+                        // Incorrect amount of caret parts
+                        this.plugin.newError(error_message_base + "Perhaps too many numeric parts are defined? If more than four parts are defined, make sure to define complete sets of four parts. The amount of numeric parts needs to be dividable by 4.");
+                        return;
+                    }
+
                     // Even though the file is already loaded, rendering it may take some time, thus the height of the content may increase.
                     // For this reason, there needs to be a tiny delay before setting the caret position. If the caret position is set immediately,
                     // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
@@ -91,34 +114,29 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                     window.setTimeout(() => {
                         const editor = getEditor(this.app)
                         if (editor) {
-                            // Determine line
-                            let caret_line: number = caret_position[0];
-                            if (caret_line < 0) {
-                                // Negative line means to calculate it from the end of the file.
-                                caret_line = Math.max(0, editor.lastLine() + caret_line + 1);
+                            if (count_caret_parts >= 4) {
+                                // Selection mode
+                                // There can be multiple selections defined
+                                const selections: EditorSelectionOrCaret[] = [];
+                                while (caret_parts.length) {
+                                    const from_line = caret_parts.shift();
+                                    const from_column = caret_parts.shift();
+                                    const to_line = caret_parts.shift();
+                                    const to_column = caret_parts.shift();
+                                    selections.push({
+                                        anchor: prepareEditorPosition(editor, from_line, from_column),
+                                        head: prepareEditorPosition(editor, to_line, to_column),
+                                    })
+                                }
+                                editor.setSelections(selections);
                             } else {
-                                // Positive line needs just a small adjustment.
-                                // Editor line is zero-indexed, line numbers are 1-indexed.
-                                caret_line -= 1;
+                                // Simple caret mode
+                                const caret_line: number = caret_parts[0];
+                                const caret_column: number = caret_parts[1] ?? 1;
+                                editor.setCursor(prepareEditorPosition(editor, caret_line, caret_column));
                             }
-
-                            // Determine column
-                            let caret_column: number = caret_position[1] ?? 1;
-                            if (caret_column < 0) {
-                                // Negative column means to calculate it from the end of the line.
-                                caret_column = Math.max(0, editor.getLine(caret_line).length + caret_column + 1);
-                            } else {
-                                // Positive column needs just a small adjustment.
-                                // Editor column is zero-indexed, column numbers are 1-indexed.
-                                caret_column -= 1;
-                            }
-
-                            editor.setCursor({
-                                line: caret_line,
-                                ch: caret_column,
-                            });
                         }
-                    }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
+                    }, 500); // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
                 }
             });
         }
