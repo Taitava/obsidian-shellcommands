@@ -1,7 +1,7 @@
 import SC_Plugin from "../main";
 import {ParsingResult} from "../TShellCommand";
 import {
-    createPrompField,
+    createPromptField,
     PromptField,
     PromptFieldConfiguration,
     PromptModal,
@@ -51,7 +51,7 @@ export class Prompt {
         this.prompt_fields = [];
         this.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
             this.prompt_fields.push(
-                createPrompField(container_element, field_configuration)
+                createPromptField(container_element, field_configuration)
             );
         });
     }
