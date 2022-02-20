@@ -44,6 +44,9 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                 }
             }
 
+            // Trim the file path, for being able to use cleaner separation between file name and other parts, e.g: MyFile.md : new-pane
+            open_file_path = open_file_path.trim();
+
             // Special features
             const caret_parts: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column. If more parts are present, they will be used for making selections.
             let new_pane: boolean = false;
@@ -51,7 +54,7 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
             let file_definition_interpreting_failed = false;
 
             file_definition_parts.forEach((file_definition_part: string) => {
-                file_definition_part = file_definition_part.toLocaleLowerCase();
+                file_definition_part = file_definition_part.toLocaleLowerCase().trim(); // .trim() is for being able to use cleaner separation between e.g. different selections: MyFile.md:1:1:1:-1 : 5:1:5:-1
 
                 // Determine the part type
                 if (isInteger(file_definition_part, true)) {
