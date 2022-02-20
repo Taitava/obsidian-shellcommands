@@ -40,9 +40,9 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                 file_definition_part = file_definition_part.toLocaleLowerCase();
 
                 // Determine the part type
-                if (isInteger(file_definition_part)) {
+                if (isInteger(file_definition_part, true)) {
                     // This is a number, so consider it as a caret position part.
-                    caret_position.push(Math.max(0, parseInt(file_definition_part) - 1)); // Editor position is zero-indexed, line numbers/columns are 1-indexed.
+                    caret_position.push(parseInt(file_definition_part));
                 } else {
                     switch (file_definition_part) {
                         case "new-pane":
@@ -91,12 +91,34 @@ export class OutputChannelDriver_OpenFile extends OutputChannelDriver {
                     window.setTimeout(() => {
                         const editor = getEditor(this.app)
                         if (editor) {
+                            // Determine line
+                            let caret_line: number = caret_position[0];
+                            if (caret_line < 0) {
+                                // Negative line means to calculate it from the end of the file.
+                                caret_line = Math.max(0, editor.lastLine() + caret_line + 1);
+                            } else {
+                                // Positive line needs just a small adjustment.
+                                // Editor line is zero-indexed, line numbers are 1-indexed.
+                                caret_line -= 1;
+                            }
+
+                            // Determine column
+                            let caret_column: number = caret_position[1] ?? 1;
+                            if (caret_column < 0) {
+                                // Negative column means to calculate it from the end of the line.
+                                caret_column = Math.max(0, editor.getLine(caret_line).length + caret_column + 1);
+                            } else {
+                                // Positive column needs just a small adjustment.
+                                // Editor column is zero-indexed, column numbers are 1-indexed.
+                                caret_column -= 1;
+                            }
+
                             editor.setCursor({
-                                line: caret_position[0],
-                                ch: caret_position[1] ?? 0,
+                                line: caret_line,
+                                ch: caret_column,
                             });
                         }
-                    }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime.
+                    }, 500) // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
                 }
             });
         }
