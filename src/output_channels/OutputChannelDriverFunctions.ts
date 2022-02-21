@@ -27,9 +27,9 @@ registerOutputChannelDriver("notification", new OutputChannelDriver_Notification
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
+registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
-registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
 
 export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
