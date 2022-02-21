@@ -1,5 +1,5 @@
 export interface PromptFieldConfiguration {
-    type: "text";
+    // type: "text"; // TODO: Uncomment when implementing more values than just "text". No need to decide the value "text" now, it can be changed to "single-line-text" or something else, too.
     label: string;
     default_value: string;
     target_variable: string;
@@ -8,7 +8,7 @@ export interface PromptFieldConfiguration {
 
 export function getDefaultPrompFieldConfiguration(): PromptFieldConfiguration {
     return {
-        type: "text",
+        // type: "text",
         label: "",
         default_value: "",
         target_variable: "",
