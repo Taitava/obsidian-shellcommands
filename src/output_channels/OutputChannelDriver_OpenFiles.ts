@@ -16,7 +16,7 @@ import * as path from "path";
 import {EOL} from "os";
 
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
-    protected readonly title = "Open a file defined in the output";
+    protected readonly title = "Open a file";
 
     /**
      * This output channel is not suitable for stderr, as stderr can contain unexpected messages.
