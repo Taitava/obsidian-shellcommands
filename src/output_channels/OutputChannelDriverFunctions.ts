@@ -10,7 +10,7 @@ import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_Curre
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
-import {OutputChannelDriver_OpenFile} from "./OutputChannelDriver_OpenFile";
+import {OutputChannelDriver_OpenFiles} from "./OutputChannelDriver_OpenFiles";
 
 export interface OutputStreams {
     stdout?: string;
@@ -29,7 +29,7 @@ registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentF
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
-registerOutputChannelDriver("open-file", new OutputChannelDriver_OpenFile());
+registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
 
 export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
