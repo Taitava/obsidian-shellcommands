@@ -31,6 +31,18 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             const file_definition = output[output_stream_name].trim(); // Contains at least a file name, and MAYBE: a caret position, new pane option, and view state
             const file_definition_parts = file_definition.split(":");
 
+            // Future compatibility: Ensure there is no newline characters in-between the output.
+            // This is to reserve newline usage to future when this output channel will support opening multiple files at once.
+            // TODO: Remove this check when multi-file support is implemented.
+            if (file_definition.match(/[\r\n]/)) {
+                // Bad, the output contains a newline.
+                this.plugin.newErrors([
+                    "Cannot open file: The output contains linebreaks: " + file_definition,
+                    "Linebreaks will be supported in a future version of SC that allows defining multiple files to open at once.",
+                ]);
+                return;
+            }
+
             // The first part is always the file path
             let open_file_path = file_definition_parts.shift();
 
