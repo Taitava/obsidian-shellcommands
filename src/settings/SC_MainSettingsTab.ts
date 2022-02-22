@@ -104,7 +104,33 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     }
 
     private tabEvents(container_element: HTMLElement) {
-        container_element.createEl("p", {text: "This tab gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
+
+        // A general description about events
+        container_element.createEl("p", {text: "Events introduce a way to execute shell commands automatically in certain situations, e.g. when Obsidian starts. They are set up for each shell command separately, but this tab contains general options for them."});
+
+        // Enable/disable all events
+        new Setting(container_element)
+            .setName("Enable events")
+            .setDesc("This is a quick way to immediately turn off all events, if you want.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enable_events)
+                .onChange(async (enable_events: boolean) => {
+                    // The toggle was clicked.
+                    this.plugin.settings.enable_events = enable_events;
+                    if (enable_events) {
+                        // Register events.
+                        this.plugin.registerSC_Events(true);
+                    } else {
+                        // Unregister events.
+                        this.plugin.unregisterSC_Events();
+                    }
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
+        // A list of current enable events
+        container_element.createEl("p", {text: "The following gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
         let found_enabled_event = false;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
             const event_enabled_t_shell_commands = sc_event.getTShellCommands();

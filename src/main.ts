@@ -29,6 +29,8 @@ import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
+import {getSC_Events} from "./events/SC_EventList";
+import {SC_Event} from "./events/SC_Event";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -80,8 +82,10 @@ export default class SC_Plugin extends Plugin {
 			}
 		}
 
-		// Perform event registrations.
-		this.registerSC_Events();
+		// Perform event registrations, if enabled.
+		if (this.settings.enable_events) {
+			this.registerSC_Events(false);
+		}
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
@@ -209,7 +213,14 @@ export default class SC_Plugin extends Plugin {
 		debugLog("Registered.")
 	}
 
-	private registerSC_Events() {
+
+	/**
+	 * Goes through all events and all shell commands, and for each shell command, registers all the events that the shell
+	 * command as enabled in its configuration. Does not modify the configurations.
+	 *
+	 * @param called_after_changing_settings Set to: true, if this happens after changing configuration; false, if this happens during loading the plugin.
+	 */
+	public registerSC_Events(called_after_changing_settings: boolean) {
 		// Make sure that Obsidian is fully loaded before allowing any events to trigger.
 		this.app.workspace.onLayoutReady(() => {
 			// Even after Obsidian is fully loaded, wait a while in order to prevent SC_Event_onActiveLeafChanged triggering right after start-up.
@@ -219,9 +230,25 @@ export default class SC_Plugin extends Plugin {
 				const shell_commands = this.getTShellCommands();
 				for (const shell_command_id in shell_commands) {
 					const t_shell_command = shell_commands[shell_command_id];
-					t_shell_command.registerSC_Events();
+					t_shell_command.registerSC_Events(called_after_changing_settings);
 				}
 			}, 0); // 0 means to call the callback on "the next event cycle", according to window.setTimeout() documentation. It should be a long enough delay. But if SC_Event_onActiveLeafChanged still gets triggered during start-up, this value can be raised to for example 1000 (= one second).
+		});
+	}
+
+	/**
+	 * Goes through all events and all shell commands, and makes sure all of them are unregistered, e.g. will not trigger
+	 * automatically. Does not modify the configurations.
+	 */
+	public unregisterSC_Events() {
+		// Iterate all events
+		getSC_Events(this).forEach((sc_event: SC_Event) => {
+			// Iterate all shell commands
+			const shell_commands = this.getTShellCommands();
+			for (const shell_command_id in shell_commands) {
+				const t_shell_command = shell_commands[shell_command_id];
+				sc_event.unregister(t_shell_command);
+			}
 		});
 	}
 

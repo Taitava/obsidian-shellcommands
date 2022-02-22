@@ -227,10 +227,15 @@ export class TShellCommand {
 
     /**
      * Set's up all events that are enabled for this shell command.
+     *
+     * @param called_after_changing_settings Set to: true, if this happens after changing configuration; false, if this happens during loading the plugin.
      */
-    public registerSC_Events() {
+    public registerSC_Events(called_after_changing_settings: boolean) {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
-            this.registerSC_Event(sc_event);
+            const can_register = !called_after_changing_settings || sc_event.canRegisterAfterChangingSettings();
+            if (can_register) {
+                this.registerSC_Event(sc_event);
+            }
         });
     }
 

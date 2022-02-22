@@ -30,6 +30,9 @@ export interface SC_MainSettings {
     notification_message_duration: number;
     output_channel_clipboard_also_outputs_to_notification: boolean;
 
+    // Events:
+    enable_events: boolean;
+
     // Shell commands:
     shell_commands: ShellCommandsConfiguration;
 
@@ -62,6 +65,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         error_message_duration: 20,
         notification_message_duration: 10,
         output_channel_clipboard_also_outputs_to_notification: true,
+
+        // Events:
+        enable_events: true,
 
         // Shell commands:
         shell_commands: {},
