@@ -11,6 +11,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
  - [Output channel: Open a file (#143)](https://github.com/Taitava/obsidian-shellcommands/issues/143).
  - [Command palette: An ability to edit the "Execute: " prefix text (#164)](https://github.com/Taitava/obsidian-shellcommands/issues/164).
+ - [ A global option to disable all Events (#163)](https://github.com/Taitava/obsidian-shellcommands/issues/163).
 
 ### To be Changed
  - [Internal: Miscellaneous refactorings (#133)](https://github.com/Taitava/obsidian-shellcommands/issues/133).
