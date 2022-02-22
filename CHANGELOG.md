@@ -18,6 +18,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Fixed
 - [Fix a latent bug when parsing arguments in variables (#152)](https://github.com/Taitava/obsidian-shellcommands/issues/152).
+- [Bug: Ghost shell commands are executed by events even after removal (#165)](https://github.com/Taitava/obsidian-shellcommands/issues/165).
 
 ## [0.10.0] - 2022-02-06
 
