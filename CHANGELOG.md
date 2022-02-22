@@ -14,6 +14,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
  - [Internal: Miscellaneous refactorings (#133)](https://github.com/Taitava/obsidian-shellcommands/issues/133).
 
+### To be Fixed
+- [Fix a latent bug when parsing arguments in variables (#152)](https://github.com/Taitava/obsidian-shellcommands/issues/152).
+
 ## [0.10.0] - 2022-02-06
 
 ### Added
