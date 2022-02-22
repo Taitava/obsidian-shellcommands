@@ -25,6 +25,7 @@ import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
+import {EventVariable} from "./event_variables/EventVariable";
 
 export function getVariables(plugin: SC_Plugin, shell: string, sc_event?: SC_Event) {
     const shell_command_variables: Variable[] = [
@@ -64,7 +65,7 @@ export function getVariables(plugin: SC_Plugin, shell: string, sc_event?: SC_Eve
 }
 
 export function getVariableClasses() {
-    const shell_command_variables = [
+    const shell_command_variables: (typeof Variable | typeof EventVariable)[]  = [ // typeof EventVariable needs to be explicitly mentioned, because its constructor() signature contains more parameters than the constructor signature of Variable.
         // Normal variables
         Variable_CaretPosition,
         Variable_Clipboard,
