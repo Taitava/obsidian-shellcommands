@@ -239,6 +239,12 @@ export class TShellCommand {
         });
     }
 
+    public unregisterSC_Events() {
+        this.getSC_Events().forEach((sc_event: SC_Event) => {
+            this.unregisterSC_Event(sc_event);
+        });
+    }
+
     public registerToCommandPalette(): void {
         // TODO: Move the logic from plugin.registerShellCommand() to here, but split to multiple methods.
         this.plugin.registerShellCommand(this);

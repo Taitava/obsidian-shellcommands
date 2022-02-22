@@ -28,6 +28,10 @@ export class DeleteModal extends Modal {
         this.modalEl.createEl("p", {text: "Are you sure you want to delete this shell command?"});
         const delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
         delete_button.onclick = async () => {
+
+            // Unregister possible events in order to prevent them becoming ghosts that just keep executing even after removing the configuration.
+            this.t_shell_command.unregisterSC_Events();
+
             // Remove the command
             debugLog("Command " + this.shell_command_id + " gonna be removed.");
             this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.
