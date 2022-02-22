@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Changed
  - [Internal: Miscellaneous refactorings (#133)](https://github.com/Taitava/obsidian-shellcommands/issues/133).
+ - [Output channel _Ask after execution_: If some text is selected, use the selected text instead of the whole text (#158)](https://github.com/Taitava/obsidian-shellcommands/issues/158).
 
 ### To be Fixed
 - [Fix a latent bug when parsing arguments in variables (#152)](https://github.com/Taitava/obsidian-shellcommands/issues/152).
