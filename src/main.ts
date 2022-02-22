@@ -35,7 +35,7 @@ export default class SC_Plugin extends Plugin {
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.10.0";
+	public static SettingsVersion: SettingsVersionString = "0.11.0";
 
 	public settings: SC_MainSettings; // TODO: Make private and add a getter.
 	public obsidian_commands: ObsidianCommandsContainer = {};
