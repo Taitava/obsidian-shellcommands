@@ -155,8 +155,8 @@ export function gotoURL(url: string) {
     shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }
 
-export function generateObsidianCommandName(shell_command: string, alias: string) {
-    const prefix = "Execute: ";
+export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
+    const prefix = plugin.settings.obsidian_command_palette_prefix;
     if (alias) {
         // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
         return prefix + alias;

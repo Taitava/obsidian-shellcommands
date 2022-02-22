@@ -8,11 +8,14 @@ export interface SC_MainSettings {
 
     // Common:
     settings_version: SettingsVersionString;
+
+    // Hidden settings (no UI controls in the settings panel)
     /**
      * If true, logging stuff to console.log() will be enabled.
      * Might also enable some testing {{variables}} in the future, perhaps.
      */
     debug: boolean;
+    obsidian_command_palette_prefix: string;
 
     // Variables:
     preview_variables_in_command_palette: boolean;
@@ -42,7 +45,10 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
             ? SC_Plugin.SettingsVersion // For new installations, a specific settings version number can be used, as migrations do not need to be taken into account.
             : "prior-to-0.7.0"  // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
         ,
+
+        // Hidden settings (no UI controls in the settings panel)
         debug: false,
+        obsidian_command_palette_prefix: "Execute: ",
 
         // Variables:
         preview_variables_in_command_palette: true,

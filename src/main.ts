@@ -149,7 +149,7 @@ export default class SC_Plugin extends Plugin {
 		// Register an Obsidian command
 		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
+			name: generateObsidianCommandName(this, t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette) => {
 				if (is_opening_command_palette) {
