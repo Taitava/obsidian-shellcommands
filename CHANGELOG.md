@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-- Nothing at the moment.
+### To be Added
+ - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
+ - [Output channel: Open a file (#143)](https://github.com/Taitava/obsidian-shellcommands/issues/143).
+
+### To be Changed
+ - [Internal: Miscellaneous refactorings (#133)](https://github.com/Taitava/obsidian-shellcommands/issues/133).
 
 ## [0.10.0] - 2022-02-06
 
