@@ -1,4 +1,11 @@
-import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
+import {
+    App,
+    Editor,
+    EditorPosition,
+    FileSystemAdapter,
+    MarkdownView,
+    normalizePath,
+} from "obsidian";
 import {PlatformId} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
@@ -162,6 +169,48 @@ export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: st
         return prefix + alias;
     }
     return prefix + shell_command;
+}
+
+export function isInteger(value: string, allow_minus: boolean): boolean {
+    if (allow_minus) {
+        return !!value.match(/^-?\d+$/);
+    } else {
+        return !!value.match(/^\d+$/);
+    }
+}
+
+/**
+ * Translates 1-indexed caret line and column to a 0-indexed EditorPosition object. Also translates a possibly negative line
+ * to a positive line from the end of the file, and a possibly negative column to a positive column from the end of the line.
+ * @param editor
+ * @param caret_line
+ * @param caret_column
+ */
+export function prepareEditorPosition(editor: Editor, caret_line: number, caret_column: number): EditorPosition {
+    // Determine line
+    if (caret_line < 0) {
+        // Negative line means to calculate it from the end of the file.
+        caret_line = Math.max(0, editor.lastLine() + caret_line + 1);
+    } else {
+        // Positive line needs just a small adjustment.
+        // Editor line is zero-indexed, line numbers are 1-indexed.
+        caret_line -= 1;
+    }
+
+    // Determine column
+    if (caret_column < 0) {
+        // Negative column means to calculate it from the end of the line.
+        caret_column = Math.max(0, editor.getLine(caret_line).length + caret_column + 1);
+    } else {
+        // Positive column needs just a small adjustment.
+        // Editor column is zero-indexed, column numbers are 1-indexed.
+        caret_column -= 1;
+    }
+
+    return {
+        line: caret_line,
+        ch: caret_column,
+    }
 }
 
 export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;
