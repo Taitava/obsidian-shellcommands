@@ -1,7 +1,10 @@
 import {SC_Modal} from "../SC_Modal";
-import {ParsingResult} from "../TShellCommand";
+import {TShellCommand} from "../TShellCommand";
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
+import {
+    Prompt
+} from "../imports";
 
 export class PromptModal extends SC_Modal {
 
@@ -13,7 +16,8 @@ export class PromptModal extends SC_Modal {
     constructor(
         plugin: SC_Plugin,
         private readonly content_container_element: HTMLElement,
-        private readonly shell_command_parsing_result: ParsingResult,
+        private readonly t_shell_command: TShellCommand,
+        private readonly prompt: Prompt,
 
         /** A function that is called when a user clicks the execution button. This function should check the form elements' validity and return false if there are unfilled fields. */
         private readonly validator: () => boolean,
@@ -28,10 +32,15 @@ export class PromptModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        // Information about the shell command
-        this.modalEl.createEl("h2", {text: this.shell_command_parsing_result.alias, attr: {style: "margin-bottom: 0;"}});
-        if (this.shell_command_parsing_result.alias) {
-            this.modalEl.createEl("p", {text: this.shell_command_parsing_result.shell_command, attr: {style: "margin-bottom: 0;"}});
+        this.setTitle(this.prompt.getTitle());
+
+        // Information about the shell command (if wanted)
+        if (this.prompt.getConfiguration().preview_shell_command) {
+            if (this.t_shell_command.getAlias()) {
+                this.modalEl.createEl("p", {text: this.t_shell_command.getAlias(), attr: {class: "SC-no-margin"}});
+            }
+            this.modalEl.createEl("pre", {text: this.t_shell_command.getShellCommand(), attr: {class: "SC-no-margin"}});
+            this.modalEl.createEl("hr");
         }
 
         // Add content

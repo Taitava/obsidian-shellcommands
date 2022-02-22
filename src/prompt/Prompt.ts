@@ -1,5 +1,5 @@
 import SC_Plugin from "../main";
-import {ParsingResult} from "../TShellCommand";
+import {TShellCommand} from "../TShellCommand";
 import {
     createPromptField,
     PromptField,
@@ -29,13 +29,14 @@ export class Prompt {
         return this.configuration;
     }
 
-    public openPrompt(): Promise<void> {
+    public openPrompt(t_shell_command: TShellCommand): Promise<void> {
         const fields_container_element = document.createElement("div");
         this.createFields(fields_container_element);
         const modal = new PromptModal(
             this.plugin,
             fields_container_element,
-            {shell_command: "Shell command", alias: "Alias"} as ParsingResult, // TODO: Remove the parsing result completely from the prompt. Show unparsed shell command in the prompt instead.
+            t_shell_command,
+            this,
             () => {return this.validateFields();}
         );
         modal.open();
