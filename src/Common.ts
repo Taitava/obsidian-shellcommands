@@ -163,3 +163,10 @@ export function generateObsidianCommandName(shell_command: string, alias: string
     }
     return prefix + shell_command;
 }
+
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: false): string;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: boolean): string | null {
+    const selected_text = textarea_element.value.substring(textarea_element.selectionStart, textarea_element.selectionEnd);
+    return "" === selected_text && return_null_if_empty ? null : selected_text;
+}
