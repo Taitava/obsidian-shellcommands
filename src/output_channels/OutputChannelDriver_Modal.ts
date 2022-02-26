@@ -8,6 +8,7 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import SC_Plugin from "../main";
 import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_Modal} from "../SC_Modal";
+import {getSelectionFromTextarea} from "../Common";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Ask after execution";
@@ -68,9 +69,15 @@ class OutputModal extends SC_Modal {
                 is_first = false;
             }
         });
+
+        // A tip about selecting text.
+        this.modalEl.createDiv({
+            text: "Tip! If you select something, only the selected text will be used.",
+            attr: {class: "setting-item-description" /* A CSS class defined by Obsidian. */},
+        });
     }
 
-    public createOutputField(output_stream: OutputStream, output: string) {
+    private createOutputField(output_stream: OutputStream, output: string) {
         let output_textarea: TextAreaComponent;
 
         this.modalEl.createEl("hr", {attr: {class: "SC-no-margin"}});
@@ -105,16 +112,24 @@ class OutputModal extends SC_Modal {
             // Ensure this channel is not excluded
             if (!excluded_output_channels.contains(output_channel_name)) {
                 const output_channel_driver = output_channel_drivers[output_channel_name];
-                redirect_setting.addButton(button => button
-                    .setButtonText(output_channel_driver.getTitle(output_stream))
-                    .onClick(() => {
-                        // Redirect output to the selected driver
-                        const output_streams: OutputStreams = {};
-                        output_streams[output_stream] = output_textarea.getValue();
-                        output_channel_driver.initialize(this.plugin, this.t_shell_command, this.shell_command_parsing_result);
-                        output_channel_driver.handle(output_streams, this.exit_code);
-                    }),
-                );
+                // Ensure the output channel accepts this output stream. E.g. OutputChannelDriver_OpenFiles does not accept "stderr".
+                if (output_channel_driver.acceptsOutputStream(output_stream)) {
+                    redirect_setting.addButton(button => button
+                        .setButtonText(output_channel_driver.getTitle(output_stream))
+                        .onClick(() => {
+                            // Redirect output to the selected driver
+                            const output_streams: OutputStreams = {};
+                            const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
+                            output_streams[output_stream] =
+                                getSelectionFromTextarea(textarea_element, true) // Use the selection, or...
+                                ?? output_textarea.getValue() // ...use the whole text, if nothing is selected.
+                            ;
+                            output_channel_driver.initialize(this.plugin, this.t_shell_command, this.shell_command_parsing_result);
+                            output_channel_driver.handle(output_streams, this.exit_code);
+                            textarea_element.focus(); // Bring the focus back to the textarea in order to show a possible highlight (=selection) again.
+                        }),
+                    );
+                }
             }
         });
 

@@ -10,6 +10,7 @@ import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_Curre
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
 import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
+import {OutputChannelDriver_OpenFiles} from "./OutputChannelDriver_OpenFiles";
 
 export interface OutputStreams {
     stdout?: string;
@@ -26,6 +27,7 @@ registerOutputChannelDriver("notification", new OutputChannelDriver_Notification
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
+registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
@@ -135,7 +137,11 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (const name in output_channel_drivers) {
-        list[name] = output_channel_drivers[name].getTitle(output_stream);
+        const output_channel_driver: any = output_channel_drivers[name];
+        // Check that the stream is suitable for the channel
+        if (output_channel_driver.acceptsOutputStream(output_stream)) {
+            list[name] = output_channel_driver.getTitle(output_stream);
+        }
     }
     return list;
 }

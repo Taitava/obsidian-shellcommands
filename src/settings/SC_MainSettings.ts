@@ -11,11 +11,14 @@ export interface SC_MainSettings {
 
     // Common:
     settings_version: SettingsVersionString;
+
+    // Hidden settings (no UI controls in the settings panel)
     /**
      * If true, logging stuff to console.log() will be enabled.
      * Might also enable some testing {{variables}} in the future, perhaps.
      */
     debug: boolean;
+    obsidian_command_palette_prefix: string;
 
     // Variables:
     preview_variables_in_command_palette: boolean;
@@ -29,6 +32,9 @@ export interface SC_MainSettings {
     error_message_duration: number;
     notification_message_duration: number;
     output_channel_clipboard_also_outputs_to_notification: boolean;
+
+    // Events:
+    enable_events: boolean;
 
     // Shell commands:
     shell_commands: ShellCommandsConfiguration;
@@ -48,7 +54,10 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
             ? SC_Plugin.SettingsVersion // For new installations, a specific settings version number can be used, as migrations do not need to be taken into account.
             : "prior-to-0.7.0"  // This will be substituted by ShellCommandsPlugin.saveSettings() when the settings are saved.
         ,
+
+        // Hidden settings (no UI controls in the settings panel)
         debug: false,
+        obsidian_command_palette_prefix: "Execute: ",
 
         // Variables:
         preview_variables_in_command_palette: true,
@@ -62,6 +71,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         error_message_duration: 20,
         notification_message_duration: 10,
         output_channel_clipboard_also_outputs_to_notification: true,
+
+        // Events:
+        enable_events: true,
 
         // Shell commands:
         shell_commands: {},
