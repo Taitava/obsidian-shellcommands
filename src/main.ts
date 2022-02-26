@@ -32,6 +32,8 @@ import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomple
 import {getSC_Events} from "./events/SC_EventList";
 import {SC_Event} from "./events/SC_Event";
 import {
+	CustomVariableConfiguration,
+	CustomVariableInstance,
 	loadPrompts,
 	Preaction,
 } from "./imports";
@@ -46,6 +48,7 @@ export default class SC_Plugin extends Plugin {
 	public settings: SC_MainSettings; // TODO: Make private and add a getter.
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
+	private custom_variable_instances: CustomVariableInstance[];
 
 	/**
 	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
@@ -108,6 +111,10 @@ export default class SC_Plugin extends Plugin {
 
 	public getTShellCommands() {
 		return this.t_shell_commands;
+	}
+
+	public getCustomVariableInstances(): CustomVariableInstance[] {
+		return this.custom_variable_instances;
 	}
 
 	private getShellCommandConfigurations(): ShellCommandsConfiguration {
@@ -492,6 +499,12 @@ export default class SC_Plugin extends Plugin {
 
 		// Load Prompts
 		loadPrompts(this, this.settings.prompts);
+
+		// Load CustomVariables
+		this.custom_variable_instances = [];
+		this.settings.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
+			this.custom_variable_instances[custom_variable_index] = new CustomVariableInstance(this, custom_variable_configuration, custom_variable_index);
+		});
 
 		return true; // Settings are loaded and the plugin can be used.
 	}

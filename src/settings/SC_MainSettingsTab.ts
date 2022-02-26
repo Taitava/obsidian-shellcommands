@@ -19,6 +19,7 @@ import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {
     createPromptSettingsField,
+    CustomVariableInstance,
     getPrompts,
     newPrompt,
     Prompt,
@@ -202,7 +203,21 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        // Variable instructions
+        // Custom variables
+        new Setting(container_element)
+            .setName("Custom variables")
+            .setHeading() // Make the "Variables" text bold.
+            // .addExtraButton(extra_button => extra_button
+            //     .setIcon("help")
+            //     .setTooltip("Documentation: Custom variables")
+            //     .onClick(() => {
+            //         gotoURL(DocumentationCustomVariablesLink) // TODO: Create the documentation link
+            //     }),
+            // )
+        ;
+        this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
+            custom_variable_instance.createSettingFields(container_element);
+        });
 
         new Setting(container_element)
             .setName("Variables")

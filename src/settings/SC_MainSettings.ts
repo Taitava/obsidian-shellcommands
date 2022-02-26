@@ -2,6 +2,7 @@
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 import SC_Plugin from "../main";
 import {
+    CustomVariableConfiguration,
     PromptConfiguration,
 } from "../imports";
 
@@ -42,6 +43,9 @@ export interface SC_MainSettings {
     // Prompts:
     prompts: PromptConfiguration[];
 
+    // Custom variables
+    custom_variables: CustomVariableConfiguration[];
+
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
     commands?: string[];
@@ -80,6 +84,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Prompts:
         prompts: [],
+
+        // Custom variables
+        custom_variables: [],
     }
 }
 
