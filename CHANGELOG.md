@@ -203,7 +203,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...HEAD
+[0.11.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.7.1...0.8.0
