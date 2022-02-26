@@ -11,6 +11,9 @@
 // Miscellaneous files in the same folder as imports.ts
 export * from "./IDGenerator";
 
+// Models
+export * from "./models/Model"; // Must come before child model classes
+
 // Preactions
 export * from "./preactions/Preaction";
 export * from "./preactions/Preaction_Prompt";
