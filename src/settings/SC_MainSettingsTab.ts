@@ -8,7 +8,7 @@ import {debugLog} from "../Debug";
 import {
     DocumentationAutocompleteLink,
     DocumentationMainLink,
-    DocumentationVariablesLink,
+    DocumentationBuiltInVariablesLink,
     GitHubLink,
     ChangelogLink,
 } from "../Documentation";
@@ -219,14 +219,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             custom_variable_instance.createSettingFields(container_element);
         });
 
+
+        // Built-in variable instructions
         new Setting(container_element)
-            .setName("Variables")
+            .setName("Built-in variables")
             .setHeading() // Make the "Variables" text bold.
             .addExtraButton(extra_button => extra_button
                 .setIcon("help")
-                .setTooltip("Documentation: Variables")
+                .setTooltip("Documentation: Built-in variables")
                 .onClick(() => {
-                    gotoURL(DocumentationVariablesLink)
+                    gotoURL(DocumentationBuiltInVariablesLink)
                 }),
             )
         ;
