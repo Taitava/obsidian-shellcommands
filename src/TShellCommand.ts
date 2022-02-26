@@ -232,10 +232,21 @@ export class TShellCommand {
 
     /**
      * Set's up all events that are enabled for this shell command.
+     *
+     * @param called_after_changing_settings Set to: true, if this happens after changing configuration; false, if this happens during loading the plugin.
      */
-    public registerSC_Events() {
+    public registerSC_Events(called_after_changing_settings: boolean) {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
-            this.registerSC_Event(sc_event);
+            const can_register = !called_after_changing_settings || sc_event.canRegisterAfterChangingSettings();
+            if (can_register) {
+                this.registerSC_Event(sc_event);
+            }
+        });
+    }
+
+    public unregisterSC_Events() {
+        this.getSC_Events().forEach((sc_event: SC_Event) => {
+            this.unregisterSC_Event(sc_event);
         });
     }
 
@@ -326,7 +337,7 @@ export class TShellCommand {
         if (undefined !== this.obsidian_command) {
             // Yes, the shell command is registered in Obsidian's command palette.
             // Update the command palette name.
-            this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
+            this.obsidian_command.name = prefix + generateObsidianCommandName(this.plugin, shell_command, alias);
         }
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }

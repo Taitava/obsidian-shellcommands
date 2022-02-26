@@ -10,6 +10,7 @@ export abstract class OutputChannelDriver {
      * Human readable name, used in settings.
      */
     protected abstract readonly title: string;
+    protected readonly accepted_output_streams: OutputStream[] = ["stdout", "stderr"];
 
     protected plugin: SC_Plugin;
     protected app: App;
@@ -50,6 +51,10 @@ export abstract class OutputChannelDriver {
         // Handle it.
         this._handle(output, error_code);
         debugLog("Output handling is done.")
+    }
+
+    public acceptsOutputStream(output_stream: OutputStream) {
+        return this.accepted_output_streams.contains(output_stream);
     }
 
     /**
