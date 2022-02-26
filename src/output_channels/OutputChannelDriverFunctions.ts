@@ -1,5 +1,5 @@
 import {ShellCommandConfiguration} from "../settings/ShellCommandConfiguration";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
@@ -8,15 +8,16 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
+import {OutputChannelDriver_OpenFiles} from "./OutputChannelDriver_OpenFiles";
 
 export interface OutputStreams {
     stdout?: string;
     stderr?: string;
 }
 
-let output_channel_drivers:{
+const output_channel_drivers: {
     [key: string]: OutputChannelDriver;
 } = {};
 
@@ -26,13 +27,14 @@ registerOutputChannelDriver("notification", new OutputChannelDriver_Notification
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
+registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
-export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
+export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult, stdout: string, stderr: string, error_code: number | null) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
-    let shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
+    const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
 
     // Insert stdout and stderr to an object in a correct order
     let output: OutputStreams = {};
@@ -88,9 +90,9 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
         // Make two handling calls.
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            let output_channel_name = shell_command_configuration.output_channels[output_stream_name];
-            let output_message = output[output_stream_name];
-            let separated_output: OutputStreams = {};
+            const output_channel_name = shell_command_configuration.output_channels[output_stream_name];
+            const output_message = output[output_stream_name];
+            const separated_output: OutputStreams = {};
             separated_output[output_stream_name] = output_message;
             handle_stream(
                 plugin,
@@ -106,9 +108,9 @@ export function handleShellCommandOutput(plugin: ShellCommandsPlugin, t_shell_co
 }
 
 function handle_stream(
-        plugin: ShellCommandsPlugin,
+        plugin: SC_Plugin,
         t_shell_command: TShellCommand,
-        shell_command_parsing_result: ShellCommandParsingResult,
+        shell_command_parsing_result: ParsingResult,
         output_channel_name: OutputChannel,
         output: OutputStreams,
         error_code: number|null
@@ -122,7 +124,7 @@ function handle_stream(
         if (undefined === output_channel_drivers[output_channel_name]) {
             throw new Error("No output driver found for channel '" + output_channel_name + "'.");
         }
-        let driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
+        const driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
 
         // Perform handling the output
         driver.initialize(plugin, t_shell_command, shell_command_parsing_result);
@@ -131,11 +133,15 @@ function handle_stream(
 }
 
 export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
-    let list: {
+    const list: {
         [key: string]: string;
     } = {ignore: "Ignore"};
-    for (let name in output_channel_drivers) {
-        list[name] = output_channel_drivers[name].getTitle(output_stream);
+    for (const name in output_channel_drivers) {
+        const output_channel_driver: any = output_channel_drivers[name];
+        // Check that the stream is suitable for the channel
+        if (output_channel_driver.acceptsOutputStream(output_stream)) {
+            list[name] = output_channel_driver.getTitle(output_stream);
+        }
     }
     return list;
 }

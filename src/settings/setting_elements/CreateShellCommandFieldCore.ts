@@ -1,12 +1,12 @@
-import ShellCommandsPlugin from "../../main";
-import {ShellCommandSettingGroup} from "../ShellCommandsSettingsTab";
+import SC_Plugin from "../../main";
+import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
 import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export function CreateShellCommandFieldCore(
-    plugin: ShellCommandsPlugin,
+    plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_name: string,
     shell_command: string,
@@ -16,7 +16,7 @@ export function CreateShellCommandFieldCore(
     shell_command_placeholder: string = "Enter your command"
     ) {
 
-    let setting_group: ShellCommandSettingGroup;
+    let setting_group: SettingFieldGroup;
 
     function on_change(shell_command: string) {
         // Update preview
@@ -30,7 +30,7 @@ export function CreateShellCommandFieldCore(
         name_setting:
             new Setting(container_element)
                 .setName(setting_name)
-                .setClass("shell-commands-name-setting")
+                .setClass("SC-name-setting")
         ,
         shell_command_setting:
             new Setting(container_element)
@@ -39,12 +39,12 @@ export function CreateShellCommandFieldCore(
                     .setValue(shell_command)
                     .onChange(on_change)
                 )
-                .setClass("shell-commands-shell-command-setting")
+                .setClass("SC-shell-command-setting")
         ,
         preview_setting:
             new Setting(container_element)
                 .setDesc(getShellCommandPreview(plugin,shell_command, shell))
-                .setClass("shell-commands-preview-setting")
+                .setClass("SC-preview-setting")
         ,
     };
 
@@ -64,8 +64,8 @@ export function CreateShellCommandFieldCore(
  * @param shell_command
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: ShellCommandsPlugin, shell_command: string, shell: string) {
-    let parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell); // false: disables notifications if variables have syntax errors.
+export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string) {
+    const parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell);
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.

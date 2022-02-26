@@ -4,8 +4,8 @@ import {FileVariable} from "./FileVariable";
 import {getFilePath} from "./VariableHelpers";
 
 export class Variable_FilePath extends FileVariable{
-    static variable_name = "file_path";
-    static help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+    public static variable_name = "file_path";
+    public static help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -18,8 +18,8 @@ export class Variable_FilePath extends FileVariable{
         mode: "absolute" | "relative";
     }
 
-    generateValue(): string|null {
-        let active_file = this.getFile();
+    protected generateValue(): string|null {
+        const active_file = this.getFile();
         if (active_file) {
             return getFilePath(this.app, active_file, this.arguments.mode);
         } else {

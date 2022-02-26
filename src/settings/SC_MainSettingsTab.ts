@@ -1,5 +1,5 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
@@ -18,18 +18,18 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
-export class ShellCommandsSettingsTab extends PluginSettingTab {
-    plugin: ShellCommandsPlugin;
+export class SC_MainSettingsTab extends PluginSettingTab {
+    private readonly plugin: SC_Plugin;
 
     private tab_structure: TabStructure;
 
-    constructor(app: App, plugin: ShellCommandsPlugin) {
+    constructor(app: App, plugin: SC_Plugin) {
         super(app, plugin);
         this.plugin = plugin;
     }
 
-    display(): void {
-        let {containerEl} = this;
+    public display(): void {
+        const {containerEl} = this;
 
         containerEl.empty();
 
@@ -84,10 +84,10 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
 
     private tabShellCommands(container_element: HTMLElement) {
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
-        let command_fields_container = container_element.createEl("div");
+        const command_fields_container = container_element.createEl("div");
 
         // Fields for modifying existing commands
-        for (let command_id in this.plugin.getTShellCommands()) {
+        for (const command_id in this.plugin.getTShellCommands()) {
             createShellCommandField(this.plugin, command_fields_container, command_id, this.plugin.settings.show_autocomplete_menu);
         }
 
@@ -104,7 +104,33 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     }
 
     private tabEvents(container_element: HTMLElement) {
-        container_element.createEl("p", {text: "This tab gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
+
+        // A general description about events
+        container_element.createEl("p", {text: "Events introduce a way to execute shell commands automatically in certain situations, e.g. when Obsidian starts. They are set up for each shell command separately, but this tab contains general options for them."});
+
+        // Enable/disable all events
+        new Setting(container_element)
+            .setName("Enable events")
+            .setDesc("This is a quick way to immediately turn off all events, if you want.")
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.enable_events)
+                .onChange(async (enable_events: boolean) => {
+                    // The toggle was clicked.
+                    this.plugin.settings.enable_events = enable_events;
+                    if (enable_events) {
+                        // Register events.
+                        this.plugin.registerSC_Events(true);
+                    } else {
+                        // Unregister events.
+                        this.plugin.unregisterSC_Events();
+                    }
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
+        // A list of current enable events
+        container_element.createEl("p", {text: "The following gives just a quick glance over which events are enabled on which shell commands. To enable/disable events for a shell command, go to the particular shell command's settings via the 'Shell commands' tab. The list is only updated when you reopen the whole settings panel."});
         let found_enabled_event = false;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
             const event_enabled_t_shell_commands = sc_event.getTShellCommands();
@@ -238,14 +264,14 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         ;
     }
 
-    createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
+    private createNotificationDurationField(container_element: HTMLElement, title: string, description: string, setting_name: "error_message_duration" | "notification_message_duration") {
         new Setting(container_element)
             .setName(title)
             .setDesc(description + " In seconds, between 1 and 180.")
             .addText(field => field
                 .setValue(String(this.plugin.settings[setting_name]))
                 .onChange(async (duration_string: string) => {
-                    let duration: number = parseInt(duration_string);
+                    const duration: number = parseInt(duration_string);
                     if (duration >= 1 && duration <= 180) {
                         debugLog("Change " + setting_name + " from " + this.plugin.settings[setting_name] + " to " + duration);
                         this.plugin.settings[setting_name] = duration;
@@ -279,8 +305,8 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
         container_element.addEventListener("scroll", (event) => {
             this.last_position.scroll_position = container_element.scrollTop;
         });
-        for (let tab_name in this.tab_structure.buttons) {
-            let button = this.tab_structure.buttons[tab_name];
+        for (const tab_name in this.tab_structure.buttons) {
+            const button = this.tab_structure.buttons[tab_name];
             button.onClickEvent((event: MouseEvent) => {
                 last_position.tab_name = tab_name;
             });
@@ -288,7 +314,7 @@ export class ShellCommandsSettingsTab extends PluginSettingTab {
     }
 }
 
-export interface ShellCommandSettingGroup {
+export interface SettingFieldGroup {
     name_setting: Setting;
     shell_command_setting: Setting;
     preview_setting: Setting;

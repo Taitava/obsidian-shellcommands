@@ -6,8 +6,8 @@ import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFolderPath extends EventVariable {
-    static variable_name = "event_folder_path";
-    static help_text = "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is either absolute from the root of the file system, or relative from the root of the Obsidian vault.";
+    public static variable_name = "event_folder_path";
+    public static help_text = "File menu: Gives path to the selected file's parent folder. Folder menu: Gives path to the selected folder. The path is either absolute from the root of the file system, or relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {

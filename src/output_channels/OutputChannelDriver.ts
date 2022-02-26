@@ -1,19 +1,20 @@
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
 import {debugLog} from "../Debug";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ParsingResult, TShellCommand} from "../TShellCommand";
 
 export abstract class OutputChannelDriver {
     /**
      * Human readable name, used in settings.
      */
     protected abstract readonly title: string;
+    protected readonly accepted_output_streams: OutputStream[] = ["stdout", "stderr"];
 
-    protected plugin: ShellCommandsPlugin;
+    protected plugin: SC_Plugin;
     protected app: App;
-    protected shell_command_parsing_result: ShellCommandParsingResult;
+    protected shell_command_parsing_result: ParsingResult;
     protected t_shell_command: TShellCommand;
     protected accepts_empty_output = false;
 
@@ -25,7 +26,7 @@ export abstract class OutputChannelDriver {
         return this.title;
     }
 
-    public initialize(plugin: ShellCommandsPlugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+    public initialize(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
         this.plugin = plugin;
         this.app = plugin.app;
         this.t_shell_command = t_shell_command;
@@ -50,6 +51,10 @@ export abstract class OutputChannelDriver {
         // Handle it.
         this._handle(output, error_code);
         debugLog("Output handling is done.")
+    }
+
+    public acceptsOutputStream(output_stream: OutputStream) {
+        return this.accepted_output_streams.contains(output_stream);
     }
 
     /**

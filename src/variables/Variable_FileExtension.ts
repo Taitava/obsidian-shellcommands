@@ -4,8 +4,8 @@ import {getFileExtension} from "./VariableHelpers";
 import {FileVariable} from "./FileVariable";
 
 export class Variable_FileExtension extends FileVariable {
-    static variable_name = "file_extension";
-    static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
+    public static variable_name = "file_extension";
+    public static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {
@@ -18,7 +18,7 @@ export class Variable_FileExtension extends FileVariable {
         "dot": "with-dot" | "no-dot",
     }
 
-    generateValue(): string {
+    protected generateValue(): string {
         const file = this.getFile();
         if (!file) {
             return null; // null indicates that getting a value has failed and the command should not be executed.

@@ -17,7 +17,7 @@ export class SC_Event_EveryNSeconds extends SC_Event {
 
     protected _register(t_shell_command: TShellCommand) {
         const milliseconds: number = this.getConfiguration(t_shell_command).seconds * 1000;
-        let interval_id: number = window.setInterval(
+        const interval_id: number = window.setInterval(
             () => this.trigger(t_shell_command),
             milliseconds,
         );

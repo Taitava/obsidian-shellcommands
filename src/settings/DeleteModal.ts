@@ -1,17 +1,17 @@
 import {Modal} from "obsidian";
-import ShellCommandsPlugin from "../main";
-import {ShellCommandSettingGroup} from "./ShellCommandsSettingsTab";
+import SC_Plugin from "../main";
+import {SettingFieldGroup} from "./SC_MainSettingsTab";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 
-export class ShellCommandDeleteModal extends Modal {
-    private plugin: ShellCommandsPlugin;
+export class DeleteModal extends Modal {
+    private plugin: SC_Plugin;
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
-    private setting_group: ShellCommandSettingGroup;
+    private setting_group: SettingFieldGroup;
     private container_element: HTMLElement;
 
-    constructor(plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, container_element: HTMLElement) {
+    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, container_element: HTMLElement) {
         super(plugin.app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;
@@ -20,14 +20,18 @@ export class ShellCommandDeleteModal extends Modal {
         this.container_element = container_element;
     }
 
-    onOpen() {
+    public onOpen() {
         this.modalEl.createEl("h2", {text: "Delete: " + this.t_shell_command.getShellCommand()});
         if (this.t_shell_command.getAlias()) {
             this.modalEl.createEl("p", {text: "Alias: " + this.t_shell_command.getAlias()});
         }
         this.modalEl.createEl("p", {text: "Are you sure you want to delete this shell command?"});
-        let delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
+        const delete_button = this.modalEl.createEl("button", {text: "Yes, delete"});
         delete_button.onclick = async () => {
+
+            // Unregister possible events in order to prevent them becoming ghosts that just keep executing even after removing the configuration.
+            this.t_shell_command.unregisterSC_Events();
+
             // Remove the command
             debugLog("Command " + this.shell_command_id + " gonna be removed.");
             this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.

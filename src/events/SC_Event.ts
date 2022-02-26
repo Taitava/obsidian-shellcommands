@@ -1,6 +1,6 @@
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {App, EventRef} from "obsidian";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
@@ -12,7 +12,7 @@ import {DocumentationEventsFolderLink} from "../Documentation";
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
  */
 export abstract class SC_Event {
-    protected readonly plugin: ShellCommandsPlugin;
+    protected readonly plugin: SC_Plugin;
     protected readonly app: App;
 
     /**
@@ -43,7 +43,7 @@ export abstract class SC_Event {
         enabled: false,
     };
 
-    public constructor(plugin: ShellCommandsPlugin) {
+    public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;
         this.app = plugin.app;
 
@@ -94,7 +94,7 @@ export abstract class SC_Event {
     /**
      * Executes a shell command.
      */
-    protected trigger(t_shell_command: TShellCommand, parsing_result: ShellCommandParsingResult | undefined = undefined) {
+    protected trigger(t_shell_command: TShellCommand, parsing_result: ParsingResult | undefined = undefined) {
         // Check if variables are not yet parsed. (They might be parsed already by SC_MenuEvent).
         if (undefined === parsing_result) {
             // No preparsed shell command exists, so parse now.

@@ -3,7 +3,7 @@ import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
     IPlatformSpecificStringWithDefault,
-} from "./ShellCommandsPluginSettings";
+} from "./SC_MainSettings";
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
 
 export interface ShellCommandsConfiguration {

@@ -1,10 +1,10 @@
 import {App, Modal, setIcon, Setting} from "obsidian";
-import ShellCommandsPlugin from "../main";
-import {ShellCommandSettingGroup, ShellCommandsSettingsTab} from "./ShellCommandsSettingsTab";
+import SC_Plugin from "../main";
+import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
-import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./ShellCommandsPluginSettings";
+import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
     generateIgnoredErrorCodesIconTitle,
@@ -16,20 +16,20 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
 
-export class ShellCommandExtraOptionsModal extends Modal {
-    static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
-    static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
-    static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
-    static EVENTS_SUMMARY = "Events";
+export class ExtraOptionsModal extends Modal {
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
+    public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
+    public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
+    public static EVENTS_SUMMARY = "Events";
 
-    private plugin: ShellCommandsPlugin;
+    private plugin: SC_Plugin;
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private name_setting: Setting;
-    private setting_tab: ShellCommandsSettingsTab;
+    private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
-    constructor(app: App, plugin: ShellCommandsPlugin, shell_command_id: string, setting_group: ShellCommandSettingGroup, setting_tab: ShellCommandsSettingsTab) {
+    constructor(app: App, plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, setting_tab: SC_MainSettingsTab) {
         super(app);
         this.plugin = plugin;
         this.shell_command_id = shell_command_id;
@@ -38,7 +38,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
         this.setting_tab = setting_tab;
     }
 
-    onOpen() {
+    public onOpen() {
         this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});
 
         // Make the modal scrollable if it has more content than what fits in the screen.
@@ -81,9 +81,9 @@ export class ShellCommandExtraOptionsModal extends Modal {
         // Alias field
         new Setting(container_element)
             .setName("Alias")
-            .setClass("shell-commands-name-setting")
+            .setClass("SC-name-setting")
         ;
-        let alias_setting = new Setting(container_element)
+        const alias_setting = new Setting(container_element)
             .addText(text => text
                 .setValue(this.t_shell_command.getAlias())
                 .onChange(async (value) => {
@@ -100,7 +100,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     await this.plugin.saveSettings();
                 })
             )
-            .setClass("shell-commands-shell-command-setting")
+            .setClass("SC-shell-command-setting")
         ;
         alias_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
         container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
@@ -113,13 +113,13 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 .setValue(this.t_shell_command.getConfirmExecution())
                 .onChange(async (value) => {
                     this.t_shell_command.getConfiguration().confirm_execution = value;
-                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
+                    const icon_container = this.name_setting.nameEl.find("span.shell-commands-confirm-execution-icon-container");
                     if (this.t_shell_command.getConfirmExecution()) {
                         // Show icon
-                        icon_container.removeClass("shell-commands-hide");
+                        icon_container.removeClass("SC-hide");
                     } else {
                         // Hide icon
-                        icon_container.addClass("shell-commands-hide");
+                        icon_container.addClass("SC-hide");
                     }
                     await this.plugin.saveSettings();
                 })
@@ -158,11 +158,11 @@ export class ShellCommandExtraOptionsModal extends Modal {
                 .setValue(this.t_shell_command.getIgnoreErrorCodes().join(","))
                 .onChange(async (value) => {
                     // Parse the string of comma separated numbers
-                    let ignore_error_codes: number[] = [];
-                    let raw_error_codes = value.split(",");
-                    for (let i in raw_error_codes) {
-                        let raw_error_code = raw_error_codes[i];
-                        let error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
+                    const ignore_error_codes: number[] = [];
+                    const raw_error_codes = value.split(",");
+                    for (const i in raw_error_codes) {
+                        const raw_error_code = raw_error_codes[i];
+                        const error_code_candidate = parseInt(raw_error_code.trim()); // E.g. an empty string converts to NaN (= Not a Number).
                         // Ensure that the error code is not NaN, 0 or a negative number.
                         if (!isNaN(error_code_candidate) && error_code_candidate >= 0) {
                             // The candidate is legit.
@@ -175,14 +175,14 @@ export class ShellCommandExtraOptionsModal extends Modal {
                     await this.plugin.saveSettings();
 
                     // Update icon
-                    let icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
+                    const icon_container = this.name_setting.nameEl.find("span.shell-commands-ignored-error-codes-icon-container");
                     if (this.t_shell_command.getIgnoreErrorCodes().length) {
                         // Show icon
                         icon_container.setAttr("aria-label", generateIgnoredErrorCodesIconTitle(this.t_shell_command.getIgnoreErrorCodes()));
-                        icon_container.removeClass("shell-commands-hide");
+                        icon_container.removeClass("SC-hide");
                     } else {
                         // Hide icon
-                        icon_container.addClass("shell-commands-hide");
+                        icon_container.addClass("SC-hide");
                     }
                 })
             )
@@ -287,7 +287,7 @@ export class ShellCommandExtraOptionsModal extends Modal {
     }
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
-        let output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
+        const output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
         return new Setting(container_element)
             .setName(title)
             .setDesc(description)

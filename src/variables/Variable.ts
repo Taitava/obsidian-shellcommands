@@ -1,5 +1,5 @@
 import {App} from "obsidian";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {escapeValue} from "./escapers/EscapeValue";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
@@ -27,8 +27,8 @@ export interface IParameters {
  */
 export abstract class Variable {
     private static readonly parameter_separator = ":";
-    readonly plugin: ShellCommandsPlugin;
-    readonly app: App;
+    protected readonly plugin: SC_Plugin;
+    protected readonly app: App;
     private error_messages: string[] = [];
     public static readonly variable_name: string;
     protected shell: string;
@@ -51,14 +51,14 @@ export abstract class Variable {
      * @param plugin
      * @param shell Used to determine what kind of escaping should be used.
      */
-    constructor(plugin: ShellCommandsPlugin, shell: string) {
+    constructor(plugin: SC_Plugin, shell: string) {
         this.plugin = plugin
         this.app = plugin.app;
         this.shell = shell;
     }
 
     public getValue(escape: boolean) {
-        let raw_value = this.generateValue();
+        const raw_value = this.generateValue();
         if (null === raw_value) {
             // Some error(s) has occurred when generating the variable's value.
             // Prevent passing null to escapeValue().
@@ -90,10 +90,10 @@ export abstract class Variable {
         return child_class.parameter_separator;
     }
 
-    getPattern() {
+    public getPattern() {
         const error_prefix = this.getVariableName() + ".getPattern(): ";
         let pattern = '\{\{\!?' + this.getVariableName();
-        for (let parameter_name in this.getParameters()) {
+        for (const parameter_name in this.getParameters()) {
             const parameter = this.getParameters()[parameter_name];
             let parameter_type_pattern: string = this.getParameterSeparator();  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
 
@@ -162,12 +162,12 @@ export abstract class Variable {
     /**
      * Note that error messages can only exist after getValue() is called!
      */
-    getErrorMessages() {
+    public getErrorMessages() {
         return this.error_messages;
     }
 
     protected newErrorMessage(message: string) {
-        let prefix = "{{" + this.getVariableName() + "}}: ";
+        const prefix = "{{" + this.getVariableName() + "}}: ";
         this.error_messages.push(prefix + message);
     }
 

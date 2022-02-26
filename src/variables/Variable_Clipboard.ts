@@ -3,10 +3,10 @@ import {Variable} from "./Variable";
 import {clipboard} from "electron";
 
 export class Variable_Clipboard extends Variable {
-    static variable_name = "clipboard";
-    static help_text = "Gives the content you last copied to your clipboard.";
+    public static variable_name = "clipboard";
+    public static help_text = "Gives the content you last copied to your clipboard.";
 
-    generateValue(): string {
+    protected generateValue(): string {
         return clipboard.readText();
     }
 }

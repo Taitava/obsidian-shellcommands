@@ -1,23 +1,30 @@
-import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
-import {PlatformId} from "./settings/ShellCommandsPluginSettings";
+import {
+    App,
+    Editor,
+    EditorPosition,
+    FileSystemAdapter,
+    MarkdownView,
+    normalizePath,
+} from "obsidian";
+import {PlatformId} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 // @ts-ignore
 import {shell} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
     // But the code has been rewritten 2021-08-27 as per https://github.com/obsidianmd/obsidian-releases/pull/433#issuecomment-906087095
-    let adapter = app.vault.adapter;
+    const adapter = app.vault.adapter;
     if (adapter instanceof FileSystemAdapter) {
         return adapter.getBasePath();
     }
     return null;
 }
 
-export function getPluginAbsolutePath(plugin: ShellCommandsPlugin) {
+export function getPluginAbsolutePath(plugin: SC_Plugin) {
     return normalizePath2(path.join(
         getVaultAbsolutePath(plugin.app),
         plugin.app.vault.configDir,
@@ -45,7 +52,7 @@ export function getOperatingSystem(): PlatformId  {
 }
 
 export function getView(app: App) {
-    let view = app.workspace.getActiveViewOfType(MarkdownView);
+    const view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
         debugLog("getView(): Could not get a view. Will return null.");
         return null;
@@ -55,7 +62,7 @@ export function getView(app: App) {
 
 export function getEditor(app: App): Editor {
 
-    let view = getView(app);
+    const view = getView(app);
     if (null === view) {
         // Could not get a view.
         return null;
@@ -96,7 +103,7 @@ export function combineObjects(...objects: Object[]) {
 export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
-    let leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
+    const leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
     let leading_slashes = leading_slashes_regexp.exec(path)[0];
 
     // 2. Run the original normalizePath()
@@ -128,7 +135,7 @@ export function extractFileName(file_path: string) {
 
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
-    for (let property_name in object) {
+    for (const property_name in object) {
         if (result.length) {
             result += glue;
         }
@@ -155,11 +162,60 @@ export function gotoURL(url: string) {
     shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }
 
-export function generateObsidianCommandName(shell_command: string, alias: string) {
-    let prefix = "Execute: ";
+export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
+    const prefix = plugin.settings.obsidian_command_palette_prefix;
     if (alias) {
         // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
         return prefix + alias;
     }
     return prefix + shell_command;
+}
+
+export function isInteger(value: string, allow_minus: boolean): boolean {
+    if (allow_minus) {
+        return !!value.match(/^-?\d+$/);
+    } else {
+        return !!value.match(/^\d+$/);
+    }
+}
+
+/**
+ * Translates 1-indexed caret line and column to a 0-indexed EditorPosition object. Also translates a possibly negative line
+ * to a positive line from the end of the file, and a possibly negative column to a positive column from the end of the line.
+ * @param editor
+ * @param caret_line
+ * @param caret_column
+ */
+export function prepareEditorPosition(editor: Editor, caret_line: number, caret_column: number): EditorPosition {
+    // Determine line
+    if (caret_line < 0) {
+        // Negative line means to calculate it from the end of the file.
+        caret_line = Math.max(0, editor.lastLine() + caret_line + 1);
+    } else {
+        // Positive line needs just a small adjustment.
+        // Editor line is zero-indexed, line numbers are 1-indexed.
+        caret_line -= 1;
+    }
+
+    // Determine column
+    if (caret_column < 0) {
+        // Negative column means to calculate it from the end of the line.
+        caret_column = Math.max(0, editor.getLine(caret_line).length + caret_column + 1);
+    } else {
+        // Positive column needs just a small adjustment.
+        // Editor column is zero-indexed, column numbers are 1-indexed.
+        caret_column -= 1;
+    }
+
+    return {
+        line: caret_line,
+        ch: caret_column,
+    }
+}
+
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: false): string;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: boolean): string | null {
+    const selected_text = textarea_element.value.substring(textarea_element.selectionStart, textarea_element.selectionEnd);
+    return "" === selected_text && return_null_if_empty ? null : selected_text;
 }

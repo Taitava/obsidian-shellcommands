@@ -15,30 +15,32 @@ import {
 import {
 	getDefaultSettings,
 	SettingsVersionString,
-	ShellCommandsPluginSettings,
-} from "./settings/ShellCommandsPluginSettings";
+	SC_MainSettings,
+} from "./settings/SC_MainSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
-import {ShellCommandsSettingsTab} from "./settings/ShellCommandsSettingsTab";
+import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {ShellCommandParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {ParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell, isShellSupported} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
+import {getSC_Events} from "./events/SC_EventList";
+import {SC_Event} from "./events/SC_Event";
 
-export default class ShellCommandsPlugin extends Plugin {
+export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.10.0";
+	public static SettingsVersion: SettingsVersionString = "0.11.0";
 
-	settings: ShellCommandsPluginSettings;
-	obsidian_commands: ObsidianCommandsContainer = {};
+	public settings: SC_MainSettings; // TODO: Make private and add a getter.
+	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 
 	/**
@@ -51,10 +53,10 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @private
 	 */
 	private cached_parsing_results: {
-		[key: string]: ShellCommandParsingResult,
+		[key: string]: ParsingResult,
 	} = {};
 
-	async onload() {
+	public async onload() {
 		debugLog('loading plugin');
 
 		// Load settings
@@ -73,32 +75,34 @@ export default class ShellCommandsPlugin extends Plugin {
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
-		for (let shell_command_id in shell_commands) {
+		for (const shell_command_id in shell_commands) {
 			const t_shell_command = shell_commands[shell_command_id];
 			if (t_shell_command.canAddToCommandPalette()) {
 				this.registerShellCommand(t_shell_command);
 			}
 		}
 
-		// Perform event registrations.
-		this.registerSC_Events();
+		// Perform event registrations, if enabled.
+		if (this.settings.enable_events) {
+			this.registerSC_Events(false);
+		}
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
 
-		this.addSettingTab(new ShellCommandsSettingsTab(this.app, this));
+		this.addSettingTab(new SC_MainSettingsTab(this.app, this));
 	}
 
 	private loadTShellCommands() {
 		this.t_shell_commands = {};
-		let shell_command_configurations = this.getShellCommandConfigurations();
+		const shell_command_configurations = this.getShellCommandConfigurations();
 
-		for (let shell_command_id in shell_command_configurations) {
+		for (const shell_command_id in shell_command_configurations) {
 			this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configurations[shell_command_id]);
 		}
 	}
 
-	getTShellCommands() {
+	public getTShellCommands() {
 		return this.t_shell_commands;
 	}
 
@@ -128,11 +132,11 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param t_shell_command
 	 */
 	public registerShellCommand(t_shell_command: TShellCommand) {
-		let shell_command_id = t_shell_command.getId();
+		const shell_command_id = t_shell_command.getId();
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
-		const executor = (parsing_result: ShellCommandParsingResult | undefined) => {
+		const executor = (parsing_result: ParsingResult | undefined) => {
 			if (undefined === parsing_result) {
 				parsing_result = t_shell_command.parseVariables();
 			}
@@ -147,9 +151,9 @@ export default class ShellCommandsPlugin extends Plugin {
 		}
 
 		// Register an Obsidian command
-		let obsidian_command: Command = {
+		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: generateObsidianCommandName(t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
+			name: generateObsidianCommandName(this, t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette) => {
 				if (is_opening_command_palette) {
@@ -209,7 +213,14 @@ export default class ShellCommandsPlugin extends Plugin {
 		debugLog("Registered.")
 	}
 
-	private registerSC_Events() {
+
+	/**
+	 * Goes through all events and all shell commands, and for each shell command, registers all the events that the shell
+	 * command as enabled in its configuration. Does not modify the configurations.
+	 *
+	 * @param called_after_changing_settings Set to: true, if this happens after changing configuration; false, if this happens during loading the plugin.
+	 */
+	public registerSC_Events(called_after_changing_settings: boolean) {
 		// Make sure that Obsidian is fully loaded before allowing any events to trigger.
 		this.app.workspace.onLayoutReady(() => {
 			// Even after Obsidian is fully loaded, wait a while in order to prevent SC_Event_onActiveLeafChanged triggering right after start-up.
@@ -219,13 +230,29 @@ export default class ShellCommandsPlugin extends Plugin {
 				const shell_commands = this.getTShellCommands();
 				for (const shell_command_id in shell_commands) {
 					const t_shell_command = shell_commands[shell_command_id];
-					t_shell_command.registerSC_Events();
+					t_shell_command.registerSC_Events(called_after_changing_settings);
 				}
 			}, 0); // 0 means to call the callback on "the next event cycle", according to window.setTimeout() documentation. It should be a long enough delay. But if SC_Event_onActiveLeafChanged still gets triggered during start-up, this value can be raised to for example 1000 (= one second).
 		});
 	}
 
-	generateObsidianCommandId(shell_command_id: string) {
+	/**
+	 * Goes through all events and all shell commands, and makes sure all of them are unregistered, e.g. will not trigger
+	 * automatically. Does not modify the configurations.
+	 */
+	public unregisterSC_Events() {
+		// Iterate all events
+		getSC_Events(this).forEach((sc_event: SC_Event) => {
+			// Iterate all shell commands
+			const shell_commands = this.getTShellCommands();
+			for (const shell_command_id in shell_commands) {
+				const t_shell_command = shell_commands[shell_command_id];
+				sc_event.unregister(t_shell_command);
+			}
+		});
+	}
+
+	public generateObsidianCommandId(shell_command_id: string) {
 		return "shell-command-" + shell_command_id;
 	}
 
@@ -234,7 +261,7 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed.
 	 */
-	confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+	public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
 
 		// Check if the command needs confirmation before execution
 		if (t_shell_command.getConfirmExecution()) {
@@ -258,8 +285,8 @@ export default class ShellCommandsPlugin extends Plugin {
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
 	 */
-	executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
-		let working_directory = this.getWorkingDirectory();
+	public executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+		const working_directory = this.getWorkingDirectory();
 
 		// Check that the shell command is not empty
 		const shell_command = shell_command_parsing_result.shell_command.trim();
@@ -296,7 +323,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		} else {
 			// Working directory is OK
 			// Prepare execution options
-			let options: BaseEncodingOptions & ExecOptions = {
+			const options: BaseEncodingOptions & ExecOptions = {
 				"cwd": working_directory,
 				"shell": shell,
 			};
@@ -355,9 +382,9 @@ export default class ShellCommandsPlugin extends Plugin {
 		}
 	}
 
-	getWorkingDirectory() {
+	private getWorkingDirectory() {
 		// Returns either a user defined working directory, or an automatically detected one.
-		let working_directory = this.settings.working_directory;
+		const working_directory = this.settings.working_directory;
 		if (working_directory.length == 0) {
 			// No working directory specified, so use the vault directory.
 			return getVaultAbsolutePath(this.app);
@@ -369,7 +396,7 @@ export default class ShellCommandsPlugin extends Plugin {
 		return working_directory;
 	}
 
-	onunload() {
+	public onunload() {
 		debugLog('unloading plugin');
 	}
 
@@ -387,7 +414,7 @@ export default class ShellCommandsPlugin extends Plugin {
 			// Compare the version number
 			/** Note that the plugin version may be different than what will be used in the version comparison. The plugin version will be displayed in possible error messages. */
 			const plugin_version = this.getPluginVersion();
-			const version_comparison = versionCompare(ShellCommandsPlugin.SettingsVersion, current_settings_version);
+			const version_comparison = versionCompare(SC_Plugin.SettingsVersion, current_settings_version);
 			if (version_comparison === 0) {
 				// The versions are equal.
 				// Supported.
@@ -408,10 +435,10 @@ export default class ShellCommandsPlugin extends Plugin {
 		return this.manifest.version;
 	}
 
-	async loadSettings() {
+	private async loadSettings() {
 
 		// Try to read a settings file
-		let all_settings: ShellCommandsPluginSettings;
+		let all_settings: SC_MainSettings;
 		this.settings = await this.loadData(); // May have missing main settings fields, if the settings file is from an older version of SC. It will be migrated later.
 		if (null === this.settings) {
 			// The settings file does not exist.
@@ -439,9 +466,9 @@ export default class ShellCommandsPlugin extends Plugin {
 		return true; // Settings are loaded and the plugin can be used.
 	}
 
-	async saveSettings() {
+	public async saveSettings() {
 		// Update settings version in case it's old.
-		this.settings.settings_version = ShellCommandsPlugin.SettingsVersion;
+		this.settings.settings_version = SC_Plugin.SettingsVersion;
 
 		// Write settings
 		await this.saveData(this.settings);
@@ -478,11 +505,11 @@ export default class ShellCommandsPlugin extends Plugin {
 	/**
 	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
 	 */
-	generateNewShellCommandID() {
-		let existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
+	private generateNewShellCommandID() {
+		const existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
 		let new_id = 0;
-		for (let i in existing_ids) {
-			let existing_id = parseInt(existing_ids[i]);
+		for (const i in existing_ids) {
+			const existing_id = parseInt(existing_ids[i]);
 			if (existing_id >= new_id) {
 				new_id = existing_id + 1;
 			}
@@ -490,30 +517,30 @@ export default class ShellCommandsPlugin extends Plugin {
 		return String(new_id);
 	}
 
-	getPluginId() {
+	public getPluginId() {
 		return this.manifest.id;
 	}
 
-	getPluginName() {
+	public getPluginName() {
 		return this.manifest.name;
 	}
 
-	newError(message: string) {
+	public newError(message: string) {
 		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
 
-	newErrors(messages: string[]) {
+	public newErrors(messages: string[]) {
 		messages.forEach((message: string) => {
 			this.newError(message);
 		});
 	}
 
-	newNotification(message: string) {
+	public newNotification(message: string) {
 		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
 	}
 
 	public getDefaultShell(): string {
-		let operating_system = getOperatingSystem()
+		const operating_system = getOperatingSystem();
 		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
 		if (undefined === shell_name) {
 			shell_name = getUsersDefaultShell();

@@ -5,8 +5,8 @@ import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFileExtension extends EventVariable {
-    static variable_name = "event_file_extension";
-    static help_text = "Gives the selected file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
+    public static variable_name = "event_file_extension";
+    public static help_text = "Gives the selected file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {

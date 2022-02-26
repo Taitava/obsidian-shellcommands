@@ -16,7 +16,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
-            let caret_position = input_element.selectionStart;
+            const caret_position = input_element.selectionStart;
             const typed_text = input_element.value.slice(0, caret_position);
             const search_query = get_search_query(typed_text);
 
@@ -132,7 +132,7 @@ function find_starting_position(typed_text: string, supplement: string) {
     typed_text = typed_text.toLocaleLowerCase();
     supplement = supplement.toLocaleLowerCase();
     for (let supplement_index = supplement.length; supplement_index >= 0; supplement_index--) {
-        let partial_supplement = supplement.slice(0, supplement_index);
+        const partial_supplement = supplement.slice(0, supplement_index);
         if (typed_text.contains(partial_supplement)) {
             return typed_text.indexOf(partial_supplement);
         }

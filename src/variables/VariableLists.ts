@@ -14,7 +14,7 @@ import {Variable_VaultPath} from "./Variable_VaultPath";
 import {Variable_Workspace} from "./Variable_Workspace";
 import {DEBUG_ON} from "../Debug";
 import {Variable_Passthrough} from "./Variable_Passthrough";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {Variable_YAMLValue} from "./Variable_YAMLValue";
 import {SC_Event} from "../events/SC_Event";
 import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
@@ -25,9 +25,10 @@ import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
+import {EventVariable} from "./event_variables/EventVariable";
 
-export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_event?: SC_Event) {
-    let shell_command_variables: Variable[] = [
+export function getVariables(plugin: SC_Plugin, shell: string, sc_event?: SC_Event) {
+    const shell_command_variables: Variable[] = [
         // Normal variables
         new Variable_CaretPosition(plugin, shell),
         new Variable_Clipboard(plugin, shell),
@@ -64,7 +65,7 @@ export function getVariables(plugin: ShellCommandsPlugin, shell: string, sc_even
 }
 
 export function getVariableClasses() {
-    let shell_command_variables = [
+    const shell_command_variables: (typeof Variable | typeof EventVariable)[]  = [ // typeof EventVariable needs to be explicitly mentioned, because its constructor() signature contains more parameters than the constructor signature of Variable.
         // Normal variables
         Variable_CaretPosition,
         Variable_Clipboard,

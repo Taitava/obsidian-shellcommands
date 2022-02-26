@@ -11,7 +11,7 @@ export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
     protected _handle(output: OutputStreams) {
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
         // will be joined together with " " as a separator.
-        let output_message = joinObjectProperties(output, " ");
+        const output_message = joinObjectProperties(output, " ");
         clipboard.writeText(output_message);
 
         if (this.plugin.settings.output_channel_clipboard_also_outputs_to_notification) {

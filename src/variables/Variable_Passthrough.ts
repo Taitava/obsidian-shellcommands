@@ -1,8 +1,8 @@
 import {IParameters, Variable} from "./Variable";
 
 export class Variable_Passthrough extends Variable {
-    static variable_name = "passthrough";
-    static help_text = "Gives the same value that is passed as an argument. Used for testing special characters' escaping.";
+    public static variable_name = "passthrough";
+    public static help_text = "Gives the same value that is passed as an argument. Used for testing special characters' escaping.";
 
     protected static readonly parameters: IParameters = {
         value: {
@@ -15,7 +15,7 @@ export class Variable_Passthrough extends Variable {
         value: string,
     };
 
-    generateValue(): string {
+    protected generateValue(): string {
         // Simply return the argument that was received.
         return this.arguments.value;
     }

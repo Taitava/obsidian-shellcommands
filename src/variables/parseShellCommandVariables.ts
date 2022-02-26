@@ -1,5 +1,5 @@
 import {Variable} from "./Variable";
-import ShellCommandsPlugin from "../main";
+import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {getVariables} from "./VariableLists";
 import {SC_Event} from "../events/SC_Event";
@@ -11,26 +11,32 @@ import {SC_Event} from "../events/SC_Event";
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
+export function parseShellCommandVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
     const variables = getVariables(plugin, shell, sc_event);
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
-    for (let variable_index in variables)
+    for (const variable_index in variables)
     {
-        let variable: Variable = variables[variable_index];
-        let pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
+        const variable: Variable = variables[variable_index];
+        const pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
-        let _arguments: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
-        while ((_arguments = pattern.exec(command)) !== null) {
+        let argument_matches: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
+        while ((argument_matches = pattern.exec(command)) !== null) {
+
+            // Remove stuff that should not be iterated in a later loop.
+            const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {
+                return "number" === typeof key;
+                // This leaves out for example the following non-numeric keys (and their values):
+                // - "groups"
+                // - "index"
+                // - "input"
+                // In the future, there can also come more elements that will be skipped. E.g. "indices". See: https://github.com/nothingislost/obsidian-dynamic-highlights/issues/25#issuecomment-1038563990 (referenced 2022-02-22).
+            });
+
+            // Get the {{variable}} string that will be substituted (= replaced with the actual value of the variable).
             const substitute = _arguments.shift(); // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'.
 
-            // Remove stuff that should not be iterated in the next loop.
-            // "If the property which you are trying to delete does not exist, delete will not have any effect and will return true." This is good. https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/delete
-            delete _arguments["groups"];
-            delete _arguments["index"];
-            delete _arguments["input"];
-
             // Iterate all arguments
-            for (let i in _arguments) {
+            for (const i in _arguments) {
                 // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
                 if (undefined !== _arguments[i]) {
                     // The argument is present.
@@ -49,7 +55,7 @@ export function parseShellCommandVariables(plugin: ShellCommandsPlugin, command:
             }
 
             // Render the variable
-            let variable_value = variable.getValue(escape);
+            const variable_value = variable.getValue(escape);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 debugLog("Parsing command " + command + " failed.");

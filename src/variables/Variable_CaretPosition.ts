@@ -3,8 +3,8 @@ import {IParameters, Variable} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 export class Variable_CaretPosition extends Variable {
-    static variable_name = "caret_position";
-    static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
+    public static variable_name = "caret_position";
+    public static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -17,7 +17,7 @@ export class Variable_CaretPosition extends Variable {
         mode: string;
     }
 
-    generateValue(): string {
+    protected generateValue(): string {
         // Check that we are able to get an editor
         const editor = getEditor(this.app);
         if (null === editor) {

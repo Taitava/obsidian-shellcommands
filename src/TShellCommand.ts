@@ -1,5 +1,5 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
-import ShellCommandsPlugin from "./main";
+import SC_Plugin from "./main";
 import {generateObsidianCommandName, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
@@ -14,11 +14,11 @@ export interface TShellCommandContainer {
 export class TShellCommand {
 
     private readonly id: string;
-    private plugin: ShellCommandsPlugin;
+    private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
-    constructor (plugin: ShellCommandsPlugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
+    constructor (plugin: SC_Plugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
         this.plugin = plugin;
         this.id = shell_command_id;
         this.configuration = configuration;
@@ -40,7 +40,7 @@ export class TShellCommand {
     }
 
     public getShell(): string {
-        let operating_system = getOperatingSystem();
+        const operating_system = getOperatingSystem();
 
         // Check if the shell command has defined a specific shell.
         if (undefined === this.configuration.shells[operating_system]) {
@@ -62,7 +62,7 @@ export class TShellCommand {
      * command does not have an explicit version for the current OS.
      */
     public getShellCommand(): string {
-        let operating_system = getOperatingSystem();
+        const operating_system = getOperatingSystem();
 
         // Check if the shell command has defined a specific command for this operating system.
         if (undefined === this.configuration.platform_specific_commands[operating_system]) {
@@ -227,10 +227,21 @@ export class TShellCommand {
 
     /**
      * Set's up all events that are enabled for this shell command.
+     *
+     * @param called_after_changing_settings Set to: true, if this happens after changing configuration; false, if this happens during loading the plugin.
      */
-    public registerSC_Events() {
+    public registerSC_Events(called_after_changing_settings: boolean) {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
-            this.registerSC_Event(sc_event);
+            const can_register = !called_after_changing_settings || sc_event.canRegisterAfterChangingSettings();
+            if (can_register) {
+                this.registerSC_Event(sc_event);
+            }
+        });
+    }
+
+    public unregisterSC_Events() {
+        this.getSC_Events().forEach((sc_event: SC_Event) => {
+            this.unregisterSC_Event(sc_event);
         });
     }
 
@@ -264,9 +275,9 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
-    public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
+    public parseVariables(sc_event?: SC_Event): ParsingResult {
         // Parse variables in the actual shell command
-        const parsing_result: ShellCommandParsingResult = {
+        const parsing_result: ParsingResult = {
             shell_command: "",
             alias: "",
             succeeded: false,
@@ -321,13 +332,13 @@ export class TShellCommand {
         if (undefined !== this.obsidian_command) {
             // Yes, the shell command is registered in Obsidian's command palette.
             // Update the command palette name.
-            this.obsidian_command.name = prefix + generateObsidianCommandName(shell_command, alias);
+            this.obsidian_command.name = prefix + generateObsidianCommandName(this.plugin, shell_command, alias);
         }
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
 }
 
-export interface ShellCommandParsingResult {
+export interface ParsingResult {
     shell_command: string;
     alias: string;
     succeeded: boolean;
