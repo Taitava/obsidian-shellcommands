@@ -45,7 +45,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
             if ("}}" === after_caret) {
                 // The replacing will happen in a {{variable}}.
                 // Do not accidentally insert another }} pair.
-                supplement = supplement.replace(/}}$/, ""); // Only removes a trailing }} if there is one.
+                supplement = supplement.replace(/\}\}$/u, ""); // Only removes a trailing }} if there is one.
             }
 
             // Try to save part of the beginning, in case it seems like not being part of the search query.
@@ -72,7 +72,7 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
 
             // Move the caret to a logical continuation point
             caret_position = replace_start + supplement.length;
-            if (supplement.match(/:}}$/)) {
+            if (supplement.match(/:\}\}$/u)) {
                 // Place the caret after the colon, instead of after }}.
                 caret_position -= 2;
             }
@@ -193,7 +193,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
             if (type === "normal-variable") {
                 // Add an unescaped version of the variable, too
                 CustomAutocompleteItems.push({
-                    value: autocomplete_item_value.replace(/^{{/, "{{!"), // Add an exclamation mark to the variable name.
+                    value: autocomplete_item_value.replace(/^\{\{/u, "{{!"), // Add an exclamation mark to the variable name.
                     help_text: autocomplete_item_label,
                     group: group_name,
                     type: "unescaped-variable",
@@ -245,18 +245,18 @@ interface IAutocompleteSearchQuery {
  * @param typed_text
  */
 function get_search_query(typed_text: string): IAutocompleteSearchQuery {
-    let search_text = typed_text.match(/\S*?$/)[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
+    let search_text = typed_text.match(/\S*?$/u)[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
     let search_type: AutocompleteSearchQueryType = "other"; // May be overwritten.
 
     if (search_text.contains("}}")) {
         // The query happens right after a {{variable}}.
         // Make the query string to start after the }} pair, i.e. remove }} and everything before it. This improves the search.
-        search_text = search_text.replace(/.+}}/, "");
+        search_text = search_text.replace(/.+\}\}/u, "");
     }
     if (search_text.contains("{{")) {
         // A {{variable}} is being queried.
         // Make the query string to start from the {{ pair, i.e. remove everything before {{ . This improves the search.
-        search_text = search_text.replace(/.+{{/, "{{");
+        search_text = search_text.replace(/.+\{\{/u, "{{");
         if (search_text.contains("{{!")) {
             // An _unescaped_ variable is searched for.
             search_type = "unescaped-variable";

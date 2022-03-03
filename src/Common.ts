@@ -103,7 +103,7 @@ export function combineObjects(...objects: Object[]) {
 export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
-    const leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
+    const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
     let leading_slashes = leading_slashes_regexp.exec(path)[0];
 
     // 2. Run the original normalizePath()
@@ -114,8 +114,8 @@ export function normalizePath2(path: string) {
     if (isWindows()) {
         // The platform is Windows.
         // Convert / to \
-        path = path.replace(/\//g, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
-        leading_slashes = leading_slashes.replace(/\//g, "\\"); // Same here.
+        path = path.replace(/\//gu, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
+        leading_slashes = leading_slashes.replace(/\//gu, "\\"); // Same here.
     }
     // Now ensure that path still contains leading slashes (if there were any before calling normalizePath()).
     // Check that the path should have a similar set of leading slashes at the beginning. It can be at least "/" (on linux/Mac), or "\\" (on Windows when it's a network path), in theory even "///" or "\\\\\" whatever.
@@ -173,9 +173,9 @@ export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: st
 
 export function isInteger(value: string, allow_minus: boolean): boolean {
     if (allow_minus) {
-        return !!value.match(/^-?\d+$/);
+        return !!value.match(/^-?\d+$/u);
     } else {
-        return !!value.match(/^\d+$/);
+        return !!value.match(/^\d+$/u);
     }
 }
 

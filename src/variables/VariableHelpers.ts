@@ -116,7 +116,7 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
         let property_name: string = property_parts.shift();
 
         // Check if the property name is a negative numeric index.
-        if (property_name.match(/^-\d+$/)) {
+        if (property_name.match(/^-\d+$/u)) {
             // The property name is a negative number.
             // Check that yaml_object contains at least one element.
             const yaml_object_keys = Object.getOwnPropertyNames(yaml_object).filter(key => key !== "length"); // All _really custom_ yaml keys, not .length
@@ -124,7 +124,7 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
                 // Check if yaml_object happens to be an indexed list.
                 let is_indexed_list = true;
                 yaml_object_keys.forEach((key) => {
-                    if (!key.match(/^\d+$/)) {
+                    if (!key.match(/^\d+$/u)) {
                         // At least one non-numeric key was found, so consider the object not to be an indexed list.
                         is_indexed_list = false;
                     }
