@@ -10,6 +10,10 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
 
+### To be Fixed
+ - [Bug: Variable escaping corrupts four-byte unicode characters, e.g. emojis (#171)](https://github.com/Taitava/obsidian-shellcommands/issues/171).
+ - [Bug: Constent in 'Ask after execution' modal is some times clipped off (#172)](https://github.com/Taitava/obsidian-shellcommands/issues/172).
+
 ## [0.11.0] - 2022-02-26
 
 ### Added
