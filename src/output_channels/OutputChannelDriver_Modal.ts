@@ -8,6 +8,7 @@ import {OutputChannel, OutputStream} from "./OutputChannel";
 import SC_Plugin from "../main";
 import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {getSelectionFromTextarea} from "../Common";
+import {CmdOrCtrl} from "../Hotkeys";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Ask after execution";
@@ -120,7 +121,8 @@ class OutputModal extends Modal {
                 if (output_channel_driver.acceptsOutputStream(output_stream)) {
                     redirect_setting.addButton(button => button
                         .setButtonText(output_channel_driver.getTitle(output_stream))
-                        .onClick(() => {
+                        .setTooltip(CmdOrCtrl() + " + click to close the modal.")
+                        .onClick((event: MouseEvent) => {
                             // Redirect output to the selected driver
                             const output_streams: OutputStreams = {};
                             const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
@@ -130,7 +132,17 @@ class OutputModal extends Modal {
                             ;
                             output_channel_driver.initialize(this.plugin, this.t_shell_command, this.shell_command_parsing_result);
                             output_channel_driver.handle(output_streams, this.exit_code);
-                            textarea_element.focus(); // Bring the focus back to the textarea in order to show a possible highlight (=selection) again.
+
+                            // Finish
+                            if (event.ctrlKey) {
+                                // Special click, control key is pressed.
+                                // Close the modal.
+                                this.close();
+                            } else {
+                                // Normal click, control key is not pressed.
+                                // Do not close the modal.
+                                textarea_element.focus(); // Bring the focus back to the textarea in order to show a possible highlight (=selection) again.
+                            }
                         }),
                     );
                 }
