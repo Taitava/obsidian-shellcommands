@@ -80,6 +80,16 @@ export default class SC_Plugin extends Plugin {
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
 
+		// Load Prompts
+		loadPrompts(this, this.settings.prompts);
+
+		// Load CustomVariables
+		this.custom_variable_instances = [];
+		this.settings.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
+			this.custom_variable_instances[custom_variable_index] = new CustomVariableInstance(this, custom_variable_configuration, custom_variable_index);
+		});
+
+
 		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
 		for (const shell_command_id in shell_commands) {
@@ -496,16 +506,6 @@ export default class SC_Plugin extends Plugin {
 			await this.disablePlugin();
 			return false; // The plugin should not be used.
 		}
-
-		// Load Prompts
-		loadPrompts(this, this.settings.prompts);
-
-		// Load CustomVariables
-		this.custom_variable_instances = [];
-		this.settings.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
-			this.custom_variable_instances[custom_variable_index] = new CustomVariableInstance(this, custom_variable_configuration, custom_variable_index);
-		});
-
 		return true; // Settings are loaded and the plugin can be used.
 	}
 
