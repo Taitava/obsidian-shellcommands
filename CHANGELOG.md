@@ -14,7 +14,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### Fixed
  - [Bug: Variable escaping corrupts four-byte unicode characters, e.g. emojis (#171)](https://github.com/Taitava/obsidian-shellcommands/issues/171).
- - [Bug: Constent in 'Ask after execution' modal is some times clipped off (#172)](https://github.com/Taitava/obsidian-shellcommands/issues/172).
+ - [Bug: Content in 'Ask after execution' modal is some times clipped off (#172)](https://github.com/Taitava/obsidian-shellcommands/issues/172).
 
 ## [0.11.0] - 2022-02-26
 
