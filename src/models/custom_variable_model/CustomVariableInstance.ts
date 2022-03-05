@@ -1,10 +1,10 @@
 import {Setting} from "obsidian";
-import {SC_MainSettings} from "../settings/SC_MainSettings";
-import SC_Plugin from "../main";
+import {SC_MainSettings} from "../../settings/SC_MainSettings";
+import SC_Plugin from "../../main";
 import {
     Model,
     ParentModelOneToManyRelation,
-} from "../imports";
+} from "../../imports";
 
 export class CustomVariableInstance extends Model<CustomVariableConfiguration, SC_MainSettings> {
     protected readonly model_singular_name = "Custom variable";
