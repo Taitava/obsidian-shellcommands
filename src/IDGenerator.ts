@@ -9,6 +9,10 @@ export class IDGenerator {
         this.current_ids = ids;
     }
 
+    public addCurrentID(id: string) {
+        this.current_ids.push(id);
+    }
+
     public generateID(): string {
         let generated_id: string = "";
         while (generated_id.length < this.min_length || this.isIDReserved(generated_id)) {

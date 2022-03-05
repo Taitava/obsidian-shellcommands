@@ -20,6 +20,8 @@ import {TShellCommand} from "../TShellCommand";
 import {
     createPromptSettingsField,
     CustomVariableInstance,
+    CustomVariableModel,
+    getModel,
     getPrompts,
     newPrompt,
     Prompt,
@@ -215,8 +217,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             //     }),
             // )
         ;
+        const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
-            custom_variable_instance.createSettingFields(container_element);
+            custom_variable_model.createSettingFields(custom_variable_instance, container_element);
         });
 
 
