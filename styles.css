@@ -18,6 +18,10 @@
     border-top: none;
 }
 
+.SC-wrappable {
+    white-space: normal;
+}
+
 /*
  * SHELL COMMAND SETTING CONTAINERS
  */

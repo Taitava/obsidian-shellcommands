@@ -54,7 +54,7 @@ class OutputModal extends Modal {
         this.titleEl.innerText = heading ? heading : "Shell command output";
 
         // Shell command preview
-        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin"}}); // no margin so that exit code will be close.
+        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin SC-wrappable"}}); // no margin so that exit code will be close.
 
         // Exit code
         if (this.exit_code !== null) {
