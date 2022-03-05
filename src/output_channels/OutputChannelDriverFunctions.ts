@@ -22,12 +22,12 @@ const output_channel_drivers: {
 } = {};
 
 // Register output channel drivers
-registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
 registerOutputChannelDriver("notification", new OutputChannelDriver_Notification());
 registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
 registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
 registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
 registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
+registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
