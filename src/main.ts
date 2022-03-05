@@ -34,6 +34,7 @@ import {SC_Event} from "./events/SC_Event";
 import {
 	CustomVariableConfiguration,
 	CustomVariableInstance,
+	introduceModels,
 	loadPrompts,
 	Preaction,
 } from "./imports";
@@ -76,6 +77,9 @@ export default class SC_Plugin extends Plugin {
 
 		// Run possible configuration migrations
 		await RunMigrations(this);
+
+		// Define models
+		introduceModels(this);
 
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();

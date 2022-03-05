@@ -12,7 +12,9 @@
 export * from "./IDGenerator";
 
 // Models
+export * from "./models/Instance"; // Must come before child instance classes
 export * from "./models/Model"; // Must come before child model classes
+export * from "./models/models";
 export * from "./models/custom_variable_model/CustomVariableInstance";
 
 // Preactions
