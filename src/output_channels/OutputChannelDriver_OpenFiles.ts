@@ -34,7 +34,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             // Future compatibility: Ensure there is no newline characters in-between the output.
             // This is to reserve newline usage to future when this output channel will support opening multiple files at once.
             // TODO: Remove this check when multi-file support is implemented.
-            if (file_definition.match(/[\r\n]/)) {
+            if (file_definition.match(/[\r\n]/u)) {
                 // Bad, the output contains a newline.
                 this.plugin.newErrors([
                     "Cannot open file: The output contains linebreaks: " + file_definition,
