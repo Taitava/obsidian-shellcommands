@@ -51,7 +51,7 @@ class OutputModal extends SC_Modal {
         this.titleEl.innerText = heading ? heading : "Shell command output";  // TODO: Use this.setTitle() instead.
 
         // Shell command preview
-        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin"}}); // no margin so that exit code will be close.
+        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin SC-wrappable"}}); // no margin so that exit code will be close.
 
         // Exit code
         if (this.exit_code !== null) {
@@ -102,6 +102,7 @@ class OutputModal extends SC_Modal {
         const redirect_setting = new Setting(this.modalEl)
             .setDesc("Redirect:")
             .setClass("SC-no-top-border")
+            .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
         ;
         const excluded_output_channels: OutputChannel[] = [
             "notification", // Would not make sense to create a temporary balloon for text that is already visible.

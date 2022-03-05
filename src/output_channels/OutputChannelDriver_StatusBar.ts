@@ -19,7 +19,7 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
         status_bar_element.setAttr("aria-label", stdout_and_stderr);
 
         // Show last line permanently.
-        const output_message_lines = stdout_and_stderr.split(/(\r\n|\r|\n)/);
+        const output_message_lines = stdout_and_stderr.split(/(\r\n|\r|\n)/u);
         const last_output_line = output_message_lines[output_message_lines.length - 1];
         status_bar_element.setText(last_output_line);
     }

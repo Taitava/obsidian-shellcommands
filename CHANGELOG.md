@@ -10,6 +10,12 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
 
+## [0.11.1] - 2022-03-05
+
+### Fixed
+ - [Bug: Variable escaping corrupts four-byte unicode characters, e.g. emojis (#171)](https://github.com/Taitava/obsidian-shellcommands/issues/171).
+ - [Bug: Content in 'Ask after execution' modal is some times clipped off (#172)](https://github.com/Taitava/obsidian-shellcommands/issues/172).
+
 ## [0.11.0] - 2022-02-26
 
 ### Added
@@ -203,7 +209,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...HEAD
+[0.11.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.8.0...0.9.0
