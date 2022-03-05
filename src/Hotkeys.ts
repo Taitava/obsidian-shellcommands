@@ -32,10 +32,14 @@ export function HotkeyToString(hotkey: Hotkey) {
         let modifier_key = modifier.toString(); // This is one of 'Mod' | 'Ctrl' | 'Meta' | 'Shift' | 'Alt'
         if ("Mod" === modifier_key) {
             // Change "Mod" to something more meaningful.
-            modifier_key = Platform.isMacOS ? "Cmd" : "Ctrl"; // isMacOS should also be true if the device is iPhone/iPad. Can be handy if this plugin gets mobile support some day.
+            modifier_key = CmdOrCtrl(); // isMacOS should also be true if the device is iPhone/iPad. Can be handy if this plugin gets mobile support some day.
         }
         keys.push(modifier_key);
     });
     keys.push(hotkey.key); // This is something like a letter ('A', 'B' etc) or space/enter/whatever.
     return keys.join(" + ");
+}
+
+export function CmdOrCtrl(): "Cmd" | "Ctrl" {
+    return Platform.isMacOS ? "Cmd" : "Ctrl"
 }
