@@ -105,6 +105,7 @@ class OutputModal extends Modal {
         const redirect_setting = new Setting(this.modalEl)
             .setDesc("Redirect:")
             .setClass("SC-no-top-border")
+            .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
         ;
         const excluded_output_channels: OutputChannel[] = [
             "notification", // Would not make sense to create a temporary balloon for text that is already visible.
