@@ -5,6 +5,7 @@ import {
 } from "../../imports";
 import {Setting} from "obsidian";
 import SC_Plugin from "../../main";
+import {randomInteger} from "../../Common";
 
 export function createPromptFieldSettingField(plugin: SC_Plugin, container_element: HTMLElement, prompt: Prompt, prompt_field_index: number, prompt_field_configuration: PromptFieldConfiguration) {
     const label_placeholders = [
@@ -18,16 +19,17 @@ export function createPromptFieldSettingField(plugin: SC_Plugin, container_eleme
         "What is the purpose of life?",
     ];
     const default_value_placeholders = [
-        "Bond, James Bond",
-        "Very big, and still expanding",
-        "Infinite",
-        String(Math.floor(Math.random() * 10)),
-        "USA for Africa: We are the world",
-        "A blue deeper than ocean",
-        "Thousands",
-        "Thinking",
+        ["Bond, James Bond", "John Doe", "Jane Doe", "Mr. Bean"],
+        ["Very big, and still expanding", "93 billion light-years"],
+        ["Infinite", "Too long to wait for"],
+        [String(randomInteger(0, 9)), "I don't have one"],
+        ["We are the world (USA for Africa)", "Heal the world (Michael Jackson)", "Imagine (John Lennon)"],
+        ["Blue as deep as an ocean", "Red as love", "Grass-green", "Snow-white"],
+        ["Thousands", "Many", "Countless", "None"],
+        ["Thinking", "Being a being", "42"],
     ];
-    const label_placeholder_index: number = Math.floor(Math.random() * label_placeholders.length);
+    const label_placeholder_index: number = randomInteger(0, label_placeholders.length - 1);
+    const default_value_placeholders_subset: string[] = default_value_placeholders[label_placeholder_index];
     const setting_group: PromptFieldSettingGroup = {
         heading_setting: new Setting(container_element)
             .setName("") // This will be set down below.
@@ -60,7 +62,10 @@ export function createPromptFieldSettingField(plugin: SC_Plugin, container_eleme
             .setDesc("Can be static text, {{variables}} or a combination of both.")
             .addText(text => text
                 .setValue(prompt_field_configuration.default_value)
-                .setPlaceholder(default_value_placeholders[label_placeholder_index])
+                .setPlaceholder(
+                    prompt_field_configuration.label ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
+                    : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
+                )
                 .onChange(async (new_default_value: string) => {
                     prompt_field_configuration.default_value = new_default_value;
                     await plugin.saveSettings();

@@ -219,3 +219,8 @@ export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, 
     const selected_text = textarea_element.value.substring(textarea_element.selectionStart, textarea_element.selectionEnd);
     return "" === selected_text && return_null_if_empty ? null : selected_text;
 }
+
+export function randomInteger(min: number, max: number) {
+    const range = max - min + 1;
+    return min + Math.floor(Math.random() * range);
+}
