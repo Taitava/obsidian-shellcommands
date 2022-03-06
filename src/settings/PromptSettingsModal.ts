@@ -1,11 +1,12 @@
 import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
+import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
-    createPromptFieldSettingField,
-    getDefaultPrompFieldConfiguration,
+    getModel,
     Prompt,
-    PromptFieldConfiguration,
+    PromptField,
+    PromptFieldModel,
 } from "../imports";
 
 export class PromptSettingsModal extends SC_Modal {
@@ -50,24 +51,13 @@ export class PromptSettingsModal extends SC_Modal {
         ;
 
         // Fields
+        const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
         const fields_container = container_element.createDiv();
-        this.prompt.getConfiguration().fields.forEach((prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number) => {
-            createPromptFieldSettingField(this.plugin, fields_container, this.prompt, prompt_field_index, prompt_field_configuration);
+        this.prompt.prompt_fields.forEach((prompt_field: PromptField) => {
+            prompt_field_model.createSettingFields(prompt_field, fields_container);
         });
 
         // New field button
-        new Setting(container_element)
-            .addButton(button => button
-                .setButtonText("New field")
-                .onClick(async () => {
-                    // Create a new prompt field
-                    const prompt_field_configuration = getDefaultPrompFieldConfiguration();
-                    this.prompt.getConfiguration().fields.push(prompt_field_configuration);
-                    await this.plugin.saveSettings();
-                    const prompt_field_index = this.prompt.getConfiguration().fields.length - 1;
-                    createPromptFieldSettingField(this.plugin, fields_container, this.prompt, prompt_field_index, prompt_field_configuration);
-                }),
-            )
-        ;
+        createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt.configuration);
     }
 }

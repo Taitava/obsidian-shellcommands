@@ -1,8 +1,5 @@
 import {
-    CustomVariableConfiguration,
-    CustomVariableInstance,
     IDGenerator,
-    Instance,
     Model,
     ParentModelOneToManyRelation,
     Prompt,
@@ -24,7 +21,7 @@ export class PromptModel extends Model {
         return {
             type: "one-to-many",
             key: "prompts",
-            index: prompt.prompt_index as number, // TODO: Change the relation so that instead of defining 'index', would be defined an 'id'.
+            index: prompt.prompt_index as number, // TODO: Change the relation so that instead of defining 'index', would be defined an 'id'. But needs to take into account that PromptField uses an ID-less relation.
         };
     }
 

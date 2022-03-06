@@ -3,7 +3,9 @@ import {TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {
-    Prompt
+    Prompt,
+    PromptField,
+    PromptFieldMap,
 } from "../../imports";
 
 export class PromptModal extends SC_Modal {
@@ -15,7 +17,7 @@ export class PromptModal extends SC_Modal {
 
     constructor(
         plugin: SC_Plugin,
-        private readonly content_container_element: HTMLElement,
+        private readonly prompt_fields: PromptFieldMap,
         private readonly t_shell_command: TShellCommand,
         private readonly prompt: Prompt,
 
@@ -43,8 +45,10 @@ export class PromptModal extends SC_Modal {
             this.modalEl.createEl("hr");
         }
 
-        // Add content
-        this.modalEl.appendChild(this.content_container_element);
+        // Create fields
+        this.prompt_fields.forEach((prompt_field: PromptField) => {
+            prompt_field.createField(this.modalEl);
+        });
 
         // Execute button
         new Setting(this.modalEl)

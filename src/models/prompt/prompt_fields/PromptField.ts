@@ -1,20 +1,25 @@
+import {Setting} from "obsidian";
 import {
-    PromptFieldConfiguration,
+    Instance,
+    PromptConfiguration,
+    PromptFieldModel,
 } from "../../../imports";
 
-export abstract class PromptField {
+export abstract class PromptField extends Instance {
 
     protected value: string | number;
 
     constructor(
-        protected readonly container_element: HTMLElement,
-        protected readonly configuration: PromptFieldConfiguration,
+        protected model: PromptFieldModel,
+        public parent_configuration: PromptConfiguration,
+        public configuration: PromptFieldConfiguration,
+        public prompt_field_index: keyof PromptConfiguration["fields"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
+        super(model, configuration, parent_configuration);
         this.storeValue(this.configuration.default_value);
-        this.createField();
     }
 
-    protected abstract createField(): void;
+    public abstract createField(container_element: HTMLElement): Setting;
 
     public getValue() {
         return this.value;
@@ -40,4 +45,14 @@ export abstract class PromptField {
     }
 
     protected abstract isFilled(): boolean;
+}
+
+export interface PromptFieldConfiguration {
+    // type: "text"; // TODO: Uncomment when implementing more values than just "text". No need to decide the value "text" now, it can be changed to "single-line-text" or something else, too.
+    label: string;
+    // TODO: Add 'description'
+    default_value: string;
+    //  TODO: Add 'placeholder'.
+    target_variable: string;
+    required: boolean;
 }

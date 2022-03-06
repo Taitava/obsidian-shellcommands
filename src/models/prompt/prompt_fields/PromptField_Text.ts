@@ -7,8 +7,8 @@ export class PromptField_Text extends PromptField {
 
     protected value: string;
 
-    protected createField() {
-        new Setting(this.container_element)
+    public createField(container_element: HTMLElement) {
+        return new Setting(container_element)
             .setName(this.configuration.label)
             .addText(text => text
                 .setValue(this.configuration.default_value)

@@ -2,27 +2,30 @@ import SC_Plugin from "../../main";
 import {TShellCommand} from "../../TShellCommand";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {
-    createPromptField,
+    getModel,
     Instance,
     PromptField,
     PromptFieldConfiguration,
+    PromptFieldMap,
+    PromptFieldModel,
     PromptModal,
     PromptModel,
 } from "../../imports";
 
 export class Prompt extends Instance {
 
-    private prompt_fields: PromptField[] = [];
+    public prompt_fields: PromptFieldMap = new PromptFieldMap();
 
     constructor(
         protected model: PromptModel,
         protected plugin: SC_Plugin,
-        configuration: PromptConfiguration,
-        parent_configuration: SC_MainSettings,
+        public configuration: PromptConfiguration,
+        public parent_configuration: SC_MainSettings,
         public prompt_index: keyof SC_MainSettings["prompts"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
         super(model, configuration, parent_configuration);
         this.model.id_generator.addCurrentID(configuration.id);
+        this.createFields();
     }
 
 
@@ -39,11 +42,9 @@ export class Prompt extends Instance {
     }
 
     public openPrompt(t_shell_command: TShellCommand): Promise<void> {
-        const fields_container_element = document.createElement("div");
-        this.createFields(fields_container_element);
         const modal = new PromptModal(
             this.plugin,
-            fields_container_element,
+            this.prompt_fields,
             t_shell_command,
             this,
             () => {return this.validateFields();}
@@ -55,13 +56,9 @@ export class Prompt extends Instance {
     /**
      * Creates PromptField instances, NOT setting fields!
      */
-    private createFields(container_element: HTMLElement) {
-        this.prompt_fields = [];
-        this.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
-            this.prompt_fields.push(
-                createPromptField(container_element, field_configuration)
-            );
-        });
+    private createFields() {
+        const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
+        this.prompt_fields = prompt_field_model.createInstances(this.configuration)
     }
 
     /**
