@@ -40,8 +40,7 @@ export class CustomVariableModel extends Model {
         return custom_variable_instances;
     }
 
-    public newInstance(): CustomVariableInstance {
-        const parent_configuration: SC_MainSettings = this.plugin.settings;
+    public newInstance(parent_configuration: SC_MainSettings): CustomVariableInstance {
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
         const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
         parent_configuration.custom_variables.push(custom_variable_configuration);

@@ -221,7 +221,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
-        createNewModelInstanceButton<CustomVariableModel>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container);
+        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings);
 
 
         // Built-in variable instructions
@@ -289,11 +289,11 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getPrompts().forEach((prompt: Prompt) => {
             prompt_model.createSettingFields(prompt, prompts_container_element);
         });
-        new Setting(container_element)
+        new Setting(container_element) // TODO: Change to use createNewModelInstanceButton().
             .addButton(button => button
                 .setButtonText("New prompt")
                 .onClick(async () => {
-                    const prompt = prompt_model.newInstance();
+                    const prompt = prompt_model.newInstance(this.plugin.settings);
                     await this.plugin.saveSettings();
                     prompt_model.createSettingFields(prompt, prompts_container_element);
                     prompt_model.openSettingsModal(prompt); // Open the prompt settings modal, as the user will probably want to configure it now anyway.

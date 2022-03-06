@@ -35,7 +35,7 @@ export abstract class Model {
     /**
      * Creates a new instance and adds its configuration to the parent configuration.
      */
-    public abstract newInstance(): Instance;
+    public abstract newInstance(parent_configuration: unknown): Instance;
 
     public createSettingFields(instance: Instance, container_element: HTMLElement) {
         const main_setting_field = this._createSettingFields(instance, container_element);

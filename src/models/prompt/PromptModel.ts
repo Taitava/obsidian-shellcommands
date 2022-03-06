@@ -38,14 +38,13 @@ export class PromptModel extends Model {
         return prompts;
     }
 
-    public newInstance(): Prompt {
+    public newInstance(parent_configuration: SC_MainSettings): Prompt {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration and generate an ID
         const prompt_configuration = this._getDefaultConfiguration();
 
         // Instantiate a Prompt
-        const parent_configuration: SC_MainSettings = this.plugin.settings;
         const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings, parent_configuration.prompts.length);
 
         // Store the configuration into plugin's settings
