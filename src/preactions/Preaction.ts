@@ -1,5 +1,5 @@
 import SC_Plugin from "../main";
-import {ParsingResult} from "../TShellCommand";
+import {TShellCommand} from "../TShellCommand";
 import {
     Preaction_Prompt,
     Preaction_Prompt_Configuration,
@@ -10,7 +10,7 @@ export abstract class Preaction {
     protected constructor(
         protected readonly plugin: SC_Plugin,
         protected readonly configuration: PreactionConfiguration,
-        protected readonly shell_command_parsing_result: ParsingResult,
+        protected readonly t_shell_command: TShellCommand,
     ) {}
 
     /**
@@ -31,10 +31,10 @@ export abstract class Preaction {
     protected abstract getDefaultConfiguration(): PreactionConfiguration;
 }
 
-export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, shell_command_parsing_result: ParsingResult): Preaction {
+export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, t_shell_command: TShellCommand): Preaction {
     switch (preaction_configuration.preaction_code) {
         case "prompt":
-            return new Preaction_Prompt(plugin, (preaction_configuration as Preaction_Prompt_Configuration), shell_command_parsing_result);
+            return new Preaction_Prompt(plugin, (preaction_configuration as Preaction_Prompt_Configuration), t_shell_command);
     }
 }
 

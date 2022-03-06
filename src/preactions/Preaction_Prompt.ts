@@ -5,20 +5,20 @@ import {
     Prompt,
 } from "../imports";
 import SC_Plugin from "../main";
-import {ParsingResult} from "../TShellCommand";
+import {TShellCommand} from "../TShellCommand";
 
 export class Preaction_Prompt extends Preaction {
 
     constructor(
         plugin: SC_Plugin,
         protected readonly configuration: Preaction_Prompt_Configuration,
-        shell_command_parsing_result: ParsingResult,
+        t_shell_command: TShellCommand,
     ) {
-        super(plugin, configuration,shell_command_parsing_result);
+        super(plugin, configuration, t_shell_command);
     }
 
     protected doPreaction(): Promise<void> {
-        return this.getPrompt().openPrompt();
+        return this.getPrompt().openPrompt(this.t_shell_command);
     }
 
     protected getDefaultConfiguration(): Preaction_Prompt_Configuration {

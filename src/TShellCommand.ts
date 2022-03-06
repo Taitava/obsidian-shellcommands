@@ -349,7 +349,7 @@ export class TShellCommand {
             if (preaction_configuration.enabled) {
                 // Yes, it's enabled.
                 // Instantiate the preaction.
-                preactions.push(createPreaction(this.plugin, preaction_configuration, shell_command_parsing_result));
+                preactions.push(createPreaction(this.plugin, preaction_configuration, this));
             }
         });
         return preactions;
