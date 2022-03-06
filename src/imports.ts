@@ -30,12 +30,11 @@ export * from "./models/prompt/prompt_fields/PromptField";
 export * from "./models/prompt/prompt_fields/PromptField_Text";
 export * from "./models/prompt/prompt_fields/PromptFieldConfiguration";
 export * from "./models/prompt/Prompt";
-export * from "./models/prompt/PromptFunctions";
 export * from "./models/prompt/PromptModal";
+export * from "./models/prompt/PromptModel";
 
 // Settings
 export * from "./settings/setting_elements/createPromptFieldSettingField";
-export * from "./settings/setting_elements/createPromptSettingsField";
 export * from "./settings/DeletePromptFieldModal";
 export * from "./settings/DeletePromptModal";
 export * from "./settings/PromptSettingsModal";

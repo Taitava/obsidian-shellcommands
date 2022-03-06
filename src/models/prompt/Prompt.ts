@@ -1,21 +1,30 @@
 import SC_Plugin from "../../main";
 import {TShellCommand} from "../../TShellCommand";
+import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {
     createPromptField,
+    Instance,
     PromptField,
     PromptFieldConfiguration,
     PromptModal,
-    PromptSettingsModal,
+    PromptModel,
 } from "../../imports";
 
-export class Prompt {
+export class Prompt extends Instance {
 
     private prompt_fields: PromptField[] = [];
 
     constructor(
-        private plugin: SC_Plugin,
-        private configuration: PromptConfiguration,
-    ) {}
+        protected model: PromptModel,
+        protected plugin: SC_Plugin,
+        configuration: PromptConfiguration,
+        parent_configuration: SC_MainSettings,
+        public prompt_index: keyof SC_MainSettings["prompts"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
+    ) {
+        super(model, configuration, parent_configuration);
+        this.model.id_generator.addCurrentID(configuration.id);
+    }
+
 
     public getID() {
         return this.configuration.id;
@@ -43,11 +52,9 @@ export class Prompt {
         return modal.promise;
     }
 
-    public openSettingsModal() {
-        const modal = new PromptSettingsModal(this.plugin, this);
-        modal.open();
-    }
-
+    /**
+     * Creates PromptField instances, NOT setting fields!
+     */
     private createFields(container_element: HTMLElement) {
         this.prompt_fields = [];
         this.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
@@ -57,6 +64,9 @@ export class Prompt {
         });
     }
 
+    /**
+     * Validates values in PromptField instances, NOT setting fields!
+     */
     private validateFields() {
         let valid = true;
         this.prompt_fields.forEach((prompt_field: PromptField) => {

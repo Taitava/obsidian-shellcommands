@@ -36,8 +36,9 @@ import {
 	CustomVariableModel,
 	getModel,
 	introduceModels,
-	loadPrompts,
 	Preaction,
+	PromptMap,
+	PromptModel,
 } from "./imports";
 
 export default class SC_Plugin extends Plugin {
@@ -50,6 +51,7 @@ export default class SC_Plugin extends Plugin {
 	public settings: SC_MainSettings; // TODO: Make private and add a getter.
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
+	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstance[];
 
 	/**
@@ -86,7 +88,8 @@ export default class SC_Plugin extends Plugin {
 		this.loadTShellCommands();
 
 		// Load Prompts
-		loadPrompts(this, this.settings.prompts);
+		const prompt_model = getModel<PromptModel>(PromptModel.name);
+		this.prompts = prompt_model.createInstances(this.settings);
 
 		// Load CustomVariables
 		const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
@@ -124,6 +127,10 @@ export default class SC_Plugin extends Plugin {
 
 	public getTShellCommands() {
 		return this.t_shell_commands;
+	}
+
+	public getPrompts() {
+		return this.prompts;
 	}
 
 	public getCustomVariableInstances(): CustomVariableInstance[] {

@@ -1,5 +1,4 @@
 import {
-    getPromptById,
     Preaction,
     PreactionConfiguration,
     Prompt,
@@ -30,7 +29,7 @@ export class Preaction_Prompt extends Preaction {
     }
 
     private getPrompt(): Prompt {
-        return getPromptById(this.configuration.prompt_id);
+        return this.plugin.getPrompts().get(this.configuration.prompt_id);
     }
 }
 

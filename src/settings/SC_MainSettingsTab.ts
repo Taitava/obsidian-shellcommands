@@ -18,13 +18,11 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {
-    createPromptSettingsField,
     CustomVariableInstance,
     CustomVariableModel,
     getModel,
-    getPrompts,
-    newPrompt,
     Prompt,
+    PromptModel
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 
@@ -282,22 +280,23 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     private tabPreactions(container_element: HTMLElement) {
 
         // Prompts
+        const prompt_model = getModel<PromptModel>(PromptModel.name);
         new Setting(container_element)
             .setName("Prompts")
             .setHeading() // Make the "Prompts" text to appear as a heading.
         ;
         const prompts_container_element = container_element.createDiv();
-        getPrompts().forEach((prompt: Prompt) => {
-            createPromptSettingsField(this.plugin, prompts_container_element, prompt);
+        this.plugin.getPrompts().forEach((prompt: Prompt) => {
+            prompt_model.createSettingFields(prompt, prompts_container_element);
         });
         new Setting(container_element)
             .addButton(button => button
                 .setButtonText("New prompt")
                 .onClick(async () => {
-                    const prompt = newPrompt(this.plugin);
+                    const prompt = prompt_model.newInstance();
                     await this.plugin.saveSettings();
-                    createPromptSettingsField(this.plugin, prompts_container_element, prompt);
-                    prompt.openSettingsModal(); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
+                    prompt_model.createSettingFields(prompt, prompts_container_element);
+                    prompt_model.openSettingsModal(prompt); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
                 }),
             )
         ;

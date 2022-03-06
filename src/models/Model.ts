@@ -28,9 +28,9 @@ export abstract class Model {
 
     /**
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
-     * @param parent_configuration
+     * TODO: Rename this method to loadInstances().
      */
-    public abstract createInstances(parent_configuration: unknown): object[];
+    public abstract createInstances(parent_configuration: unknown): object[] | Map<string, Instance>; // TODO: Change so that only Map is allowed.
 
     /**
      * Creates a new instance and adds its configuration to the parent configuration.
