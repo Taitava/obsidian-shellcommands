@@ -40,6 +40,15 @@ export class CustomVariableModel extends Model {
         return custom_variable_instances;
     }
 
+    public newInstance(): CustomVariableInstance {
+        const parent_configuration: SC_MainSettings = this.plugin.settings;
+        const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
+        const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
+        parent_configuration.custom_variables.push(custom_variable_configuration);
+        return custom_variable_instance;
+        // TODO: Move this logic to the base Model class.
+    }
+
     protected _createSettingFields(instance: CustomVariableInstance, container_element: HTMLElement): Setting {
         return new Setting(container_element)
             .setName("Variable name")
@@ -48,6 +57,8 @@ export class CustomVariableModel extends Model {
                 .setValue(instance.configuration.name)
                 .onChange(async (new_name: string) => {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
+                    // TODO: If another custom variable has the same name, display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
+                    // TODO: If the name does not begin with {{_ and end with }} , display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
                     instance.configuration.name = new_name;
                     await this.plugin.saveSettings();
                 }),
@@ -57,7 +68,7 @@ export class CustomVariableModel extends Model {
     protected _getDefaultConfiguration(): CustomVariableConfiguration {
         return {
             id: this.id_generator.generateID(),
-            name: "{{_}}",
+            name: "{{_}}", // TODO: If the name {{_}} is already in use, append a sequential number, e.g. {{_1}}, {{_2}} etc.
         }
     }
 }

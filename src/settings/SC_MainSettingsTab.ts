@@ -26,6 +26,7 @@ import {
     newPrompt,
     Prompt,
 } from "../imports";
+import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -218,9 +219,11 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             // )
         ;
         const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
+        const custom_variable_container = container_element.createDiv();
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
-            custom_variable_model.createSettingFields(custom_variable_instance, container_element);
+            custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
+        createNewModelInstanceButton<CustomVariableModel>(this.plugin, "CustomVariableModel", container_element, custom_variable_container);
 
 
         // Built-in variable instructions
