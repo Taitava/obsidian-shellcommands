@@ -173,14 +173,14 @@ class OutputModal extends Modal {
                         redirect_button.setTooltip(
                             `Normal click OR ${CmdOrCtrl()} + ${OutputModal.toHotkeyString(hotkey_counter)}: Redirect to ${output_channel_name.toLocaleLowerCase()}.`
                             + EOL + EOL +
-                            CmdOrCtrl() + ` + click OR ${CmdOrCtrl()} + Shift + ${OutputModal.toHotkeyString(hotkey_counter)}: Redirect and close the modal.` // If you change this, remember to change the one below, too!
+                            CmdOrCtrl() + ` + click OR ${CmdOrCtrl()} + Alt + ${OutputModal.toHotkeyString(hotkey_counter)}: Redirect and close the modal.` // If you change this, remember to change the one below, too!
                         );
 
                         // 1. hotkey: Ctrl/Cmd + number: handle output
                         this.scope.register(["Ctrl"], OutputModal.toHotkeyString(hotkey_counter), handle_output);
 
-                        // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
-                        this.scope.register(["Ctrl", "Shift"], OutputModal.toHotkeyString(hotkey_counter), () => {
+                        // 2. hotkey: Ctrl/Cmd + Alt + number: handle output and close the modal.
+                        this.scope.register(["Ctrl", "Alt"], OutputModal.toHotkeyString(hotkey_counter), () => {
                             handle_output();
                             this.close();
                         });
