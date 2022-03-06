@@ -17,6 +17,17 @@ export function createPromptFieldSettingField(plugin: SC_Plugin, container_eleme
         "How many books have you read?",
         "What is the purpose of life?",
     ];
+    const default_value_placeholders = [
+        "Bond, James Bond",
+        "Very big, and still expanding",
+        "Infinite",
+        String(Math.floor(Math.random() * 10)),
+        "USA for Africa: We are the world",
+        "A blue deeper than ocean",
+        "Thousands",
+        "Thinking",
+    ];
+    const label_placeholder_index: number = Math.floor(Math.random() * label_placeholders.length);
     const setting_group: PromptFieldSettingGroup = {
         heading_setting: new Setting(container_element)
             .setName("") // This will be set down below.
@@ -36,7 +47,7 @@ export function createPromptFieldSettingField(plugin: SC_Plugin, container_eleme
             .setDesc("Displayed in the prompt.")
             .addText(text => text
                 .setValue(prompt_field_configuration.label)
-                .setPlaceholder(label_placeholders[Math.floor(Math.random() * label_placeholders.length)])
+                .setPlaceholder(label_placeholders[label_placeholder_index])
                 .onChange(async (new_label: string) => {
                     prompt_field_configuration.label = new_label;
                     _update_heading()
@@ -49,7 +60,7 @@ export function createPromptFieldSettingField(plugin: SC_Plugin, container_eleme
             .setDesc("Can be static text, {{variables}} or a combination of both.")
             .addText(text => text
                 .setValue(prompt_field_configuration.default_value)
-                .setPlaceholder("")
+                .setPlaceholder(default_value_placeholders[label_placeholder_index])
                 .onChange(async (new_default_value: string) => {
                     prompt_field_configuration.default_value = new_default_value;
                     await plugin.saveSettings();
