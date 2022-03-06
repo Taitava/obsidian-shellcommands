@@ -164,6 +164,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
 
     // Iterate autocomplete item groups
     const group_names = Object.getOwnPropertyNames(yaml);
+    const error_messages: string[] = [];
     group_names.forEach((group_name: string) => {
         const group_items = yaml[group_name];
         const group_item_values = Object.getOwnPropertyNames(group_items);
@@ -172,7 +173,8 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
         group_item_values.forEach((autocomplete_item_value: string) => {
             const autocomplete_item_label = group_items[autocomplete_item_value];
             if (typeof autocomplete_item_label !== "string") {
-                return "Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + typeof autocomplete_item_label;
+                error_messages.push("Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + autocomplete_item_label + " is a " + typeof autocomplete_item_label + ", but it should be a string.");
+                return;
             }
 
             // Determine a correct type for the item
@@ -201,6 +203,10 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
             }
         });
     });
+    if (error_messages.length > 0) {
+        // Something failed
+        return error_messages.join("; ");
+    }
 
     // All ok
     return true;

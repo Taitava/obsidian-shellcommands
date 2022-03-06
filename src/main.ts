@@ -155,7 +155,7 @@ export default class SC_Plugin extends Plugin {
 			id: this.generateObsidianCommandId(shell_command_id),
 			name: generateObsidianCommandName(this, t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
-			checkCallback: (is_opening_command_palette) => {
+			checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
 				if (is_opening_command_palette) {
 					// The user is currently opening the command palette.
 
@@ -193,7 +193,7 @@ export default class SC_Plugin extends Plugin {
 				} else {
 					// The user has instructed to execute the command.
 					executor(
-						this.cached_parsing_results[t_shell_command.getId()] // Can be undefined, if no preparsing was done. executor() will handle parsing then.
+						this.cached_parsing_results[t_shell_command.getId()], // Can be undefined, if no preparsing was done. executor() will handle parsing then.
 					);
 
 					// Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
@@ -204,6 +204,7 @@ export default class SC_Plugin extends Plugin {
 					// even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
 					// commands might be.
 					this.cached_parsing_results = {}; // Removes obsolete preparsed variables from all shell commands.
+					return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
 				}
 			}
 		};

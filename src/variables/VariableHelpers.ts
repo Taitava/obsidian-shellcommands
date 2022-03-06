@@ -9,7 +9,7 @@ import {App, getAllTags, TFile, TFolder} from "obsidian";
  * @param mode
  */
 export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "relative") {
-    switch (mode.toLowerCase()) {
+    switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
             return normalizePath2(getVaultAbsolutePath(app) + "/" + folder.path);
         case "relative":
@@ -32,7 +32,7 @@ export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "rel
  * @param mode
  */
 export function getFilePath(app: App, file: TFile, mode: "absolute" | "relative") {
-    switch (mode.toLowerCase()) {
+    switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
             return normalizePath2(getVaultAbsolutePath(app) + "/" + file.path);
         case "relative":

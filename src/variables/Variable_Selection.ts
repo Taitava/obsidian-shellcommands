@@ -42,8 +42,7 @@ export class Variable_Selection extends Variable{
                 }
                 return "";
             default:
-                Error("ShellCommandVariable_Selection: Unrecognised view mode: "+view_mode);
-                break;
+                throw new Error("ShellCommandVariable_Selection: Unrecognised view mode: " + view_mode);
         }
     }
 
