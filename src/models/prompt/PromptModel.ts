@@ -1,7 +1,6 @@
 import {
     CustomVariableConfiguration,
     CustomVariableInstance,
-    DeletePromptModal,
     IDGenerator,
     Instance,
     Model,
@@ -63,16 +62,6 @@ export class PromptModel extends Model {
                 .setButtonText("Configure")
                 .onClick(() => {
                     this.openSettingsModal(prompt);
-                }),
-            )
-            // Deletion icon
-            .addExtraButton(button => button
-                .setIcon("trash")
-                .setTooltip("Delete this prompt")
-                .onClick(() => {
-                    // Trash icon is clicked
-                    const modal = new DeletePromptModal(this.plugin, prompt, setting, container_element)
-                    modal.open();
                 }),
             )
         ;
