@@ -178,6 +178,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
         } else {
             // No, the file does not exist, and it may not be created.
             this.plugin.newError("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
+            return Promise.reject();
         }
     }
 
