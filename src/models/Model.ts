@@ -26,7 +26,16 @@ export abstract class Model {
         }
     }
 
+    /**
+     * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
+     * @param parent_configuration
+     */
     public abstract createInstances(parent_configuration: unknown): object[];
+
+    /**
+     * Creates a new instance and adds its configuration to the parent configuration.
+     */
+    public abstract newInstance(): Instance;
 
     public createSettingFields(instance: Instance, container_element: HTMLElement) {
         const main_setting_field = this._createSettingFields(instance, container_element);
