@@ -23,7 +23,7 @@ export class Preaction_Prompt extends Preaction {
 
     protected getDefaultConfiguration(): Preaction_Prompt_Configuration {
         return {
-            preaction_code: "prompt",
+            type: "prompt",
             enabled: false,
             prompt_id: "",
         };
@@ -35,6 +35,6 @@ export class Preaction_Prompt extends Preaction {
 }
 
 export interface Preaction_Prompt_Configuration extends PreactionConfiguration {
-    preaction_code: "prompt";
+    type: "prompt";
     prompt_id: string;
 }

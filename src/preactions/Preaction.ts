@@ -32,13 +32,13 @@ export abstract class Preaction {
 }
 
 export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, t_shell_command: TShellCommand): Preaction {
-    switch (preaction_configuration.preaction_code) {
+    switch (preaction_configuration.type) {
         case "prompt":
             return new Preaction_Prompt(plugin, (preaction_configuration as Preaction_Prompt_Configuration), t_shell_command);
     }
 }
 
 export interface PreactionConfiguration {
-    preaction_code: "prompt";
+    type: "prompt";
     enabled: boolean;
 }
