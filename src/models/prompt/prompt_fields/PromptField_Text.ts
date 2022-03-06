@@ -1,7 +1,7 @@
 import {Setting} from "obsidian";
 import {
     PromptField,
-} from "../../imports";
+} from "../../../imports";
 
 export class PromptField_Text extends PromptField {
 

@@ -1,12 +1,12 @@
-import SC_Plugin from "../main";
-import {TShellCommand} from "../TShellCommand";
+import SC_Plugin from "../../main";
+import {TShellCommand} from "../../TShellCommand";
 import {
     createPromptField,
     PromptField,
     PromptFieldConfiguration,
     PromptModal,
     PromptSettingsModal,
-} from "../imports";
+} from "../../imports";
 
 export class Prompt {
 

@@ -1,10 +1,10 @@
-import {SC_Modal} from "../SC_Modal";
-import {TShellCommand} from "../TShellCommand";
-import SC_Plugin from "../main";
+import {SC_Modal} from "../../SC_Modal";
+import {TShellCommand} from "../../TShellCommand";
+import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {
     Prompt
-} from "../imports";
+} from "../../imports";
 
 export class PromptModal extends SC_Modal {
 

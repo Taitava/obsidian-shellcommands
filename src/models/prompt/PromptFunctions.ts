@@ -1,9 +1,9 @@
-import SC_Plugin from "../main";
+import SC_Plugin from "../../main";
 import {
     IDGenerator,
     Prompt,
     PromptConfiguration,
-} from "../imports";
+} from "../../imports";
 
 const prompts: Prompt[] = [];
 

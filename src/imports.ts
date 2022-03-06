@@ -6,15 +6,17 @@
 
 
 
-// SECTIONS - Keep in alphabetical order!
+// SECTIONS - Add new stuff in alphabetical order, if possible!
 
 // Miscellaneous files in the same folder as imports.ts
 export * from "./IDGenerator";
 
-// Models
-export * from "./models/Instance"; // Must come before child instance classes
-export * from "./models/Model"; // Must come before child model classes
+// Models - must come before subclasses of Model and Instance
+export * from "./models/Instance";
+export * from "./models/Model";
 export * from "./models/models";
+
+// Custom variables
 export * from "./models/custom_variable/CustomVariableInstance";
 export * from "./models/custom_variable/CustomVariableModel";
 
@@ -23,13 +25,13 @@ export * from "./preactions/Preaction";
 export * from "./preactions/Preaction_Prompt";
 
 // Prompts
-export * from "./prompt/prompt_fields/createPromptField";
-export * from "./prompt/prompt_fields/PromptField";
-export * from "./prompt/prompt_fields/PromptField_Text";
-export * from "./prompt/prompt_fields/PromptFieldConfiguration";
-export * from "./prompt/Prompt";
-export * from "./prompt/PromptFunctions";
-export * from "./prompt/PromptModal";
+export * from "./models/prompt/prompt_fields/createPromptField";
+export * from "./models/prompt/prompt_fields/PromptField";
+export * from "./models/prompt/prompt_fields/PromptField_Text";
+export * from "./models/prompt/prompt_fields/PromptFieldConfiguration";
+export * from "./models/prompt/Prompt";
+export * from "./models/prompt/PromptFunctions";
+export * from "./models/prompt/PromptModal";
 
 // Settings
 export * from "./settings/setting_elements/createPromptFieldSettingField";
