@@ -61,6 +61,6 @@ export class PromptSettingsModal extends SC_Modal {
         });
 
         // New field button
-        createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt.configuration);
+        createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt);
     }
 }
