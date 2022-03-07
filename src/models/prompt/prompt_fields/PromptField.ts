@@ -1,6 +1,7 @@
 import {Setting} from "obsidian";
 import {
     Instance,
+    Prompt,
     PromptConfiguration,
     PromptFieldModel,
 } from "../../../imports";
@@ -11,11 +12,11 @@ export abstract class PromptField extends Instance {
 
     constructor(
         public model: PromptFieldModel,
-        public parent_configuration: PromptConfiguration,
+        public prompt: Prompt,
         public configuration: PromptFieldConfiguration,
         public prompt_field_index: keyof PromptConfiguration["fields"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
-        super(model, configuration, parent_configuration);
+        super(model, configuration, prompt.configuration);
         this.storeValue(this.configuration.default_value);
     }
 

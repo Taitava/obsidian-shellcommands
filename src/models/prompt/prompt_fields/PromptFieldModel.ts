@@ -3,7 +3,7 @@ import {randomInteger} from "../../../Common";
 import {
     Model,
     ParentModelOneToManyRelation,
-    PromptConfiguration,
+    Prompt,
     PromptField,
     PromptField_Text,
     PromptFieldConfiguration,
@@ -23,20 +23,20 @@ export class PromptFieldModel extends Model {
         };
     }
 
-    public createInstances(parent_configuration: PromptConfiguration): Map<number, PromptField> {
+    public createInstances(prompt: Prompt): Map<number, PromptField> {
         const prompt_fields = new PromptFieldMap;
         let index = 0;
-        parent_configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
+        prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
             prompt_fields.set( // TODO: Change to a Set instead of a Map. Then the index variable can be removed from this method.
                 index++, // 0-indexed
                 // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-                new PromptField_Text(this, parent_configuration, field_configuration, index), // TODO: Extract this to a separate method.
+                new PromptField_Text(this, prompt, field_configuration, index), // TODO: Extract this to a separate method.
             );
         });
         return prompt_fields;
     }
 
-    public newInstance(parent_configuration: PromptConfiguration): PromptField {
+    public newInstance(prompt: Prompt): PromptField {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration
@@ -44,10 +44,10 @@ export class PromptFieldModel extends Model {
 
         // Instantiate a PromptField
         // TODO: When implementing 'type', add different types here, e.g. PromptField_Integer in addition to PromptField_Text.
-        const prompt_field = new PromptField_Text(this, parent_configuration, prompt_field_configuration, parent_configuration.fields.length); // TODO: Extract this to a separate method.
+        const prompt_field = new PromptField_Text(this, prompt, prompt_field_configuration, prompt.configuration.fields.length); // TODO: Extract this to a separate method.
 
         // Store the configuration into the prompt's configuration
-        parent_configuration.fields.push(prompt_field_configuration);
+        prompt.configuration.fields.push(prompt_field_configuration);
 
         // Return the PromptField
         return prompt_field;

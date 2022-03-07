@@ -3,6 +3,7 @@ import {Setting} from "obsidian";
 import {
     ConfirmationModal,
     Instance,
+    InstanceConfiguration,
 } from "../imports";
 
 export abstract class Model {
@@ -33,12 +34,12 @@ export abstract class Model {
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
      * TODO: Rename this method to loadInstances().
      */
-    public abstract createInstances(parent_configuration: unknown): object[] | Map<string | number, Instance>; // TODO: Change so that only Map is allowed. TODO: Consider changing so that Set is also allowed, in which case remove 'number' possibility from Map.
+    public abstract createInstances(parent_instance_or_configuration: Instance | InstanceConfiguration): object[] | Map<string | number, Instance>; // TODO: Change so that only Map is allowed. TODO: Consider changing so that Set is also allowed, in which case remove 'number' possibility from Map.
 
     /**
      * Creates a new instance and adds its configuration to the parent configuration.
      */
-    public abstract newInstance(parent_configuration: unknown): Instance;
+    public abstract newInstance(parent_instance_or_configuration: Instance | InstanceConfiguration): Instance;
 
     /**
      *
