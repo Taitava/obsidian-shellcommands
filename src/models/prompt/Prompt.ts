@@ -61,7 +61,7 @@ export class Prompt extends Instance {
      */
     private createFields() {
         const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
-        this.prompt_fields = prompt_field_model.createInstances(this)
+        this.prompt_fields = prompt_field_model.loadInstances(this)
     }
 
     /**

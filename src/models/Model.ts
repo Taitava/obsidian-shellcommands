@@ -18,9 +18,8 @@ export abstract class Model {
 
     /**
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
-     * TODO: Rename this method to loadInstances().
      */
-    public abstract createInstances(parent_instance_or_configuration: Instance | InstanceConfiguration): Set<Instance> | Map<string, Instance>;
+    public abstract loadInstances(parent_instance_or_configuration: Instance | InstanceConfiguration): Set<Instance> | Map<string, Instance>;
 
     /**
      * Creates a new instance and adds its configuration to the parent configuration.
@@ -110,7 +109,6 @@ export abstract class Model {
             case "one-to-many":
                 // This is a relation where 'key' points to an indexed array of instance configurations. Use 'index' to pick the correct instance configuration.
                 instance.parent_configuration[relation.key].splice(relation.index, 1); // Do not use delete, as it would place null in the list.
-                // delete instance.parent_configuration[relation.key][relation.index]; // TODO: This is just for trying if delete is able to affect plugin.settings too.
                 break;
         }
     }

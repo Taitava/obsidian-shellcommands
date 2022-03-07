@@ -89,11 +89,11 @@ export default class SC_Plugin extends Plugin {
 
 		// Load Prompts
 		const prompt_model = getModel<PromptModel>(PromptModel.name);
-		this.prompts = prompt_model.createInstances(this.settings);
+		this.prompts = prompt_model.loadInstances(this.settings);
 
 		// Load CustomVariables
 		const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
-		this.custom_variable_instances = custom_variable_model.createInstances(this.settings);
+		this.custom_variable_instances = custom_variable_model.loadInstances(this.settings);
 
 
 		// Make all defined shell commands to appear in the Obsidian command palette.

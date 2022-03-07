@@ -25,7 +25,7 @@ export class CustomVariableModel extends Model {
         };
     }
 
-    public createInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceSet {
+    public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceSet {
         this.custom_variable_instances = new CustomVariableInstanceSet;
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
             this.custom_variable_instances.add(
