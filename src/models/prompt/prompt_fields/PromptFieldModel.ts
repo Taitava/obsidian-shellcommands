@@ -137,7 +137,7 @@ export class PromptFieldModel extends Model {
         _update_heading();
 
         function _update_heading() {
-            setting_group.heading_setting.setName(prompt_field.configuration.label === "" ? "Unlabeled field" : prompt_field.configuration.label);
+            setting_group.heading_setting.setName(prompt_field.getTitle());
         }
 
         return setting_group.heading_setting;
