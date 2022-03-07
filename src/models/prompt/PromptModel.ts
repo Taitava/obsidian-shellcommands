@@ -12,6 +12,7 @@ import {SC_MainSettings} from "../../settings/SC_MainSettings";
 export class PromptModel extends Model {
 
     public readonly id_generator = new IDGenerator();
+    private prompts = new PromptMap();
 
     public getSingularName(): string {
         return "Prompt";
@@ -26,12 +27,12 @@ export class PromptModel extends Model {
     }
 
     public createInstances(parent_configuration: SC_MainSettings): PromptMap {
-        const prompts = new PromptMap();
+        this.prompts = new PromptMap();
         parent_configuration.prompts.forEach((prompt_configuration: PromptConfiguration, prompt_index: number) => {
             const prompt: Prompt = new Prompt(this, this.plugin, prompt_configuration, parent_configuration, prompt_index);
-            prompts.set(prompt_configuration.id, prompt);
+            this.prompts.set(prompt_configuration.id, prompt);
         });
-        return prompts;
+        return this.prompts;
     }
 
     public newInstance(parent_configuration: SC_MainSettings): Prompt {
@@ -42,6 +43,7 @@ export class PromptModel extends Model {
 
         // Instantiate a Prompt
         const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings, parent_configuration.prompts.length);
+        this.prompts.set(prompt.getID(), prompt);
 
         // Store the configuration into plugin's settings
         this.plugin.settings.prompts.push(prompt_configuration);
@@ -55,7 +57,7 @@ export class PromptModel extends Model {
         const setting = new Setting(container_element)
             // Configuration button
             .setName(prompt.getTitle())
-            .addButton(button => button
+            .addButton(button => button // TODO: Change to cog icon.
                 .setButtonText("Configure")
                 .onClick(() => {
                     this.openSettingsModal(prompt);
@@ -77,6 +79,10 @@ export class PromptModel extends Model {
             preview_shell_command: false,
             fields: [],
         };
+    }
+
+    protected _deleteInstance(prompt: Prompt): void {
+        this.prompts.delete(prompt.getID());
     }
 }
 
