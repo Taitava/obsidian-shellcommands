@@ -124,12 +124,12 @@ export class PromptFieldModel extends Model {
                 .setName("Target variable")
                 .setDesc("Where the inputted value will be stored in. You can use the variable in a shell command.")
                 .addDropdown(dropdown => dropdown
-                    .setValue(prompt_field.configuration.target_variable)
+                    .setValue(prompt_field.configuration.target_variable_id) // FIXME: Does not seem to work :(.
                     .addOption("", "") // An option for a situation when nothing is selected.
                     .addOptions(custom_variable_options)
                     .addOption("new", "Create a new custom variable") // TODO: Make selecting this open a prompt for creating a new custom variable.
                     .onChange(async (new_target_variable: string) => {
-                        prompt_field.configuration.target_variable = new_target_variable;
+                        prompt_field.configuration.target_variable_id = new_target_variable;
                         await this.plugin.saveSettings();
                     })
                 )
@@ -162,7 +162,7 @@ export class PromptFieldModel extends Model {
             // TODO: Add 'description'
             default_value: "",
             //  TODO: Add 'placeholder'.
-            target_variable: "",
+            target_variable_id: "",
             required: true,
         }
     }

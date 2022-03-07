@@ -58,6 +58,6 @@ export interface PromptFieldConfiguration {
     // TODO: Add 'description'
     default_value: string;
     //  TODO: Add 'placeholder'.
-    target_variable: string;
+    target_variable_id: string;
     required: boolean;
 }
