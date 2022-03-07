@@ -16,20 +16,6 @@ export abstract class Model {
 
     protected abstract defineParentConfigurationRelation(instance: Instance): ParentModelOneToOneRelation | ParentModelOneToManyRelation;
 
-    public delete(instance: Instance) {
-        const parent_configuration_relation: ParentModelOneToOneRelation | ParentModelOneToManyRelation = this.defineParentConfigurationRelation(instance);
-        switch (parent_configuration_relation.type) {
-            // case "one-to-one": // TODO: Uncomment when first model that needs this is implemented.
-                // This is a relation where 'key' points directly to the instance's configuration.
-                // delete this.parent_configuration[this.parent_configuration_relation.key];
-                // break;
-            case "one-to-many":
-                // This is a relation where 'key' points to an indexed array of instance configurations. Use 'index' to pick the correct instance configuration.
-                delete instance.parent_configuration[parent_configuration_relation.key][parent_configuration_relation.index as keyof {}]; // TODO: Find out a way to avoid using 'keyof {}'.
-                break;
-        }
-    }
-
     /**
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
      * TODO: Rename this method to loadInstances().
@@ -72,8 +58,11 @@ export abstract class Model {
                 confirmation_modal.open();
                 confirmation_modal.promise.then(async () => {
                     // User has confirmed the deletion.
+                    // Delete the configuration and remove the instance from custom collections.
+                    this.deleteInstance(instance);
+
+                    // Delete setting fields.
                     this.deleteSettingFields(instance);
-                    // this.deleteInstance(instance); // TODO: Uncomment this line and fix it.
 
                     // Save settings
                     await this.plugin.saveSettings();
@@ -103,6 +92,34 @@ export abstract class Model {
 
     private deleteSettingFields(instance: Instance) {
         instance.setting_fields_container.remove();
+    }
+
+    /**
+     * Deletes the instance from configuration, and calls _deleteChild() which will delete the instance from custom collections.
+     *
+     * Can be made public if needed.
+     */
+    public deleteInstance(instance: Instance) {
+        this._deleteInstance(instance);
+        const relation = this.defineParentConfigurationRelation(instance);
+        switch (relation.type) {
+            // case "one-to-one": // TODO: Uncomment when first model that needs this is implemented.
+                // This is a relation where 'key' points directly to the instance's configuration.
+                // delete this.parent_configuration[this.relation.key];
+                // break;
+            case "one-to-many":
+                // This is a relation where 'key' points to an indexed array of instance configurations. Use 'index' to pick the correct instance configuration.
+                instance.parent_configuration[relation.key].splice(relation.index, 1); // Do not use delete, as it would place null in the list.
+                // delete instance.parent_configuration[relation.key][relation.index]; // TODO: This is just for trying if delete is able to affect plugin.settings too.
+                break;
+        }
+    }
+
+    /**
+     * This should delete the instance from custom collections. It should be overridden by all Instance classes that have deletable children.
+     */
+    protected _deleteInstance(instance: Instance) {
+        throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method. Maybe the class is not supposed to have children?");
     }
 
 }
