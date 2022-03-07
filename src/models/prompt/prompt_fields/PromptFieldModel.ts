@@ -28,10 +28,11 @@ export class PromptFieldModel extends Model {
         let index = 0;
         prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
             prompt_fields.set( // TODO: Change to a Set instead of a Map. Then the index variable can be removed from this method.
-                index++, // 0-indexed
+                index, // 0-indexed
                 // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
                 new PromptField_Text(this, prompt, field_configuration, index), // TODO: Extract this to a separate method.
             );
+            index++;
         });
         return prompt_fields;
     }
@@ -154,6 +155,10 @@ export class PromptFieldModel extends Model {
             target_variable: "",
             required: true,
         }
+    }
+
+    protected _deleteInstance(prompt_field: PromptField): void {
+        prompt_field.prompt.prompt_fields.delete(prompt_field.prompt_field_index as number); // TODO: Remove 'as number' after prompt_fields in changed to be a Set instead of a Map.
     }
 }
 
