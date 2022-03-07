@@ -6,7 +6,17 @@ import {
     Model,
 } from "../imports";
 
-export function createNewModelInstanceButton<ModelClass extends Model, InstanceClass extends Instance>(plugin: SC_Plugin, model_class_name: string, button_container_element: HTMLElement, instance_container_element: HTMLElement, parent_instance_or_configuration: InstanceClass["parent_configuration"] | InstanceClass["parent_instance"]) {
+export function createNewModelInstanceButton<
+        ModelClass extends Model,
+        InstanceClass extends Instance,
+    >(
+        plugin: SC_Plugin,
+        model_class_name: string,
+        button_container_element: HTMLElement,
+        instance_container_element: HTMLElement,
+        parent_instance_or_configuration: InstanceClass["parent_configuration"] | InstanceClass["parent_instance"]
+    ) {
+
     const model = getModel<ModelClass>(model_class_name);
     new Setting(button_container_element)
         .addButton(button => button
