@@ -9,6 +9,7 @@
 // SECTIONS - Add new stuff in alphabetical order, if possible!
 
 // Miscellaneous files in the same folder as imports.ts
+export * from "./ConfirmationModal";
 export * from "./IDGenerator";
 
 // Models - must come before subclasses of Model and Instance
@@ -33,6 +34,4 @@ export * from "./models/prompt/PromptModal";
 export * from "./models/prompt/PromptModel";
 
 // Settings
-export * from "./settings/DeletePromptFieldModal";
-export * from "./settings/DeletePromptModal";
-export * from "./settings/PromptSettingsModal";
+export * from "./settings/PromptSettingsModal"; // TODO: Move the file to models/prompt/.

@@ -21,6 +21,10 @@ export abstract class PromptField extends Instance {
 
     public abstract createField(container_element: HTMLElement): Setting;
 
+    public getTitle(): string {
+        return this.configuration.label;
+    }
+
     public getValue() {
         return this.value;
     }

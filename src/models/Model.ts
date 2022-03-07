@@ -1,6 +1,9 @@
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
-import {Instance} from "../imports";
+import {
+    ConfirmationModal,
+    Instance,
+} from "../imports";
 
 export abstract class Model {
 
@@ -38,15 +41,29 @@ export abstract class Model {
     public abstract newInstance(parent_configuration: unknown): Instance;
 
     public createSettingFields(instance: Instance, container_element: HTMLElement) {
-        const main_setting_field = this._createSettingFields(instance, container_element);
+        instance.setting_fields_container = container_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
+        const main_setting_field = this._createSettingFields(instance, instance.setting_fields_container);
         main_setting_field.addExtraButton(button => button
             .setIcon("trash")
             .setTooltip("Delete this " + this.getSingularName().toLocaleLowerCase())
             .onClick(() => {
                 // The trash icon has been clicked
-                // Open up a modal asking for confirmation if the instance can be delete from this.parent_configuration.
-                // TODO: Create a general confirmation modal that can be fed with a question about deleting this instance and a "Yes, delete" text for a button. Use a promise to handle the actual deletion so that the deletion logic is programmed here, not in the modal.
-                this.plugin.newNotification("A deletion modal is not implemented yet.");
+                // Open up a modal asking for confirmation if the instance can be deleted from this.parent_configuration.
+                const confirmation_modal = new ConfirmationModal(
+                    this.plugin,
+                    "Delete " + this.getSingularName().toLocaleLowerCase() + ": " + instance.getTitle(),
+                    "Are you sure you want to delete this " + this.getSingularName().toLocaleLowerCase() + "?",
+                    "Yes, delete",
+                );
+                confirmation_modal.open();
+                confirmation_modal.promise.then(async () => {
+                    // User has confirmed the deletion.
+                    this.deleteSettingFields(instance);
+                    // this.deleteInstance(instance); // TODO: Uncomment this line and fix it.
+
+                    // Save settings
+                    await this.plugin.saveSettings();
+                });
             }),
         );
     }
@@ -60,6 +77,10 @@ export abstract class Model {
      * @protected
      */
     protected abstract _createSettingFields(instance: Instance, container_element: HTMLElement): Setting;
+
+    private deleteSettingFields(instance: Instance) {
+        instance.setting_fields_container.remove();
+    }
 
 }
 

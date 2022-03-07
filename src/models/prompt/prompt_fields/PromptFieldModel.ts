@@ -80,16 +80,6 @@ export class PromptFieldModel extends Model {
             heading_setting: new Setting(container_element)
                 .setName("") // This will be set down below.
                 .setHeading()
-                // TODO: Make the Model base class create a delete button.
-                // .addExtraButton(button => button
-                //     .setIcon("trash")
-                //     .setTooltip("Delete this field.")
-                //     .onClick(() => {
-                //         // Trash icon is clicked
-                //         const modal = new DeletePromptFieldModal(plugin, prompt, prompt_field_index, prompt_field.configuration, setting_group, container_element)
-                //         modal.open();
-                //     }),
-                // )
             ,
             label_setting: new Setting(container_element)
                 .setName("Field label")
