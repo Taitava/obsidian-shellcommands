@@ -7,7 +7,7 @@ export abstract class Instance {
     public setting_fields_container: HTMLElement;
 
     public constructor(
-        protected readonly model: Model,
+        public readonly model: Model,
         public readonly configuration: InstanceConfiguration,
         public readonly parent_configuration: InstanceConfiguration,
     ) {}

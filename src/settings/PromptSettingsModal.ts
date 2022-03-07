@@ -30,6 +30,9 @@ export class PromptSettingsModal extends SC_Modal {
                 .onChange(async (new_title: string) => {
                     this.prompt.getConfiguration().title = new_title;
                     await this.plugin.saveSettings();
+
+                    // Update the title in settings view by resetting setting fields.
+                    this.prompt.model.resetSettingFields(this.prompt);
                 }),
             )
 

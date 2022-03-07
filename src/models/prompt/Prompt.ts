@@ -17,7 +17,7 @@ export class Prompt extends Instance {
     public prompt_fields: PromptFieldMap = new PromptFieldMap();
 
     constructor(
-        protected model: PromptModel,
+        public model: PromptModel,
         protected plugin: SC_Plugin,
         public configuration: PromptConfiguration,
         public parent_configuration: SC_MainSettings,

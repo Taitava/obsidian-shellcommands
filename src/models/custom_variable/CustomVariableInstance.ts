@@ -10,7 +10,7 @@ export class CustomVariableInstance extends Instance {
     public configuration: CustomVariableConfiguration;
 
     constructor(
-        protected readonly model: CustomVariableModel,
+        public readonly model: CustomVariableModel,
         configuration: CustomVariableConfiguration,
         parent_configuration: SC_MainSettings,
         public custom_variable_index: keyof SC_MainSettings["custom_variables"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.

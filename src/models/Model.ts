@@ -40,8 +40,21 @@ export abstract class Model {
      */
     public abstract newInstance(parent_configuration: unknown): Instance;
 
-    public createSettingFields(instance: Instance, container_element: HTMLElement) {
-        instance.setting_fields_container = container_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
+    /**
+     *
+     * @param instance
+     * @param container_element Optional.
+     *  - If defined, a new nested container element will be created in the given element, and the new element will be stored to instance.setting_fields_container.
+     *  - If not defined, instance.setting_fields_container must already have an HTMLElement.
+     */
+    public createSettingFields(instance: Instance, container_element?: HTMLElement) {
+        if (container_element) {
+            // Create a container
+            instance.setting_fields_container = container_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
+        } else if (!instance.setting_fields_container) {
+            // No container
+            throw new Error(this.constructor.name + ".createSettingFields(): instance.setting_fields_container is not set, and no parent container is passed as an argument.");
+        }
         const main_setting_field = this._createSettingFields(instance, instance.setting_fields_container);
         main_setting_field.addExtraButton(button => button
             .setIcon("trash")
@@ -77,6 +90,15 @@ export abstract class Model {
      * @protected
      */
     protected abstract _createSettingFields(instance: Instance, container_element: HTMLElement): Setting;
+
+    public resetSettingFields(instance: Instance) {
+        if (!instance.setting_fields_container) {
+            // No container
+            throw new Error(this.constructor.name + ".resetSettingFields(): instance.setting_fields_container is not set. This method can only be called _after_ createSettingFields() has been called!");
+        }
+        instance.setting_fields_container.empty();
+        this.createSettingFields(instance);
+    }
 
     private deleteSettingFields(instance: Instance) {
         instance.setting_fields_container.remove();

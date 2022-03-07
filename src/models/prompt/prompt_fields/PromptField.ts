@@ -10,7 +10,7 @@ export abstract class PromptField extends Instance {
     protected value: string | number;
 
     constructor(
-        protected model: PromptFieldModel,
+        public model: PromptFieldModel,
         public parent_configuration: PromptConfiguration,
         public configuration: PromptFieldConfiguration,
         public prompt_field_index: keyof PromptConfiguration["fields"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
