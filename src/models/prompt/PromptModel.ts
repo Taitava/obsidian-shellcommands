@@ -57,8 +57,9 @@ export class PromptModel extends Model {
         const setting = new Setting(container_element)
             // Configuration button
             .setName(prompt.getTitle())
-            .addButton(button => button // TODO: Change to cog icon.
-                .setButtonText("Configure")
+            .addExtraButton(button => button // TODO: Change to cog icon.
+                .setTooltip("Define prompt fields")
+                .setIcon("gear")
                 .onClick(() => {
                     this.openSettingsModal(prompt);
                 }),
