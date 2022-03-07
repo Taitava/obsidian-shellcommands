@@ -21,6 +21,10 @@ export class CustomVariableInstance extends Instance {
         this.model.id_generator.addCurrentID(configuration.id);
     }
 
+    public getID() {
+        return this.configuration.id;
+    }
+
     public getTitle(): string {
         return this.configuration.name;
     }

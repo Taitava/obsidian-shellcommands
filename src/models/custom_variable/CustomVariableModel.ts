@@ -9,7 +9,7 @@ import {
 
 export class CustomVariableModel extends Model {
 
-    private custom_variable_instances: CustomVariableInstanceSet;
+    private custom_variable_instances: CustomVariableInstanceMap;
 
     public getSingularName(): string {
         return "Custom variable";
@@ -25,10 +25,11 @@ export class CustomVariableModel extends Model {
         };
     }
 
-    public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceSet {
-        this.custom_variable_instances = new CustomVariableInstanceSet;
+    public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceMap {
+        this.custom_variable_instances = new CustomVariableInstanceMap;
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
-            this.custom_variable_instances.add(
+            this.custom_variable_instances.set(
+                custom_variable_configuration.id,
                 new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, custom_variable_index)
             );
         });
@@ -39,7 +40,7 @@ export class CustomVariableModel extends Model {
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
         const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
         parent_configuration.custom_variables.push(custom_variable_configuration);
-        this.custom_variable_instances.add(custom_variable_instance);
+        this.custom_variable_instances.set(custom_variable_configuration.id, custom_variable_instance);
         return custom_variable_instance;
         // TODO: Move this logic to the base Model class.
     }
@@ -68,7 +69,7 @@ export class CustomVariableModel extends Model {
     }
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
-        this.custom_variable_instances.delete(custom_variable_instance);
+        this.custom_variable_instances.delete(custom_variable_instance.getID());
     }
 }
 
@@ -77,4 +78,4 @@ export interface CustomVariableConfiguration {
     name: string,
 }
 
-export class CustomVariableInstanceSet extends Set<CustomVariableInstance> {}
+export class CustomVariableInstanceMap extends Map<string, CustomVariableInstance> {}

@@ -32,7 +32,7 @@ import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomple
 import {getSC_Events} from "./events/SC_EventList";
 import {SC_Event} from "./events/SC_Event";
 import {
-	CustomVariableInstanceSet,
+	CustomVariableInstanceMap,
 	CustomVariableModel,
 	getModel,
 	introduceModels,
@@ -52,7 +52,7 @@ export default class SC_Plugin extends Plugin {
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
-	private custom_variable_instances: CustomVariableInstanceSet;
+	private custom_variable_instances: CustomVariableInstanceMap;
 
 	/**
 	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
@@ -133,7 +133,7 @@ export default class SC_Plugin extends Plugin {
 		return this.prompts;
 	}
 
-	public getCustomVariableInstances(): CustomVariableInstanceSet {
+	public getCustomVariableInstances(): CustomVariableInstanceMap {
 		return this.custom_variable_instances;
 	}
 
