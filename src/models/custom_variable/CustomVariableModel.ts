@@ -1,6 +1,5 @@
 import {Setting} from "obsidian";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
-import SC_Plugin from "../../main";
 import {CustomVariableInstance} from "./CustomVariableInstance";
 import {
     IDGenerator,
@@ -9,6 +8,8 @@ import {
 } from "../../imports";
 
 export class CustomVariableModel extends Model {
+
+    private custom_variable_instances: CustomVariableInstance[];
 
     public getSingularName(): string {
         return "Custom variable";
@@ -25,17 +26,18 @@ export class CustomVariableModel extends Model {
     }
 
     public createInstances(parent_configuration: SC_MainSettings): CustomVariableInstance[] {
-        const custom_variable_instances: CustomVariableInstance[] = [];
+        this.custom_variable_instances = [];
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
-            custom_variable_instances[custom_variable_index] = new CustomVariableInstance( this, custom_variable_configuration, parent_configuration, custom_variable_index);
+            this.custom_variable_instances[custom_variable_index] = new CustomVariableInstance( this, custom_variable_configuration, parent_configuration, custom_variable_index);
         });
-        return custom_variable_instances;
+        return this.custom_variable_instances;
     }
 
     public newInstance(parent_configuration: SC_MainSettings): CustomVariableInstance {
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
         const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
         parent_configuration.custom_variables.push(custom_variable_configuration);
+        this.custom_variable_instances.push(custom_variable_instance);
         return custom_variable_instance;
         // TODO: Move this logic to the base Model class.
     }
@@ -61,6 +63,10 @@ export class CustomVariableModel extends Model {
             id: this.id_generator.generateID(),
             name: "{{_}}", // TODO: If the name {{_}} is already in use, append a sequential number, e.g. {{_1}}, {{_2}} etc.
         }
+    }
+
+    protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
+        this.custom_variable_instances.remove(custom_variable_instance);
     }
 }
 
