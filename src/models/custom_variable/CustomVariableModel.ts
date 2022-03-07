@@ -16,14 +16,6 @@ export class CustomVariableModel extends Model {
 
     public readonly id_generator = new IDGenerator();
 
-    constructor(
-        plugin: SC_Plugin,
-    ) {
-        super(plugin);
-
-        // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new CustomVariableInstances.
-    }
-
     protected defineParentConfigurationRelation(instance: CustomVariableInstance): ParentModelOneToManyRelation {
         return {
             type: "one-to-many",

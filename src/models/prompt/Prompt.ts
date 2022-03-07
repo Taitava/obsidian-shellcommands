@@ -24,7 +24,10 @@ export class Prompt extends Instance {
         public prompt_index: keyof SC_MainSettings["prompts"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
         super(model, configuration, parent_configuration);
+
+        // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new Prompts.
         this.model.id_generator.addCurrentID(configuration.id);
+
         this.createFields();
     }
 
