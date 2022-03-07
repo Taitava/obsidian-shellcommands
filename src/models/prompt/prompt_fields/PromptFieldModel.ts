@@ -1,6 +1,7 @@
 import {Setting} from "obsidian";
 import {randomInteger} from "../../../Common";
 import {
+    CustomVariableInstance,
     Model,
     ParentModelOneToManyRelation,
     Prompt,
@@ -78,6 +79,14 @@ export class PromptFieldModel extends Model {
         ];
         const label_placeholder_index: number = randomInteger(0, label_placeholders.length - 1);
         const default_value_placeholders_subset: string[] = default_value_placeholders[label_placeholder_index];
+
+        // Create a list of custom variables
+        const custom_variable_options: {[key: string]: string} = {};
+        this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance, custom_variable_id: string) => {
+            custom_variable_options[custom_variable_id] = custom_variable_instance.getTitle();
+        });
+
+        // Create the setting fields
         const setting_group: PromptFieldSettingGroup = {
             heading_setting: new Setting(container_element)
                 .setName("") // This will be set down below.
@@ -113,12 +122,12 @@ export class PromptFieldModel extends Model {
             ,
             target_variable_setting: new Setting(container_element)
                 .setName("Target variable")
-                .setDesc("A custom variable that you can use in a shell command to read the input value.")
+                .setDesc("Where the inputted value will be stored in. You can use the variable in a shell command.")
                 .addDropdown(dropdown => dropdown
                     .setValue(prompt_field.configuration.target_variable)
                     .addOption("", "") // An option for a situation when nothing is selected.
-                    // .addOptions() TODO: Add a list of custom variables when custom variables are implemented.
-                    .addOption("new", "Create a new custom variable")
+                    .addOptions(custom_variable_options)
+                    .addOption("new", "Create a new custom variable") // TODO: Make selecting this open a prompt for creating a new custom variable.
                     .onChange(async (new_target_variable: string) => {
                         prompt_field.configuration.target_variable = new_target_variable;
                         await this.plugin.saveSettings();
