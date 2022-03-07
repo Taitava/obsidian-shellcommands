@@ -28,8 +28,7 @@ export class PromptFieldModel extends Model {
         let index = 0;
         prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
             prompt_fields.add(
-                // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-                new PromptField_Text(this, prompt, field_configuration, index), // TODO: Extract this to a separate method.
+                this.createInstance(prompt, field_configuration, index)
             );
         });
         return prompt_fields;
@@ -42,14 +41,18 @@ export class PromptFieldModel extends Model {
         const prompt_field_configuration = this._getDefaultConfiguration();
 
         // Instantiate a PromptField
-        // TODO: When implementing 'type', add different types here, e.g. PromptField_Integer in addition to PromptField_Text.
-        const prompt_field = new PromptField_Text(this, prompt, prompt_field_configuration, prompt.configuration.fields.length); // TODO: Extract this to a separate method.
+        const prompt_field = this.createInstance(prompt, prompt_field_configuration, prompt.configuration.fields.length);
 
         // Store the configuration into the prompt's configuration
         prompt.configuration.fields.push(prompt_field_configuration);
 
         // Return the PromptField
         return prompt_field;
+    }
+
+    private createInstance(prompt: Prompt, prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number): PromptField {
+        // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
+        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index)
     }
 
     protected _createSettingFields(prompt_field: PromptField, container_element: HTMLElement): Setting {
