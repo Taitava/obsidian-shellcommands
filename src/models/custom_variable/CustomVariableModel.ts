@@ -9,7 +9,7 @@ import {
 
 export class CustomVariableModel extends Model {
 
-    private custom_variable_instances: CustomVariableInstance[];
+    private custom_variable_instances: CustomVariableInstanceSet;
 
     public getSingularName(): string {
         return "Custom variable";
@@ -25,10 +25,12 @@ export class CustomVariableModel extends Model {
         };
     }
 
-    public createInstances(parent_configuration: SC_MainSettings): CustomVariableInstance[] {
-        this.custom_variable_instances = [];
+    public createInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceSet {
+        this.custom_variable_instances = new CustomVariableInstanceSet;
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
-            this.custom_variable_instances[custom_variable_index] = new CustomVariableInstance( this, custom_variable_configuration, parent_configuration, custom_variable_index);
+            this.custom_variable_instances.add(
+                new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, custom_variable_index)
+            );
         });
         return this.custom_variable_instances;
     }
@@ -37,7 +39,7 @@ export class CustomVariableModel extends Model {
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
         const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
         parent_configuration.custom_variables.push(custom_variable_configuration);
-        this.custom_variable_instances.push(custom_variable_instance);
+        this.custom_variable_instances.add(custom_variable_instance);
         return custom_variable_instance;
         // TODO: Move this logic to the base Model class.
     }
@@ -66,7 +68,7 @@ export class CustomVariableModel extends Model {
     }
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
-        this.custom_variable_instances.remove(custom_variable_instance);
+        this.custom_variable_instances.delete(custom_variable_instance);
     }
 }
 
@@ -74,3 +76,5 @@ export interface CustomVariableConfiguration {
     id: string,
     name: string,
 }
+
+export class CustomVariableInstanceSet extends Set<CustomVariableInstance> {}

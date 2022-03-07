@@ -20,7 +20,7 @@ export abstract class Model {
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
      * TODO: Rename this method to loadInstances().
      */
-    public abstract createInstances(parent_instance_or_configuration: Instance | InstanceConfiguration): object[] | Map<string | number, Instance>; // TODO: Change so that only Map is allowed. TODO: Consider changing so that Set is also allowed, in which case remove 'number' possibility from Map.
+    public abstract createInstances(parent_instance_or_configuration: Instance | InstanceConfiguration): Set<Instance> | Map<string, Instance>;
 
     /**
      * Creates a new instance and adds its configuration to the parent configuration.

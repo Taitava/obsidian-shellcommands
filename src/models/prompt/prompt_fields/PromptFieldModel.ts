@@ -23,16 +23,14 @@ export class PromptFieldModel extends Model {
         };
     }
 
-    public createInstances(prompt: Prompt): Map<number, PromptField> {
-        const prompt_fields = new PromptFieldMap;
+    public createInstances(prompt: Prompt): PromptFieldSet {
+        const prompt_fields = new PromptFieldSet;
         let index = 0;
         prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
-            prompt_fields.set( // TODO: Change to a Set instead of a Map. Then the index variable can be removed from this method.
-                index, // 0-indexed
+            prompt_fields.add(
                 // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
                 new PromptField_Text(this, prompt, field_configuration, index), // TODO: Extract this to a separate method.
             );
-            index++;
         });
         return prompt_fields;
     }
@@ -158,11 +156,11 @@ export class PromptFieldModel extends Model {
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {
-        prompt_field.prompt.prompt_fields.delete(prompt_field.prompt_field_index as number); // TODO: Remove 'as number' after prompt_fields in changed to be a Set instead of a Map.
+        prompt_field.prompt.prompt_fields.delete(prompt_field);
     }
 }
 
-export class PromptFieldMap extends Map<number, PromptField> {} // TODO: Consider making this to be a Set instead of a Map, as id's are not used here.
+export class PromptFieldSet extends Set<PromptField> {}
 
 export interface PromptFieldSettingGroup {
     heading_setting: Setting;

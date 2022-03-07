@@ -6,7 +6,7 @@ import {
     Instance,
     PromptField,
     PromptFieldConfiguration,
-    PromptFieldMap,
+    PromptFieldSet,
     PromptFieldModel,
     PromptModal,
     PromptModel,
@@ -14,7 +14,7 @@ import {
 
 export class Prompt extends Instance {
 
-    public prompt_fields: PromptFieldMap = new PromptFieldMap();
+    public prompt_fields: PromptFieldSet = new PromptFieldSet();
 
     constructor(
         public model: PromptModel,

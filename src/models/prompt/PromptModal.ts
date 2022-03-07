@@ -5,7 +5,7 @@ import {Setting} from "obsidian";
 import {
     Prompt,
     PromptField,
-    PromptFieldMap,
+    PromptFieldSet,
 } from "../../imports";
 
 export class PromptModal extends SC_Modal {
@@ -17,7 +17,7 @@ export class PromptModal extends SC_Modal {
 
     constructor(
         plugin: SC_Plugin,
-        private readonly prompt_fields: PromptFieldMap,
+        private readonly prompt_fields: PromptFieldSet,
         private readonly t_shell_command: TShellCommand,
         private readonly prompt: Prompt,
 
