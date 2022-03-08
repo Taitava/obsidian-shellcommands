@@ -84,4 +84,5 @@ export interface PromptConfiguration {
     title: string;
     preview_shell_command: boolean;
     fields: PromptFieldConfiguration[];
+    execute_button_text: string;
 }

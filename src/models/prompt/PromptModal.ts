@@ -53,7 +53,7 @@ export class PromptModal extends SC_Modal {
         // Execute button
         new Setting(this.modalEl)
             .addButton(button => button
-                .setButtonText("Execute")
+                .setButtonText(this.prompt.configuration.execute_button_text)
                 .onClick(() => {
                     if (this.validator()) {
                         // The form fields are filled ok

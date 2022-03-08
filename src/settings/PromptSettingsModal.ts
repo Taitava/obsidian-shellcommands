@@ -62,5 +62,17 @@ export class PromptSettingsModal extends SC_Modal {
 
         // New field button
         createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt);
+
+        // Execute button text
+        new Setting(container_element)
+            .setName("Execute button text")
+            .addText(text => text
+                .setValue(this.prompt.configuration.execute_button_text)
+                .onChange(async (new_execute_button_text) => {
+                    this.prompt.configuration.execute_button_text = new_execute_button_text;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
     }
 }

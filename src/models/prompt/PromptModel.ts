@@ -79,6 +79,7 @@ export class PromptModel extends Model {
             title: "",
             preview_shell_command: false,
             fields: [],
+            execute_button_text: "Execute",
         };
     }
 
