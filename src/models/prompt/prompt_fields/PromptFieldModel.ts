@@ -154,6 +154,11 @@ export class PromptFieldModel extends Model {
         return setting_group.heading_setting;
     }
 
+    public validateValue(prompt_field: PromptField, field: string, value: unknown): Promise<void> {
+        // This method is not used, so it can just resolve all the time.
+        return Promise.resolve();
+    }
+
     private _getDefaultConfiguration(): PromptFieldConfiguration {
         return {
             // type: "text",

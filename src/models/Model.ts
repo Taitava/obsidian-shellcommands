@@ -120,6 +120,8 @@ export abstract class Model {
         throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method. Maybe the class is not supposed to have children?");
     }
 
+    public abstract validateValue(instance: Instance, field: string, value: unknown): Promise<void>;
+
 }
 
 /**

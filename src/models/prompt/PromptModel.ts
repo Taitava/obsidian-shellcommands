@@ -68,6 +68,11 @@ export class PromptModel extends Model {
         return setting;
     }
 
+    public validateValue(prompt: Prompt, field: string, value: unknown): Promise<void> {
+        // This method is not used, so it can just resolve all the time.
+        return Promise.resolve(undefined);
+    }
+
     public openSettingsModal(prompt: Prompt) {
         const modal = new PromptSettingsModal(this.plugin, prompt);
         modal.open();

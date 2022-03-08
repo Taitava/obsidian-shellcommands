@@ -38,6 +38,12 @@ export abstract class Instance {
 
     public abstract getTitle(): string;
 
+    public setIfValid(field: string, value: unknown): Promise<void> {
+        return this.model.validateValue(this, field, value).then(() => {
+            this.configuration[field] = value;
+        });
+    }
+
 }
 
 export interface InstanceConfiguration {
