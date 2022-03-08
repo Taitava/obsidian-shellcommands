@@ -26,8 +26,7 @@ export class PromptFieldModel extends Model {
 
     public loadInstances(prompt: Prompt): PromptFieldSet {
         const prompt_fields = new PromptFieldSet;
-        let index = 0;
-        prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration) => {
+        prompt.configuration.fields.forEach((field_configuration: PromptFieldConfiguration, index) => {
             prompt_fields.add(
                 this.createInstance(prompt, field_configuration, index)
             );
