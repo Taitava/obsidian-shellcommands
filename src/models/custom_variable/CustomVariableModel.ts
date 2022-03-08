@@ -46,25 +46,73 @@ export class CustomVariableModel extends Model {
     }
 
     protected _createSettingFields(instance: CustomVariableInstance, container_element: HTMLElement): Setting {
+        const warning_setting = new Setting(container_element).setHeading();
         return new Setting(container_element)
             .setName("Variable name")
             .setDesc("Must begin with {{_ and end with }} and contain at least one character inside. Allowed characters are letters a-z, numbers 0-9 and an underscore _")
             .addText(text => text
                 .setValue(instance.configuration.name)
-                .onChange(async (new_name: string) => {
+                .onChange((new_name: string) => {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
                     // TODO: If another custom variable has the same name, display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
                     // TODO: If the name does not begin with {{_ and end with }} , display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
-                    instance.configuration.name = new_name;
-                    await this.plugin.saveSettings();
+                    instance.setIfValid("name", new_name).then(async () => {
+                        // Valid
+                        warning_setting.setName(""); // Removes a possible warning message.
+                        await this.plugin.saveSettings();
+                    }, (reason: string) => {
+                        // Not valid
+                        // Display a warning message.
+                        warning_setting.setName(reason + " The name was not saved.");
+                    });
                 }),
-            );
+            )
+        ;
+    }
+
+    public validateValue(custom_variable_instance: CustomVariableInstance, field: keyof CustomVariableInstance["configuration"], custom_variable_name: string): Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            switch (field) {
+                case "name":
+                    // Check that the name is wrapped in {{_ and }}, and the inner part contains only characters a-z, 0-9 and/or underline _
+                    if (!custom_variable_name.match(/^\{\{_[\w\d]+\}\}$/u)) {
+                        // Incorrect format.
+                        reject(`Name ${custom_variable_name} does not meet the naming requirements.`);
+                        return;
+                    }
+
+                    // Make sure the name is unique.
+                    // TODO: Extract this to a new method when implementing sequential numbering in _getDefaultConfiguration().
+                    let is_duplicate = false;
+                    this.custom_variable_instances.forEach((custom_variable2_instance: CustomVariableInstance, custom_variable2_id: string) => {
+                        // Don't check the current instance.
+                        if (custom_variable2_id !== custom_variable_instance.getID()) {
+                            // Check if the name is a duplicate
+                            if (custom_variable_name.toLocaleLowerCase() === custom_variable2_instance.configuration.name.toLocaleLowerCase()) {
+                                is_duplicate = true;
+                            }
+                        }
+                    });
+
+                    // Check if it's a duplicate.
+                    if (is_duplicate) {
+                        reject(`Name ${custom_variable_name} is already reserved.`);
+                    } else {
+                        resolve();
+                    }
+                    return;
+                default:
+                    // Other fields do not need validation.
+                    resolve();
+                    return;
+            }
+        });
     }
 
     protected _getDefaultConfiguration(): CustomVariableConfiguration {
         return {
             id: this.id_generator.generateID(),
-            name: "{{_}}", // TODO: If the name {{_}} is already in use, append a sequential number, e.g. {{_1}}, {{_2}} etc.
+            name: "{{_1}}", // TODO: If the name {{_}} is already in use, increase the sequential number, e.g. {{_2}}, {{_3}} etc.
         }
     }
 
