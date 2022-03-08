@@ -1,7 +1,7 @@
 export class IDGenerator {
     constructor(
         private current_ids: string[] = [],
-        private readonly min_length = 5,
+        private readonly min_length = 10,
         private readonly characters = "abcdefghijklmnopqrstuvwxyz0123456789",
     ) {}
 
