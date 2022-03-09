@@ -81,23 +81,12 @@ export class CustomVariableModel extends Model {
                         return;
                     }
 
-                    // Make sure the name is unique.
-                    // TODO: Extract this to a new method when implementing sequential numbering in _getDefaultConfiguration().
-                    let is_duplicate = false;
-                    this.custom_variable_instances.forEach((custom_variable2_instance: CustomVariableInstance, custom_variable2_id: string) => {
-                        // Don't check the current instance.
-                        if (custom_variable2_id !== custom_variable_instance.getID()) {
-                            // Check if the name is a duplicate
-                            if (custom_variable_name.toLocaleLowerCase() === custom_variable2_instance.configuration.name.toLocaleLowerCase()) {
-                                is_duplicate = true;
-                            }
-                        }
-                    });
-
-                    // Check if it's a duplicate.
-                    if (is_duplicate) {
+                    // Check if the name is a duplicate.
+                    if (this.isCustomVariableNameDuplicate(custom_variable_name, custom_variable_instance)) {
+                        // It's a duplicate.
                         reject(`Name ${custom_variable_name} is already reserved.`);
                     } else {
+                        // It's unique.
                         resolve();
                     }
                     return;
@@ -110,14 +99,41 @@ export class CustomVariableModel extends Model {
     }
 
     protected _getDefaultConfiguration(): CustomVariableConfiguration {
+        // Generate a unique name for the variable by using a sequential number.
+        let sequential_number = 1;
+        while (this.isCustomVariableNameDuplicate(`{{_${sequential_number}}}`)) {
+            sequential_number++;
+        }
+
+        // Create a configuration object.
         return {
             id: this.id_generator.generateID(),
-            name: "{{_1}}", // TODO: If the name {{_}} is already in use, increase the sequential number, e.g. {{_2}}, {{_3}} etc.
-        }
+            name: `{{_${sequential_number}}}`,
+        };
     }
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
         this.custom_variable_instances.delete(custom_variable_instance.getID());
+    }
+
+    /**
+     * Can be changed to public if needed.
+     */
+    private isCustomVariableNameDuplicate(custom_variable_name: string, ignore_custom_variable_instance?: CustomVariableInstance): boolean {
+        let is_duplicate = false;
+        this.custom_variable_instances.forEach((custom_variable2_instance: CustomVariableInstance, custom_variable_id: string) => {
+            // First check can the current custom variable attend to the duplicate test.
+            if (ignore_custom_variable_instance && custom_variable_id === ignore_custom_variable_instance.getID()) {
+                // Don't check this instance. This skipping is used for the current owner of the name.
+                return;
+            }
+
+            // Now do the actual duplicate test.
+            if (custom_variable_name.toLocaleLowerCase() === custom_variable2_instance.configuration.name.toLocaleLowerCase()) {
+                is_duplicate = true;
+            }
+        });
+        return is_duplicate;
     }
 }
 
