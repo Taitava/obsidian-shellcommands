@@ -1,7 +1,7 @@
 import {
     IDGenerator,
     Model,
-    ParentModelOneToManyRelation,
+    ParentModelOneToManyIdRelation,
     Prompt,
     PromptConfiguration,
     PromptSettingsModal,
@@ -18,18 +18,18 @@ export class PromptModel extends Model {
         return "Prompt";
     }
 
-    protected defineParentConfigurationRelation(prompt: Prompt): ParentModelOneToManyRelation {
+    protected defineParentConfigurationRelation(prompt: Prompt): ParentModelOneToManyIdRelation {
         return {
-            type: "one-to-many",
+            type: "one-to-many-id",
             key: "prompts",
-            index: prompt.prompt_index as number, // TODO: Change the relation so that instead of defining 'index', would be defined an 'id'. But needs to take into account that PromptField uses an ID-less relation.
+            id: prompt.getID(),
         };
     }
 
     public loadInstances(parent_configuration: SC_MainSettings): PromptMap {
         this.prompts = new PromptMap();
-        parent_configuration.prompts.forEach((prompt_configuration: PromptConfiguration, prompt_index: number) => {
-            const prompt: Prompt = new Prompt(this, this.plugin, prompt_configuration, parent_configuration, prompt_index);
+        parent_configuration.prompts.forEach((prompt_configuration: PromptConfiguration) => {
+            const prompt: Prompt = new Prompt(this, this.plugin, prompt_configuration, parent_configuration);
             this.prompts.set(prompt_configuration.id, prompt);
         });
         return this.prompts;
@@ -42,7 +42,7 @@ export class PromptModel extends Model {
         const prompt_configuration = this._getDefaultConfiguration();
 
         // Instantiate a Prompt
-        const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings, parent_configuration.prompts.length);
+        const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings);
         this.prompts.set(prompt.getID(), prompt);
 
         // Store the configuration into plugin's settings

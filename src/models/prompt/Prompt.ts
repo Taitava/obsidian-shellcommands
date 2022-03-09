@@ -21,7 +21,6 @@ export class Prompt extends Instance {
         protected plugin: SC_Plugin,
         public configuration: PromptConfiguration,
         public parent_configuration: SC_MainSettings,
-        public prompt_index: keyof SC_MainSettings["prompts"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
         super(model, configuration, parent_configuration);
 

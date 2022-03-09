@@ -14,7 +14,10 @@ export abstract class Model {
 
     public abstract getSingularName(): string;
 
-    protected abstract defineParentConfigurationRelation(instance: Instance): ParentModelOneToOneRelation | ParentModelOneToManyRelation;
+    /**
+     *TODO: Change this to public and call it from Instance.constructor() and store the result in a new property Instance.parent_relation. Make other callers use the new property instead of calling this method.
+     */
+    protected abstract defineParentConfigurationRelation(instance: Instance): ParentModelOneToOneRelation | ParentModelOneToManyIndexRelation | ParentModelOneToManyIdRelation;
 
     /**
      * Creates instance objects from already existing configuration. I.e. does not create NEW instances or new configurations.
@@ -106,11 +109,31 @@ export abstract class Model {
                 // This is a relation where 'key' points directly to the instance's configuration.
                 // delete this.parent_configuration[this.relation.key];
                 // break;
-            case "one-to-many":
+            case "one-to-many-index":
                 // This is a relation where 'key' points to an indexed array of instance configurations. Use 'index' to pick the correct instance configuration.
                 instance.parent_configuration[relation.key].splice(relation.index, 1); // Do not use delete, as it would place null in the list.
                 break;
+            case "one-to-many-id":
+                // This is a relation where 'key' points to an indexed array of instance configurations. Use 'id' to determine the correct index.
+                const index = this.idToIndex(instance.parent_configuration[relation.key], relation.id);
+                if (null === index) {
+                    // Something went wrong
+                    throw new Error(`${this.constructor.name}.deleteInstance(): Could not find an index for id ${relation.id}.`);
+                }
+                instance.parent_configuration[relation.key].splice(index, 1); // Do not use delete, as it would place null in the list.
+                break;
         }
+    }
+
+    private idToIndex(configurations: InstanceConfiguration[], id: string): number | null {
+        let result_index = null;
+        configurations.forEach((instance_configuration: InstanceConfiguration, index) => {
+            if (instance_configuration.id === id) {
+                // This is the correct configuration.
+                result_index = index;
+            }
+        });
+        return result_index;
     }
 
     /**
@@ -128,7 +151,7 @@ export abstract class Model {
  * @abstract This interface should not be used directly. Use one of the child interfaces instead.
  */
 interface ParentModelRelation {
-    type: "one-to-one" | "one-to-many";
+    type: "one-to-one" | "one-to-many-index" | "one-to-many-id";
     key: string;
 }
 
@@ -136,9 +159,14 @@ export interface ParentModelOneToOneRelation extends ParentModelRelation {
     type: "one-to-one";
 }
 
-export interface ParentModelOneToManyRelation extends ParentModelRelation{
-    type: "one-to-many";
+export interface ParentModelOneToManyIndexRelation extends ParentModelRelation {
+    type: "one-to-many-index";
     index: number; // TODO: Find a way to use something like: keyof InstanceConfiguration[this["key"]] . 'keyof' needs to be replaced with something suitable for a numeric index of an array. 'keyof' is only applicable for objects.
+}
+
+export interface ParentModelOneToManyIdRelation extends ParentModelRelation {
+    type: "one-to-many-id";
+    id: string;
 }
 
 

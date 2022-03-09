@@ -4,7 +4,7 @@ import {CustomVariableInstance} from "./CustomVariableInstance";
 import {
     IDGenerator,
     Model,
-    ParentModelOneToManyRelation,
+    ParentModelOneToManyIdRelation,
 } from "../../imports";
 
 export class CustomVariableModel extends Model {
@@ -17,20 +17,20 @@ export class CustomVariableModel extends Model {
 
     public readonly id_generator = new IDGenerator();
 
-    protected defineParentConfigurationRelation(instance: CustomVariableInstance): ParentModelOneToManyRelation {
+    protected defineParentConfigurationRelation(custom_variable_instance: CustomVariableInstance): ParentModelOneToManyIdRelation {
         return {
-            type: "one-to-many",
+            type: "one-to-many-id",
             key: "custom_variables",
-            index: instance.custom_variable_index as number, // TODO: Find a way to avoid using 'as number'.
+            id: custom_variable_instance.getID(),
         };
     }
 
     public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceMap {
         this.custom_variable_instances = new CustomVariableInstanceMap;
-        parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration, custom_variable_index: number) => {
+        parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration) => {
             this.custom_variable_instances.set(
                 custom_variable_configuration.id,
-                new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, custom_variable_index)
+                new CustomVariableInstance(this, custom_variable_configuration, parent_configuration)
             );
         });
         return this.custom_variable_instances;
@@ -38,7 +38,7 @@ export class CustomVariableModel extends Model {
 
     public newInstance(parent_configuration: SC_MainSettings): CustomVariableInstance {
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
-        const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration, parent_configuration.custom_variables.length);
+        const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration);
         parent_configuration.custom_variables.push(custom_variable_configuration);
         this.custom_variable_instances.set(custom_variable_configuration.id, custom_variable_instance);
         return custom_variable_instance;

@@ -3,7 +3,7 @@ import {randomInteger} from "../../../Common";
 import {
     CustomVariableInstance,
     Model,
-    ParentModelOneToManyRelation,
+    ParentModelOneToManyIndexRelation,
     Prompt,
     PromptField,
     PromptField_Text,
@@ -16,9 +16,9 @@ export class PromptFieldModel extends Model {
         return "Field";
     }
 
-    protected defineParentConfigurationRelation(prompt_field: PromptField): ParentModelOneToManyRelation {
+    protected defineParentConfigurationRelation(prompt_field: PromptField): ParentModelOneToManyIndexRelation {
         return {
-            type: "one-to-many",
+            type: "one-to-many-index",
             key: "fields",
             index: prompt_field.prompt_field_index as number,
         };
