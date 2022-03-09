@@ -168,7 +168,6 @@ export abstract class Variable {
                 .filter(parameter_name => this.parameters[parameter_name].required === true) // Only include mandatory parameters
         ;
         if (parameter_names.length > 0) {
-            parameters = this.parameter_separator + parameter_names.join(this.parameter_separator);
             parameter_indicator = this.parameter_separator; // When the variable name ends with a parameter separator character, it indicates to a user that an argument should be supplied.
         }
 
