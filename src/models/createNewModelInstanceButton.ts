@@ -18,17 +18,20 @@ export function createNewModelInstanceButton<
         button_container_element: HTMLElement,
         instance_container_element: HTMLElement,
         parent_instance_or_configuration: InstanceClass["parent_configuration"] | InstanceClass["parent_instance"]
-    ): Promise<InstanceClass> {
+    ): Promise<{instance: InstanceClass, main_setting: Setting}> {
 
-    return new Promise<InstanceClass>((resolve_promise) => {
+    return new Promise((resolve_promise) => {
         const model = getModel<ModelClass>(model_class_name);
         new Setting(button_container_element)
             .addButton(button => button
                 .setButtonText("New " + model.getSingularName().toLocaleLowerCase())
                 .onClick(async () => {
                     const instance = model.newInstance(parent_instance_or_configuration) as InstanceClass;
-                    model.createSettingFields(instance, instance_container_element);
-                    resolve_promise(instance);
+                    const main_setting = model.createSettingFields(instance, instance_container_element);
+                    resolve_promise({
+                        "instance": instance,
+                        "main_setting": main_setting,
+                    });
                     await plugin.saveSettings();
                 }),
             )

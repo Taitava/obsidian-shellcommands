@@ -29,48 +29,40 @@ export abstract class Model {
      */
     public abstract newInstance(parent_instance_or_configuration: Instance | InstanceConfiguration): Instance;
 
-    /**
-     *
-     * @param instance
-     * @param container_element Optional.
-     *  - If defined, a new nested container element will be created in the given element, and the new element will be stored to instance.setting_fields_container.
-     *  - If not defined, instance.setting_fields_container must already have an HTMLElement.
-     */
-    public createSettingFields(instance: Instance, container_element?: HTMLElement) {
-        if (container_element) {
-            // Create a container
-            instance.setting_fields_container = container_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
-        } else if (!instance.setting_fields_container) {
-            // No container
-            throw new Error(this.constructor.name + ".createSettingFields(): instance.setting_fields_container is not set, and no parent container is passed as an argument.");
+    public createSettingFields(instance: Instance, parent_element: HTMLElement, with_deletion = true) {
+        // Create a container
+        const setting_fields_container = parent_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
+
+        const main_setting_field = this._createSettingFields(instance, setting_fields_container);
+        if (with_deletion) {
+            main_setting_field.addExtraButton(button => button
+                .setIcon("trash")
+                .setTooltip("Delete this " + this.getSingularName().toLocaleLowerCase())
+                .onClick(() => {
+                    // The trash icon has been clicked
+                    // Open up a modal asking for confirmation if the instance can be deleted from this.parent_configuration.
+                    const confirmation_modal = new ConfirmationModal(
+                        this.plugin,
+                        "Delete " + this.getSingularName().toLocaleLowerCase() + ": " + instance.getTitle(),
+                        "Are you sure you want to delete this " + this.getSingularName().toLocaleLowerCase() + "?",
+                        "Yes, delete",
+                    );
+                    confirmation_modal.open();
+                    confirmation_modal.promise.then(async () => {
+                        // User has confirmed the deletion.
+                        // Delete the configuration and remove the instance from custom collections.
+                        this.deleteInstance(instance);
+
+                        // Delete setting fields.
+                        setting_fields_container.remove();
+
+                        // Save settings
+                        await this.plugin.saveSettings();
+                    });
+                }),
+            );
         }
-        const main_setting_field = this._createSettingFields(instance, instance.setting_fields_container);
-        main_setting_field.addExtraButton(button => button
-            .setIcon("trash")
-            .setTooltip("Delete this " + this.getSingularName().toLocaleLowerCase())
-            .onClick(() => {
-                // The trash icon has been clicked
-                // Open up a modal asking for confirmation if the instance can be deleted from this.parent_configuration.
-                const confirmation_modal = new ConfirmationModal(
-                    this.plugin,
-                    "Delete " + this.getSingularName().toLocaleLowerCase() + ": " + instance.getTitle(),
-                    "Are you sure you want to delete this " + this.getSingularName().toLocaleLowerCase() + "?",
-                    "Yes, delete",
-                );
-                confirmation_modal.open();
-                confirmation_modal.promise.then(async () => {
-                    // User has confirmed the deletion.
-                    // Delete the configuration and remove the instance from custom collections.
-                    this.deleteInstance(instance);
-
-                    // Delete setting fields.
-                    this.deleteSettingFields(instance);
-
-                    // Save settings
-                    await this.plugin.saveSettings();
-                });
-            }),
-        );
+        return main_setting_field;
     }
 
     /**
@@ -82,19 +74,6 @@ export abstract class Model {
      * @protected
      */
     protected abstract _createSettingFields(instance: Instance, container_element: HTMLElement): Setting;
-
-    public resetSettingFields(instance: Instance) {
-        if (!instance.setting_fields_container) {
-            // No container
-            throw new Error(this.constructor.name + ".resetSettingFields(): instance.setting_fields_container is not set. This method can only be called _after_ createSettingFields() has been called!");
-        }
-        instance.setting_fields_container.empty();
-        this.createSettingFields(instance);
-    }
-
-    private deleteSettingFields(instance: Instance) {
-        instance.setting_fields_container.remove();
-    }
 
     /**
      * Deletes the instance from configuration, and calls _deleteChild() which will delete the instance from custom collections.

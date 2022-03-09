@@ -4,8 +4,6 @@ import {
 
 export abstract class Instance {
 
-    public setting_fields_container: HTMLElement;
-
     /**
      * Configuration of the parent instance. E.g. if the current instance is a PromptField, then parent_configurations is a Prompt's configuration.
      * Can be trusted to always exist, unlike parent_instance.

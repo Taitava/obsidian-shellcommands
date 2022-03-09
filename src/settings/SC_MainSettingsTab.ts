@@ -292,8 +292,8 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // 'New prompt' button
         const new_prompt_button_promise = createNewModelInstanceButton<PromptModel, Prompt>(this.plugin, PromptModel.name, container_element, prompts_container_element, this.plugin.settings);
-        new_prompt_button_promise.then((prompt: Prompt) => {
-            prompt_model.openSettingsModal(prompt); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
+        new_prompt_button_promise.then((result: {instance: Prompt, main_setting: Setting}) => {
+            prompt_model.openSettingsModal(result.instance, result.main_setting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
         });
     }
 

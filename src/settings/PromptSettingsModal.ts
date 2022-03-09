@@ -14,6 +14,7 @@ export class PromptSettingsModal extends SC_Modal {
     constructor(
         plugin: SC_Plugin,
         private readonly prompt: Prompt,
+        private readonly prompt_name_setting: Setting,
     ) {
         super(plugin);
     }
@@ -32,7 +33,7 @@ export class PromptSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
 
                     // Update the title in settings view by resetting setting fields.
-                    this.prompt.model.resetSettingFields(this.prompt);
+                    this.prompt_name_setting.setName(new_title);
                 }),
             )
 

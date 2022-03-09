@@ -54,18 +54,18 @@ export class PromptModel extends Model {
     }
 
     protected _createSettingFields(prompt: Prompt, container_element: HTMLElement): Setting {
-        const setting = new Setting(container_element)
+        const prompt_name_setting = new Setting(container_element)
             // Configuration button
             .setName(prompt.getTitle())
             .addExtraButton(button => button // TODO: Change to cog icon.
                 .setTooltip("Define prompt fields")
                 .setIcon("gear")
                 .onClick(() => {
-                    this.openSettingsModal(prompt);
+                    this.openSettingsModal(prompt, prompt_name_setting);
                 }),
             )
         ;
-        return setting;
+        return prompt_name_setting;
     }
 
     public validateValue(prompt: Prompt, field: string, value: unknown): Promise<void> {
@@ -73,8 +73,8 @@ export class PromptModel extends Model {
         return Promise.resolve(undefined);
     }
 
-    public openSettingsModal(prompt: Prompt) {
-        const modal = new PromptSettingsModal(this.plugin, prompt);
+    public openSettingsModal(prompt: Prompt, prompt_name_setting: Setting) {
+        const modal = new PromptSettingsModal(this.plugin, prompt, prompt_name_setting);
         modal.open();
     }
 
