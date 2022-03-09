@@ -2,6 +2,9 @@ import {Setting} from "obsidian";
 import {randomInteger} from "../../../Common";
 import {
     CustomVariableInstance,
+    CustomVariableModel,
+    CustomVariableSettingsModal,
+    getModel,
     Model,
     ParentModelOneToManyIndexRelation,
     Prompt,
@@ -125,11 +128,38 @@ export class PromptFieldModel extends Model {
                 .addDropdown(dropdown => dropdown
                     .addOption("", "") // An option for a situation when nothing is selected.
                     .addOptions(custom_variable_options)
-                    .addOption("new", "Create a new custom variable") // TODO: Make selecting this open a prompt for creating a new custom variable.
+                    .addOption("new", "Create a new custom variable")
                     .setValue(prompt_field.configuration.target_variable_id)
-                    .onChange(async (new_target_variable: string) => {
-                        prompt_field.configuration.target_variable_id = new_target_variable;
-                        await this.plugin.saveSettings();
+                    .onChange(async (new_target_variable_id: string) => {
+                        if ("new" === new_target_variable_id) {
+                            // Create a new custom variable.
+                            const model = getModel<CustomVariableModel>(CustomVariableModel.name)
+                            const custom_variable_instance = model.newInstance(this.plugin.settings);
+                            this.plugin.saveSettings().then(() => {
+                                const modal = new CustomVariableSettingsModal(
+                                    this.plugin,
+                                    custom_variable_instance,
+                                    async () => {
+                                        // Variable is created.
+                                        dropdown.addOption(custom_variable_instance.getID(), custom_variable_instance.getTitle());
+                                        dropdown.setValue(custom_variable_instance.getID());
+                                        prompt_field.configuration.target_variable_id = custom_variable_instance.getID();
+                                        await this.plugin.saveSettings();
+                                    },
+                                    async () => {
+                                        dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
+                                        // Variable creation was cancelled.
+                                        model.deleteInstance(custom_variable_instance);
+                                        await this.plugin.saveSettings();
+                                    },
+                                );
+                                modal.open();
+                            });
+                        } else {
+                            // Use an existing target_variable.
+                            prompt_field.configuration.target_variable_id = new_target_variable_id;
+                            await this.plugin.saveSettings();
+                        }
                     })
                 )
             ,
