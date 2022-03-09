@@ -3,25 +3,6 @@ import SC_Plugin from "../main";
 import {escapeValue} from "./escapers/EscapeValue";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
-interface IArguments {
-    [key: string]: any;
-}
-
-/**
- * key = string, parameter name
- * value = boolean, is the parameter mandatory or not?
- */
-export interface IParameters {
-    [key: string]: {
-        /** What data type is allowed. (New types can be added later). Should be omitted, if 'options' is used. */
-        type?: "string" | "integer";
-        /** This can define static values for this parameter. Should be omitted, if 'type' is used. */
-        options?: string[];
-        /** Is this parameter mandatory? */
-        required: boolean;
-    };
-}
-
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
  */
@@ -232,4 +213,23 @@ export abstract class Variable {
     public static(): any {
         return this.constructor as typeof Variable;
     }
+}
+
+interface IArguments {
+    [key: string]: any;
+}
+
+/**
+ * key = string, parameter name
+ * value = boolean, is the parameter mandatory or not?
+ */
+export interface IParameters {
+    [key: string]: {
+        /** What data type is allowed. (New types can be added later). Should be omitted, if 'options' is used. */
+        type?: "string" | "integer";
+        /** This can define static values for this parameter. Should be omitted, if 'type' is used. */
+        options?: string[];
+        /** Is this parameter mandatory? */
+        required: boolean;
+    };
 }
