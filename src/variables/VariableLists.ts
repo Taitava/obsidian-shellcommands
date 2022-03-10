@@ -16,7 +16,6 @@ import {DEBUG_ON} from "../Debug";
 import {Variable_Passthrough} from "./Variable_Passthrough";
 import SC_Plugin from "../main";
 import {Variable_YAMLValue} from "./Variable_YAMLValue";
-import {SC_Event} from "../events/SC_Event";
 import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
 import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
 import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
@@ -25,9 +24,8 @@ import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
-import {EventVariable} from "./event_variables/EventVariable";
 
-export function getVariables(plugin: SC_Plugin, sc_event: SC_Event): VariableSet {
+export function getVariables(plugin: SC_Plugin): VariableSet {
     const variables = new VariableSet([
         // Normal variables
         new Variable_CaretPosition(plugin),
@@ -46,14 +44,14 @@ export function getVariables(plugin: SC_Plugin, sc_event: SC_Event): VariableSet
         new Variable_YAMLValue(plugin),
 
         // Event variables
-        new Variable_EventFileExtension(plugin, sc_event),
-        new Variable_EventFileName(plugin, sc_event),
-        new Variable_EventFilePath(plugin, sc_event),
-        new Variable_EventFolderName(plugin, sc_event),
-        new Variable_EventFolderPath(plugin, sc_event),
-        new Variable_EventTags(plugin, sc_event),
-        new Variable_EventTitle(plugin, sc_event),
-        new Variable_EventYAMLValue(plugin, sc_event),
+        new Variable_EventFileExtension(plugin),
+        new Variable_EventFileName(plugin),
+        new Variable_EventFilePath(plugin),
+        new Variable_EventFolderName(plugin),
+        new Variable_EventFolderPath(plugin),
+        new Variable_EventTags(plugin),
+        new Variable_EventTitle(plugin),
+        new Variable_EventYAMLValue(plugin),
     ]);
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.

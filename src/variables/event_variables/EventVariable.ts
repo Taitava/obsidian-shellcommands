@@ -1,24 +1,13 @@
 import {Variable} from "../Variable";
-import SC_Plugin from "../../main";
 import {SC_Event} from "../../events/SC_Event";
 
 export abstract class EventVariable extends Variable {
-    /**
-     * If sc_event is not set, then the variable is tried to be read in a situation where no event has happened - which should be denied.
-     * @protected
-     */
-    protected sc_event?: SC_Event;
 
     /**
      * @protected
      * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
      */
     protected supported_sc_events: typeof SC_Event[];
-
-    public constructor(plugin: SC_Plugin, sc_event: SC_Event) {
-        super(plugin);
-        this.sc_event = sc_event;
-    }
 
     /**
      * Every subclass should call this method in their generateValue() before returning a value. If this method returns false,
@@ -28,16 +17,17 @@ export abstract class EventVariable extends Variable {
      *
      * @protected
      */
-    protected checkSC_EventSupport(): boolean{
+    protected checkSC_EventSupport(sc_event: SC_Event): boolean{
         // 1. Check generally that an event is happening.
-        if (!this.sc_event) {
+        // (Maybe this check is not so important anymore, as sc_event is now received as a parameter instead of from a property, but check just in case.)
+        if (!sc_event) {
             this.newErrorMessage("This variable can only be used during events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
 
         // 2. Check particularly which event it is.
-        if (!this.supportsSC_Event(this.sc_event.getClass())) {
-            this.newErrorMessage("This variable does not support event '" + this.sc_event.static().getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
+        if (!this.supportsSC_Event(sc_event.getClass())) {
+            this.newErrorMessage("This variable does not support event '" + sc_event.static().getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
         return true;

@@ -25,12 +25,12 @@ export class Variable_EventFolderPath extends EventVariable {
         SC_Event_FolderMenu,
     ];
 
-    protected generateValue(): string | null {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const folder = (this.sc_event as SC_Event_FileMenu | SC_Event_FolderMenu).getFolder();
+        const folder = sc_event.getFolder();
         return getFolderPath(this.app, folder, this.arguments.mode);
     }
 

@@ -23,12 +23,12 @@ export class Variable_EventFileExtension extends EventVariable {
         SC_Event_FileMenu,
     ];
 
-    protected generateValue(): string | null {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const file = (this.sc_event as SC_Event_FileMenu).getFile();
+        const file = sc_event.getFile();
         return getFileExtension(file, this.arguments.dot === "with-dot");
     }
 

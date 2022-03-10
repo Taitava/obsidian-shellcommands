@@ -56,7 +56,7 @@ export function parseShellCommandVariables(plugin: SC_Plugin, command: string, s
             }
 
             // Render the variable
-            const raw_variable_value = variable.getValue();
+            const raw_variable_value = variable.getValue(sc_event);
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 debugLog("Parsing command " + command + " failed.");

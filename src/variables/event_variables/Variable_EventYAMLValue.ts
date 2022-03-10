@@ -22,12 +22,12 @@ export class Variable_EventYAMLValue extends EventVariable {
         SC_Event_FileMenu,
     ];
 
-    protected generateValue(): string | null {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const file = (this.sc_event as SC_Event_FileMenu).getFile();
+        const file = sc_event.getFile();
         const result = getFileYAMLValue(this.app, file, this.arguments.property_name);
         if (Array.isArray(result)) {
             // The result contains error message(s).

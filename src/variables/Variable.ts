@@ -1,6 +1,7 @@
 import {App} from "obsidian";
 import SC_Plugin from "../main";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {SC_Event} from "../events/SC_Event";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -44,11 +45,14 @@ export abstract class Variable {
     /**
      * TODO: Remove this method and make generateValue() public.
      */
-    public getValue() {
-        return this.generateValue();
+    public getValue(sc_event?: SC_Event) {
+        return this.generateValue(sc_event);
     }
 
-    protected abstract generateValue(): string|null;
+    /**
+     * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method, but that method might be removed some day.
+     */
+    protected abstract generateValue(sc_event?: SC_Event): string|null;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;

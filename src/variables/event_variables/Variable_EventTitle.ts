@@ -9,11 +9,11 @@ export class Variable_EventTitle extends EventVariable {
         SC_Event_FileMenu,
     ];
 
-    protected generateValue(): string | null {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        return (this.sc_event as SC_Event_FileMenu).getFile().basename;
+        return sc_event.getFile().basename;
     }
 }

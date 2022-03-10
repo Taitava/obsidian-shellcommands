@@ -22,12 +22,12 @@ export class Variable_EventTags extends EventVariable {
         separator: string,
     };
 
-    protected generateValue(): string {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu): string {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const file = (this.sc_event as SC_Event_FileMenu).getFile();
+        const file = sc_event.getFile();
         return getFileTags(this.app, file).join(this.arguments.separator);
     }
 }
