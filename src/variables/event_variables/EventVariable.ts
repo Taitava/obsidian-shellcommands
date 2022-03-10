@@ -15,8 +15,8 @@ export abstract class EventVariable extends Variable {
      */
     protected supported_sc_events: typeof SC_Event[];
 
-    public constructor(plugin: SC_Plugin, shell: string, sc_event: SC_Event) {
-        super(plugin, shell);
+    public constructor(plugin: SC_Plugin, sc_event: SC_Event) {
+        super(plugin);
         this.sc_event = sc_event;
     }
 

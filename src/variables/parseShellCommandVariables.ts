@@ -3,6 +3,7 @@ import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {getVariables} from "./VariableLists";
 import {SC_Event} from "../events/SC_Event";
+import {escapeValue} from "./escapers/EscapeValue";
 
 /**
  * @param plugin
@@ -55,7 +56,7 @@ export function parseShellCommandVariables(plugin: SC_Plugin, command: string, s
             }
 
             // Render the variable
-            const variable_value = variable.getValue(escape);
+            const raw_variable_value = variable.getValue();
             if (variable.getErrorMessages().length) {
                 // There has been a problem and executing the command should be cancelled.
                 debugLog("Parsing command " + command + " failed.");
@@ -63,10 +64,23 @@ export function parseShellCommandVariables(plugin: SC_Plugin, command: string, s
             }
             else
             {
+                // Parsing was ok.
+
+                // Escape the value if needed.
+                let use_variable_value: string;
+                if (escape) {
+                    // Use an escaped value.
+                    use_variable_value = escapeValue(shell, raw_variable_value);
+                } else {
+                    // No escaping is wanted, so use the raw value.
+                    use_variable_value = raw_variable_value;
+                }
+
+                // Replace the variable name with the variable value.
                 parsed_command = parsed_command.replace(substitute, () => {
                     // Do the replacing in a function in order to avoid a possible $ character to be interpreted by JavaScript to interact with the regex.
                     // More information: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter (referenced 2021-11-02.)
-                    return variable_value;
+                    return use_variable_value;
                 });
             }
         }

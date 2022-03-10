@@ -120,20 +120,17 @@ export abstract class SC_Event {
         return this.event_title;
     }
 
-    /**
-     * @param shell Needed just for being able to instantiate variables.
-     */
-    public getSummaryOfEventVariables(shell: string): string {
+    public getSummaryOfEventVariables(): string {
         const variable_names: string[] = [];
-        this.getEventVariables(shell).forEach((variable: Variable) => {
+        this.getEventVariables().forEach((variable: Variable) => {
             variable_names.push("{{" + variable.variable_name + "}}");
         });
         return variable_names.join(", ");
     }
 
-    private getEventVariables(shell: string) {
+    private getEventVariables() {
         const event_variables: EventVariable[] = [];
-        getVariables(this.plugin, shell).forEach((variable: Variable) => {
+        getVariables(this.plugin).forEach((variable: Variable) => {
             // Check if the variable is an EventVariable
             if (variable instanceof EventVariable) {
                 // Yes it is.

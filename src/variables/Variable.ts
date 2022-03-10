@@ -1,6 +1,5 @@
 import {App} from "obsidian";
 import SC_Plugin from "../main";
-import {escapeValue} from "./escapers/EscapeValue";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 /**
@@ -37,20 +36,11 @@ export abstract class Variable {
         this.shell = shell;
     }
 
-    public getValue(escape: boolean) {
-        const raw_value = this.generateValue();
-        if (null === raw_value) {
-            // Some error(s) has occurred when generating the variable's value.
-            // Prevent passing null to escapeValue().
-            return null;
-        }
-        if (escape) {
-            // Value should be escaped.
-            return escapeValue(this.shell, raw_value);
-        } else {
-            // A raw, unescaped value is expected.
-            return raw_value;
-        }
+    /**
+     * TODO: Remove this method and make generateValue() public.
+     */
+    public getValue() {
+        return this.generateValue();
     }
 
     protected abstract generateValue(): string|null;

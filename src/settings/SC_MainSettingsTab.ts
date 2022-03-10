@@ -237,7 +237,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
+        const variables = getVariables(this.plugin);
         variables.forEach((variable: Variable) => {
             const paragraph = container_element.createEl("p");
             paragraph.insertAdjacentHTML("afterbegin",

@@ -27,33 +27,33 @@ import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 import {EventVariable} from "./event_variables/EventVariable";
 
-export function getVariables(plugin: SC_Plugin, shell: string, sc_event?: SC_Event) {
+export function getVariables(plugin: SC_Plugin, sc_event?: SC_Event) {
     const shell_command_variables: Variable[] = [
         // Normal variables
-        new Variable_CaretPosition(plugin, shell),
-        new Variable_Clipboard(plugin, shell),
-        new Variable_Date(plugin, shell),
-        new Variable_FileExtension(plugin, shell),
-        new Variable_FileName(plugin, shell),
-        new Variable_FilePath(plugin, shell),
-        new Variable_FolderName(plugin, shell),
-        new Variable_FolderPath(plugin, shell),
-        new Variable_Selection(plugin, shell),
-        new Variable_Tags(plugin, shell),
-        new Variable_Title(plugin, shell),
-        new Variable_VaultPath(plugin, shell),
-        new Variable_Workspace(plugin, shell),
-        new Variable_YAMLValue(plugin, shell),
+        new Variable_CaretPosition(plugin),
+        new Variable_Clipboard(plugin),
+        new Variable_Date(plugin),
+        new Variable_FileExtension(plugin),
+        new Variable_FileName(plugin),
+        new Variable_FilePath(plugin),
+        new Variable_FolderName(plugin),
+        new Variable_FolderPath(plugin),
+        new Variable_Selection(plugin),
+        new Variable_Tags(plugin),
+        new Variable_Title(plugin),
+        new Variable_VaultPath(plugin),
+        new Variable_Workspace(plugin),
+        new Variable_YAMLValue(plugin),
 
         // Event variables
-        new Variable_EventFileExtension(plugin, shell, sc_event),
-        new Variable_EventFileName(plugin, shell, sc_event),
-        new Variable_EventFilePath(plugin, shell, sc_event),
-        new Variable_EventFolderName(plugin, shell, sc_event),
-        new Variable_EventFolderPath(plugin, shell, sc_event),
-        new Variable_EventTags(plugin, shell, sc_event),
-        new Variable_EventTitle(plugin, shell, sc_event),
-        new Variable_EventYAMLValue(plugin, shell, sc_event),
+        new Variable_EventFileExtension(plugin, sc_event),
+        new Variable_EventFileName(plugin, sc_event),
+        new Variable_EventFilePath(plugin, sc_event),
+        new Variable_EventFolderName(plugin, sc_event),
+        new Variable_EventFolderPath(plugin, sc_event),
+        new Variable_EventTags(plugin, sc_event),
+        new Variable_EventTitle(plugin, sc_event),
+        new Variable_EventYAMLValue(plugin, sc_event),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
