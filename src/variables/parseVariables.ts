@@ -15,7 +15,6 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (const variable of variables)
     {
-        const variable: Variable = variables[variable_index];
         const pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
