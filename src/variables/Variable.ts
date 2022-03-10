@@ -7,9 +7,8 @@ import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
  */
 export abstract class Variable {
     private static readonly parameter_separator = ":";
-    protected readonly plugin: SC_Plugin;
     protected readonly app: App;
-    private error_messages: string[] = [];
+    private error_messages: string[]; // Default value is set in .reset()
     public readonly variable_name: string;
     public readonly help_text: string;
 
@@ -23,17 +22,23 @@ export abstract class Variable {
      * This contains actual values for parameters.
      * @protected
      */
-    protected arguments: IArguments = {};
+    protected arguments: IArguments; // Default value is set in .reset()
+
+    constructor(
+        protected readonly plugin: SC_Plugin,
+    ) {
+        this.app = plugin.app;
+        this.reset(); // This is also called in parseShellCommandVariables(), but call it here just in case.
+    }
 
     /**
-     *
-     * @param plugin
-     * @param shell Used to determine what kind of escaping should be used.
+     * Variable instances are reused multiple times. This method resets all properties that are modified during usage:
+     *  - error_messages
+     *  - arguments
      */
-    constructor(plugin: SC_Plugin, shell: string) {
-        this.plugin = plugin
-        this.app = plugin.app;
-        this.shell = shell;
+    public reset() {
+        this.error_messages = [];
+        this.arguments = {};
     }
 
     /**

@@ -32,6 +32,10 @@ import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomple
 import {getSC_Events} from "./events/SC_EventList";
 import {SC_Event} from "./events/SC_Event";
 import {
+	getVariables,
+	VariableSet,
+} from "./variables/VariableLists";
+import {
 	CustomVariableInstanceMap,
 	CustomVariableModel,
 	getModel,
@@ -53,6 +57,7 @@ export default class SC_Plugin extends Plugin {
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
+	private variables: VariableSet;
 
 	/**
 	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
@@ -91,9 +96,12 @@ export default class SC_Plugin extends Plugin {
 		const prompt_model = getModel<PromptModel>(PromptModel.name);
 		this.prompts = prompt_model.loadInstances(this.settings);
 
-		// Load CustomVariables
+		// Load CustomVariables (configuration instances)
 		const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
 		this.custom_variable_instances = custom_variable_model.loadInstances(this.settings);
+
+		// Load variables (both built-in and custom ones). Do this AFTER loading configs for custom variables!
+		this.variables = getVariables(this);
 
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
@@ -127,6 +135,10 @@ export default class SC_Plugin extends Plugin {
 
 	public getTShellCommands() {
 		return this.t_shell_commands;
+	}
+
+	public getVariables() {
+		return this.variables;
 	}
 
 	public getPrompts() {

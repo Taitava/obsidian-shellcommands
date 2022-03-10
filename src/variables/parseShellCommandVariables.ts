@@ -1,7 +1,5 @@
-import {Variable} from "./Variable";
 import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
-import {getVariables} from "./VariableLists";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 
@@ -13,15 +11,17 @@ import {escapeValue} from "./escapers/EscapeValue";
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
 export function parseShellCommandVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
-    const variables = getVariables(plugin, shell, sc_event);
+    const variables = plugin.getVariables(); // TODO: How to handle sc_event?
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
-    for (const variable_index in variables)
+    for (const variable of variables)
     {
         const variable: Variable = variables[variable_index];
         const pattern = new RegExp(variable.getPattern(), "ig"); // i: case-insensitive; g: match all occurrences instead of just the first one.
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
         while ((argument_matches = pattern.exec(command)) !== null) {
+            // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
+            variable.reset();
 
             // Remove stuff that should not be iterated in a later loop.
             const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {

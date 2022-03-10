@@ -4,7 +4,6 @@ import {ParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
-import {getVariables} from "../variables/VariableLists";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 import {DocumentationEventsFolderLink} from "../Documentation";
 
@@ -130,7 +129,7 @@ export abstract class SC_Event {
 
     private getEventVariables() {
         const event_variables: EventVariable[] = [];
-        getVariables(this.plugin).forEach((variable: Variable) => {
+        this.plugin.getVariables().forEach((variable: Variable) => {
             // Check if the variable is an EventVariable
             if (variable instanceof EventVariable) {
                 // Yes it is.

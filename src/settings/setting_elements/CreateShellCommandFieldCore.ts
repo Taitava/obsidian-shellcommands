@@ -52,7 +52,7 @@ export function CreateShellCommandFieldCore(
     if (show_autocomplete_menu) {
         // @ts-ignore
         const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
-        createAutocomplete(input_element, getVariableAutocompleteItems(), on_change);
+        createAutocomplete(input_element, getVariableAutocompleteItems(plugin), on_change);
     }
 
     return setting_group;

@@ -27,8 +27,8 @@ import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 import {EventVariable} from "./event_variables/EventVariable";
 
-export function getVariables(plugin: SC_Plugin, sc_event?: SC_Event) {
-    const shell_command_variables: Variable[] = [
+export function getVariables(plugin: SC_Plugin, sc_event: SC_Event): VariableSet {
+    const variables = new VariableSet([
         // Normal variables
         new Variable_CaretPosition(plugin),
         new Variable_Clipboard(plugin),
@@ -54,49 +54,14 @@ export function getVariables(plugin: SC_Plugin, sc_event?: SC_Event) {
         new Variable_EventTags(plugin, sc_event),
         new Variable_EventTitle(plugin, sc_event),
         new Variable_EventYAMLValue(plugin, sc_event),
-    ];
+    ]);
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
-        shell_command_variables.push(
-            new Variable_Passthrough(plugin, shell),
+        variables.add(
+            new Variable_Passthrough(plugin),
         );
     }
-    return shell_command_variables;
+    return variables;
 }
 
-export function getVariableClasses() {
-    const shell_command_variables: (typeof Variable | typeof EventVariable)[]  = [ // typeof EventVariable needs to be explicitly mentioned, because its constructor() signature contains more parameters than the constructor signature of Variable.
-        // Normal variables
-        Variable_CaretPosition,
-        Variable_Clipboard,
-        Variable_Date,
-        Variable_FileExtension,
-        Variable_FileName,
-        Variable_FilePath,
-        Variable_FolderName,
-        Variable_FolderPath,
-        Variable_Selection,
-        Variable_Tags,
-        Variable_Title,
-        Variable_VaultPath,
-        Variable_Workspace,
-        Variable_YAMLValue,
-
-        // Event variables
-        Variable_EventFileExtension,
-        Variable_EventFileName,
-        Variable_EventFilePath,
-        Variable_EventFolderName,
-        Variable_EventFolderPath,
-        Variable_EventTags,
-        Variable_EventTitle,
-        Variable_EventYAMLValue,
-    ];
-    if (DEBUG_ON) {
-        // Variables that are only designed for 'Shell commands test suite'.
-        shell_command_variables.push(
-            Variable_Passthrough,
-        );
-    }
-    return shell_command_variables;
-}
+export class VariableSet extends Set<Variable> {}

@@ -12,7 +12,6 @@ import {
     GitHubLink,
     ChangelogLink,
 } from "../Documentation";
-import {getVariables} from "../variables/VariableLists";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
@@ -237,7 +236,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        const variables = getVariables(this.plugin);
+        const variables = this.plugin.getVariables();
         variables.forEach((variable: Variable) => {
             const paragraph = container_element.createEl("p");
             paragraph.insertAdjacentHTML("afterbegin",
