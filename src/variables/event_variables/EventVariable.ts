@@ -13,7 +13,7 @@ export abstract class EventVariable extends Variable {
      * @protected
      * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
      */
-    protected static supported_sc_events: typeof SC_Event[];
+    protected supported_sc_events: typeof SC_Event[];
 
     public constructor(plugin: SC_Plugin, shell: string, sc_event: SC_Event) {
         super(plugin, shell);
@@ -31,23 +31,23 @@ export abstract class EventVariable extends Variable {
     protected checkSC_EventSupport(): boolean{
         // 1. Check generally that an event is happening.
         if (!this.sc_event) {
-            this.newErrorMessage("This variable can only be used during events: " + this.static().getSummaryOfSupportedEvents());
+            this.newErrorMessage("This variable can only be used during events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
 
         // 2. Check particularly which event it is.
-        if (!this.static().supportsSC_Event(this.sc_event.getClass())) {
-            this.newErrorMessage("This variable does not support event '" + this.sc_event.static().getTitle() + "'. Supported events: " + this.static().getSummaryOfSupportedEvents());
+        if (!this.supportsSC_Event(this.sc_event.getClass())) {
+            this.newErrorMessage("This variable does not support event '" + this.sc_event.static().getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
             return false;
         }
         return true;
     }
 
-    public static supportsSC_Event(sc_event_class: typeof SC_Event): boolean {
+    public supportsSC_Event(sc_event_class: typeof SC_Event): boolean {
         return this.supported_sc_events.contains(sc_event_class);
     }
 
-    private static getSummaryOfSupportedEvents(): string {
+    private getSummaryOfSupportedEvents(): string {
         const sc_event_titles: string[] = [];
         this.supported_sc_events.forEach((sc_event_class: typeof SC_Event) => {
             sc_event_titles.push(sc_event_class.getTitle());
@@ -55,11 +55,7 @@ export abstract class EventVariable extends Variable {
         return sc_event_titles.join(", ");
     }
 
-    public static getAvailabilityText(): string {
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> in events: " + this.getSummaryOfSupportedEvents() + ".";
-    }
-
-    public static(): any {
-        return this.constructor as typeof EventVariable;
     }
 }

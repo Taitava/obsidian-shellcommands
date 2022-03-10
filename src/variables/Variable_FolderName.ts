@@ -1,8 +1,8 @@
 import {FolderVariable} from "./FolderVariable";
 
 export class Variable_FolderName extends FolderVariable {
-    public static variable_name = "folder_name";
-    public static help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
+    public variable_name = "folder_name";
+    public help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
 
     protected generateValue(): string {
         const folder = this.getFolder();

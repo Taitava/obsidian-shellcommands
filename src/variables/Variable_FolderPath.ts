@@ -4,8 +4,8 @@ import {FolderVariable} from "./FolderVariable";
 import {getFolderPath} from "./VariableHelpers";
 
 export class Variable_FolderPath extends FolderVariable {
-    public static variable_name = "folder_path";
-    public static help_text = "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+    public variable_name = "folder_path";
+    public help_text = "Gives path to the current file's parent folder, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -27,7 +27,7 @@ export class Variable_FolderPath extends FolderVariable {
         }
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{

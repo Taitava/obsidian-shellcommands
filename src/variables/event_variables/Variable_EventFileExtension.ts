@@ -5,8 +5,8 @@ import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFileExtension extends EventVariable {
-    public static variable_name = "event_file_extension";
-    public static help_text = "Gives the selected file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
+    public variable_name = "event_file_extension";
+    public help_text = "Gives the selected file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {
@@ -19,7 +19,7 @@ export class Variable_EventFileExtension extends EventVariable {
         "dot": "with-dot" | "no-dot",
     }
 
-    protected static supported_sc_events = [
+    protected supported_sc_events = [
         SC_Event_FileMenu,
     ];
 
@@ -32,7 +32,7 @@ export class Variable_EventFileExtension extends EventVariable {
         return getFileExtension(file, this.arguments.dot === "with-dot");
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{

@@ -3,8 +3,8 @@ import {IParameters, Variable} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 export class Variable_CaretPosition extends Variable {
-    public static variable_name = "caret_position";
-    public static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
+    public variable_name = "caret_position";
+    public help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -46,7 +46,7 @@ export class Variable_CaretPosition extends Variable {
         }
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{
@@ -94,7 +94,7 @@ export class Variable_CaretPosition extends Variable {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
     }
 
-    public static getAvailabilityText(): string {
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
     }
 }

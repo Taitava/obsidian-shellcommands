@@ -126,7 +126,7 @@ export abstract class SC_Event {
     public getSummaryOfEventVariables(shell: string): string {
         const variable_names: string[] = [];
         this.getEventVariables(shell).forEach((variable: Variable) => {
-            variable_names.push("{{" + variable.getVariableName() + "}}");
+            variable_names.push("{{" + variable.variable_name + "}}");
         });
         return variable_names.join(", ");
     }
@@ -138,7 +138,7 @@ export abstract class SC_Event {
             if (variable instanceof EventVariable) {
                 // Yes it is.
                 // Check if the variable supports this particular event.
-                if (variable.static().supportsSC_Event(this.getClass())) {
+                if (variable.supportsSC_Event(this.getClass())) {
                     // Yes it supports.
                     event_variables.push(variable);
                 }

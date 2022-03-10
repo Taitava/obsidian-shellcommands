@@ -1,8 +1,8 @@
 import {FileVariable} from "./FileVariable";
 
 export class Variable_FileName extends FileVariable {
-    public static variable_name = "file_name";
-    public static help_text = "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.";
+    public variable_name = "file_name";
+    public help_text = "Gives the current file name with a file extension. If you need it without the extension, use {{title}} instead.";
 
     protected generateValue(): string {
         const file = this.getFile();

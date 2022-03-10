@@ -6,8 +6,8 @@ import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFilePath extends EventVariable {
-    public static variable_name = "event_file_path";
-    public static help_text = "Gives path to the selected file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+    public variable_name = "event_file_path";
+    public help_text = "Gives path to the selected file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -20,7 +20,7 @@ export class Variable_EventFilePath extends EventVariable {
         mode: "absolute" | "relative";
     }
 
-    protected static supported_sc_events = [
+    protected supported_sc_events = [
         SC_Event_FileMenu,
     ];
 
@@ -33,7 +33,7 @@ export class Variable_EventFilePath extends EventVariable {
         return getFilePath(this.app, file, this.arguments.mode);
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{

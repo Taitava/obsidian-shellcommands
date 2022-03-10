@@ -4,8 +4,8 @@ import {FileVariable} from "./FileVariable";
 import {getFilePath} from "./VariableHelpers";
 
 export class Variable_FilePath extends FileVariable{
-    public static variable_name = "file_path";
-    public static help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+    public variable_name = "file_path";
+    public help_text = "Gives path to the current file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -27,7 +27,7 @@ export class Variable_FilePath extends FileVariable{
         }
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{

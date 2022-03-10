@@ -3,8 +3,8 @@ import {Variable} from "./Variable";
 import {debugLog} from "../Debug";
 
 export class Variable_Selection extends Variable{
-    public static variable_name = "selection";
-    public static help_text = "Gives the currently selected text.";
+    public variable_name = "selection";
+    public help_text = "Gives the currently selected text.";
 
     protected generateValue(): string {
 
@@ -46,7 +46,7 @@ export class Variable_Selection extends Variable{
         }
     }
 
-    public static getAvailabilityText(): string {
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
     }
 }

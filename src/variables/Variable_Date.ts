@@ -2,8 +2,8 @@ import {moment} from "obsidian";
 import {IParameters, Variable} from "./Variable";
 
 export class Variable_Date extends Variable {
-    public static variable_name = "date";
-    public static help_text = "Gives a date/time stamp as per your liking. The \"format\" part can be customized and is mandatory. Formatting options: https://momentjs.com/docs/#/displaying/format/";
+    public variable_name = "date";
+    public help_text = "Gives a date/time stamp as per your liking. The \"format\" part can be customized and is mandatory. Formatting options: https://momentjs.com/docs/#/displaying/format/";
 
     protected static readonly parameters: IParameters = {
         format: {

@@ -3,10 +3,10 @@ import {SC_Event_FolderMenu} from "../../events/SC_Event_FolderMenu";
 import {EventVariable} from "./EventVariable";
 
 export class Variable_EventFolderName extends EventVariable {
-    public static variable_name = "event_folder_name";
-    public static help_text = "File menu: Gives the selected file's parent folder name. Folder menu: Gives the selected folder's name. No ancestor folders are included.";
+    public variable_name = "event_folder_name";
+    public help_text = "File menu: Gives the selected file's parent folder name. Folder menu: Gives the selected folder's name. No ancestor folders are included.";
 
-    protected static supported_sc_events = [
+    protected supported_sc_events = [
         SC_Event_FileMenu,
         SC_Event_FolderMenu,
     ];

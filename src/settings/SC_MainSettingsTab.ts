@@ -243,9 +243,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             paragraph.insertAdjacentHTML("afterbegin",
                 variable.getHelpName() +
                 "<br>" +
-                variable.getHelpText()
+                variable.help_text
             );
-            const availability_text: string = variable.static().getAvailabilityText();
+            const availability_text: string = variable.getAvailabilityText();
             if (availability_text) {
                 paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
             }

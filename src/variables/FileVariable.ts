@@ -11,7 +11,7 @@ export abstract class FileVariable extends Variable {
         return current_file;
     }
 
-    public static getAvailabilityText(): string {
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> when the active pane contains a file, not in graph view or other non-file view.";
     }
 }

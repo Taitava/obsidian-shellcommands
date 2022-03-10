@@ -11,9 +11,8 @@ export abstract class Variable {
     protected readonly plugin: SC_Plugin;
     protected readonly app: App;
     private error_messages: string[] = [];
-    public static readonly variable_name: string;
-    protected shell: string;
-    public static readonly help_text: string;
+    public readonly variable_name: string;
+    public readonly help_text: string;
 
     /**
      * A definition for what parameters this variables takes.
@@ -56,11 +55,6 @@ export abstract class Variable {
 
     protected abstract generateValue(): string|null;
 
-    public getVariableName() {
-        const child_class = this.constructor as typeof Variable;
-        return child_class.variable_name;
-    }
-
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
         return child_class.parameters;
@@ -72,8 +66,8 @@ export abstract class Variable {
     }
 
     public getPattern() {
-        const error_prefix = this.getVariableName() + ".getPattern(): ";
-        let pattern = '\{\{\!?' + this.getVariableName();
+        const error_prefix = this.variable_name + ".getPattern(): ";
+        let pattern = '\{\{\!?' + this.variable_name;
         for (const parameter_name in this.getParameters()) {
             const parameter = this.getParameters()[parameter_name];
             let parameter_type_pattern: string = this.getParameterSeparator();  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
@@ -148,7 +142,7 @@ export abstract class Variable {
     }
 
     protected newErrorMessage(message: string) {
-        const prefix = "{{" + this.getVariableName() + "}}: ";
+        const prefix = "{{" + this.variable_name + "}}: ";
         this.error_messages.push(prefix + message);
     }
 
@@ -158,17 +152,17 @@ export abstract class Variable {
         });
     }
 
-    public static getAutocompleteItems(): IAutocompleteItem[] {
+    public getAutocompleteItems(): IAutocompleteItem[] {
 
         // Check if the variable has at least one _mandatory_ parameter.
         let parameters = ""
         let parameter_indicator = "";
         const parameter_names =
-            Object.getOwnPropertyNames(this.parameters)
-                .filter(parameter_name => this.parameters[parameter_name].required === true) // Only include mandatory parameters
+            Object.getOwnPropertyNames(this.getParameters())
+                .filter(parameter_name => this.getParameters()[parameter_name].required === true) // Only include mandatory parameters
         ;
         if (parameter_names.length > 0) {
-            parameter_indicator = this.parameter_separator; // When the variable name ends with a parameter separator character, it indicates to a user that an argument should be supplied.
+            parameter_indicator = Variable.parameter_separator; // When the variable name ends with a parameter separator character, it indicates to a user that an argument should be supplied.
         }
 
         return [
@@ -191,26 +185,14 @@ export abstract class Variable {
     }
 
     public getHelpName() {
-        return "<strong>{{" + this.getVariableName() + "}}</strong>";
-    }
-
-    public getHelpText() {
-        const child_class = this.constructor as typeof Variable;
-        return child_class.help_text;
+        return "<strong>{{" + this.variable_name + "}}</strong>";
     }
 
     /**
      * For variables that are always available, returns an empty string.
      */
-    public static getAvailabilityText() {
+    public getAvailabilityText() {
         return "";
-    }
-
-    /**
-     * Return type needs to be 'any' so that child classes can return a child type.
-     */
-    public static(): any {
-        return this.constructor as typeof Variable;
     }
 }
 

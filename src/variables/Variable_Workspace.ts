@@ -1,8 +1,8 @@
 import {Variable} from "./Variable";
 
 export class Variable_Workspace extends Variable{
-    public static variable_name = "workspace";
-    public static help_text = "Gives the current workspace's name.";
+    public variable_name = "workspace";
+    public help_text = "Gives the current workspace's name.";
 
     protected generateValue(): string {
 
@@ -28,7 +28,7 @@ export class Variable_Workspace extends Variable{
         return workspace_name;
     }
 
-    public static getAvailabilityText(): string {
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> when the Workspaces core plugin is enabled.";
     }
 }

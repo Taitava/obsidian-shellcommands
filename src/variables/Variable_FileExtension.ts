@@ -4,8 +4,8 @@ import {getFileExtension} from "./VariableHelpers";
 import {FileVariable} from "./FileVariable";
 
 export class Variable_FileExtension extends FileVariable {
-    public static variable_name = "file_extension";
-    public static help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
+    public variable_name = "file_extension";
+    public help_text = "Gives the current file name's ending. Use {{file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {
@@ -27,7 +27,7 @@ export class Variable_FileExtension extends FileVariable {
         return getFileExtension(file, this.arguments.dot === "with-dot");
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{

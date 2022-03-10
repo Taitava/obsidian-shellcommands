@@ -4,8 +4,8 @@ import {getFileYAMLValue} from "../VariableHelpers";
 import {IParameters} from "../Variable";
 
 export class Variable_EventYAMLValue extends EventVariable {
-    public static variable_name = "event_yaml_value";
-    public static help_text = "Reads a single value from the selected file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
+    public variable_name = "event_yaml_value";
+    public help_text = "Reads a single value from the selected file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
 
     protected static readonly parameters: IParameters = {
         property_name: {
@@ -18,7 +18,7 @@ export class Variable_EventYAMLValue extends EventVariable {
         property_name: string;
     }
 
-    protected static supported_sc_events = [
+    protected supported_sc_events = [
         SC_Event_FileMenu,
     ];
 
