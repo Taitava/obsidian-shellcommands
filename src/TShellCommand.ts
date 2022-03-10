@@ -3,7 +3,7 @@ import SC_Plugin from "./main";
 import {generateObsidianCommandName, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
-import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
+import {parseVariables} from "./variables/parseVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {
@@ -289,7 +289,7 @@ export class TShellCommand {
             error_messages: [],
         };
 
-        const parsed_shell_command = parseShellCommandVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
+        const parsed_shell_command = parseVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
 
         if (Array.isArray(parsed_shell_command)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
@@ -304,7 +304,7 @@ export class TShellCommand {
         }
 
         // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const parsed_alias = parseShellCommandVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
+        const parsed_alias = parseVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
         if (Array.isArray(parsed_alias)) {
             // Variable parsing failed, because an array was returned, which contains error messages.
             debugLog("Shell command preview: Variable parsing failed for alias " + this.getAlias());

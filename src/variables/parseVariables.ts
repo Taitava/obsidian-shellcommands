@@ -10,7 +10,7 @@ import {escapeValue} from "./escapers/EscapeValue";
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseShellCommandVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
+export function parseVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
     const variables = plugin.getVariables(); // TODO: How to handle sc_event?
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (const variable of variables)

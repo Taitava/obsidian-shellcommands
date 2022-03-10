@@ -1,7 +1,7 @@
 import SC_Plugin from "../../main";
 import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
-import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
+import {parseVariables} from "../../variables/parseVariables";
 import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
@@ -65,7 +65,7 @@ export function CreateShellCommandFieldCore(
  * @public Exported because createShellCommandField uses this.
  */
 export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string) {
-    const parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell);
+    const parsed_shell_command = parseVariables(plugin, shell_command, shell);
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.
