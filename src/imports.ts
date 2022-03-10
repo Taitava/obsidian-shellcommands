@@ -12,6 +12,9 @@
 export * from "./ConfirmationModal";
 export * from "./IDGenerator";
 
+// Libraries by third parties (that are included in this repository).
+export * from "./lib/escapeRegExp";
+
 // Models - must come before subclasses of Model and Instance
 export * from "./models/Instance";
 export * from "./models/Model";
