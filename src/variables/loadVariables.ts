@@ -25,7 +25,7 @@ import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileE
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 
-export function getVariables(plugin: SC_Plugin): VariableSet {
+export function loadVariables(plugin: SC_Plugin): VariableSet {
     const variables = new VariableSet([
         // Normal variables
         new Variable_CaretPosition(plugin),

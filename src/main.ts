@@ -32,9 +32,9 @@ import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomple
 import {getSC_Events} from "./events/SC_EventList";
 import {SC_Event} from "./events/SC_Event";
 import {
-	getVariables,
+	loadVariables,
 	VariableSet,
-} from "./variables/VariableLists";
+} from "./variables/loadVariables";
 import {
 	CustomVariableInstanceMap,
 	CustomVariableModel,
@@ -101,7 +101,7 @@ export default class SC_Plugin extends Plugin {
 		this.custom_variable_instances = custom_variable_model.loadInstances(this.settings);
 
 		// Load variables (both built-in and custom ones). Do this AFTER loading configs for custom variables!
-		this.variables = getVariables(this);
+		this.variables = loadVariables(this);
 
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
