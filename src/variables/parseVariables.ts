@@ -11,7 +11,7 @@ import {escapeValue} from "./escapers/EscapeValue";
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
 export function parseVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
-    const variables = plugin.getVariables(); // TODO: How to handle sc_event?
+    const variables = plugin.getVariables();
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (const variable of variables)
     {
