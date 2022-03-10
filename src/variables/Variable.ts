@@ -66,7 +66,7 @@ export abstract class Variable {
 
     public getPattern() {
         const error_prefix = this.variable_name + ".getPattern(): ";
-        let pattern = '\{\{\!?' + this.variable_name;
+        let pattern = '\\{\\{!?' + this.variable_name; // TODO: variable_name in pattern needs to be regexp quoted! Currently this doesn't cause any harm, but in the future custom variables will allow users to submit variable names. Even though they are restricted to a-z, 0-9 and _ characters, it might be that those restrictions will be lifted later.
         for (const parameter_name in this.getParameters()) {
             const parameter = this.getParameters()[parameter_name];
             let parameter_type_pattern: string = this.getParameterSeparator();  // Here this.parameter_separator (= : ) is included in the parameter value just so that it's not needed to do nested parenthesis to accomplish possible optionality: (:())?. parseShellCommandVariables() will remove the leading : .
@@ -109,7 +109,7 @@ export abstract class Variable {
             }
 
         }
-        pattern += '\}\}';
+        pattern += '\\}\\}';
         return pattern;
     }
 
