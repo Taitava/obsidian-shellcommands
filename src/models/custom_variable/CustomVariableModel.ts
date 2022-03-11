@@ -54,8 +54,6 @@ export class CustomVariableModel extends Model {
                 .setValue(instance.configuration.name)
                 .onChange((new_name: string) => {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
-                    // TODO: If another custom variable has the same name, display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
-                    // TODO: If the name does not begin with {{_ and end with }} , display a warning in the field's description and do not save. Mention that saving is disabled. Create a validator method for this.
                     instance.setIfValid("name", new_name).then(async () => {
                         // Valid
                         warning_setting.setName(""); // Removes a possible warning message.
