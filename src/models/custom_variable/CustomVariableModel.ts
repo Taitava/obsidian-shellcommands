@@ -46,26 +46,35 @@ export class CustomVariableModel extends Model {
     }
 
     protected _createSettingFields(instance: CustomVariableInstance, container_element: HTMLElement): Setting {
-        const warning_setting = new Setting(container_element).setHeading();
-        return new Setting(container_element)
+        // Heading setting
+        const heading_setting = new Setting(container_element)
+            .setName(instance.getFullName())
+            .setHeading()
+        ;
+
+        // Name setting
+        new Setting(container_element)
             .setName("Variable name")
-            .setDesc("Must begin with {{_ and end with }} and contain at least one character inside. Allowed characters are letters a-z, numbers 0-9 and an underscore _")
+            .setDesc("Must contain at least one character. Allowed characters are letters a-z, numbers 0-9 and an underscore _")
+            .setClass("SC-custom-variable-name-setting")
             .addText(text => text
                 .setValue(instance.configuration.name)
                 .onChange((new_name: string) => {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
                     instance.setIfValid("name", new_name).then(async () => {
                         // Valid
-                        warning_setting.setName(""); // Removes a possible warning message.
+                        heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
                         await this.plugin.saveSettings();
                     }, (reason: string) => {
                         // Not valid
                         // Display a warning message.
-                        warning_setting.setName(reason + " The name was not saved.");
+                        heading_setting.setName(reason + " The name was not saved.");
                     });
                 }),
             )
         ;
+
+        // Description setting
         new Setting(container_element)
             .setName("Description")
             .setDesc("Appears in the autocomplete list in settings along with the variable name.")
@@ -79,24 +88,24 @@ export class CustomVariableModel extends Model {
                 }),
             )
         ;
-        return name_setting;
+        return heading_setting;
     }
 
     public validateValue(custom_variable_instance: CustomVariableInstance, field: keyof CustomVariableInstance["configuration"], custom_variable_name: string): Promise<void> {
         return new Promise<void>((resolve, reject) => {
             switch (field) {
                 case "name":
-                    // Check that the name is wrapped in {{_ and }}, and the inner part contains only characters a-z, 0-9 and/or underline _
-                    if (!custom_variable_name.match(/^\{\{_[\w\d]+\}\}$/u)) {
+                    // Check that the name contains only characters a-z, 0-9 and/or underline _
+                    if (!custom_variable_name.match(/^[\w\d]+$/u)) {
                         // Incorrect format.
-                        reject(`Name ${custom_variable_name} does not meet the naming requirements.`);
+                        reject(`The name {{_${custom_variable_name}}} does not meet the naming requirements.`);
                         return;
                     }
 
                     // Check if the name is a duplicate.
                     if (this.isCustomVariableNameDuplicate(custom_variable_name, custom_variable_instance)) {
                         // It's a duplicate.
-                        reject(`Name ${custom_variable_name} is already reserved.`);
+                        reject(`The name {{_${custom_variable_name}}} is already reserved.`);
                     } else {
                         // It's unique.
                         resolve();
@@ -113,14 +122,14 @@ export class CustomVariableModel extends Model {
     protected _getDefaultConfiguration(): CustomVariableConfiguration {
         // Generate a unique name for the variable by using a sequential number.
         let sequential_number = 1;
-        while (this.isCustomVariableNameDuplicate(`{{_${sequential_number}}}`)) {
+        while (this.isCustomVariableNameDuplicate(String(sequential_number))) {
             sequential_number++;
         }
 
         // Create a configuration object.
         return {
             id: this.id_generator.generateID(),
-            name: `{{_${sequential_number}}}`,
+            name: String(sequential_number),
             description: "",
         };
     }

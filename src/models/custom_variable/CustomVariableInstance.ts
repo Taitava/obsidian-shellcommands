@@ -24,7 +24,18 @@ export class CustomVariableInstance extends Instance {
         return this.configuration.id;
     }
 
+    public getFullName() {
+        return `{{${this.getPrefixedName()}}}`;
+    }
+
+    /**
+     * Adds an underscore in front of the name.
+     */
+    public getPrefixedName() {
+        return "_" + this.configuration.name;
+    }
+
     public getTitle(): string {
-        return this.configuration.name;
+        return this.getFullName();
     }
 }

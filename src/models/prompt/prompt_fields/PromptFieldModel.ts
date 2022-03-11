@@ -85,7 +85,7 @@ export class PromptFieldModel extends Model {
         // Create a list of custom variables
         const custom_variable_options: {[key: string]: string} = {};
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance, custom_variable_id: string) => {
-            custom_variable_options[custom_variable_id] = custom_variable_instance.getTitle();
+            custom_variable_options[custom_variable_id] = custom_variable_instance.getFullName();
         });
 
         // Create the setting fields

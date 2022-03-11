@@ -76,6 +76,19 @@ span.SC-main-icon-container {
 
 
 /*
+ * CUSTOM VARIABLE SETTINGS
+ */
+
+div.setting-item.SC-custom-variable-name-setting div.setting-item-control::before {
+    content: "{{_"; /* Wrap custom variable name field in {{_ }} */
+}
+
+div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after {
+    content: "}}"; /* Wrap custom variable name field in {{_ }} */
+}
+
+
+/*
  * Tab elements
  * This CSS is copied 2021-10-21 from https://www.w3schools.com/howto/howto_js_tabs.asp
  * Modifications:
