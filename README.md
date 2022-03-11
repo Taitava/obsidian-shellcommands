@@ -15,11 +15,11 @@ You can customise your commands with built-in variables that can provide the cur
 **This plugin doesn't come with any kind of warranty in case it does something bad to your files!** If you know programming, [check the source code in GitHub](https://github.com/Taitava/obsidian-shellcommands) so you know how it executes commands.
 
 ## Main issues
-- Special characters in `{{variable}}` values are escaped (except if CMD.EXE is used as a shell), but it's still experimental. Potential escaping problems can be dangerous. [See this issue (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11)
-- [Windows: Non-ascii characters in commands do not work correctly (#5)](https://github.com/Taitava/obsidian-shellcommands/issues/5)
-- Android and iPhone/iPad: I guess this does not work on these devices, because it uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. Please raise an issue in GitHub if you are interested in support for Android/iOS.
+- **Windows & PowerShell: Non-English characters can be corrupted in output**. Input _might_ work ok. Read more: #157. Linux and Mac users should not have this issue.
+- Special characters in `{{variable}}` values are escaped (except if CMD.EXE is used as a shell), but it's **still experimental**. Potential escaping problems can be dangerous. [See this issue (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Edit 2022-03-11: Now that the escaping system has been in use for a few months, it seems that it works quite nicely. However, more experience is still welcome.
+- **No mobile support**, because the plugin uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. I do not have any plans at the moment to research an ability to make this work on mobile. If you have some clues, please start a discussion in GitHub.
 
-For other issues/ideas, see the [issue tracker](https://github.com/Taitava/obsidian-shellcommands/issues).
+For future ideas, see the [Discussions section](https://github.com/Taitava/obsidian-shellcommands/discussions).
 
 ## Installation & usage
 
