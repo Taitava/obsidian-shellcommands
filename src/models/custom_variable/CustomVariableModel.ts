@@ -37,9 +37,13 @@ export class CustomVariableModel extends Model {
     }
 
     public newInstance(parent_configuration: SC_MainSettings): CustomVariableInstance {
+
+        // Create a default configuration object
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
-        const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration);
         parent_configuration.custom_variables.push(custom_variable_configuration);
+
+        // Create a CustomVariableInstance for handling the configuration
+        const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration);
         this.custom_variable_instances.set(custom_variable_configuration.id, custom_variable_instance);
 
         // Create an operational variable.
