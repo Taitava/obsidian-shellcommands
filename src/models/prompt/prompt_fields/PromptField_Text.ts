@@ -8,10 +8,12 @@ export class PromptField_Text extends PromptField {
     protected value: string;
 
     public createField(container_element: HTMLElement) {
+        const initial_value: any = this.configuration.default_value;
+        this.storeValue(initial_value);
         return new Setting(container_element)
             .setName(this.configuration.label)
             .addText(text => text
-                .setValue(this.configuration.default_value)
+                .setValue(initial_value)
                 .onChange(value => this.storeValue(value)),
             )
         ;
