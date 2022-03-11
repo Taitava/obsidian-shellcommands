@@ -66,6 +66,20 @@ export class CustomVariableModel extends Model {
                 }),
             )
         ;
+        new Setting(container_element)
+            .setName("Description")
+            .setDesc("Appears in the autocomplete list in settings along with the variable name.")
+            .addText(text => text
+                .setValue(instance.configuration.description)
+                .onChange(async (new_description: string) => {
+                    // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
+                    instance.configuration.description = new_description;
+                    instance.getCustomVariable().help_text = new_description; // Update the description also to the operational variable, not only in configuration.
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+        return name_setting;
     }
 
     public validateValue(custom_variable_instance: CustomVariableInstance, field: keyof CustomVariableInstance["configuration"], custom_variable_name: string): Promise<void> {
@@ -107,6 +121,7 @@ export class CustomVariableModel extends Model {
         return {
             id: this.id_generator.generateID(),
             name: `{{_${sequential_number}}}`,
+            description: "",
         };
     }
 
@@ -138,6 +153,7 @@ export class CustomVariableModel extends Model {
 export interface CustomVariableConfiguration {
     id: string,
     name: string,
+    description: string,
 }
 
 export class CustomVariableInstanceMap extends Map<string, CustomVariableInstance> {}
