@@ -41,6 +41,10 @@ export class CustomVariableModel extends Model {
         const custom_variable_instance = new CustomVariableInstance(this, custom_variable_configuration, parent_configuration);
         parent_configuration.custom_variables.push(custom_variable_configuration);
         this.custom_variable_instances.set(custom_variable_configuration.id, custom_variable_instance);
+
+        // Create an operational variable.
+        this.plugin.getVariables().add(custom_variable_instance.createCustomVariable());
+
         return custom_variable_instance;
         // TODO: Move this logic to the base Model class.
     }
@@ -64,6 +68,7 @@ export class CustomVariableModel extends Model {
                     instance.setIfValid("name", new_name).then(async () => {
                         // Valid
                         heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
+                        instance.getCustomVariable().variable_name = new_name; // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
                     }, (reason: string) => {
                         // Not valid
@@ -135,6 +140,16 @@ export class CustomVariableModel extends Model {
     }
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
+        // TODO: The custom variable should be removed from all Prompts that use it.
+
+        // Delete CustomVariable
+        try {
+            this.plugin.getVariables().delete(custom_variable_instance.getCustomVariable());
+        } catch (error) {
+            // If custom_variable_instance.getCustomVariable() failed, no need to do anything. It just means there is no CustomVariable, so there's nothing to delete.
+        }
+
+        // Delete CustomVariableInstance
         this.custom_variable_instances.delete(custom_variable_instance.getID());
     }
 

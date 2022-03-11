@@ -24,6 +24,7 @@ import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
+import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
     const variables = new VariableSet([
@@ -59,6 +60,12 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
             new Variable_Passthrough(plugin),
         );
     }
+
+    // Load CustomVariables
+    plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
+        variables.add(custom_variable_instance.createCustomVariable())
+    });
+
     return variables;
 }
 

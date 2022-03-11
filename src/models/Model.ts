@@ -9,7 +9,7 @@ import {
 export abstract class Model {
 
     public constructor(
-        protected readonly plugin: SC_Plugin,
+        public readonly plugin: SC_Plugin,
     ) {}
 
     public abstract getSingularName(): string;

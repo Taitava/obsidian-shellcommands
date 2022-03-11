@@ -3,6 +3,7 @@ import {TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {
+    CustomVariableInstance,
     Prompt,
     PromptField,
     PromptFieldSet,
@@ -57,6 +58,7 @@ export class PromptModal extends SC_Modal {
                 .onClick(() => {
                     if (this.validator()) {
                         // The form fields are filled ok
+                        this.assignValuesToVariables();
                         this.resolve_promise();
                         this.user_confirmed_ok = true;
                         this.close();
@@ -74,6 +76,18 @@ export class PromptModal extends SC_Modal {
 
         if (!this.user_confirmed_ok) { // TODO: Find out if there is a way to not use this kind of flag property. Can the status be checked from the promise itself?
             this.reject_promise();
+        }
+    }
+
+    private assignValuesToVariables() {
+        for (const prompt_field of this.prompt_fields) {
+            const target_variable_id = prompt_field.configuration.target_variable_id;
+            const custom_variable_instance: CustomVariableInstance = this.plugin.getCustomVariableInstances().get(target_variable_id);
+            if (!custom_variable_instance) {
+                throw new Error(this.constructor.name + ".assignValuesToVariables(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
+            }
+            const variable = custom_variable_instance.getCustomVariable();
+            variable.setValue(prompt_field.getValue() as string); // TODO: Remove 'as string' when numeric variable types are implemented.
         }
     }
 }

@@ -21,6 +21,7 @@ export * from "./models/Model";
 export * from "./models/models";
 
 // Custom variables
+export * from "./variables/CustomVariable";
 export * from "./models/custom_variable/CustomVariableInstance";
 export * from "./models/custom_variable/CustomVariableModel";
 export * from "./models/custom_variable/CustomVariableSettingsModal";

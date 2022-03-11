@@ -11,8 +11,8 @@ export abstract class Variable {
     private static readonly parameter_separator = ":";
     protected readonly app: App;
     private error_messages: string[]; // Default value is set in .reset()
-    public readonly variable_name: string;
-    public readonly help_text: string;
+    public variable_name: string;
+    public help_text: string;
 
     /**
      * A definition for what parameters this variables takes.

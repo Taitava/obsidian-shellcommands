@@ -155,6 +155,10 @@ export class PromptFieldModel extends Model {
                                 );
                                 modal.open();
                             });
+                        } else if ("" === new_target_variable_id) {
+                            // The target variable cannot be undefined.
+                            dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
+                            this.plugin.newNotification("A target variable must be selected!");
                         } else {
                             // Use an existing target_variable.
                             prompt_field.configuration.target_variable_id = new_target_variable_id;
