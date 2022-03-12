@@ -220,6 +220,31 @@ export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, 
     return "" === selected_text && return_null_if_empty ? null : selected_text;
 }
 
+/**
+ * Creates an HTMLElement (with freely decidable tag) and adds the given content into it as normal text. No HTML formatting
+ * is supported, i.e. possible HTML special characters are shown as-is. Newline characters are converted to <br> elements.
+ *
+ * @param tag
+ * @param content
+ * @param parent_element
+ */
+export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, content: string, parent_element: HTMLElement) {
+    const content_element = parent_element.createEl(tag);
+
+    // Insert content line-by-line
+    const content_lines = content.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
+    content_lines.forEach((content_line: string, content_line_index: number) => {
+        // Insert the line.
+        content_element.insertAdjacentText("beforeend", content_line);
+
+        // Insert a linebreak <br> if needed.
+        if (content_line_index < content_lines.length - 1) {
+            content_element.insertAdjacentHTML("beforeend", "<br>");
+        }
+    });
+    return content_element;
+}
+
 export function randomInteger(min: number, max: number) {
     const range = max - min + 1;
     return min + Math.floor(Math.random() * range);

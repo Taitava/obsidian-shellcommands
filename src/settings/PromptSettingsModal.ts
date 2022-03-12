@@ -50,6 +50,19 @@ export class PromptSettingsModal extends SC_Modal {
             .controlEl.find("input").focus()
         ;
 
+        // Description
+        new Setting(container_element)
+            .setName("Description")
+            .setDesc("Displayed between the prompt title and fields.")
+            .addTextArea(textarea => textarea
+                .setValue(this.prompt.configuration.description)
+                .onChange(async (new_description: string) => {
+                    this.prompt.getConfiguration().description = new_description;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+
         // Preview shell command
         new Setting(container_element)
             .setName("Preview shell command in prompt")

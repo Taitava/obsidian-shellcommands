@@ -3,6 +3,7 @@ import {TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
+import {createMultilineTextElement} from "../../Common";
 import {
     CustomVariableInstance,
     Prompt,
@@ -46,6 +47,12 @@ export class PromptModal extends SC_Modal {
             }
             this.modalEl.createEl("pre", {text: this.t_shell_command.getShellCommand(), attr: {class: "SC-no-margin"}});
             this.modalEl.createEl("hr");
+        }
+
+        // Description
+        if (this.prompt.configuration.description) {
+            const description_element = createMultilineTextElement("p", this.prompt.configuration.description, this.modalEl);
+            description_element.addClass("setting-item-description"); // A CSS class defined by Obsidian.
         }
 
         // Create fields

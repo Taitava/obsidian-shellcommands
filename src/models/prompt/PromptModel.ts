@@ -82,6 +82,7 @@ export class PromptModel extends Model {
         return {
             id: this.id_generator.generateID(),
             title: "",
+            description: "",
             preview_shell_command: false,
             fields: [],
             execute_button_text: "Execute",

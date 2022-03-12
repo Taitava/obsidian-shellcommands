@@ -102,6 +102,7 @@ export class Prompt extends Instance {
 export interface PromptConfiguration {
     id: string;
     title: string;
+    description: string;
     preview_shell_command: boolean;
     fields: PromptFieldConfiguration[];
     execute_button_text: string;
