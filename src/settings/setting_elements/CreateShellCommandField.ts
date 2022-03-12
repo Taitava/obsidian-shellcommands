@@ -89,6 +89,16 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             })
         )
         .addExtraButton(button => button
+            .setTooltip(ExtraOptionsModal.PREACTIONS_OPTIONS_SUMMARY)
+            .setIcon("note-glyph")
+            .onClick(async () => {
+                // Open an extra options modal: Preactions tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                modal.open();
+                modal.activateTab("extra-options-preactions");
+            })
+        )
+        .addExtraButton(button => button
             .setTooltip(ExtraOptionsModal.OUTPUT_OPTIONS_SUMMARY)
             .setIcon("lines-of-text")
             .onClick(async () => {

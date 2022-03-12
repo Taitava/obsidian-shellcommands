@@ -16,9 +16,18 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
 import {SC_Modal} from "../SC_Modal";
+import {
+    getModel,
+    Preaction_Prompt_Configuration,
+    PreactionConfiguration,
+    Prompt,
+    PromptModel,
+    PromptSettingsModal,
+} from "../imports";
 
 export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
+    public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
     public static EVENTS_SUMMARY = "Events";
@@ -49,6 +58,13 @@ export class ExtraOptionsModal extends SC_Modal {
                 icon: "gear",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabGeneral(container_element);
+                },
+            },
+            "extra-options-preactions": {
+                title: "Preactions",
+                icon: "note-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabPreactions(container_element);
                 },
             },
             "extra-options-output": {
@@ -121,6 +137,83 @@ export class ExtraOptionsModal extends SC_Modal {
                     }
                     await this.plugin.saveSettings();
                 })
+            )
+        ;
+    }
+
+    private tabPreactions(container_element: HTMLElement) {
+        container_element.createEl("p", {text: "Preactions are performed before the actual shell command gets executed, to do certain preparations for the shell command."});
+        const preactions_configuration = this.t_shell_command.getConfiguration().preactions;
+
+        // Load config values
+        let preaction_prompt_configuration: Preaction_Prompt_Configuration = null;
+        preactions_configuration.forEach((preaction_configuration: PreactionConfiguration) => {
+            switch (preaction_configuration.type) {
+                case "prompt":
+                    preaction_prompt_configuration = preaction_configuration as Preaction_Prompt_Configuration;
+            }
+        });
+
+        // Preaction: Prompt
+        let prompt_options: {[key: string]: string} = {};
+        this.plugin.getPrompts().forEach((prompt: Prompt) => {
+            prompt_options[prompt.getID()] = prompt.getTitle();
+        });
+        let old_selected_prompt_option: string = preaction_prompt_configuration === null ? "no-prompt" : preaction_prompt_configuration.prompt_id;
+        new Setting(container_element)
+            .setName("Prompt")
+            .setDesc("Prompts are used to ask values from the user right before shell command execution. The values can be accessed in the shell command via custom variables. You can manage all prompts in the plugin's main settings view, under the 'Preactions' tab.")
+            .addDropdown(dropdown => dropdown
+                .addOption("no-prompt", "No prompt")
+                .addOptions(prompt_options)
+                .addOption("new", "Create a new prompt")
+                .setValue(old_selected_prompt_option)
+                .onChange(async (new_prompt_id: string) => {
+                    switch (new_prompt_id) {
+                        case "new":
+                            // Create a new Prompt.
+                            const model = getModel<PromptModel>(PromptModel.name)
+                            const new_prompt = model.newInstance(this.plugin.settings);
+                            this.plugin.saveSettings().then(() => {
+                                const modal = new PromptSettingsModal(
+                                    this.plugin,
+                                    new_prompt,
+                                    null,
+                                    "Create prompt",
+                                    async () => {
+                                        // Prompt is created.
+                                        dropdown.addOption(new_prompt.getID(), new_prompt.getTitle());
+                                        dropdown.setValue(new_prompt.getID());
+                                        preaction_prompt_configuration.enabled = true;
+                                        preaction_prompt_configuration.prompt_id = new_prompt.getID();
+                                        await this.plugin.saveSettings();
+                                        old_selected_prompt_option = dropdown.getValue();
+                                    },
+                                    async () => {
+                                        // Prompt creation was cancelled.
+                                        dropdown.setValue(old_selected_prompt_option); // Reset the dropdown selection.
+                                        model.deleteInstance(new_prompt);
+                                        await this.plugin.saveSettings();
+                                    },
+                                );
+                                modal.open();
+                            });
+                            break;
+                        case "no-prompt":
+                            // Disable the prompt.
+                            preaction_prompt_configuration.enabled = false;
+                            await this.plugin.saveSettings();
+                            old_selected_prompt_option = dropdown.getValue();
+                            break;
+                        default:
+                            // Use an existing prompt.
+                            preaction_prompt_configuration.enabled = true;
+                            preaction_prompt_configuration.prompt_id = new_prompt_id;
+                            await this.plugin.saveSettings();
+                            old_selected_prompt_option = dropdown.getValue();
+                            break;
+                    }
+                }),
             )
         ;
     }

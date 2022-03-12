@@ -11,10 +11,19 @@ import {
 
 export class PromptSettingsModal extends SC_Modal {
 
+    private ok_button_clicked = false;
+
     constructor(
         plugin: SC_Plugin,
         private readonly prompt: Prompt,
-        private readonly prompt_name_setting: Setting,
+
+        /** Can be undefined if the modal is created from a place where there is no name element. */
+        private readonly prompt_name_setting?: Setting,
+
+        /** If defined, a button will be added and on_after_ok() / on_after_cancelling() will be called depending on whether the button was clicked or not. */
+        private readonly ok_button_text?: string,
+        private readonly on_after_ok?: () => void,
+        private readonly on_after_cancelling?: () => void,
     ) {
         super(plugin);
     }
@@ -32,8 +41,8 @@ export class PromptSettingsModal extends SC_Modal {
                     this.prompt.getConfiguration().title = new_title;
                     await this.plugin.saveSettings();
 
-                    // Update the title in settings view by resetting setting fields.
-                    this.prompt_name_setting.setName(new_title);
+                    // Update the title in a name setting. (Only if the modal was created from a place where a Prompt name element exists).
+                    this.prompt_name_setting?.setName(new_title);
                 }),
             )
 
@@ -75,5 +84,28 @@ export class PromptSettingsModal extends SC_Modal {
                 }),
             )
         ;
+
+        // Ok button
+        if (this.ok_button_text) {
+            new Setting(container_element)
+                .addButton(button => button
+                    .setButtonText(this.ok_button_text)
+                    .onClick(() => {
+                        this.ok_button_clicked = true;
+                        this.on_after_ok();
+                        this.close();
+                    }),
+                )
+            ;
+        }
+    }
+
+    public onClose(): void {
+        super.onClose();
+
+        // Call a cancelling hook if one is defined (and if the closing happens due to cancelling, i.e. the ok button is NOT clicked).
+        if (!this.ok_button_clicked && this.on_after_cancelling) {
+            this.on_after_cancelling();
+        }
     }
 }
