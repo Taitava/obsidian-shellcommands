@@ -3,6 +3,8 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 
+let parsed_variables_count: number;
+
 /**
  * @param plugin
  * @param command
@@ -13,6 +15,7 @@ import {escapeValue} from "./escapers/EscapeValue";
 export function parseVariables(plugin: SC_Plugin, command: string, shell: string | null, sc_event?: SC_Event | null): string | string[] {
     const variables = plugin.getVariables();
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
+    parsed_variables_count = 0;
     for (const variable of variables)
     {
         const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
@@ -21,6 +24,9 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
         while ((argument_matches = pattern.exec(command)) !== null) {
             // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
             variable.reset();
+
+            // Count how many times any variables have appeared.
+            parsed_variables_count++;
 
             // Remove stuff that should not be iterated in a later loop.
             const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {
@@ -89,4 +95,11 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
         }
     }
     return parsed_command;
+}
+
+/**
+ * TODO: Make parseVariables() to return a ParsingResult and insert the variable count in that interface. Then remove the global variable parsed_variables_count.
+ */
+export function countOfParsedVariables(): number {
+    return parsed_variables_count;
 }
