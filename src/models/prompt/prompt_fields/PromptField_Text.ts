@@ -12,7 +12,7 @@ export class PromptField_Text extends PromptField {
     private text_component: TextComponent;
 
     protected _createField(container_element: HTMLElement, sc_event: SC_Event | null) {
-        return new Setting(container_element)
+        new Setting(container_element)
             .setName(this.configuration.label)
             .addText((text_component) => {
                 this.text_component = text_component;

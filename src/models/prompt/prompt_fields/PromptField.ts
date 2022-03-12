@@ -46,7 +46,7 @@ export abstract class PromptField extends Instance {
         this.applyDefaultValue(sc_event);
     }
 
-    protected abstract _createField(container_element: HTMLElement, sc_event: SC_Event | null): Setting;
+    protected abstract _createField(container_element: HTMLElement, sc_event: SC_Event | null): void;
 
     public getTitle(): string {
         return this.configuration.label === "" ? "Unlabelled field" : this.configuration.label;
