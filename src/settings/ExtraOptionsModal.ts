@@ -12,6 +12,8 @@ import {
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
+import {createAutocomplete} from "./setting_elements/Autocomplete";
+import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
@@ -97,26 +99,33 @@ export class ExtraOptionsModal extends SC_Modal {
             .setName("Alias")
             .setClass("SC-name-setting")
         ;
+        const on_alias_change = async (value: string) => {
+            // Change the actual alias value
+            this.t_shell_command.getConfiguration().alias = value;
+
+            // Update Obsidian command palette
+            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
+
+            // UpdateShell commands settings panel
+            this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));
+
+            // Save
+            await this.plugin.saveSettings();
+        };
         const alias_setting = new Setting(container_element)
             .addText(text => text
                 .setValue(this.t_shell_command.getAlias())
-                .onChange(async (value) => {
-                    // Change the actual alias value
-                    this.t_shell_command.getConfiguration().alias = value;
-
-                    // Update Obsidian command palette
-                    this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
-
-                    // UpdateShell commands settings panel
-                    this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));
-
-                    // Save
-                    await this.plugin.saveSettings();
-                })
+                .onChange(on_alias_change)
             )
             .setClass("SC-shell-command-setting")
         ;
-        alias_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
+        const alias_input_element: HTMLInputElement = alias_setting.controlEl.find("input") as HTMLInputElement;
+        alias_input_element.addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
+        if (this.plugin.settings.show_autocomplete_menu) {
+            // Show autocomplete menu (= a list of available variables).
+            createAutocomplete(alias_input_element, getVariableAutocompleteItems(this.plugin), on_alias_change);
+        }
+
         container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
         container_element.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
 
