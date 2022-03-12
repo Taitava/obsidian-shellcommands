@@ -1,5 +1,7 @@
 import {Setting} from "obsidian";
 import {randomInteger} from "../../../Common";
+import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
+import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
 import {
     CustomVariableInstance,
     CustomVariableModel,
@@ -88,6 +90,11 @@ export class PromptFieldModel extends Model {
             custom_variable_options[custom_variable_id] = custom_variable_instance.getFullName();
         });
 
+        const on_default_value_setting_change = async (new_default_value: string) => {
+            prompt_field.configuration.default_value = new_default_value;
+            await this.plugin.saveSettings();
+        };
+
         // Create the setting fields
         const setting_group: PromptFieldSettingGroup = {
             heading_setting: new Setting(container_element)
@@ -116,10 +123,7 @@ export class PromptFieldModel extends Model {
                         prompt_field.configuration.label ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
                             : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
                     )
-                    .onChange(async (new_default_value: string) => {
-                        prompt_field.configuration.default_value = new_default_value;
-                        await this.plugin.saveSettings();
-                    })
+                    .onChange(on_default_value_setting_change)
                 )
             ,
             target_variable_setting: new Setting(container_element)
@@ -183,6 +187,13 @@ export class PromptFieldModel extends Model {
 
         function _update_heading() {
             setting_group.heading_setting.setName(prompt_field.getTitle());
+        }
+
+        // Autocomplete menu
+        if (this.plugin.settings.show_autocomplete_menu) {
+            // Show autocomplete menu (= a list of available variables).
+            const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
+            createAutocomplete(default_value_input_element, getVariableAutocompleteItems(this.plugin), on_default_value_setting_change);
         }
 
         return setting_group.heading_setting;
