@@ -6,11 +6,11 @@ import {escapeValue} from "./escapers/EscapeValue";
 /**
  * @param plugin
  * @param command
- * @param shell
+ * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
  */
-export function parseVariables(plugin: SC_Plugin, command: string, shell: string, sc_event?: SC_Event): string | string[] {
+export function parseVariables(plugin: SC_Plugin, command: string, shell: string | null, sc_event?: SC_Event | null): string | string[] {
     const variables = plugin.getVariables();
     let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
     for (const variable of variables)
@@ -51,6 +51,10 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
             if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
                 // The variable usage begins with {{! instead of {{
                 // This means the variable's value should NOT be escaped.
+                escape = false;
+            }
+            if (!shell) {
+                // Escaping is forced OFF.
                 escape = false;
             }
 
