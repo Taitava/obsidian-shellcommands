@@ -10,6 +10,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
  - [Hotkeys for output channel: Ask after execution (#145)](https://github.com/Taitava/obsidian-shellcommands/issues/145).
+ - [Add autocomplete menu to Alias field (#182)](https://github.com/Taitava/obsidian-shellcommands/issues/182).
 
 ### To be Changed
  - [Internal: Variable refactorings (#178)](https://github.com/Taitava/obsidian-shellcommands/issues/178).
