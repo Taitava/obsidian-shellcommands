@@ -1,3 +1,4 @@
+import {SC_Event} from "../events/SC_Event";
 import {
     Preaction,
     PreactionConfiguration,
@@ -12,12 +13,13 @@ export class Preaction_Prompt extends Preaction {
         plugin: SC_Plugin,
         protected readonly configuration: Preaction_Prompt_Configuration,
         t_shell_command: TShellCommand,
+        protected readonly sc_event: SC_Event | null,
     ) {
-        super(plugin, configuration, t_shell_command);
+        super(plugin, configuration, t_shell_command, sc_event);
     }
 
     protected doPreaction(): Promise<void> {
-        return this.getPrompt().openPrompt(this.t_shell_command);
+        return this.getPrompt().openPrompt(this.t_shell_command, this.sc_event);
     }
 
     protected getDefaultConfiguration(): Preaction_Prompt_Configuration {

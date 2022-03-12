@@ -185,7 +185,7 @@ export default class SC_Plugin extends Plugin {
 			}
 			if (parsing_result.succeeded) {
 				// The command was parsed correctly.
-				this.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+				this.confirmAndExecuteShellCommand(t_shell_command, parsing_result, null /* No SC_Event is available when executing via command palette or hotkey. */);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages
@@ -307,11 +307,12 @@ export default class SC_Plugin extends Plugin {
 	 *
 	 * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
 	 * @param shell_command_parsing_result The actual shell command that will be executed.
+	 * @param sc_event Needed for Preactions to be able to access all variables, in case any variables are used by a Preaction. Use null, if the shell command execution happens outside of any event context.
 	 */
-	public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+	public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult, sc_event: SC_Event | null) {
 
 		// Perform preactions before execution
-		const preactions = t_shell_command.getPreactions(shell_command_parsing_result);
+		const preactions = t_shell_command.getPreactions(shell_command_parsing_result, sc_event);
 		let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
 		preactions.forEach((preaction: Preaction) => {
 			preaction_pipeline = preaction_pipeline.then(() => {

@@ -108,7 +108,7 @@ export abstract class SC_Event {
         }
 
         // Execute the shell command.
-        this.plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+        this.plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result, this);
     }
 
     public static getCode() {

@@ -4,6 +4,7 @@ import {Setting} from "obsidian";
 import {parseVariables} from "../../variables/parseVariables";
 import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
+import {SC_Event} from "../../events/SC_Event";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -20,7 +21,7 @@ export function CreateShellCommandFieldCore(
 
     function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell));
+        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell, null /* No event is available during preview. */));
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -43,7 +44,7 @@ export function CreateShellCommandFieldCore(
         ,
         preview_setting:
             new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command, shell))
+                .setDesc(getShellCommandPreview(plugin,shell_command, shell, null /* No event is available during preview. */))
                 .setClass("SC-preview-setting")
         ,
     };
@@ -62,10 +63,12 @@ export function CreateShellCommandFieldCore(
  *
  * @param plugin
  * @param shell_command
+ * @param shell
+ * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string) {
-    const parsed_shell_command = parseVariables(plugin, shell_command, shell);
+export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, sc_event: SC_Event | null) {
+    const parsed_shell_command = parseVariables(plugin, shell_command, shell, sc_event);
     if (Array.isArray(parsed_shell_command)) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.

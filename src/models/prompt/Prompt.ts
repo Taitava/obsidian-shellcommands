@@ -1,6 +1,7 @@
 import SC_Plugin from "../../main";
 import {TShellCommand} from "../../TShellCommand";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
+import {SC_Event} from "../../events/SC_Event";
 import {
     getModel,
     Instance,
@@ -43,12 +44,13 @@ export class Prompt extends Instance {
         return this.configuration;
     }
 
-    public openPrompt(t_shell_command: TShellCommand): Promise<void> {
+    public openPrompt(t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<void> {
         const modal = new PromptModal(
             this.plugin,
             this.prompt_fields,
             t_shell_command,
             this,
+            sc_event,
             () => {return this.validateFields();}
         );
         modal.open();
@@ -66,14 +68,33 @@ export class Prompt extends Instance {
     /**
      * Validates values in PromptField instances, NOT setting fields!
      */
-    private validateFields() {
-        let valid = true;
+    private validateFields(): Promise<void> {
+
+        // Iterate all fields and check their validity.
+        const error_messages: string[] = [];
         this.prompt_fields.forEach((prompt_field: PromptField) => {
+
+            // Check if the field has parsing errors.
+            const parsing_errors: string[] = prompt_field.getParsingErrors();
+            for (const parsing_error of parsing_errors) {
+                // This field has parsing error(s).
+                error_messages.push(`'${prompt_field.getTitle()}': ` + parsing_error);
+            }
+
+            // Check other validity.
             if (!prompt_field.validate()) {
-                valid = false;
+                // This field failed to validate.
+                // TODO: Change this so that the message will come from prompt_field.validate().
+                error_messages.push(`'${prompt_field.getTitle()}' needs to be filled.`);
             }
         });
-        return valid;
+
+        // Return the result.
+        if (0 === error_messages.length) {
+            return Promise.resolve();
+        } else {
+            return Promise.reject(error_messages);
+        }
     }
 
 }

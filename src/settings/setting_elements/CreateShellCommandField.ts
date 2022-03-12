@@ -73,7 +73,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
                 const t_shell_command = plugin.getTShellCommands()[shell_command_id]; // TODO: Is this redundant? Could the t_shell_command defined in lines 22 / 26 (near 'const is_new') be used?
                 const parsing_result = t_shell_command.parseVariables();
                 if (parsing_result.succeeded) {
-                    plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+                    plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result, null /* No SC_Event is available when manually executing the shell command. */);
                 } else {
                     plugin.newErrors(parsing_result.error_messages);
                 }

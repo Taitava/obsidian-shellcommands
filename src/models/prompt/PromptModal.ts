@@ -2,6 +2,7 @@ import {SC_Modal} from "../../SC_Modal";
 import {TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
+import {SC_Event} from "../../events/SC_Event";
 import {
     CustomVariableInstance,
     Prompt,
@@ -21,9 +22,10 @@ export class PromptModal extends SC_Modal {
         private readonly prompt_fields: PromptFieldSet,
         private readonly t_shell_command: TShellCommand,
         private readonly prompt: Prompt,
+        private sc_event: SC_Event | null,
 
         /** A function that is called when a user clicks the execution button. This function should check the form elements' validity and return false if there are unfilled fields. */
-        private readonly validator: () => boolean,
+        private readonly validator: () => Promise<void>,
     ) {
         super(plugin);
         this.promise = new Promise<void>((resolve, reject) => {
@@ -48,7 +50,7 @@ export class PromptModal extends SC_Modal {
 
         // Create fields
         this.prompt_fields.forEach((prompt_field: PromptField) => {
-            prompt_field.createField(this.modalEl);
+            prompt_field.createField(this.modalEl, this.sc_event);
         });
 
         // Execute button
@@ -56,16 +58,16 @@ export class PromptModal extends SC_Modal {
             .addButton(button => button
                 .setButtonText(this.prompt.configuration.execute_button_text)
                 .onClick(() => {
-                    if (this.validator()) {
+                    this.validator().then(() => {
                         // The form fields are filled ok
                         this.assignValuesToVariables();
                         this.resolve_promise();
                         this.user_confirmed_ok = true;
                         this.close();
-                    } else {
-                        // Some mandatory fields are not filled
-                        this.plugin.newError("A mandatory field is missing a value.");
-                    }
+                    }).catch((error_messages: string[]) => {
+                        // There were some problems with the fields.
+                        this.plugin.newErrors(error_messages);
+                    });
                 })
             )
         ;
@@ -87,7 +89,7 @@ export class PromptModal extends SC_Modal {
                 throw new Error(this.constructor.name + ".assignValuesToVariables(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
             }
             const variable = custom_variable_instance.getCustomVariable();
-            variable.setValue(prompt_field.getValue() as string); // TODO: Remove 'as string' when numeric variable types are implemented.
+            variable.setValue(prompt_field.getParsedValue());
         }
     }
 }

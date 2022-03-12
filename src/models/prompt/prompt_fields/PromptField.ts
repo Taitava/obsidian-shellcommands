@@ -1,4 +1,9 @@
 import {Setting} from "obsidian";
+import {SC_Event} from "../../../events/SC_Event";
+import {
+    countOfParsedVariables,
+    parseVariables,
+} from "../../../variables/parseVariables";
 import {
     Instance,
     Prompt,
@@ -8,7 +13,14 @@ import {
 
 export abstract class PromptField extends Instance {
 
-    protected value: string | number;
+    /**
+     * Contains a value preview element.
+     * @protected
+     */
+    protected preview_setting: Setting;
+
+    private parsed_value: string;
+    private parsing_errors: string[] = [];
 
     constructor(
         public model: PromptFieldModel,
@@ -17,21 +29,97 @@ export abstract class PromptField extends Instance {
         public prompt_field_index: keyof PromptConfiguration["fields"], // TODO: 'keyof' is kind of incorrect here, 'keyof' is for objects, but 'SC_MainSettings["custom_variables"]' is an array with numeric indexes.
     ) {
         super(model, configuration, prompt.configuration);
-        this.storeValue(this.configuration.default_value);
     }
 
-    public abstract createField(container_element: HTMLElement): Setting;
+    /**
+     *
+     * @param container_element
+     * @param sc_event Used when parsing variables for default_value and the inputted value. Needed so that also {{event_*}} variables can be used in prompts.
+     */
+    public createField(container_element: HTMLElement, sc_event: SC_Event | null): void {
+        this._createField(container_element, sc_event);
+
+        // Create a preview setting element. It will not contain any actual setting elements, just text.
+        this.preview_setting = new Setting(container_element);
+
+        // Parse variable in the default value and insert it to the field.
+        this.applyDefaultValue(sc_event);
+    }
+
+    protected abstract _createField(container_element: HTMLElement, sc_event: SC_Event | null): Setting;
 
     public getTitle(): string {
         return this.configuration.label === "" ? "Unlabelled field" : this.configuration.label;
     }
 
-    public getValue() {
-        return this.value;
+    /**
+     * Gets a value from the form field.
+     * @protected
+     */
+    protected abstract getValue(): any;
+
+    /**
+     * Sets a value to the form field.
+     * @param value
+     * @protected
+     */
+    protected abstract setValue(value: any): void;
+
+    /**
+     * Parses the default value and sets it to the form element.
+     * @param sc_event
+     * @private
+     */
+    private applyDefaultValue(sc_event: SC_Event | null) {
+        const default_value = this.configuration.default_value;
+        let parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, sc_event);
+        if (Array.isArray(parsing_result)) {
+            // The result is an array containing parsing error messages.
+            this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
+        } else {
+            // Parsing succeeded.
+            this.setValue(parsing_result);
+        }
+        this.valueHasChanged(sc_event);
     }
 
-    protected storeValue(value: string | number) {
-        this.value = value;
+    public getParsedValue() {
+        return this.parsed_value;
+    }
+
+    public getParsingErrors() {
+        return this.parsing_errors;
+    }
+
+    /**
+     * Updates this.parsed_value, this.parsing_errors and this.preview_setting .
+     *
+     * @param sc_event
+     * @protected
+     */
+    protected valueHasChanged(sc_event: SC_Event) {
+        let preview: string;
+
+        // Parse variables in the value.
+        let parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, sc_event);
+        if (Array.isArray(parsing_result)) {
+            // The result is an array containing parsing error messages.
+            this.parsed_value = null;
+            preview = parsing_result[0]; // Display the first error message. If there are more, others can be omitted.
+            this.parsing_errors = parsing_result;
+        } else {
+            // Parsing succeeded
+            this.parsed_value = parsing_result;
+            preview = parsing_result;
+            this.parsing_errors = []; // No errors.
+        }
+
+        // Update the preview element.
+        if (0 === countOfParsedVariables()) {
+             // If no variables were used, hide the description as it's not needed to repeat the value that already shows up in the form field.
+            preview = "";
+        }
+        this.preview_setting.setDesc(preview);
     }
 
     /**
