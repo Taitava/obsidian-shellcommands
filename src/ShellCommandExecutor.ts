@@ -36,7 +36,7 @@ export class ShellCommandExecutor {
     public confirmAndExecuteShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
 
         // Perform preactions before execution
-        const preactions = this.t_shell_command.getPreactions(shell_command_parsing_result, this.sc_event);
+        const preactions = this.t_shell_command.getPreactions(this.sc_event);
         let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
         preactions.forEach((preaction: Preaction) => {
             preaction_pipeline = preaction_pipeline.then(() => {
