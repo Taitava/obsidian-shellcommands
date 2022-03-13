@@ -20,6 +20,10 @@ export class ShellCommandExecutor {
 
     constructor(
         private plugin: SC_Plugin,
+        private t_shell_command: TShellCommand,
+
+        /** Needed for Preactions to be able to access all variables, in case any variables are used by a Preaction. Use null, if the shell command execution happens outside of any event context. */
+        private sc_event: SC_Event | null,
     ) {}
 
     /**
@@ -27,14 +31,12 @@ export class ShellCommandExecutor {
      *
      * TODO: Change the name of this method to reflect the new behavior.
      *
-     * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
      * @param shell_command_parsing_result The actual shell command that will be executed.
-     * @param sc_event Needed for Preactions to be able to access all variables, in case any variables are used by a Preaction. Use null, if the shell command execution happens outside of any event context.
      */
-    public confirmAndExecuteShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult, sc_event: SC_Event | null) {
+    public confirmAndExecuteShellCommand(shell_command_parsing_result: ParsingResult) {
 
         // Perform preactions before execution
-        const preactions = t_shell_command.getPreactions(shell_command_parsing_result, sc_event);
+        const preactions = this.t_shell_command.getPreactions(shell_command_parsing_result, this.sc_event);
         let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
         preactions.forEach((preaction: Preaction) => {
             preaction_pipeline = preaction_pipeline.then(() => {
@@ -46,10 +48,10 @@ export class ShellCommandExecutor {
 
             // TODO: This confirmation check should be migrated into a Preaction. We should go now directly to the execution part.
             // Check if the command needs confirmation before execution
-            if (t_shell_command.getConfirmExecution()) {
+            if (this.t_shell_command.getConfirmExecution()) {
                 // Yes, a confirmation is needed.
                 // Open a confirmation modal.
-                new ConfirmExecutionModal(this.plugin, shell_command_parsing_result, t_shell_command)
+                new ConfirmExecutionModal(this.plugin, shell_command_parsing_result, this.t_shell_command)
                     .open()
                 ;
                 return; // Do not execute now. The modal will call executeShellCommand() later if needed.
@@ -57,7 +59,7 @@ export class ShellCommandExecutor {
             } else {
                 // No need to confirm.
                 // Execute.
-                this.executeShellCommand(t_shell_command, shell_command_parsing_result);
+                this.executeShellCommand(shell_command_parsing_result);
             }
         }).catch(() => {
             // Cancel execution
@@ -71,10 +73,9 @@ export class ShellCommandExecutor {
      * Does not ask for confirmation before execution. This should only be called if: a) a confirmation is already asked from a user, or b) this command is defined not to need a confirmation.
      * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
      *
-     * @param t_shell_command Used for reading other properties. t_shell_command.shell_command won't be used!
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      */
-    public executeShellCommand(t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+    public executeShellCommand(shell_command_parsing_result: ParsingResult) {
         const working_directory = this.getWorkingDirectory();
 
         // Check that the shell command is not empty
@@ -89,7 +90,7 @@ export class ShellCommandExecutor {
         // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
         // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
         // shell can be written there.
-        const shell = t_shell_command.getShell();
+        const shell = this.t_shell_command.getShell();
         if (!isShellSupported(shell)) {
             debugLog("Shell is not supported: " + shell);
             this.plugin.newError("This plugin does not support the following shell: " + shell);
@@ -127,12 +128,12 @@ export class ShellCommandExecutor {
                     debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
 
                     // Check if this error should be displayed to the user or not
-                    if (t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
+                    if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
                         // The user has ignored this error.
                         debugLog("User has ignored this error, so won't display it.");
 
                         // Handle only stdout output stream
-                        handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, "", null);
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null);
                     } else {
                         // Show the error.
                         debugLog("Will display the error to user.");
@@ -145,7 +146,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle both stdout and stderr output streams
-                        handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
                     }
                 } else {
                     // Probably no errors, but do one more check.
@@ -153,7 +154,7 @@ export class ShellCommandExecutor {
                     // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
                     if (stderr.length > 0) {
                         // Check a special case: should error code 0 be ignored?
-                        if (t_shell_command.getIgnoreErrorCodes().contains(0)) {
+                        if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
                             // Exit code 0 is on the ignore list, so suppress stderr output.
                             stderr = "";
                             debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
@@ -165,7 +166,7 @@ export class ShellCommandExecutor {
                     }
 
                     // Handle output
-                    handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                    handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                 }
             });
         }

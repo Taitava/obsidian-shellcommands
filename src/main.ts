@@ -180,8 +180,12 @@ export default class SC_Plugin extends Plugin {
 			}
 			if (parsing_result.succeeded) {
 				// The command was parsed correctly.
-				const executor_instance = new ShellCommandExecutor(this); // Named 'executor_instance' because 'executor' is another constant.
-				executor_instance.confirmAndExecuteShellCommand(t_shell_command, parsing_result, null /* No SC_Event is available when executing via command palette or hotkey. */);
+				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
+					this,
+					t_shell_command,
+					null // No SC_Event is available when executing via command palette or hotkey.
+				);
+				executor_instance.confirmAndExecuteShellCommand(parsing_result);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages

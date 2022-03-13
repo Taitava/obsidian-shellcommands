@@ -111,8 +111,8 @@ export abstract class SC_Event {
         }
 
         // Execute the shell command.
-        const executor = new ShellCommandExecutor(this.plugin);
-        executor.confirmAndExecuteShellCommand(t_shell_command, parsing_result, this);
+        const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
+        executor.confirmAndExecuteShellCommand(parsing_result);
     }
 
     public static getCode() {

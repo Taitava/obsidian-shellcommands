@@ -34,8 +34,8 @@ export class ConfirmExecutionModal extends SC_Modal {
                 .setButtonText("Yes, execute!")
                 .onClick(() => {
                     debugLog("User confirmed execution of shell command: " + this.shell_command_parsing_result);
-                    const executor = new ShellCommandExecutor(this.plugin);
-                    executor.executeShellCommand(this.t_shell_command, this.shell_command_parsing_result);
+                    const executor = new ShellCommandExecutor(this.plugin, this.t_shell_command, null); // sc_event is null, because variables are already parsed at this point (so not event related variables are needed at this point). This will change when this confirmation is refactored into a Preaction, in which point the confirmation will not call .executeShellCommand() directly anymore.
+                    executor.executeShellCommand( this.shell_command_parsing_result);
                     this.close();
                 })
             )
