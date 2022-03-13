@@ -3,8 +3,6 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 
-let parsed_variables_count: number;
-
 /**
  * @param plugin
  * @param content
@@ -17,11 +15,11 @@ export function parseVariables(plugin: SC_Plugin, content: string, shell: string
         parsed_content: null,
         succeeded: false,
         error_messages: [],
+        count_parsed_variables: 0,
     };
 
     const variables = plugin.getVariables();
     parsing_result.parsed_content = content; // Create a copy of the variable because we don't want to alter the original value of 'content' during iterating its regex matches. Originally this copy was just another local variable, but now it's changed to be a property in an object.
-    parsed_variables_count = 0;
     for (const variable of variables)
     {
         const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
@@ -32,7 +30,7 @@ export function parseVariables(plugin: SC_Plugin, content: string, shell: string
             variable.reset();
 
             // Count how many times any variables have appeared.
-            parsed_variables_count++;
+            parsing_result.count_parsed_variables++;
 
             // Remove stuff that should not be iterated in a later loop.
             const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {
@@ -107,15 +105,9 @@ export function parseVariables(plugin: SC_Plugin, content: string, shell: string
     return parsing_result;
 }
 
-/**
- * TODO: Make parseVariables() to return a ParsingResult and insert the variable count in that interface. Then remove the global variable parsed_variables_count.
- */
-export function countOfParsedVariables(): number {
-    return parsed_variables_count;
-}
-
 export interface ParsingResult {
     parsed_content: string;
     succeeded: boolean;
     error_messages: string[];
+    count_parsed_variables: number;
 }

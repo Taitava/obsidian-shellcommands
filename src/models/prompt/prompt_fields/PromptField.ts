@@ -1,9 +1,6 @@
 import {Setting} from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
-import {
-    countOfParsedVariables,
-    parseVariables,
-} from "../../../variables/parseVariables";
+import {parseVariables} from "../../../variables/parseVariables";
 import {
     Instance,
     Prompt,
@@ -115,7 +112,7 @@ export abstract class PromptField extends Instance {
         }
 
         // Update the preview element.
-        if (0 === countOfParsedVariables()) {
+        if (0 === parsing_result.count_parsed_variables) {
              // If no variables were used, hide the description as it's not needed to repeat the value that already shows up in the form field.
             preview = "";
         }
