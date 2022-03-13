@@ -6,6 +6,9 @@ import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 import {DocumentationEventsFolderLink} from "../Documentation";
+import {
+    ShellCommandExecutor
+} from "../imports";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -108,7 +111,8 @@ export abstract class SC_Event {
         }
 
         // Execute the shell command.
-        this.plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result, this);
+        const executor = new ShellCommandExecutor(this.plugin);
+        executor.confirmAndExecuteShellCommand(t_shell_command, parsing_result, this);
     }
 
     public static getCode() {

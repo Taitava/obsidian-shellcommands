@@ -3,6 +3,9 @@ import SC_Plugin from "./main";
 import {ParsingResult, TShellCommand} from "./TShellCommand";
 import {debugLog} from "./Debug";
 import {SC_Modal} from "./SC_Modal";
+import {
+    ShellCommandExecutor
+} from "./imports";
 
 export class ConfirmExecutionModal extends SC_Modal {
 
@@ -31,7 +34,8 @@ export class ConfirmExecutionModal extends SC_Modal {
                 .setButtonText("Yes, execute!")
                 .onClick(() => {
                     debugLog("User confirmed execution of shell command: " + this.shell_command_parsing_result);
-                    this.plugin.executeShellCommand(this.t_shell_command, this.shell_command_parsing_result);
+                    const executor = new ShellCommandExecutor(this.plugin);
+                    executor.executeShellCommand(this.t_shell_command, this.shell_command_parsing_result);
                     this.close();
                 })
             )

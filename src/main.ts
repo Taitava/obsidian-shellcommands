@@ -37,6 +37,7 @@ import {
 	introduceModels,
 	PromptMap,
 	PromptModel,
+	ShellCommandExecutor,
 } from "./imports";
 
 export default class SC_Plugin extends Plugin {
@@ -179,7 +180,8 @@ export default class SC_Plugin extends Plugin {
 			}
 			if (parsing_result.succeeded) {
 				// The command was parsed correctly.
-				this.confirmAndExecuteShellCommand(t_shell_command, parsing_result, null /* No SC_Event is available when executing via command palette or hotkey. */);
+				const executor_instance = new ShellCommandExecutor(this); // Named 'executor_instance' because 'executor' is another constant.
+				executor_instance.confirmAndExecuteShellCommand(t_shell_command, parsing_result, null /* No SC_Event is available when executing via command palette or hotkey. */);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages

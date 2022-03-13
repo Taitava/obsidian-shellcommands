@@ -14,8 +14,13 @@ import {SC_Event} from "./events/SC_Event";
 import {
     Preaction,
 } from "./imports";
+import SC_Plugin from "./main";
 
 export class ShellCommandExecutor {
+
+    constructor(
+        private plugin: SC_Plugin,
+    ) {}
 
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
@@ -44,7 +49,7 @@ export class ShellCommandExecutor {
             if (t_shell_command.getConfirmExecution()) {
                 // Yes, a confirmation is needed.
                 // Open a confirmation modal.
-                new ConfirmExecutionModal(this, shell_command_parsing_result, t_shell_command)
+                new ConfirmExecutionModal(this.plugin, shell_command_parsing_result, t_shell_command)
                     .open()
                 ;
                 return; // Do not execute now. The modal will call executeShellCommand() later if needed.
@@ -77,7 +82,7 @@ export class ShellCommandExecutor {
         if (!shell_command.length) {
             // It is empty
             debugLog("The shell command is empty. :(");
-            this.newError("The shell command is empty :(");
+            this.plugin.newError("The shell command is empty :(");
             return;
         }
 
@@ -87,7 +92,7 @@ export class ShellCommandExecutor {
         const shell = t_shell_command.getShell();
         if (!isShellSupported(shell)) {
             debugLog("Shell is not supported: " + shell);
-            this.newError("This plugin does not support the following shell: " + shell);
+            this.plugin.newError("This plugin does not support the following shell: " + shell);
             return;
         }
 
@@ -97,13 +102,13 @@ export class ShellCommandExecutor {
             // Working directory does not exist
             // Prevent execution
             debugLog("Working directory does not exist: " + working_directory);
-            this.newError("Working directory does not exist: " + working_directory);
+            this.plugin.newError("Working directory does not exist: " + working_directory);
         }
         else if (!fs.lstatSync(working_directory).isDirectory()) {
             // Working directory is not a directory.
             // Prevent execution
             debugLog("Working directory exists but is not a folder: " + working_directory);
-            this.newError("Working directory exists but is not a folder: " + working_directory);
+            this.plugin.newError("Working directory exists but is not a folder: " + working_directory);
         } else {
             // Working directory is OK
             // Prepare execution options
@@ -127,7 +132,7 @@ export class ShellCommandExecutor {
                         debugLog("User has ignored this error, so won't display it.");
 
                         // Handle only stdout output stream
-                        handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, "", null);
+                        handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, "", null);
                     } else {
                         // Show the error.
                         debugLog("Will display the error to user.");
@@ -140,7 +145,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle both stdout and stderr output streams
-                        handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
+                        handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
                     }
                 } else {
                     // Probably no errors, but do one more check.
@@ -160,7 +165,7 @@ export class ShellCommandExecutor {
                     }
 
                     // Handle output
-                    handleShellCommandOutput(this, t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                    handleShellCommandOutput(this.plugin, t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                 }
             });
         }
@@ -168,14 +173,14 @@ export class ShellCommandExecutor {
 
     private getWorkingDirectory() {
         // Returns either a user defined working directory, or an automatically detected one.
-        const working_directory = this.settings.working_directory;
+        const working_directory = this.plugin.settings.working_directory;
         if (working_directory.length == 0) {
             // No working directory specified, so use the vault directory.
-            return getVaultAbsolutePath(this.app);
+            return getVaultAbsolutePath(this.plugin.app);
         } else if (!path.isAbsolute(working_directory)) {
             // The working directory is relative.
             // Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
-            return path.join(getVaultAbsolutePath(this.app), working_directory);
+            return path.join(getVaultAbsolutePath(this.plugin.app), working_directory);
         }
         return working_directory;
     }
