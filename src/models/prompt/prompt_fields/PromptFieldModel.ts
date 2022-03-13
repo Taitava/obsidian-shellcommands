@@ -134,7 +134,7 @@ export class PromptFieldModel extends Model {
                     .addOptions(custom_variable_options)
                     .addOption("new", "Create a new custom variable")
                     .setValue(prompt_field.configuration.target_variable_id)
-                    .onChange(async (new_target_variable_id: string) => {
+                    .onChange((new_target_variable_id: string) => {
                         if ("new" === new_target_variable_id) {
                             // Create a new custom variable.
                             const model = getModel<CustomVariableModel>(CustomVariableModel.name)
@@ -164,9 +164,16 @@ export class PromptFieldModel extends Model {
                             dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
                             this.plugin.newNotification("A target variable must be selected!");
                         } else {
-                            // Use an existing target_variable.
-                            prompt_field.configuration.target_variable_id = new_target_variable_id;
-                            await this.plugin.saveSettings();
+                            // Use an existing target variable.
+                            // Check that this target variable is not reserved.
+                            prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
+                                // It can be used.
+                                await this.plugin.saveSettings();
+                            }).catch((error_message: string) => {
+                                // The target variable is reserved.
+                                dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
+                                this.plugin.newNotification(error_message);
+                            });
                         }
                     })
                 )
@@ -199,9 +206,29 @@ export class PromptFieldModel extends Model {
         return setting_group.heading_setting;
     }
 
-    public validateValue(prompt_field: PromptField, field: string, value: unknown): Promise<void> {
-        // This method is not used, so it can just resolve all the time.
-        return Promise.resolve();
+    public validateValue(prompt_field: PromptField, field: keyof PromptFieldConfiguration, value: unknown): Promise<void> {
+        switch (field) {
+            case "target_variable_id":
+                const new_target_variable_id: string = value as string; // A more descriptive name for 'value'.
+                // Check that the target variable is not used by other fields of the same Prompt.
+                for (const other_prompt_field of prompt_field.prompt.prompt_fields) {
+                    if (prompt_field !== other_prompt_field) { // Do not check the same field. Only check other fields.
+                        // Check if this other field has the same target variable.
+                        if (new_target_variable_id === other_prompt_field.configuration.target_variable_id) {
+                            // They have the same target_variable_id.
+                            // Return an error message.
+                            const target_variable_name = this.plugin.getCustomVariableInstances().get(new_target_variable_id).getFullName();
+                            return Promise.reject(`Target variable ${target_variable_name} is already used by another field in the same prompt. Select another variable.`);
+                        }
+                    }
+                }
+                // All fields have been checked and no collisions were found.
+                return Promise.resolve();
+
+            default:
+                // No validation for other fields.
+                throw new Error(this.constructor.name + ".validateValue(): No validation is implemented for other fields.");
+        }
     }
 
     private _getDefaultConfiguration(): PromptFieldConfiguration {
