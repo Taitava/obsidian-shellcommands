@@ -68,12 +68,12 @@ export function CreateShellCommandFieldCore(
  * @public Exported because createShellCommandField uses this.
  */
 export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, sc_event: SC_Event | null) {
-    const parsed_shell_command = parseVariables(plugin, shell_command, shell, sc_event);
-    if (Array.isArray(parsed_shell_command)) {
+    const parsing_result = parseVariables(plugin, shell_command, shell, sc_event);
+    if (!parsing_result.succeeded) {
         // Variable parsing failed.
         // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-        return parsed_shell_command[0];
+        return parsing_result.error_messages[0];
     }
     // Variable parsing succeeded
-    return parsed_shell_command;
+    return parsing_result.parsed_content;
 }

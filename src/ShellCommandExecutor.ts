@@ -7,7 +7,7 @@ import * as fs from "fs";
 import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {ParsingResult, TShellCommand} from "./TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
@@ -33,7 +33,7 @@ export class ShellCommandExecutor {
      *
      * @param shell_command_parsing_result The actual shell command that will be executed.
      */
-    public confirmAndExecuteShellCommand(shell_command_parsing_result: ParsingResult) {
+    public confirmAndExecuteShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
 
         // Perform preactions before execution
         const preactions = this.t_shell_command.getPreactions(shell_command_parsing_result, this.sc_event);
@@ -75,7 +75,7 @@ export class ShellCommandExecutor {
      *
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      */
-    public executeShellCommand(shell_command_parsing_result: ParsingResult) {
+    public executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
         const working_directory = this.getWorkingDirectory();
 
         // Check that the shell command is not empty

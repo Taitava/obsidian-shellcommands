@@ -7,21 +7,27 @@ let parsed_variables_count: number;
 
 /**
  * @param plugin
- * @param command
+ * @param content
  * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
  * @param sc_event Use undefined, if parsing is not happening during an event.
- * @return string|string[] If parsing fails, an array of string error messages is returned. If the parsing succeeds, the parsed shell command will be returned just as a string, not in an array.
+ * @return ParsingResult
  */
-export function parseVariables(plugin: SC_Plugin, command: string, shell: string | null, sc_event?: SC_Event | null): string | string[] {
+export function parseVariables(plugin: SC_Plugin, content: string, shell: string | null, sc_event?: SC_Event | null): ParsingResult {
+    const parsing_result: ParsingResult = {
+        parsed_content: null,
+        succeeded: false,
+        error_messages: [],
+    };
+
     const variables = plugin.getVariables();
-    let parsed_command = command; // Create a copy of the variable because we don't want to alter the original value of 'command' during iterating its regex matches.
+    parsing_result.parsed_content = content; // Create a copy of the variable because we don't want to alter the original value of 'content' during iterating its regex matches. Originally this copy was just another local variable, but now it's changed to be a property in an object.
     parsed_variables_count = 0;
     for (const variable of variables)
     {
         const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
-        while ((argument_matches = pattern.exec(command)) !== null) {
+        while ((argument_matches = pattern.exec(content)) !== null) {
             // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
             variable.reset();
 
@@ -67,9 +73,12 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
             // Render the variable
             const raw_variable_value = variable.getValue(sc_event);
             if (variable.getErrorMessages().length) {
-                // There has been a problem and executing the command should be cancelled.
-                debugLog("Parsing command " + command + " failed.");
-                return variable.getErrorMessages(); // Returning now prevents parsing rest of the variables.
+                // There has been problem(s) with this variable.
+                debugLog("Parsing content " + content + " failed.");
+                parsing_result.succeeded = false;
+                parsing_result.parsed_content = null;
+                parsing_result.error_messages = variable.getErrorMessages(); // Returning now prevents parsing rest of the variables.
+                return parsing_result;
             }
             else
             {
@@ -86,7 +95,7 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
                 }
 
                 // Replace the variable name with the variable value.
-                parsed_command = parsed_command.replace(substitute, () => {
+                parsing_result.parsed_content = parsing_result.parsed_content.replace(substitute, () => {
                     // Do the replacing in a function in order to avoid a possible $ character to be interpreted by JavaScript to interact with the regex.
                     // More information: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter (referenced 2021-11-02.)
                     return use_variable_value;
@@ -94,7 +103,8 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
             }
         }
     }
-    return parsed_command;
+    parsing_result.succeeded = true;
+    return parsing_result;
 }
 
 /**
@@ -102,4 +112,10 @@ export function parseVariables(plugin: SC_Plugin, command: string, shell: string
  */
 export function countOfParsedVariables(): number {
     return parsed_variables_count;
+}
+
+export interface ParsingResult {
+    parsed_content: string;
+    succeeded: boolean;
+    error_messages: string[];
 }

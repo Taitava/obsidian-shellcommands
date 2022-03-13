@@ -6,7 +6,7 @@ import {
 import {Setting, TextAreaComponent} from "obsidian";
 import {OutputChannel, OutputStream} from "./OutputChannel";
 import SC_Plugin from "../main";
-import {ParsingResult, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_Modal} from "../SC_Modal";
 import {getSelectionFromTextarea} from "../Common";
 
@@ -32,10 +32,10 @@ class OutputModal extends SC_Modal {
 
     private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
-    private readonly shell_command_parsing_result: ParsingResult;
+    private readonly shell_command_parsing_result: ShellCommandParsingResult;
     private exit_code: number = null;
 
-    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         super(plugin);
 
         this.outputs = outputs;

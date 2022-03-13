@@ -19,7 +19,7 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
-import {ParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {ShellCommandParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
@@ -64,7 +64,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private cached_parsing_results: {
-		[key: string]: ParsingResult,
+		[key: string]: ShellCommandParsingResult,
 	} = {};
 
 	public async onload() {
@@ -174,7 +174,7 @@ export default class SC_Plugin extends Plugin {
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
-		const executor = (parsing_result: ParsingResult | undefined) => {
+		const executor = (parsing_result: ShellCommandParsingResult | undefined) => {
 			if (undefined === parsing_result) {
 				parsing_result = t_shell_command.parseVariables();
 			}

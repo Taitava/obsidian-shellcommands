@@ -72,13 +72,13 @@ export abstract class PromptField extends Instance {
      */
     private applyDefaultValue(sc_event: SC_Event | null) {
         const default_value = this.configuration.default_value;
-        let parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, sc_event);
-        if (Array.isArray(parsing_result)) {
-            // The result is an array containing parsing error messages.
+        const parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, sc_event);
+        if (!parsing_result.succeeded) {
+            // Parsing failed.
             this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
         } else {
             // Parsing succeeded.
-            this.setValue(parsing_result);
+            this.setValue(parsing_result.parsed_content);
         }
         this.valueHasChanged(sc_event);
     }
@@ -101,16 +101,16 @@ export abstract class PromptField extends Instance {
         let preview: string;
 
         // Parse variables in the value.
-        let parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, sc_event);
-        if (Array.isArray(parsing_result)) {
-            // The result is an array containing parsing error messages.
+        const parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, sc_event);
+        if (!parsing_result.succeeded) {
+            // Parsing failed.
             this.parsed_value = null;
-            preview = parsing_result[0]; // Display the first error message. If there are more, others can be omitted.
-            this.parsing_errors = parsing_result;
+            preview = parsing_result.error_messages[0]; // Display the first error message. If there are more, others can be omitted.
+            this.parsing_errors = parsing_result.error_messages;
         } else {
             // Parsing succeeded
-            this.parsed_value = parsing_result;
-            preview = parsing_result;
+            this.parsed_value = parsing_result.parsed_content;
+            preview = parsing_result.parsed_content;
             this.parsing_errors = []; // No errors.
         }
 

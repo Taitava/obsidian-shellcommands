@@ -3,7 +3,10 @@ import SC_Plugin from "./main";
 import {generateObsidianCommandName, getOperatingSystem} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
-import {parseVariables} from "./variables/parseVariables";
+import {
+    parseVariables,
+    ParsingResult,
+} from "./variables/parseVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {
@@ -280,46 +283,48 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
-    public parseVariables(sc_event?: SC_Event): ParsingResult {
-        // Parse variables in the actual shell command
-        const parsing_result: ParsingResult = {
+    public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
+
+        // Create a specialized parsing result object will contain both parsed shell command and parsed alias.
+        const shell_command_and_alias_parsing_result: ShellCommandParsingResult = {
             shell_command: "",
             alias: "",
             succeeded: false,
             error_messages: [],
         };
 
-        const parsed_shell_command = parseVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
+        // Parse variables in the actual shell command
+        const shell_command_parsing_result= parseVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
 
-        if (Array.isArray(parsed_shell_command)) {
+        if (!shell_command_parsing_result.succeeded) {
             // Variable parsing failed, because an array was returned, which contains error messages.
             debugLog("Shell command preview: Variable parsing failed for shell command " + this.getShellCommand());
-            parsing_result.succeeded = false;
-            parsing_result.error_messages = parsed_shell_command;
-            return parsing_result;
+            shell_command_and_alias_parsing_result.succeeded = false;
+            shell_command_and_alias_parsing_result.error_messages = shell_command_parsing_result.error_messages;
+            return shell_command_and_alias_parsing_result;
         } else {
             // Variable parsing succeeded.
             // Use the parsed values.
-            parsing_result.shell_command = parsed_shell_command;
+            shell_command_and_alias_parsing_result.shell_command = shell_command_parsing_result.parsed_content;
         }
 
         // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const parsed_alias = parseVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
-        if (Array.isArray(parsed_alias)) {
+        const alias_parsing_result = parseVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
+        if (!alias_parsing_result.succeeded) {
             // Variable parsing failed, because an array was returned, which contains error messages.
             debugLog("Shell command preview: Variable parsing failed for alias " + this.getAlias());
-            parsing_result.succeeded = false;
-            parsing_result.error_messages = parsed_alias;
-            return parsing_result;
+            shell_command_and_alias_parsing_result.succeeded = false;
+            shell_command_and_alias_parsing_result.error_messages = alias_parsing_result.error_messages;
+            return shell_command_and_alias_parsing_result;
         } else {
             // Variable parsing succeeded.
             // Use the parsed values.
-            parsing_result.alias = parsed_alias;
+            shell_command_and_alias_parsing_result.alias = alias_parsing_result.parsed_content;
         }
 
         // All ok
-        parsing_result.succeeded = true;
-        return parsing_result;
+        shell_command_and_alias_parsing_result.succeeded = true;
+        return shell_command_and_alias_parsing_result;
     }
 
     public setObsidianCommand(obsidian_command: Command) {
@@ -342,7 +347,7 @@ export class TShellCommand {
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
 
-    public getPreactions(shell_command_parsing_result: ParsingResult, sc_event: SC_Event | null): Preaction[] {
+    public getPreactions(shell_command_parsing_result: ShellCommandParsingResult, sc_event: SC_Event | null): Preaction[] {
         const preactions: Preaction[] = [];
         this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
             // Only create the preaction if it's enabled.
@@ -356,9 +361,9 @@ export class TShellCommand {
     }
 }
 
-export interface ParsingResult {
-    shell_command: string;
-    alias: string;
+export interface ShellCommandParsingResult {
+    shell_command: string,
+    alias: string,
     succeeded: boolean;
     error_messages: string[];
 }
