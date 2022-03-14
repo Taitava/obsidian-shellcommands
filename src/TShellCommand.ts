@@ -347,17 +347,20 @@ export class TShellCommand {
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
 
+    private cached_preactions: Preaction[];
     public getPreactions(): Preaction[] {
-        const preactions: Preaction[] = [];
-        this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
-            // Only create the preaction if it's enabled.
-            if (preaction_configuration.enabled) {
-                // Yes, it's enabled.
-                // Instantiate the preaction.
-                preactions.push(createPreaction(this.plugin, preaction_configuration, this));
-            }
-        });
-        return preactions;
+        if (!this.cached_preactions) {
+            this.cached_preactions = [];
+            this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
+                // Only create the preaction if it's enabled.
+                if (preaction_configuration.enabled) {
+                    // Yes, it's enabled.
+                    // Instantiate the Preaction.
+                    this.cached_preactions.push(createPreaction(this.plugin, preaction_configuration, this));
+                }
+            });
+        }
+        return this.cached_preactions;
     }
 }
 
