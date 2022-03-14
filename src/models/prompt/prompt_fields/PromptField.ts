@@ -2,6 +2,8 @@ import {Setting} from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
 import {parseVariables} from "../../../variables/parseVariables";
 import {
+    CustomVariable,
+    CustomVariableInstance,
     Instance,
     Prompt,
     PromptConfiguration,
@@ -135,6 +137,15 @@ export abstract class PromptField extends Instance {
     }
 
     protected abstract isFilled(): boolean;
+
+    public getTargetVariable(): CustomVariable {
+        const target_variable_id = this.configuration.target_variable_id;
+        const custom_variable_instance: CustomVariableInstance = this.prompt.model.plugin.getCustomVariableInstances().get(target_variable_id);
+        if (!custom_variable_instance) {
+            throw new Error(this.constructor.name + ".getTargetVariable(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
+        }
+        return custom_variable_instance.getCustomVariable();
+    }
 }
 
 export interface PromptFieldConfiguration {

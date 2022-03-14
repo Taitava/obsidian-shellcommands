@@ -5,7 +5,6 @@ import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
 import {createMultilineTextElement} from "../../Common";
 import {
-    CustomVariableInstance,
     Prompt,
     PromptField,
     PromptFieldSet,
@@ -99,13 +98,7 @@ export class PromptModal extends SC_Modal {
 
     private assignValuesToVariables() {
         for (const prompt_field of this.prompt_fields) {
-            const target_variable_id = prompt_field.configuration.target_variable_id;
-            const custom_variable_instance: CustomVariableInstance = this.plugin.getCustomVariableInstances().get(target_variable_id);
-            if (!custom_variable_instance) {
-                throw new Error(this.constructor.name + ".assignValuesToVariables(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
-            }
-            const variable = custom_variable_instance.getCustomVariable();
-            variable.setValue(prompt_field.getParsedValue());
+            prompt_field.getTargetVariable().setValue(prompt_field.getParsedValue());
         }
     }
 }
