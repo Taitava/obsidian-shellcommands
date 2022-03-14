@@ -19,6 +19,7 @@ import {SC_Event} from "../events/SC_Event";
 import {gotoURL} from "../Common";
 import {SC_Modal} from "../SC_Modal";
 import {
+    getDefaultPreaction_Prompt_Configuration,
     getModel,
     Preaction_Prompt_Configuration,
     PreactionConfiguration,
@@ -178,6 +179,14 @@ export class ExtraOptionsModal extends SC_Modal {
                 .addOption("new", "Create a new prompt")
                 .setValue(old_selected_prompt_option)
                 .onChange(async (new_prompt_id: string) => {
+                    // Create a PreactionPromptConfiguration if it does not exist.
+                    if (!preaction_prompt_configuration) {
+                        preaction_prompt_configuration = getDefaultPreaction_Prompt_Configuration();
+                        preactions_configuration.push(preaction_prompt_configuration);
+                        this.t_shell_command.resetPreactions();
+                    }
+
+                    // Interpret the selection
                     switch (new_prompt_id) {
                         case "new":
                             // Create a new Prompt.
@@ -211,6 +220,7 @@ export class ExtraOptionsModal extends SC_Modal {
                         case "no-prompt":
                             // Disable the prompt.
                             preaction_prompt_configuration.enabled = false;
+                            this.t_shell_command.resetPreactions();
                             await this.plugin.saveSettings();
                             old_selected_prompt_option = dropdown.getValue();
                             break;

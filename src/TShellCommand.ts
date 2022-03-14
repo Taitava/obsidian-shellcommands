@@ -382,6 +382,15 @@ export class TShellCommand {
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
 
+    /**
+     * Clears an internal cache used by .getPreactions().
+     * Only needed to be called after creating new PreactionConfigurations or deleting old ones. Should not need to be called
+     * when modifying properties in existing PreactionConfigurations.
+     */
+    public resetPreactions() {
+        delete this.cached_preactions;
+    }
+
     private cached_preactions: Preaction[];
     public getPreactions(): Preaction[] {
         if (!this.cached_preactions) {

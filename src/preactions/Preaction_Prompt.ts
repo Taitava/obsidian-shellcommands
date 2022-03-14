@@ -49,6 +49,14 @@ export class Preaction_Prompt extends Preaction {
     }
 }
 
+export function getDefaultPreaction_Prompt_Configuration(): Preaction_Prompt_Configuration {
+    return {
+        type: "prompt",
+        enabled: false,
+        prompt_id: "",
+    };
+}
+
 export interface Preaction_Prompt_Configuration extends PreactionConfiguration {
     type: "prompt";
     prompt_id: string;
