@@ -1,3 +1,12 @@
+import {
+	CustomVariableInstanceMap,
+	CustomVariableModel,
+	getModel,
+	introduceModels,
+	PromptMap,
+	PromptModel,
+	ShellCommandExecutor,
+} from "./imports";
 import {Command, Notice, Plugin} from 'obsidian';
 import {
 	combineObjects,
@@ -30,15 +39,6 @@ import {
 	loadVariables,
 	VariableSet,
 } from "./variables/loadVariables";
-import {
-	CustomVariableInstanceMap,
-	CustomVariableModel,
-	getModel,
-	introduceModels,
-	PromptMap,
-	PromptModel,
-	ShellCommandExecutor,
-} from "./imports";
 
 export default class SC_Plugin extends Plugin {
 	/**
