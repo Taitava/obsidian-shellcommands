@@ -93,6 +93,24 @@ export function combineObjects(...objects: Object[]) {
     return Object.assign({}, ...objects);
 }
 
+export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<SetType> {
+    return new Set<SetType>([...set1, ...set2]);
+}
+
+/**
+ * Returns a new Set cloned from 'from_set', with all items presented in 'remove_set' removed from it.
+ *
+ * @param from_set
+ * @param remove_set
+ */
+export function removeFromSet<SetType>(from_set: Set<SetType>, remove_set: Set<SetType>): Set<SetType> {
+    const reduced_set = new Set(from_set);
+    for (const removable of remove_set) {
+        reduced_set.delete(removable);
+    }
+    return reduced_set;
+}
+
 /**
  * Same as normalizePath(), but fixes these glitches:
  * - Leading forward slashes / backward slashes should not be removed.

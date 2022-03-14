@@ -1,4 +1,5 @@
 import {SC_Event} from "../events/SC_Event";
+import {VariableSet} from "../variables/loadVariables";
 import {
     Preaction,
     PreactionConfiguration,
@@ -21,6 +22,20 @@ export class Preaction_Prompt extends Preaction {
         return this.getPrompt().openPrompt(this.t_shell_command, sc_event);
     }
 
+    /**
+     * Returns all the CustomVariables whose values this Preaction's Prompt sets.
+     */
+    public getDependentVariables(): VariableSet {
+        const variables = new VariableSet();
+        for (const prompt_field of this.getPrompt().prompt_fields) {
+            variables.add(prompt_field.getTargetVariable());
+        }
+        return variables;
+    }
+
+    /**
+     * TODO: Remove.
+     */
     protected getDefaultConfiguration(): Preaction_Prompt_Configuration {
         return {
             type: "prompt",

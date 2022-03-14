@@ -1,6 +1,7 @@
 import SC_Plugin from "../main";
 import {TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
+import {VariableSet} from "../variables/loadVariables";
 import {
     Preaction_Prompt,
     Preaction_Prompt_Configuration,
@@ -29,7 +30,18 @@ export abstract class Preaction {
         return this.doPreaction(sc_event);
     }
 
-    protected abstract getDefaultConfiguration(): PreactionConfiguration;
+    protected abstract getDefaultConfiguration(): PreactionConfiguration; // TODO: Remove if this won't be used.
+
+    /**
+     * Returns variables that are dependent of this Preaction, i.e. variables whose value is set by this Preaction.
+     * If a variable is READ by a Preaction, it is NOT considered to be _dependent_ of the Preaction, as long as the variable's
+     * value is not changed by the Preaction.
+     *
+     * By default, it returns an empty VariableSet, because not all Preactions will use variables at all.
+     */
+    public getDependentVariables(): VariableSet {
+        return new VariableSet();
+    }
 }
 
 export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, t_shell_command: TShellCommand): Preaction {

@@ -4,10 +4,9 @@ import {
 } from "./Common";
 import * as path from "path";
 import * as fs from "fs";
-import {ConfirmExecutionModal} from "./ConfirmExecutionModal";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
+import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
@@ -28,39 +27,51 @@ export class ShellCommandExecutor {
 
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
-     *
-     * TODO: Change the name of this method to reflect the new behavior.
-     *
-     * @param shell_command_parsing_result The actual shell command that will be executed.
      */
-    public confirmAndExecuteShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
+    public doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess) {
+        const preactions = this.t_shell_command.getPreactions();
 
-        // Perform preactions before execution
-        const preactions = this.t_shell_command.getPreactions(this.sc_event);
+        // Does an already started ParsingProcess exist?
+        if (!parsing_process) {
+            // No ParsingProcess yet.
+            // Create one and parse all variables that are safe to parse before preactions.
+            parsing_process = this.t_shell_command.createParsingProcess(this.sc_event);
+            // Parse the first set of variables, not all sets.
+            if (!parsing_process.process()) {
+                // Some errors happened.
+                parsing_process.displayErrorMessages();
+                return;
+            }
+        }
+
+        // Perform preactions
         let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
         preactions.forEach((preaction: Preaction) => {
             preaction_pipeline = preaction_pipeline.then(() => {
-                return preaction.perform();
+                // TODO: Pass parsing_process to preaction.perform() so that Prompt can display the partially parsed shell command.
+                return preaction.perform(this.sc_event);
             });
         });
         preaction_pipeline.then(() => {
-            // Execute
 
-            // TODO: This confirmation check should be migrated into a Preaction. We should go now directly to the execution part.
-            // Check if the command needs confirmation before execution
-            if (this.t_shell_command.getConfirmExecution()) {
-                // Yes, a confirmation is needed.
-                // Open a confirmation modal.
-                new ConfirmExecutionModal(this.plugin, shell_command_parsing_result, this.t_shell_command)
-                    .open()
-                ;
-                return; // Do not execute now. The modal will call executeShellCommand() later if needed.
-                // TODO: This confirmation check should be migrated into a Preaction.
-            } else {
-                // No need to confirm.
-                // Execute.
+            // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
+            // all variables are already parsed.
+            if (parsing_process.processRest()) {
+                // Parsing the rest of the variables succeeded
+                // Execute the shell command.
+                const parsing_results = parsing_process.getParsingResults();
+                const shell_command_parsing_result: ShellCommandParsingResult = {
+                    shell_command: parsing_results["shell_command"].parsed_content,
+                    alias: parsing_results["alias"].parsed_content,
+                    succeeded: true,
+                    error_messages: [],
+                };
                 this.executeShellCommand(shell_command_parsing_result);
+            } else {
+                // Parsing has failed.
+                parsing_process.displayErrorMessages();
             }
+
         }).catch(() => {
             // Cancel execution
             debugLog("Shell command execution cancelled.")

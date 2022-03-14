@@ -1,6 +1,9 @@
 import SC_Plugin from "../main";
 import {App, EventRef} from "obsidian";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {
+    ShellCommandParsingProcess,
+    TShellCommand,
+} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
@@ -95,24 +98,13 @@ export abstract class SC_Event {
 
     /**
      * Executes a shell command.
+     * @param t_shell_command
+     * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
-    protected trigger(t_shell_command: TShellCommand, parsing_result: ShellCommandParsingResult | undefined = undefined) {
-        // Check if variables are not yet parsed. (They might be parsed already by SC_MenuEvent).
-        if (undefined === parsing_result) {
-            // No preparsed shell command exists, so parse now.
-            parsing_result = t_shell_command.parseVariables(this);
-
-            // Check the parsing result.
-            if (!parsing_result.succeeded) {
-                // Errors occurred when parsing variables.
-                this.plugin.newErrors(parsing_result.error_messages);
-                return;
-            }
-        }
-
+    protected trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
         // Execute the shell command.
         const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
-        executor.confirmAndExecuteShellCommand(parsing_result);
+        executor.doPreactionsAndExecuteShellCommand(parsing_process);
     }
 
     public static getCode() {

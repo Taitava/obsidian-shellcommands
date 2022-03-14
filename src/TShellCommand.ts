@@ -1,16 +1,22 @@
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import SC_Plugin from "./main";
-import {generateObsidianCommandName, getOperatingSystem} from "./Common";
+import {
+    generateObsidianCommandName,
+    getOperatingSystem,
+    mergeSets,
+    removeFromSet,
+} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
 import {
     parseVariables,
-    ParsingResult,
 } from "./variables/parseVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
+import {VariableSet} from "./variables/loadVariables";
 import {
     createPreaction,
+    ParsingProcess,
     Preaction,
     PreactionConfiguration
 } from "./imports";
@@ -283,6 +289,9 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
+    /**
+     * TODO: Remove in another commit, as this is not used anymore. It's not removed in this commit in order to avoid git diff confusing the new .createParsingProcess() method with this one.
+     */
     public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
 
         // Create a specialized parsing result object will contain both parsed shell command and parsed alias.
@@ -327,6 +336,32 @@ export class TShellCommand {
         return shell_command_and_alias_parsing_result;
     }
 
+    /**
+     * Creates a new ParsingProcess instance and defines two sets of variables:
+     *  - First set: All variables that are not tied to any preactions.
+     *  - Second set: Variables that are tied to preactions. Can be an empty set.
+     * You need to still call ParsingProcess.process() to parse the first set. ShellCommandExecutor takes care of calling
+     * ParsingProcess.processRest() to process all non-processed sets.
+     *
+     * @See ParsingProcess class for a description of the process.
+     * @param sc_event Needed to get {{event_*}} variables parsed. Can be left out if working outside any SC_Event context, in which case {{event_*}} variables are inaccessible.
+     */
+    public createParsingProcess(sc_event: SC_Event | null): ShellCommandParsingProcess {
+        return new ParsingProcess<shell_command_parsing_map>(
+            this.plugin,
+            {
+                "shell_command": this.getShellCommand(),
+                "alias": this.getAlias(),
+            },
+            this.getShell(),
+            sc_event,
+            [
+                this.getNonPreactionsDependentVariables(), // First set: All variables that are not tied to any preactions.
+                this.getPreactionsDependentVariables(), // Second set: Variables that are tied to preactions. Can be an empty set.
+            ]
+        );
+    }
+
     public setObsidianCommand(obsidian_command: Command) {
         this.obsidian_command = obsidian_command;
     }
@@ -362,6 +397,26 @@ export class TShellCommand {
         }
         return this.cached_preactions;
     }
+
+    /**
+     * Returns Variables that are not dependent on any Preaction.
+     * @private Can be made public if needed.
+     */
+    private getNonPreactionsDependentVariables(): VariableSet {
+        const all_variables = this.plugin.getVariables();
+        return removeFromSet(all_variables, this.getPreactionsDependentVariables());
+    }
+
+    /**
+     * @private Can be made public if needed.
+     */
+    private getPreactionsDependentVariables(): VariableSet {
+        let dependent_variables = new VariableSet();
+        for (const preaction of this.getPreactions()) {
+            dependent_variables = mergeSets(dependent_variables, preaction.getDependentVariables());
+        }
+        return dependent_variables;
+    }
 }
 
 export interface ShellCommandParsingResult {
@@ -370,3 +425,10 @@ export interface ShellCommandParsingResult {
     succeeded: boolean;
     error_messages: string[];
 }
+
+export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
+
+type shell_command_parsing_map = {
+    "shell_command": string,
+    "alias": string,
+};

@@ -19,7 +19,7 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
-import {ShellCommandParsingResult, TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
 import {getUsersDefaultShell} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
@@ -63,8 +63,8 @@ export default class SC_Plugin extends Plugin {
 	 *
 	 * @private
 	 */
-	private cached_parsing_results: {
-		[key: string]: ShellCommandParsingResult,
+	private cached_parsing_processes: {
+		[key: string]: ShellCommandParsingProcess,
 	} = {};
 
 	public async onload() {
@@ -174,22 +174,22 @@ export default class SC_Plugin extends Plugin {
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
-		const executor = (parsing_result: ShellCommandParsingResult | undefined) => {
-			if (undefined === parsing_result) {
-				parsing_result = t_shell_command.parseVariables();
+		const executor = (parsing_process: ShellCommandParsingProcess | undefined) => {
+			if (!parsing_process) {
+				parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
 			}
-			if (parsing_result.succeeded) {
+			if (parsing_process.process()) {
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
 					t_shell_command,
 					null // No SC_Event is available when executing via command palette or hotkey.
 				);
-				executor_instance.confirmAndExecuteShellCommand(parsing_result);
+				executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages
-				this.newErrors(parsing_result.error_messages);
+				parsing_process.displayErrorMessages();
 			}
 		}
 
@@ -213,15 +213,19 @@ export default class SC_Plugin extends Plugin {
 					debugLog("Getting command palette preview for shell command #" + t_shell_command.getId());
 					if (this.settings.preview_variables_in_command_palette) {
 						// Preparse variables
-						const parsing_result = t_shell_command.parseVariables();
-						if (parsing_result.succeeded) {
+						const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+						if (parsing_process.process()) {
 							// Parsing succeeded
 
 							// Rename Obsidian command
-							t_shell_command.renameObsidianCommand(parsing_result.shell_command, parsing_result.alias);
+							const parsing_result = parsing_process.getParsingResults();
+							t_shell_command.renameObsidianCommand(
+								parsing_result["shell_command"].parsed_content,
+								parsing_result["alias"].parsed_content,
+							);
 
 							// Store the preparsed variables so that they will be used if this shell command gets executed.
-							this.cached_parsing_results[t_shell_command.getId()] = parsing_result;
+							this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
 
 							// All done now
 							return true;
@@ -230,13 +234,13 @@ export default class SC_Plugin extends Plugin {
 
 					// If parsing failed (or was disabled), then use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
 					t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
-					this.cached_parsing_results[t_shell_command.getId()] = undefined;
+					this.cached_parsing_processes[t_shell_command.getId()] = undefined;
 					return true;
 
 				} else {
 					// The user has instructed to execute the command.
 					executor(
-						this.cached_parsing_results[t_shell_command.getId()], // Can be undefined, if no preparsing was done. executor() will handle parsing then.
+						this.cached_parsing_processes[t_shell_command.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
 					);
 
 					// Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
@@ -246,7 +250,7 @@ export default class SC_Plugin extends Plugin {
 					// This deletion also needs to be done even if the executed command was not a preparsed command, because
 					// even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
 					// commands might be.
-					this.cached_parsing_results = {}; // Removes obsolete preparsed variables from all shell commands.
+					this.cached_parsing_processes = {}; // Removes obsolete preparsed variables from all shell commands.
 					return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
 				}
 			}
