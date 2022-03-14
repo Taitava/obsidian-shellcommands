@@ -12,7 +12,6 @@ export abstract class Preaction {
         protected readonly plugin: SC_Plugin,
         protected readonly configuration: PreactionConfiguration,
         protected readonly t_shell_command: TShellCommand,
-        protected readonly sc_event: SC_Event,
     ) {}
 
     /**
@@ -21,22 +20,22 @@ export abstract class Preaction {
      * promises return true, the shell command will be executed.
      * @protected
      */
-    protected abstract doPreaction(): Promise<void>;
+    protected abstract doPreaction(sc_event: SC_Event): Promise<void>;
 
     /**
      * Maybe this wrapper method is unneeded, but have it for a while at least.
      */
-    public perform(): Promise<void> {
-        return this.doPreaction();
+    public perform(sc_event: SC_Event): Promise<void> {
+        return this.doPreaction(sc_event);
     }
 
     protected abstract getDefaultConfiguration(): PreactionConfiguration;
 }
 
-export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, t_shell_command: TShellCommand, sc_event: SC_Event | null): Preaction {
+export function createPreaction(plugin: SC_Plugin, preaction_configuration: PreactionConfiguration, t_shell_command: TShellCommand): Preaction {
     switch (preaction_configuration.type) {
         case "prompt":
-            return new Preaction_Prompt(plugin, (preaction_configuration as Preaction_Prompt_Configuration), t_shell_command, sc_event);
+            return new Preaction_Prompt(plugin, (preaction_configuration as Preaction_Prompt_Configuration), t_shell_command);
     }
 }
 
