@@ -2,15 +2,23 @@ import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
+import {VariableSet} from "./loadVariables";
 
 /**
  * @param plugin
  * @param content
  * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
  * @param sc_event Use undefined, if parsing is not happening during an event.
+ * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
  * @return ParsingResult
  */
-export function parseVariables(plugin: SC_Plugin, content: string, shell: string | null, sc_event?: SC_Event | null): ParsingResult {
+export function parseVariables(
+        plugin: SC_Plugin,
+        content: string,
+        shell: string | null,
+        sc_event?: SC_Event | null,
+        variables: VariableSet = plugin.getVariables(),
+    ): ParsingResult {
     const parsing_result: ParsingResult = {
         parsed_content: null,
         succeeded: false,
@@ -18,7 +26,6 @@ export function parseVariables(plugin: SC_Plugin, content: string, shell: string
         count_parsed_variables: 0,
     };
 
-    const variables = plugin.getVariables();
     parsing_result.parsed_content = content; // Create a copy of the variable because we don't want to alter the original value of 'content' during iterating its regex matches. Originally this copy was just another local variable, but now it's changed to be a property in an object.
     for (const variable of variables)
     {
