@@ -9,6 +9,7 @@ import {
     PromptField,
     PromptFieldSet,
 } from "../../imports";
+import {parseVariables} from "../../variables/parseVariables";
 
 export class PromptModal extends SC_Modal {
 
@@ -38,7 +39,13 @@ export class PromptModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.setTitle(this.prompt.getTitle());
+        // Parse and display title
+        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, null);
+        this.setTitle(
+            title_parsing_result.succeeded
+            ? title_parsing_result.parsed_content
+            : title_parsing_result.original_content
+        );
 
         // Information about the shell command (if wanted)
         if (this.t_shell_command && this.prompt.getConfiguration().preview_shell_command) {

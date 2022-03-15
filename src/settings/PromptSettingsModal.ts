@@ -1,6 +1,9 @@
 import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
-import {Setting} from "obsidian";
+import {
+    Setting,
+    TextComponent,
+} from "obsidian";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
     getModel,
@@ -8,6 +11,8 @@ import {
     PromptField,
     PromptFieldModel,
 } from "../imports";
+import {createAutocomplete} from "./setting_elements/Autocomplete";
+import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
 
 export class PromptSettingsModal extends SC_Modal {
 
@@ -33,7 +38,8 @@ export class PromptSettingsModal extends SC_Modal {
         const container_element = this.modalEl;
 
         // Title
-        new Setting(container_element)
+        let title_setting_component: TextComponent;
+        const title_setting = new Setting(container_element)
             .setName("Prompt title")
             .addExtraButton(icon => icon
                 .setTooltip("Try the prompt without executing any shell command.")
@@ -43,7 +49,7 @@ export class PromptSettingsModal extends SC_Modal {
                     this.prompt.openPrompt(null, null);
                 })
             )
-            .addText(text => text
+            .addText(text => title_setting_component = text
                 .setValue(this.prompt.getTitle())
                 .onChange(async (new_title: string) => {
                     this.prompt.getConfiguration().title = new_title;
@@ -53,10 +59,17 @@ export class PromptSettingsModal extends SC_Modal {
                     this.prompt_name_setting?.setName(new_title);
                 }),
             )
-
-            // Focus on the text field
-            .controlEl.find("input").focus()
         ;
+        const title_input_element: HTMLInputElement = title_setting.controlEl.find("input") as HTMLInputElement;
+        
+        // Focus on the title field.
+        title_input_element.focus();
+
+        // Autocomplete for Title.
+        if (this.plugin.settings.show_autocomplete_menu) {
+            createAutocomplete(title_input_element, getVariableAutocompleteItems(this.plugin), title_setting_component.onChanged);
+        }
+
 
         // Description
         new Setting(container_element)
