@@ -35,6 +35,14 @@ export class PromptSettingsModal extends SC_Modal {
         // Title
         new Setting(container_element)
             .setName("Prompt title")
+            .addExtraButton(icon => icon
+                .setTooltip("Try the prompt without executing any shell command.")
+                .setIcon("run-command")
+                .onClick(() => {
+                    // "Dry run" the Prompt
+                    this.prompt.openPrompt(null, null);
+                })
+            )
             .addText(text => text
                 .setValue(this.prompt.getTitle())
                 .onChange(async (new_title: string) => {

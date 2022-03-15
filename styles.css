@@ -89,6 +89,16 @@ div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after
 
 
 /*
+ * PROMPT MODALS
+ */
+
+p.SC-prompt-dry-run-notice {
+    font-style: italic;
+    font-weight: bold;
+}
+
+
+/*
  * Tab elements
  * This CSS is copied 2021-10-21 from https://www.w3schools.com/howto/howto_js_tabs.asp
  * Modifications:

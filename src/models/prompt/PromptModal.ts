@@ -20,7 +20,8 @@ export class PromptModal extends SC_Modal {
     constructor(
         plugin: SC_Plugin,
         private readonly prompt_fields: PromptFieldSet,
-        private readonly t_shell_command: TShellCommand,
+        /** Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables. */
+        private readonly t_shell_command: TShellCommand | null,
         private readonly prompt: Prompt,
         private sc_event: SC_Event | null,
 
@@ -40,7 +41,7 @@ export class PromptModal extends SC_Modal {
         this.setTitle(this.prompt.getTitle());
 
         // Information about the shell command (if wanted)
-        if (this.prompt.getConfiguration().preview_shell_command) {
+        if (this.t_shell_command && this.prompt.getConfiguration().preview_shell_command) {
             if (this.t_shell_command.getAlias()) {
                 this.modalEl.createEl("p", {text: this.t_shell_command.getAlias(), attr: {class: "SC-no-margin"}});
             }
@@ -86,6 +87,11 @@ export class PromptModal extends SC_Modal {
                 })
             )
         ;
+
+        if (!this.t_shell_command) {
+            // Notice that this is a preview only Prompt.
+            this.modalEl.createEl("p", {text: `This is a preview Prompt. No shell command will be executed, but clicking the '${this.prompt.configuration.execute_button_text}' button will still store the inputted value(s) to variable(s).`}).addClass("SC-prompt-dry-run-notice");
+        }
     }
 
     public onClose(): void {

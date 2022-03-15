@@ -44,7 +44,11 @@ export class Prompt extends Instance {
         return this.configuration;
     }
 
-    public openPrompt(t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<void> {
+    /**
+     * @param t_shell_command Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables.
+     * @param sc_event
+     */
+    public openPrompt(t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
         const modal = new PromptModal(
             this.plugin,
             this.prompt_fields,
