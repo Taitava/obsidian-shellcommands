@@ -9,7 +9,10 @@ import {
     PromptField,
     PromptFieldSet,
 } from "../../imports";
-import {parseVariables} from "../../variables/parseVariables";
+import {
+    parseVariables,
+    ParsingResult,
+} from "../../variables/parseVariables";
 
 export class PromptModal extends SC_Modal {
 
@@ -56,9 +59,15 @@ export class PromptModal extends SC_Modal {
             this.modalEl.createEl("hr");
         }
 
-        // Description
+        // Parse and display description
         if (this.prompt.configuration.description) {
-            const description_element = createMultilineTextElement("p", this.prompt.configuration.description, this.modalEl);
+            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, null);
+            const description =
+                description_parsing_result.succeeded
+                ? description_parsing_result.parsed_content
+                : description_parsing_result.original_content
+            ;
+            const description_element = createMultilineTextElement("p", description, this.modalEl);
             description_element.addClass("setting-item-description"); // A CSS class defined by Obsidian.
         }
 

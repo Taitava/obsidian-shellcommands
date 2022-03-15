@@ -2,6 +2,7 @@ import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
 import {
     Setting,
+    TextAreaComponent,
     TextComponent,
 } from "obsidian";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
@@ -72,10 +73,11 @@ export class PromptSettingsModal extends SC_Modal {
 
 
         // Description
-        new Setting(container_element)
+        let description_setting_component: TextAreaComponent;
+        const description_setting = new Setting(container_element)
             .setName("Description")
-            .setDesc("Displayed between the prompt title and fields.")
-            .addTextArea(textarea => textarea
+            .setDesc("Displayed between the prompt title and fields. Both Description and Title support {{variables}}.")
+            .addTextArea(textarea => description_setting_component = textarea
                 .setValue(this.prompt.configuration.description)
                 .onChange(async (new_description: string) => {
                     this.prompt.getConfiguration().description = new_description;
@@ -83,6 +85,13 @@ export class PromptSettingsModal extends SC_Modal {
                 }),
             )
         ;
+
+        // Autocomplete for Description.
+        if (this.plugin.settings.show_autocomplete_menu) {
+            const description_textarea_element: HTMLTextAreaElement = description_setting.controlEl.find("textarea") as HTMLTextAreaElement;
+            const forged_input_element: HTMLInputElement = description_textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
+            createAutocomplete(forged_input_element, getVariableAutocompleteItems(this.plugin), description_setting_component.onChanged);
+        }
 
         // Preview shell command
         new Setting(container_element)
