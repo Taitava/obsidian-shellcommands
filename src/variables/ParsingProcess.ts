@@ -141,6 +141,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             this.parsing_results[content_key] = cloneObject(parsing_result);
         } else {
             // Merge
+            // NOTE: this.parsing_results[content_key].original_content IS KEPT UNCHANGED! The newer "original" content is not actually original, because it's partly parsed. That's why the old one is preserved.
             this.parsing_results[content_key].parsed_content = parsing_result.parsed_content; // New parsed content overrides the old one.
             this.parsing_results[content_key].succeeded &&= parsing_result.succeeded; // Both the old and new parsing must have succeeded in order to consider the whole process succeeded.
             this.parsing_results[content_key].error_messages.push(...parsing_result.error_messages); // Include both old and new error messages.

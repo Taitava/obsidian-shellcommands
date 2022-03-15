@@ -20,6 +20,7 @@ export function parseVariables(
         variables: VariableSet = plugin.getVariables(),
     ): ParsingResult {
     const parsing_result: ParsingResult = {
+        original_content: content,
         parsed_content: null,
         succeeded: false,
         error_messages: [],
@@ -113,6 +114,7 @@ export function parseVariables(
 }
 
 export interface ParsingResult {
+    original_content: string;
     parsed_content: string;
     succeeded: boolean;
     error_messages: string[];
