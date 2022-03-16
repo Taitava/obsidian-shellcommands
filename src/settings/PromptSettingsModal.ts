@@ -108,6 +108,10 @@ export class PromptSettingsModal extends SC_Modal {
         ;
 
         // Fields
+        new Setting(container_element)
+            .setName("Fields")
+            .setDesc("Tip! You can use {{variables}} in 'Field label', 'Default value' and 'Description'.")
+        ;
         const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
         const fields_container = container_element.createDiv();
         this.prompt.prompt_fields.forEach((prompt_field: PromptField) => {

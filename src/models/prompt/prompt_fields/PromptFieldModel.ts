@@ -100,6 +100,7 @@ export class PromptFieldModel extends Model {
 
         // Create the setting fields
         const setting_group_element = container_element.createDiv({attr: {class: "SC-setting-group"}});
+        let label_setting_component: TextComponent;
         let description_setting_component: TextComponent;
         const setting_group: PromptFieldSettingGroup = {
             heading_setting: new Setting(setting_group_element)
@@ -108,7 +109,7 @@ export class PromptFieldModel extends Model {
             ,
             label_setting: new Setting(setting_group_element)
                 .setName("Field label")
-                .addText(text => text
+                .addText(text => label_setting_component = text
                     .setValue(prompt_field.configuration.label)
                     .setPlaceholder(label_placeholders[label_placeholder_index])
                     .onChange(async (new_label: string) => {
@@ -120,7 +121,6 @@ export class PromptFieldModel extends Model {
             ,
             default_value_setting: new Setting(setting_group_element)
                 .setName("Default value")
-                .setDesc("Can be static text, {{variables}} or a combination of both.")
                 .addText(text => text
                     .setValue(prompt_field.configuration.default_value)
                     .setPlaceholder(
@@ -132,7 +132,6 @@ export class PromptFieldModel extends Model {
             ,
             description_setting: new Setting(setting_group_element)
                 .setName("Description")
-                .setDesc("Can be static text, {{variables}} or a combination of both.")
                 .addText(text => description_setting_component = text
                     .setValue(prompt_field.configuration.description)
                     .onChange(async (new_description: string) => {
@@ -214,6 +213,8 @@ export class PromptFieldModel extends Model {
         // Autocomplete menu
         if (this.plugin.settings.show_autocomplete_menu) {
             // Show autocomplete menu (= a list of available variables).
+            const label_input_element = setting_group.label_setting.controlEl.find("input") as HTMLInputElement;
+            createAutocomplete(label_input_element, getVariableAutocompleteItems(this.plugin), label_setting_component.onChanged);
             const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(default_value_input_element, getVariableAutocompleteItems(this.plugin), on_default_value_setting_change);
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
