@@ -73,7 +73,7 @@ export class PromptModal extends SC_Modal {
 
         // Create fields
         this.prompt_fields.forEach((prompt_field: PromptField) => {
-            prompt_field.createField(this.modalEl, this.sc_event);
+            prompt_field.createField(this.modalEl.createDiv({attr: {class: "SC-setting-group"}}), this.sc_event);
         });
 
         // Tip about variables
