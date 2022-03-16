@@ -1,4 +1,7 @@
-import {Setting} from "obsidian";
+import {
+    Setting,
+    TextComponent,
+} from "obsidian";
 import {randomInteger} from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
@@ -97,6 +100,7 @@ export class PromptFieldModel extends Model {
 
         // Create the setting fields
         const setting_group_element = container_element.createDiv({attr: {class: "SC-setting-group"}});
+        let description_setting_component: TextComponent;
         const setting_group: PromptFieldSettingGroup = {
             heading_setting: new Setting(setting_group_element)
                 .setName("") // This will be set down below.
@@ -124,6 +128,17 @@ export class PromptFieldModel extends Model {
                             : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
                     )
                     .onChange(on_default_value_setting_change)
+                )
+            ,
+            description_setting: new Setting(setting_group_element)
+                .setName("Description")
+                .setDesc("Can be static text, {{variables}} or a combination of both.")
+                .addText(text => description_setting_component = text
+                    .setValue(prompt_field.configuration.description)
+                    .onChange(async (new_description: string) => {
+                        prompt_field.configuration.description = new_description;
+                        await this.plugin.saveSettings();
+                    }),
                 )
             ,
             target_variable_setting: new Setting(setting_group_element)
@@ -201,6 +216,8 @@ export class PromptFieldModel extends Model {
             // Show autocomplete menu (= a list of available variables).
             const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(default_value_input_element, getVariableAutocompleteItems(this.plugin), on_default_value_setting_change);
+            const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
+            createAutocomplete(description_input_element, getVariableAutocompleteItems(this.plugin), description_setting_component.onChanged);
         }
 
         return setting_group.heading_setting;
@@ -235,7 +252,7 @@ export class PromptFieldModel extends Model {
         return {
             // type: "text",
             label: "",
-            // TODO: Add 'description'
+            description: "",
             default_value: "",
             //  TODO: Add 'placeholder'.
             target_variable_id: "",
@@ -254,6 +271,7 @@ export interface PromptFieldSettingGroup {
     heading_setting: Setting;
     label_setting: Setting;
     default_value_setting: Setting;
+    description_setting: Setting;
     target_variable_setting: Setting
     required_setting: Setting;
 }
