@@ -23,6 +23,39 @@
 }
 
 /*
+ * SETTING GROUPS
+ * Related setting fields combined together.
+ */
+
+div.SC-setting-group div.setting-item:not(div.setting-item-heading+div.setting-item) {
+    /* Remove top border from all settings in the group, except settings that come AFTER a heading setting, as it looks
+     * good when there is a border line below a heading setting.
+     */
+    border-top: none;
+}
+
+div.SC-setting-group div.setting-item {
+    padding: 5px; /* Shrink the padding. */
+}
+
+div.SC-setting-group div.setting-item div.setting-item-info,
+div.SC-setting-group div.setting-item div.setting-item-control {
+    width: 50%; /* Make sure description does not take over 50% of the space. */
+}
+
+div.SC-setting-group div.setting-item input[type=text],
+div.SC-setting-group div.setting-item textarea,
+div.SC-setting-group div.setting-item select {
+    width: 100%; /* Enlarge fields. */
+    max-width: 100%; /* Remove a maximum width limitation, at least <select> elements had one. */
+}
+
+div.SC-setting-group div.setting-item textarea {
+    resize: both; /* Allow resizing multiline text fields freely. */
+}
+
+
+/*
  * SHELL COMMAND SETTING CONTAINERS
  */
 

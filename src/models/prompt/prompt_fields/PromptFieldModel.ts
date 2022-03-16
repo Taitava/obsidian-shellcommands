@@ -96,14 +96,14 @@ export class PromptFieldModel extends Model {
         };
 
         // Create the setting fields
+        const setting_group_element = container_element.createDiv({attr: {class: "SC-setting-group"}});
         const setting_group: PromptFieldSettingGroup = {
-            heading_setting: new Setting(container_element)
+            heading_setting: new Setting(setting_group_element)
                 .setName("") // This will be set down below.
                 .setHeading()
             ,
-            label_setting: new Setting(container_element)
+            label_setting: new Setting(setting_group_element)
                 .setName("Field label")
-                .setDesc("Displayed in the prompt.")
                 .addText(text => text
                     .setValue(prompt_field.configuration.label)
                     .setPlaceholder(label_placeholders[label_placeholder_index])
@@ -114,7 +114,7 @@ export class PromptFieldModel extends Model {
                     })
                 )
             ,
-            default_value_setting: new Setting(container_element)
+            default_value_setting: new Setting(setting_group_element)
                 .setName("Default value")
                 .setDesc("Can be static text, {{variables}} or a combination of both.")
                 .addText(text => text
@@ -126,7 +126,7 @@ export class PromptFieldModel extends Model {
                     .onChange(on_default_value_setting_change)
                 )
             ,
-            target_variable_setting: new Setting(container_element)
+            target_variable_setting: new Setting(setting_group_element)
                 .setName("Target variable")
                 .setDesc("Where the inputted value will be stored in. You can use the variable in a shell command.")
                 .addDropdown(dropdown => dropdown
@@ -178,7 +178,7 @@ export class PromptFieldModel extends Model {
                     })
                 )
             ,
-            required_setting: new Setting(container_element)
+            required_setting: new Setting(setting_group_element)
                 .setName("Is required")
                 .setDesc("If on, the field needs to be filled before the prompt can be submitted.")
                 .addToggle(toggle => toggle

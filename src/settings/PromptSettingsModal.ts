@@ -37,10 +37,11 @@ export class PromptSettingsModal extends SC_Modal {
     public onOpen(): void {
         super.onOpen();
         const container_element = this.modalEl;
+        const title_and_description_group_element = container_element.createDiv({attr: {class: "SC-setting-group"}});
 
         // Title
         let title_setting_component: TextComponent;
-        const title_setting = new Setting(container_element)
+        const title_setting = new Setting(title_and_description_group_element)
             .setName("Prompt title")
             .addExtraButton(icon => icon
                 .setTooltip("Try the prompt without executing any shell command.")
@@ -74,7 +75,7 @@ export class PromptSettingsModal extends SC_Modal {
 
         // Description
         let description_setting_component: TextAreaComponent;
-        const description_setting = new Setting(container_element)
+        const description_setting = new Setting(title_and_description_group_element)
             .setName("Description")
             .setDesc("Displayed between the prompt title and fields. Both Description and Title support {{variables}}.")
             .addTextArea(textarea => description_setting_component = textarea
@@ -117,7 +118,7 @@ export class PromptSettingsModal extends SC_Modal {
         createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt);
 
         // Execute button text
-        new Setting(container_element)
+        new Setting(container_element.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Execute button text")
             .addText(text => text
                 .setValue(this.prompt.configuration.execute_button_text)
