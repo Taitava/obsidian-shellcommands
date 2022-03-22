@@ -146,6 +146,11 @@ export class PromptSettingsModal extends SC_Modal {
                 )
             ;
         }
+
+        // A tip about CSS styling.
+        new Setting(container_element)
+            .setDesc("Tip! You can customise the style of the prompt modal with CSS by using the class ." + this.prompt.getCSSClass() + " or ." + Prompt.getCSSBaseClass()+" (for all prompt modals).")
+        ;
     }
 
     public onClose(): void {

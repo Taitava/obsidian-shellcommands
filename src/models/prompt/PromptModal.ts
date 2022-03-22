@@ -108,6 +108,9 @@ export class PromptModal extends SC_Modal {
             // Notice that this is a preview only Prompt.
             this.modalEl.createEl("p", {text: `This is a preview Prompt. No shell command will be executed, but clicking the '${this.prompt.configuration.execute_button_text}' button will still store the inputted value(s) to variable(s).`}).addClass("SC-prompt-dry-run-notice");
         }
+
+        // Add CSS classes so that custom styling can be done on a per-prompt modal basis (or for all prompt modals via a common class).
+        this.modalEl.addClasses(this.prompt.getCSSClasses());
     }
 
     public onClose(): void {

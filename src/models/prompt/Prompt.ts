@@ -44,6 +44,21 @@ export class Prompt extends Instance {
         return this.configuration;
     }
 
+    public getCSSClass(): string {
+        return Prompt.getCSSBaseClass() + "-" + this.getID();
+    }
+
+    public static getCSSBaseClass() {
+        return "SC-prompt-modal";
+    }
+
+    public getCSSClasses() {
+        return [
+            Prompt.getCSSBaseClass(),
+            this.getCSSClass(),
+        ]
+    }
+
     /**
      * @param t_shell_command Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables.
      * @param sc_event
