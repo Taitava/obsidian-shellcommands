@@ -81,7 +81,7 @@ export class PromptModal extends SC_Modal {
         if (this.prompt_fields.size > 0) {
             // TODO: When implementing different field types, add a check that the tip is only shown when there are text/numeric fields present.
             // Only show the tip if this modal actually contains fields. Prompts can also be used as custom 'confirmation prompts' without any fields.
-            tip = "Tip! You can also use variables in text fields.";
+            tip = "Tip! You can use {{variables}} in text fields.";
         }
 
         // Execute button
