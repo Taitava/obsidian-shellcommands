@@ -22,6 +22,10 @@
     white-space: normal;
 }
 
+.SC-small-font {
+    font-size: 80%;
+}
+
 /*
  * SETTING GROUPS
  * Related setting fields combined together.

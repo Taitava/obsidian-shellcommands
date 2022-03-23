@@ -4,6 +4,7 @@ import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
 import {createMultilineTextElement} from "../../Common";
+import {Variable} from "../../variables/Variable";
 import {
     Prompt,
     PromptField,
@@ -50,13 +51,106 @@ export class PromptModal extends SC_Modal {
             : title_parsing_result.original_content
         );
 
-        // Information about the shell command (if wanted)
-        if (this.t_shell_command && this.prompt.getConfiguration().preview_shell_command) {
-            if (this.t_shell_command.getAlias()) {
+        // Preview the shell command (if wanted)
+        // TODO: Extract to a separate method, as this is a big block of code.
+        let update_shell_command_preview: (() => void) | null = null; // Stays null if .preview_shell_command is false.
+        let focused_prompt_field: PromptField | undefined;
+        if (this.prompt.getConfiguration().preview_shell_command) {
+            let shell_command_preview_text: string;
+            if (this.t_shell_command?.getAlias()) {
                 this.modalEl.createEl("p", {text: this.t_shell_command.getAlias(), attr: {class: "SC-no-margin"}});
             }
-            this.modalEl.createEl("pre", {text: this.t_shell_command.getShellCommand(), attr: {class: "SC-no-margin"}});
+
+            // Create "Show variable values" toggle
+            let preview_variable_values: boolean = true;
+            const variable_names_visible_icon: string = "code-glyph";
+            const variable_values_visible_glyph: string = "price-tag-glyph";
+            const preview_variable_values_setting = new Setting(this.modalEl)
+                .addExtraButton(button => button
+                    .setIcon(variable_values_visible_glyph)
+                    .setTooltip("Toggle showing variable names or values.")
+                    .onClick(() => {
+                        preview_variable_values = !preview_variable_values;
+                        button.setIcon(
+                            preview_variable_values
+                            ? variable_values_visible_glyph
+                            : variable_names_visible_icon
+                        )
+                        update_shell_command_preview();
+                    }),
+                )
+            ;
+
+            // Decide what text to use in the preview
+            if (this.t_shell_command) {
+                // Show a real shell command
+                shell_command_preview_text = this.t_shell_command.getShellCommand();
+            } else {
+                // Make up a fake "shell command" for previewing.
+                shell_command_preview_text = this.prompt.getExampleShellCommand();
+                this.modalEl.createEl("p", {text: "(This is not a real shell command, it's just an example for this preview when no real shell command is available.)", attr: {class: "SC-no-margin SC-small-font"}});
+            }
             this.modalEl.createEl("hr");
+
+            // A function for handling preview text updates.
+            update_shell_command_preview = () => {
+                let shell_command_preview_text_final = shell_command_preview_text;
+                if (preview_variable_values) {
+                    // The preview should show the VALUES.
+
+                    // Ensure the form fields do not contain any parsing errors. (If there are errors, an unparsed preview text will be shown).
+                    if (this.getPromptFieldsParsingErrors().length === 0) {
+                        // All fields are parsed ok (= individual parsing).
+                        // Insert the field values into the shell command preview by parsing the preview text.
+
+                        // Get current values from the prompt fields.
+                        const fresh_values = this.getPromptFieldsValues(); // These PromptField values are fresh, so not yet stored in the actual variables.
+
+
+                        // Parse variables in the shell command preview text.
+                        const parsing_result = parseVariables(
+                            this.plugin,
+                            shell_command_preview_text,
+                            this.getShell(),
+                            this.sc_event,
+                            undefined, // Use all variables.
+                            (variable: Variable, raw_value: string): string => {
+                                if (fresh_values.has(variable.variable_name)) {
+                                    // Change the value to the one in the prompt field.
+                                    variable.reset(); // Remove any possible error messages. TODO: Change Variable.getValue() so that it returns an object containing error messages in addition to the value. Then this function should take the object as an argument and remove the error messages from that object. It would not need this kind of side effects that affect the Variable instance.
+                                    return fresh_values.get(variable.variable_name);
+                                } else {
+                                    // No modifications.
+                                    return raw_value;
+                                }
+                            },
+                            (variable: Variable, escaped_value: string): string => {
+                                // Emphasize the value that came from the currently focused field.
+                                if (focused_prompt_field) {
+                                    if (variable.variable_name.toLocaleLowerCase() === focused_prompt_field.getTargetVariableInstance().getPrefixedName().toLocaleLowerCase()) {
+                                        // Make the value bold.
+                                        return `<strong>${escaped_value}</strong>`;
+                                    }
+                                }
+                                // No modifications.
+                                return escaped_value;
+                            },
+                        );
+                        if (parsing_result.succeeded) {
+                            shell_command_preview_text_final = parsing_result.parsed_content;
+                        }
+                    }
+                } else {
+                    // The preview should show the VARIABLE NAMES.
+                    if (focused_prompt_field) {
+                        shell_command_preview_text_final = shell_command_preview_text_final.replace(
+                            focused_prompt_field.getTargetVariableInstance().getFullName(),
+                            "<strong>" + focused_prompt_field.getTargetVariableInstance().getFullName() + "</strong>",
+                        );
+                    }
+                }
+                preview_variable_values_setting.descEl.innerHTML = shell_command_preview_text_final;
+            };
         }
 
         // Parse and display description
@@ -72,9 +166,31 @@ export class PromptModal extends SC_Modal {
         }
 
         // Create fields
+        let is_first_field = true;
         this.prompt_fields.forEach((prompt_field: PromptField) => {
-            prompt_field.createField(this.modalEl.createDiv({attr: {class: "SC-setting-group"}}), this.sc_event);
+            prompt_field.createField(
+                this.modalEl.createDiv({attr: {class: "SC-setting-group"}}),
+                this.sc_event
+            );
+            if (update_shell_command_preview) {
+                prompt_field.onChange(update_shell_command_preview);
+            }
+            prompt_field.onFocus((prompt_field: PromptField) => {
+                focused_prompt_field = prompt_field;
+                if (update_shell_command_preview) {
+                    update_shell_command_preview();
+                }
+            });
+            if (is_first_field) {
+                // Focus on the first field.
+                is_first_field = false;
+                prompt_field.setFocus();
+            }
         });
+        if (update_shell_command_preview) {
+            // Set a preview text. Must be done after fields are created, because their values are accessed.
+            update_shell_command_preview();
+        }
 
         // Tip about variables
         let tip = "";
@@ -124,6 +240,37 @@ export class PromptModal extends SC_Modal {
     private assignValuesToVariables() {
         for (const prompt_field of this.prompt_fields) {
             prompt_field.getTargetVariable().setValue(prompt_field.getParsedValue());
+        }
+    }
+
+    /**
+     * Gathers a Map of variable values typed in the form, but does not store the values into the variables. Called when
+     * generating a preview text, so the result of this method will not persist in any way.
+     * @private
+     */
+    private getPromptFieldsValues() {
+        const values = new Map<string, string>();
+        for (const prompt_field of this.prompt_fields) {
+            values.set(prompt_field.getTargetVariable().variable_name, prompt_field.getParsedValue() ?? "");
+        }
+        return values;
+    }
+
+    private getPromptFieldsParsingErrors() {
+        const parsing_errors: string[] = [];
+        for (const prompt_field of this.prompt_fields) {
+            parsing_errors.push(...prompt_field.getParsingErrors());
+        }
+        return parsing_errors;
+    }
+
+    private getShell() {
+        if (this.t_shell_command) {
+            // This is a real usage of the PromptModal, so a TShellCommand is available. Look up the shell from that.
+            return this.t_shell_command.getShell();
+        } else {
+            // Just trying the PromptModal. Just use some shell for variable escaping in an example preview.
+            return this.plugin.getDefaultShell();
         }
     }
 }

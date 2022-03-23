@@ -116,6 +116,17 @@ export class Prompt extends Instance {
         }
     }
 
+    /**
+     * When previewing a PromptModal, there is no real shell command available (because no shell command has triggered the
+     * PromptModal). This method creates just a dummy shell command string that imitates a command that would echo variable values.
+     */
+    public getExampleShellCommand(): string {
+        const variable_names: string[] = [];
+        for (const prompt_field of this.prompt_fields) {
+            variable_names.push(prompt_field.getTargetVariableInstance().getFullName());
+        }
+        return "echo "+variable_names.join(" ");
+    }
 }
 
 export interface PromptConfiguration {

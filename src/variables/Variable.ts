@@ -44,7 +44,7 @@ export abstract class Variable {
     }
 
     /**
-     * TODO: Remove this method and make generateValue() public.
+     * TODO: Change this so that it returns an object {value: string, error_messages: string[]} and remove the getErrorMessages() method.
      */
     public getValue(sc_event?: SC_Event) {
         return this.generateValue(sc_event);
