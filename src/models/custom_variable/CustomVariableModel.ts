@@ -54,6 +54,9 @@ export class CustomVariableModel extends Model {
     }
 
     protected _createSettingFields(instance: CustomVariableInstance, container_element: HTMLElement): Setting {
+        // Make the fields appear closer together.
+        container_element.addClass("SC-setting-group");
+
         // Heading setting
         const heading_setting = new Setting(container_element)
             .setName(instance.getFullName())
