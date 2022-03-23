@@ -3,6 +3,7 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
+import {Variable} from "./Variable";
 
 /**
  * @param plugin
@@ -10,6 +11,8 @@ import {VariableSet} from "./loadVariables";
  * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
+ * @param raw_value_augmenter A callback that will be called before every substitution. Allows modifying or completely changing the resulted variable values.
+ * @param escaped_value_augmenter Same as raw_value_augmenter, but called after escaping the value. Can be used to for example wrap values in html elements for displaying purposes.
  * @return ParsingResult
  */
 export function parseVariables(
@@ -18,6 +21,8 @@ export function parseVariables(
         shell: string | null,
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
+        raw_value_augmenter: ((variable: Variable, raw_value: string) => string) | null = null,
+        escaped_value_augmenter: ((variable: Variable, escaped_value: string) => string) | null = null,
     ): ParsingResult {
     const parsing_result: ParsingResult = {
         original_content: content,
@@ -77,7 +82,14 @@ export function parseVariables(
             }
 
             // Render the variable
-            const raw_variable_value = variable.getValue(sc_event);
+            let raw_variable_value = variable.getValue(sc_event);
+
+            // Allow custom modification of the raw value.
+            if (raw_value_augmenter) {
+                raw_variable_value = raw_value_augmenter(variable, raw_variable_value);
+            }
+
+            // Check possible error messages that might have come from rendering.
             if (variable.getErrorMessages().length) {
                 // There has been problem(s) with this variable.
                 debugLog("Parsing content " + content + " failed.");
@@ -98,6 +110,11 @@ export function parseVariables(
                 } else {
                     // No escaping is wanted, so use the raw value.
                     use_variable_value = raw_variable_value;
+                }
+
+                // Augment the escaped value, if wanted.
+                if (escaped_value_augmenter) {
+                    use_variable_value = escaped_value_augmenter(variable, use_variable_value);
                 }
 
                 // Replace the variable name with the variable value.
