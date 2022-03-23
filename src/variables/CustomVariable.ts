@@ -30,7 +30,27 @@ export class CustomVariable extends Variable {
     }
 
     public setValue(value: string) {
+        const old_value = this.value;
         this.value = value;
+
+        // Call the onChange hook.
+        this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
     }
 
+    /**
+     * Adds the given callback function to a stack of functions that will be called whenever this CustomVariable's value changes.
+     * @param on_change_callback
+     */
+    public onChange(on_change_callback: TCustomVariableOnChangeCallback) {
+        this.on_change_callbacks.add(on_change_callback);
+    }
+    private on_change_callbacks = new Set<TCustomVariableOnChangeCallback>();
+
+    private callOnChangeCallbacks(new_value: string, old_value: string) {
+        for (const on_change_callback of this.on_change_callbacks) {
+            on_change_callback(this, new_value, old_value);
+        }
+    }
 }
+
+type TCustomVariableOnChangeCallback = (variable: CustomVariable, new_value: string, old_value: string) => void;
