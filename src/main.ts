@@ -1,13 +1,14 @@
 import {
 	CustomVariableInstanceMap,
 	CustomVariableModel,
+	CustomVariableView,
 	getModel,
 	introduceModels,
 	PromptMap,
 	PromptModel,
 	ShellCommandExecutor,
 } from "./imports";
-import {Command, Notice, Plugin} from 'obsidian';
+import {Command, Notice, Plugin, WorkspaceLeaf} from 'obsidian';
 import {
 	combineObjects,
 	generateObsidianCommandName,
@@ -116,7 +117,11 @@ export default class SC_Plugin extends Plugin {
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
 
+		// Create a SettingsTab.
 		this.addSettingTab(new SC_MainSettingsTab(this.app, this));
+
+		// Make it possible to create CustomVariableViews.
+		this.registerView(CustomVariableView.ViewType, (leaf: WorkspaceLeaf) => new CustomVariableView(this, leaf));
 	}
 
 	private loadTShellCommands() {
@@ -305,7 +310,10 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	public onunload() {
-		debugLog('unloading plugin');
+		debugLog('Unloading Shell commands plugin.');
+
+		// Close CustomVariableViews.
+		this.app.workspace.detachLeavesOfType(CustomVariableView.ViewType);
 	}
 
 	/**
@@ -454,6 +462,25 @@ export default class SC_Plugin extends Plugin {
 			shell_name = getUsersDefaultShell();
 		}
 		return shell_name;
+	}
+
+	public createCustomVariableView(): void {
+		const leaf = this.app.workspace.getRightLeaf(false);
+		leaf.setViewState({
+			type: CustomVariableView.ViewType,
+			active: true,
+		});
+		this.app.workspace.revealLeaf(leaf);
+	}
+
+	/**
+	 * Called when CustomVariable values are changed.
+	 */
+	public updateCustomVariableViews() {
+		for (const leaf of this.app.workspace.getLeavesOfType(CustomVariableView.ViewType)) {
+			debugLog("leaf"); // TODO: Do not commit.
+			(leaf.view as CustomVariableView).updateContent();
+		}
 	}
 }
 

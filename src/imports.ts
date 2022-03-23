@@ -26,6 +26,7 @@ export * from "./variables/CustomVariable";
 export * from "./models/custom_variable/CustomVariableInstance";
 export * from "./models/custom_variable/CustomVariableModel";
 export * from "./models/custom_variable/CustomVariableSettingsModal";
+export * from "./models/custom_variable/CustomVariableView";
 
 // Preactions
 export * from "./preactions/Preaction";

@@ -56,6 +56,7 @@ export class CustomVariableInstance extends Instance {
 
     public createCustomVariable(): CustomVariable {
         this.custom_variable = new CustomVariable(this.model.plugin, this);
+        this.custom_variable.onChange(() => this.model.plugin.updateCustomVariableViews());
         return this.custom_variable;
     }
 }

@@ -77,6 +77,7 @@ export class CustomVariableModel extends Model {
                         heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
                         instance.getCustomVariable().variable_name = new_name; // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
+                        this.plugin.updateCustomVariableViews();
                     }, (reason: string) => {
                         // Not valid
                         // Display a warning message.
@@ -89,7 +90,7 @@ export class CustomVariableModel extends Model {
         // Description setting
         new Setting(container_element)
             .setName("Description")
-            .setDesc("Appears in the autocomplete list in settings along with the variable name.")
+            .setDesc("Appears in autocomplete lists along with the variable name, and also in the 'Custom variables' pane, if you use it.")
             .addText(text => text
                 .setValue(instance.configuration.description)
                 .onChange(async (new_description: string) => {
@@ -97,6 +98,7 @@ export class CustomVariableModel extends Model {
                     instance.configuration.description = new_description;
                     instance.getCustomVariable().help_text = new_description; // Update the description also to the operational variable, not only in configuration.
                     await this.plugin.saveSettings();
+                    this.plugin.updateCustomVariableViews();
                 }),
             )
         ;

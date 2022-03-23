@@ -207,6 +207,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         new Setting(container_element)
             .setName("Custom variables")
             .setHeading() // Make the "Variables" text bold.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("pane-layout")
+                .setTooltip("Open a pane that displays all custom variables and their values.")
+                .onClick(() => {
+                    this.plugin.createCustomVariableView();
+                }),
+            )
             // .addExtraButton(extra_button => extra_button
             //     .setIcon("help")
             //     .setTooltip("Documentation: Custom variables")
@@ -215,6 +222,8 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             //     }),
             // )
         ;
+
+        // Settings for each CustomVariable
         const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
         const custom_variable_container = container_element.createDiv();
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
