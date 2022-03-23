@@ -31,6 +31,11 @@ export class PromptField_Text extends PromptField {
             })
         ;
 
+        // Set up onFocus hook.
+        this.text_component.inputEl.onfocus = () => {
+            this.hasGottenFocus();
+        };
+
         // Show autocomplete menu (if enabled)
         if (plugin.settings.show_autocomplete_menu) {
             const input_element = setting.controlEl.find("input") as HTMLInputElement;
@@ -44,6 +49,10 @@ export class PromptField_Text extends PromptField {
 
     protected getValue(): string {
         return this.text_component.getValue();
+    }
+
+    public setFocus(): void {
+        this.text_component.inputEl.focus();
     }
 
     protected isFilled(): boolean {

@@ -41,7 +41,7 @@ export abstract class PromptField extends Instance {
         // Create a preview setting element. It will not contain any actual setting elements, just text.
         this.preview_setting = new Setting(container_element);
 
-        // Parse variable in the default value and insert it to the field.
+        // Parse variables in the default value and insert it to the field.
         this.applyDefaultValue(sc_event);
     }
 
@@ -119,7 +119,42 @@ export abstract class PromptField extends Instance {
             preview = "";
         }
         this.preview_setting.setDesc(preview);
+
+        // Call a possible external callback
+        if (this.on_change_callback) {
+            this.on_change_callback();
+        }
     }
+
+    /**
+     * @param on_change_callback A callback that will be called whenever the field's value is changed.
+     */
+    public onChange(on_change_callback: () => void) {
+        this.on_change_callback = on_change_callback;
+    }
+    private on_change_callback?: () => void;
+
+    /**
+     * @param on_focus_callback A callback that will be called whenever the field is focused.
+     */
+    public onFocus(on_focus_callback: (prompt_field: PromptField) => void) {
+        this.on_focus_callback = on_focus_callback;
+    }
+    private on_focus_callback?: (prompt_field: PromptField) => void;
+
+    /**
+     * Should be called by the subclass when the field has gotten focus.
+     */
+    protected hasGottenFocus() {
+        if (this.on_focus_callback) {
+            this.on_focus_callback(this);
+        }
+    }
+
+    /**
+     * Forces focus on the field.
+     */
+    public abstract setFocus(): void;
 
     /**
      * Ensures that the field is filled, if it's mandatory. If the field is not mandatory, it's always valid.
