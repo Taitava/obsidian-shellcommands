@@ -138,12 +138,17 @@ export abstract class PromptField extends Instance {
 
     protected abstract isFilled(): boolean;
 
-    public getTargetVariable(): CustomVariable {
+    public getTargetVariableInstance(): CustomVariableInstance {
         const target_variable_id = this.configuration.target_variable_id;
         const custom_variable_instance: CustomVariableInstance = this.prompt.model.plugin.getCustomVariableInstances().get(target_variable_id);
         if (!custom_variable_instance) {
-            throw new Error(this.constructor.name + ".getTargetVariable(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
+            throw new Error(this.constructor.name + ".getTargetVariableInstance(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
         }
+        return custom_variable_instance;
+    }
+
+    public getTargetVariable(): CustomVariable {
+        const custom_variable_instance = this.getTargetVariableInstance();
         return custom_variable_instance.getCustomVariable();
     }
 }
