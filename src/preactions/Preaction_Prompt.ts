@@ -28,7 +28,10 @@ export class Preaction_Prompt extends Preaction {
     public getDependentVariables(): VariableSet {
         const variables = new VariableSet();
         for (const prompt_field of this.getPrompt().prompt_fields) {
-            variables.add(prompt_field.getTargetVariable());
+            // Check that the PromptField has a target variable defined. Otherwise getTargetVariable() would cause a crash.
+            if ("" !== prompt_field.configuration.target_variable_id) {
+                variables.add(prompt_field.getTargetVariable());
+            }
         }
         return variables;
     }

@@ -173,12 +173,8 @@ export class PromptFieldModel extends Model {
                                 );
                                 modal.open();
                             });
-                        } else if ("" === new_target_variable_id) {
-                            // The target variable cannot be undefined.
-                            dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
-                            this.plugin.newNotification("A target variable must be selected!");
                         } else {
-                            // Use an existing target variable.
+                            // Use an existing target variable (or an empty id "").
                             // Check that this target variable is not reserved.
                             prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
                                 // It can be used.
@@ -228,6 +224,12 @@ export class PromptFieldModel extends Model {
         switch (field) {
             case "target_variable_id":
                 const new_target_variable_id: string = value as string; // A more descriptive name for 'value'.
+
+                // Always allow an empty target_variable_id. A Prompt cannot be opened if a field lacks a target_variable_id, but it's allowed to be stored in the configuration, because new Prompts cannot have a default selected target variable.
+                if ("" === new_target_variable_id) {
+                    return Promise.resolve();
+                }
+
                 // Check that the target variable is not used by other fields of the same Prompt.
                 for (const other_prompt_field of prompt_field.prompt.prompt_fields) {
                     if (prompt_field !== other_prompt_field) { // Do not check the same field. Only check other fields.

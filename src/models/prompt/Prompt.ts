@@ -64,6 +64,14 @@ export class Prompt extends Instance {
      * @param sc_event
      */
     public openPrompt(t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
+        const can_open_prompt_result = this.canOpenPrompt();
+        if (true !== can_open_prompt_result) {
+            // Some error is preventing opening the prompt.
+            // A human-readable error message is contained in can_open_prompt_result.
+            this.plugin.newError(can_open_prompt_result);
+            return Promise.reject();
+        }
+
         const modal = new PromptModal(
             this.plugin,
             this.prompt_fields,
@@ -74,6 +82,25 @@ export class Prompt extends Instance {
         );
         modal.open();
         return modal.promise;
+    }
+
+    private canOpenPrompt(): true | string {
+
+        // Check that all PromptFields have a target variable defined.
+        for (const prompt_field of this.prompt_fields) {
+            if (!prompt_field.configuration.target_variable_id) {
+                return `Cannot open prompt: Field '${prompt_field.getTitle()}' does not have a target variable.`;
+            } else {
+                try {
+                    prompt_field.getTargetVariableInstance(); // Just try to get a CustomVariableInstance. No need to use it here, but if this fails, we know the variable is removed.
+                } catch (error) {
+                    return `Cannot open prompt: Field '${prompt_field.getTitle()}' uses a target variable which does not exist anymore.`;
+                }
+            }
+        }
+
+        // All ok.
+        return true;
     }
 
     /**
