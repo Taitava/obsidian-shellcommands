@@ -9,6 +9,8 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
+ - [Custom variables, part 1 (#159)](https://github.com/Taitava/obsidian-shellcommands/issues/159): Used to store inputted values from prompts.
+ - [Default values for variables (#190)](https://github.com/Taitava/obsidian-shellcommands/issues/190): If a variable cannot be accessed at a given moment, another value can be used instead.
  - [Hotkeys for output channel: Ask after execution (#145)](https://github.com/Taitava/obsidian-shellcommands/issues/145).
  - [Add autocomplete menu to Alias field (#182)](https://github.com/Taitava/obsidian-shellcommands/issues/182).
 
