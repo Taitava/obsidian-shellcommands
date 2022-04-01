@@ -4,7 +4,7 @@ import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
 import {createMultilineTextElement} from "../../Common";
-import {Variable} from "../../variables/Variable";
+import {Variable, VariableValueResult} from "../../variables/Variable";
 import {
     Prompt,
     PromptField,
@@ -114,15 +114,14 @@ export class PromptModal extends SC_Modal {
                             this.getShell(),
                             this.sc_event,
                             undefined, // Use all variables.
-                            (variable: Variable, raw_value: string): string => {
+                            (variable: Variable, raw_value: VariableValueResult): void => {
                                 if (fresh_values.has(variable.variable_name)) {
                                     // Change the value to the one in the prompt field.
-                                    variable.reset(); // Remove any possible error messages. TODO: Change Variable.getValue() so that it returns an object containing error messages in addition to the value. Then this function should take the object as an argument and remove the error messages from that object. It would not need this kind of side effects that affect the Variable instance.
-                                    return fresh_values.get(variable.variable_name);
-                                } else {
-                                    // No modifications.
-                                    return raw_value;
+                                    raw_value.error_messages = []; // Remove any possible error messages.
+                                    raw_value.succeeded = true; // This needs to reflect that there are no error messages.
+                                    raw_value.value = fresh_values.get(variable.variable_name);
                                 }
+                                // No modifications.
                             },
                             (variable: Variable, escaped_value: string): string => {
                                 // Emphasize the value that came from the currently focused field.

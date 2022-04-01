@@ -39,7 +39,7 @@ export class CustomVariableView extends ItemView {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
         for (const custom_variable_instance of this.plugin.getCustomVariableInstances().values()) {
-            const custom_variable_value= custom_variable_instance.getCustomVariable().getValue() ?? "[No value yet]";
+            const custom_variable_value: string = custom_variable_instance.getCustomVariable().getValue().value ?? "[No value yet]";
             const variable_list_element: any = this.container_element.createEl("ul");
             const variable_list_item_element = variable_list_element.createEl("li", {
                 text: custom_variable_instance.getFullName(),

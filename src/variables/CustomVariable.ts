@@ -16,11 +16,7 @@ export class CustomVariable extends Variable {
         this.help_text = custom_variable_instance.configuration.description;
     }
 
-    protected generateValue(): string | null {
-        return undefined;
-    }
-
-    public getValue() {
+    public generateValue() {
         if (null === this.value) {
             // TODO: Implement default value ability.
             this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")

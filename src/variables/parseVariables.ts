@@ -21,7 +21,7 @@ export function parseVariables(
         shell: string | null,
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
-        raw_value_augmenter: ((variable: Variable, raw_value: string) => string) | null = null,
+        raw_value_augmenter: ((variable: Variable, raw_value: VariableValueResult) => void) | null = null,
         escaped_value_augmenter: ((variable: Variable, escaped_value: string) => string) | null = null,
     ): ParsingResult {
     const parsing_result: ParsingResult = {
@@ -82,24 +82,17 @@ export function parseVariables(
             }
 
             // Render the variable
-            let raw_variable_value = variable.getValue(sc_event);
+            const variable_value_result = variable.getValue(sc_event);
 
             // Allow custom modification of the raw value.
             if (raw_value_augmenter) {
-                raw_variable_value = raw_value_augmenter(variable, raw_variable_value);
+                // The augmenter can modify the content of the variable_value_result object.
+                raw_value_augmenter(variable, variable_value_result);
             }
+            let raw_variable_value = variable_value_result.value;
 
             // Check possible error messages that might have come from rendering.
-            if (variable.getErrorMessages().length) {
-                // There has been problem(s) with this variable.
-                debugLog("Parsing content " + content + " failed.");
-                parsing_result.succeeded = false;
-                parsing_result.parsed_content = null;
-                parsing_result.error_messages = variable.getErrorMessages(); // Returning now prevents parsing rest of the variables.
-                return parsing_result;
-            }
-            else
-            {
+            if (variable_value_result.succeeded) {
                 // Parsing was ok.
 
                 // Escape the value if needed.
@@ -123,6 +116,13 @@ export function parseVariables(
                     // More information: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter (referenced 2021-11-02.)
                     return use_variable_value;
                 });
+            } else {
+                // There has been problem(s) with this variable.
+                debugLog("Parsing content " + content + " failed.");
+                parsing_result.succeeded = false;
+                parsing_result.parsed_content = null;
+                parsing_result.error_messages = variable_value_result.error_messages; // Returning now prevents parsing rest of the variables.
+                return parsing_result;
             }
         }
     }

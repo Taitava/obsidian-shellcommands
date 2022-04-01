@@ -43,11 +43,12 @@ export abstract class Variable {
         this.arguments = {};
     }
 
-    /**
-     * TODO: Change this so that it returns an object {value: string, error_messages: string[]} and remove the getErrorMessages() method.
-     */
-    public getValue(sc_event?: SC_Event) {
-        return this.generateValue(sc_event);
+    public getValue(sc_event?: SC_Event): VariableValueResult {
+        return {
+            value: this.generateValue(sc_event),
+            error_messages: this.error_messages,
+            succeeded: this.error_messages.length === 0,
+        };
     }
 
     /**
@@ -134,13 +135,6 @@ export abstract class Variable {
         }
     }
 
-    /**
-     * Note that error messages can only exist after getValue() is called!
-     */
-    public getErrorMessages() {
-        return this.error_messages;
-    }
-
     protected newErrorMessage(message: string) {
         const prefix = "{{" + this.variable_name + "}}: ";
         this.error_messages.push(prefix + message);
@@ -213,4 +207,12 @@ export interface IParameters {
         /** Is this parameter mandatory? */
         required: boolean;
     };
+}
+
+export interface VariableValueResult {
+    value: string | null,
+    error_messages: string[],
+
+    /** In practise, this is true every time error_messages is empty, so this is just a shorthand so that error_messages.length does not need to be checked by the consumer. */
+    succeeded: boolean,
 }
