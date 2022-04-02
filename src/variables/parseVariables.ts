@@ -5,6 +5,7 @@ import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
 import {Variable, VariableValueResult} from "./Variable";
 import {TShellCommand} from "../TShellCommand";
+import {removeFromSet} from "../Common";
 
 /**
  * @param plugin
@@ -85,7 +86,28 @@ export function parseVariables(
             }
 
             // Render the variable
-            const variable_value_result = variable.getValue(t_shell_command, sc_event);
+            const variable_value_result = variable.getValue(
+                t_shell_command,
+                sc_event,
+
+                // Define a recursive callback that can be used to parse possible variables in a default value of the current variable.
+                (raw_default_value) => {
+                    // Avoid circular references by removing the current variable from the set of parseable variables.
+                    // This will cumulate in deep nested parsing: Possible deeper parsing rounds will always have narrower
+                    // and narrower sets of variables to parse.
+                    const reduced_variables = removeFromSet(variables, variable);
+                    return parseVariables(
+                        plugin,
+                        raw_default_value,
+                        null, // Disable escaping special characters at this phase to avoid double escaping, as escaping will be done later.
+                        t_shell_command,
+                        sc_event,
+                        reduced_variables,
+                        raw_value_augmenter,
+                        escaped_value_augmenter,
+                    );
+                },
+            );
 
             // Allow custom modification of the raw value.
             if (raw_value_augmenter) {

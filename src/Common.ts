@@ -98,15 +98,19 @@ export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<
 }
 
 /**
- * Returns a new Set cloned from 'from_set', with all items presented in 'remove_set' removed from it.
+ * Returns a new Set cloned from 'from_set', with all items presented in 'remove' removed from it.
  *
  * @param from_set
- * @param remove_set
+ * @param remove Can be either a Set of removable items, or a single item.
  */
-export function removeFromSet<SetType>(from_set: Set<SetType>, remove_set: Set<SetType>): Set<SetType> {
+export function removeFromSet<SetType>(from_set: Set<SetType>, remove: Set<SetType> | SetType): Set<SetType> {
     const reduced_set = new Set(from_set);
-    for (const removable of remove_set) {
-        reduced_set.delete(removable);
+    if (remove instanceof Set) {
+        for (const removable of remove) {
+            reduced_set.delete(removable);
+        }
+    } else {
+        reduced_set.delete(remove);
     }
     return reduced_set;
 }

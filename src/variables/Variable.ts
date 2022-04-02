@@ -5,6 +5,7 @@ import {SC_Event} from "../events/SC_Event";
 import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
+import {ParsingResult} from "./parseVariables";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -51,7 +52,16 @@ export abstract class Variable {
         this.arguments = {};
     }
 
-    public getValue(t_shell_command: TShellCommand | null = null, sc_event?: SC_Event): VariableValueResult {
+    public getValue(
+        t_shell_command: TShellCommand | null = null,
+        sc_event: SC_Event | null = null,
+
+        /**
+         * Will parse variables in a default value (only used if this variable is not available this time). The callback
+         * is only used, if t_shell_command is given. Set to null, if no variable parsing is needed for default values.
+         * */
+        default_value_parser: ((content: string) => ParsingResult) | null = null,
+    ): VariableValueResult {
         let value: string;
         if (this.isAvailable(sc_event)) {
             // The variable can be used.
@@ -88,11 +98,26 @@ export abstract class Variable {
                 case "value":
                     // Return a default value.
                     debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
-                    return {
-                        value: default_value_configuration.value, // TODO: Parse variables, but add a circular reference check.
-                        error_messages: [],
-                        succeeded: true,
-                    };
+                    if (default_value_parser) {
+                        // Parse possible variables in the default value.
+                        const default_value_parsing_result = default_value_parser(default_value_configuration.value);
+                        return {
+                            value:
+                                default_value_parsing_result.succeeded
+                                    ? default_value_parsing_result.parsed_content
+                                    : default_value_parsing_result.original_content
+                            ,
+                            error_messages: default_value_parsing_result.error_messages,
+                            succeeded: default_value_parsing_result.succeeded,
+                        };
+                    } else {
+                        // No variable parsing is wanted.
+                        return {
+                            value: default_value_configuration.value,
+                            error_messages: [],
+                            succeeded: true,
+                        };
+                    }
             }
         }
     }
