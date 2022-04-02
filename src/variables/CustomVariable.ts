@@ -10,6 +10,8 @@ export class CustomVariable extends Variable {
 
     private value: string | null = null; // TODO: When implementing variable types, make this class abstract and let subclasses define the type of this property.
 
+    protected always_available = false;
+
     constructor(plugin: SC_Plugin, custom_variable_instance: CustomVariableInstance) {
         super(plugin);
         this.variable_name = custom_variable_instance.getPrefixedName();
@@ -46,6 +48,13 @@ export class CustomVariable extends Variable {
         for (const on_change_callback of this.on_change_callbacks) {
             on_change_callback(this, new_value, old_value);
         }
+    }
+
+    /**
+     * Returns true if the CustomVariable has an assigned value.
+     */
+    public isAvailable(): boolean {
+        return null !== this.value;
     }
 }
 

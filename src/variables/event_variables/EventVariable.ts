@@ -3,6 +3,8 @@ import {SC_Event} from "../../events/SC_Event";
 
 export abstract class EventVariable extends Variable {
 
+    protected always_available = false;
+
     /**
      * @protected
      * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
@@ -43,6 +45,13 @@ export abstract class EventVariable extends Variable {
             sc_event_titles.push(sc_event_class.getTitle());
         });
         return sc_event_titles.join(", ");
+    }
+
+    public isAvailable(sc_event: SC_Event | null): boolean {
+        if (!sc_event) {
+            return false;
+        }
+        return this.supportsSC_Event(sc_event.getClass());
     }
 
     public getAvailabilityText(): string {

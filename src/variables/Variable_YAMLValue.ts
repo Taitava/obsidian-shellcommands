@@ -1,6 +1,7 @@
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {getFileYAMLValue} from "./VariableHelpers";
+import {TFile} from "obsidian";
 
 export class Variable_YAMLValue extends FileVariable {
     public variable_name = "yaml_value";
@@ -21,7 +22,7 @@ export class Variable_YAMLValue extends FileVariable {
         const active_file = this.getFile();
         if (active_file) {
             // We do have an active file
-            const result = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+            const result = this.getFileYAMLValue(active_file);
             if (Array.isArray(result)) {
                 // The result contains error message(s).
                 this.newErrorMessages(result as string[]);
@@ -34,6 +35,23 @@ export class Variable_YAMLValue extends FileVariable {
             // No file is active at the moment
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
+    }
+
+    private yaml_value_cache: string[] | string ;
+    private getFileYAMLValue(active_file: TFile): string[] | string {
+        if (!this.yaml_value_cache) {
+            this.yaml_value_cache= getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+        }
+        return this.yaml_value_cache;
+    }
+
+    public isAvailable(): boolean {
+        if (!super.isAvailable()) {
+            return false;
+        }
+
+        const active_file = this.getFile();
+        return typeof this.getFileYAMLValue(active_file) === "string";
     }
 
 }

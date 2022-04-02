@@ -6,6 +6,8 @@ export class Variable_CaretPosition extends Variable {
     public variable_name = "caret_position";
     public help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 
+    protected always_available = false;
+
     protected static readonly parameters: IParameters = {
         mode: {
             options: ["line", "column"],
@@ -92,6 +94,10 @@ export class Variable_CaretPosition extends Variable {
 
     public getHelpName(): string {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
+    }
+
+    public isAvailable(): boolean {
+        return !!getEditor(this.app);
     }
 
     public getAvailabilityText(): string {

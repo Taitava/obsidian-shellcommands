@@ -16,4 +16,14 @@ export abstract class FolderVariable extends FileVariable {
         }
         return current_folder;
     }
+
+    public isAvailable(): boolean {
+        // Normal check: ensure a file pane is open and focused.
+        if (!super.isAvailable()) {
+            return false;
+        }
+
+        // Check that a parent folder is available. (If not, it's strange.)
+        return !!this.getFile().parent;
+    }
 }

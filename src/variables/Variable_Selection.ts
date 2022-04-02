@@ -6,6 +6,8 @@ export class Variable_Selection extends Variable{
     public variable_name = "selection";
     public help_text = "Gives the currently selected text.";
 
+    protected always_available = false;
+
     protected generateValue(): string {
 
         // Check that we are able to get a view
@@ -44,6 +46,11 @@ export class Variable_Selection extends Variable{
             default:
                 throw new Error("ShellCommandVariable_Selection: Unrecognised view mode: " + view_mode);
         }
+    }
+
+    public isAvailable(): boolean {
+        const view = getView(this.app);
+        return view && getEditor(this.app) && view.getMode() === "source";
     }
 
     public getAvailabilityText(): string {

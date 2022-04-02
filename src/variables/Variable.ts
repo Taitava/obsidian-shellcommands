@@ -15,6 +15,12 @@ export abstract class Variable {
     public help_text: string;
 
     /**
+     * If this is false, the variable can be assigned a default value that can be used in situations where the variable is unavailable.
+     * @protected
+     */
+    protected always_available = true;
+
+    /**
      * A definition for what parameters this variables takes.
      * @protected
      */
@@ -180,6 +186,23 @@ export abstract class Variable {
 
     public getHelpName() {
         return "<strong>{{" + this.variable_name + "}}</strong>";
+    }
+
+    /**
+     * Tells whether the variable can be currently accessed. If you want to know if the variable can sometimes be inaccessible,
+     * use isAlwaysAvailable() instead.
+     */
+    public isAvailable(sc_event: SC_Event | null) {
+        return true; // If the variable is always available, return true. If not, the variable should override this method.
+    }
+
+    /**
+     * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a suer to define
+     * default values for variables that are not always available, filtering out always available variables for which default
+     * values would not make sense.
+     */
+    public isAlwaysAvailable() {
+        return this.always_available;
     }
 
     /**
