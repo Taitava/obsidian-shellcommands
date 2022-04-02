@@ -27,7 +27,17 @@ import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
-    const variables = new VariableSet([
+
+    const variables = new VariableSet([]);
+
+    // Load CustomVariables
+    // Do this before loading built-in variables so that these user-defined variables will appear first in all lists containing variables.
+    plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
+        variables.add(custom_variable_instance.createCustomVariable())
+    });
+
+    // Load built-in variables.
+    const built_in_variables: Variable[] = [
         // Normal variables
         new Variable_CaretPosition(plugin),
         new Variable_Clipboard(plugin),
@@ -53,19 +63,17 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_EventTags(plugin),
         new Variable_EventTitle(plugin),
         new Variable_EventYAMLValue(plugin),
-    ]);
+    ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
-        variables.add(
+        built_in_variables.push(
             new Variable_Passthrough(plugin),
         );
     }
-
-    // Load CustomVariables
-    // TODO: Consider moving custom variables above built-in variables. This is to make them appear first in ExtraOptionsModal's 'Variables' tab.
-    plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
-        variables.add(custom_variable_instance.createCustomVariable())
-    });
+    for (const built_in_variable of built_in_variables) {
+        // JavaScript's Set does not have a method to add multiple items at once, so need to iterate them and add one-by-one.
+        variables.add(built_in_variable);
+    }
 
     return variables;
 }
