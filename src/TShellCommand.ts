@@ -290,53 +290,6 @@ export class TShellCommand {
     }
 
     /**
-     * TODO: Remove in another commit, as this is not used anymore. It's not removed in this commit in order to avoid git diff confusing the new .createParsingProcess() method with this one.
-     */
-    public parseVariables(sc_event?: SC_Event): ShellCommandParsingResult {
-
-        // Create a specialized parsing result object will contain both parsed shell command and parsed alias.
-        const shell_command_and_alias_parsing_result: ShellCommandParsingResult = {
-            shell_command: "",
-            alias: "",
-            succeeded: false,
-            error_messages: [],
-        };
-
-        // Parse variables in the actual shell command
-        const shell_command_parsing_result= parseVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
-
-        if (!shell_command_parsing_result.succeeded) {
-            // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for shell command " + this.getShellCommand());
-            shell_command_and_alias_parsing_result.succeeded = false;
-            shell_command_and_alias_parsing_result.error_messages = shell_command_parsing_result.error_messages;
-            return shell_command_and_alias_parsing_result;
-        } else {
-            // Variable parsing succeeded.
-            // Use the parsed values.
-            shell_command_and_alias_parsing_result.shell_command = shell_command_parsing_result.parsed_content;
-        }
-
-        // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const alias_parsing_result = parseVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
-        if (!alias_parsing_result.succeeded) {
-            // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for alias " + this.getAlias());
-            shell_command_and_alias_parsing_result.succeeded = false;
-            shell_command_and_alias_parsing_result.error_messages = alias_parsing_result.error_messages;
-            return shell_command_and_alias_parsing_result;
-        } else {
-            // Variable parsing succeeded.
-            // Use the parsed values.
-            shell_command_and_alias_parsing_result.alias = alias_parsing_result.parsed_content;
-        }
-
-        // All ok
-        shell_command_and_alias_parsing_result.succeeded = true;
-        return shell_command_and_alias_parsing_result;
-    }
-
-    /**
      * Creates a new ParsingProcess instance and defines two sets of variables:
      *  - First set: All variables that are not tied to any preactions.
      *  - Second set: Variables that are tied to preactions. Can be an empty set.
