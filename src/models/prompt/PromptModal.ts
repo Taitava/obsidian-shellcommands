@@ -44,7 +44,7 @@ export class PromptModal extends SC_Modal {
         super.onOpen();
 
         // Parse and display title
-        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, null);
+        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.sc_event);
         this.setTitle(
             title_parsing_result.succeeded
             ? title_parsing_result.parsed_content
@@ -154,7 +154,7 @@ export class PromptModal extends SC_Modal {
 
         // Parse and display description
         if (this.prompt.configuration.description) {
-            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, null);
+            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.sc_event);
             const description =
                 description_parsing_result.succeeded
                 ? description_parsing_result.parsed_content
