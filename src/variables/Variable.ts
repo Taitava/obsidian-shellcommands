@@ -163,7 +163,7 @@ export abstract class Variable {
             // Normal variable
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text + " " + this.getAvailabilityText(),
+                help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -171,7 +171,7 @@ export abstract class Variable {
             // Unescaped version of the variable
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + parameter_indicator + "}}",
-                help_text: this.help_text + " " + this.getAvailabilityText(),
+                help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "unescaped-variable",
             },
