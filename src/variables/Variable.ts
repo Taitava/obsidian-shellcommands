@@ -3,6 +3,8 @@ import SC_Plugin from "../main";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {SC_Event} from "../events/SC_Event";
 import {escapeRegExp} from "../lib/escapeRegExp";
+import {TShellCommand} from "../TShellCommand";
+import {debugLog} from "../Debug";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -49,12 +51,50 @@ export abstract class Variable {
         this.arguments = {};
     }
 
-    public getValue(sc_event?: SC_Event): VariableValueResult {
-        return {
-            value: this.generateValue(sc_event),
-            error_messages: this.error_messages,
-            succeeded: this.error_messages.length === 0,
-        };
+    public getValue(t_shell_command: TShellCommand | null = null, sc_event?: SC_Event): VariableValueResult {
+        let value: string;
+        if (this.isAvailable(sc_event)) {
+            // The variable can be used.
+            value = this.generateValue(sc_event);
+            return {
+                value: value,
+                error_messages: this.error_messages,
+                succeeded: this.error_messages.length === 0,
+            };
+        } else {
+            // The variable is not available in this situation.
+            // Check what should be done.
+            const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+            const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
+            const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
+            switch (default_value_type) {
+                case "show-errors":
+                    // Generate error messages by calling generateValue().
+                    debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                    this.generateValue(); // No need to use the return value, it's null anyway.
+                    return {
+                        value: null,
+                        error_messages: this.error_messages,
+                        succeeded: false,
+                    };
+                case "cancel-silently":
+                    // Prevent execution, but do not show any errors
+                    debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
+                    return {
+                        value: null,
+                        error_messages: [],
+                        succeeded: false,
+                    };
+                case "value":
+                    // Return a default value.
+                    debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
+                    return {
+                        value: default_value_configuration.value, // TODO: Parse variables, but add a circular reference check.
+                        error_messages: [],
+                        succeeded: true,
+                    };
+            }
+        }
     }
 
     /**
@@ -185,7 +225,24 @@ export abstract class Variable {
     }
 
     public getHelpName() {
-        return "<strong>{{" + this.variable_name + "}}</strong>";
+        return "<strong>" + this.getFullName() + "</strong>";
+    }
+
+    /**
+     * Returns the Variable's name wrapped in {{ and }}.
+     *
+     * TODO: Change hardcoded {{ }} entries to use this method all around the code.
+     */
+    public getFullName(): string {
+        return "{{" + this.variable_name + "}}";
+    }
+
+    /**
+     * Returns a unique string that can be used in default value configurations.
+     * @return Normal variable name, if this is a built-in variable; or an ID string if this is a CustomVariable.
+     */
+    public getIdentifier(): string {
+        return this.getFullName();
     }
 
     /**
@@ -210,6 +267,13 @@ export abstract class Variable {
      */
     public getAvailabilityText() {
         return "";
+    }
+
+    /**
+     * Same as getAvailabilityText(), but removes HTML from the result.
+     */
+    public getAvailabilityTextPlain(): string {
+        return this.getAvailabilityText().replace(/<\/?strong>/ig, ""); // Remove <strong> and </strong> markings from the help text
     }
 }
 
@@ -238,4 +302,9 @@ export interface VariableValueResult {
 
     /** In practise, this is true every time error_messages is empty, so this is just a shorthand so that error_messages.length does not need to be checked by the consumer. */
     succeeded: boolean,
+}
+
+export interface VariableDefaultValueConfiguration {
+    type: "show-errors" | "cancel-silently" | "value",
+    value: string,
 }

@@ -42,6 +42,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         generateShellCommandFieldName(shell_command_id, t_shell_command),
         shell_command,
         t_shell_command.getShell(),
+        t_shell_command,
         show_autocomplete_menu,
         async (shell_command: string) => {
             if (is_new) {
@@ -126,10 +127,20 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setTooltip(ExtraOptionsModal.EVENTS_SUMMARY)
             .setIcon("dice")
             .onClick(async () => {
-                // Open an extra options modal: Operating systems and shells tab
+                // Open an extra options modal: Events tab
                 const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-events");
+            })
+        )
+        .addExtraButton(button => button
+            .setTooltip(ExtraOptionsModal.VARIABLES_SUMMARY)
+            .setIcon("code-glyph")
+            .onClick(async () => {
+                // Open an extra options modal: Variables tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                modal.open();
+                modal.activateTab("extra-options-variables");
             })
         )
         .addExtraButton(button => button

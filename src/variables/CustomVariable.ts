@@ -12,7 +12,10 @@ export class CustomVariable extends Variable {
 
     protected always_available = false;
 
-    constructor(plugin: SC_Plugin, custom_variable_instance: CustomVariableInstance) {
+    constructor(
+        plugin: SC_Plugin,
+        private custom_variable_instance: CustomVariableInstance
+    ) {
         super(plugin);
         this.variable_name = custom_variable_instance.getPrefixedName();
         this.help_text = custom_variable_instance.configuration.description;
@@ -20,7 +23,6 @@ export class CustomVariable extends Variable {
 
     public generateValue() {
         if (null === this.value) {
-            // TODO: Implement default value ability.
             this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
             return null;
         }
@@ -33,6 +35,10 @@ export class CustomVariable extends Variable {
 
         // Call the onChange hook.
         this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
+    }
+
+    public getIdentifier() {
+        return this.custom_variable_instance.getID();
     }
 
     /**

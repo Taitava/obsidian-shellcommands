@@ -3,12 +3,14 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
-import {Variable} from "./Variable";
+import {Variable, VariableValueResult} from "./Variable";
+import {TShellCommand} from "../TShellCommand";
 
 /**
  * @param plugin
  * @param content
  * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
+ * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
  * @param raw_value_augmenter A callback that will be called before every substitution. Allows modifying or completely changing the resulted variable values.
@@ -19,6 +21,7 @@ export function parseVariables(
         plugin: SC_Plugin,
         content: string,
         shell: string | null,
+        t_shell_command: TShellCommand | null,
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
         raw_value_augmenter: ((variable: Variable, raw_value: VariableValueResult) => void) | null = null,
@@ -82,7 +85,7 @@ export function parseVariables(
             }
 
             // Render the variable
-            const variable_value_result = variable.getValue(sc_event);
+            const variable_value_result = variable.getValue(t_shell_command, sc_event);
 
             // Allow custom modification of the raw value.
             if (raw_value_augmenter) {

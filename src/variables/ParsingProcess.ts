@@ -9,6 +9,7 @@ import {
     cloneObject,
     uniqueArray,
 } from "../Common";
+import {TShellCommand} from "../TShellCommand";
 
 /**
  * ParsingProcess instances can be used in situations where it's uncertain can all variables be parsed at the time being,
@@ -30,7 +31,9 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     constructor(
         private plugin: SC_Plugin,
         private original_contents: ParsingMap,
-        private shell: string | null,
+
+        /** Used to get a shell (getShell()) and default values for variables. */
+        private t_shell_command: TShellCommand,
         private sc_event: SC_Event | null,
 
         /**
@@ -69,7 +72,8 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             const parsing_result = parseVariables(
                 this.plugin,
                 parse_content,
-                this.shell,
+                this.t_shell_command.getShell(),
+                this.t_shell_command,
                 this.sc_event,
                 current_variables,
             );

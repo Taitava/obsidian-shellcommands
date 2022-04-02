@@ -1,4 +1,4 @@
-import {Setting} from "obsidian";
+import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
@@ -27,6 +27,7 @@ import {
     PromptModel,
     PromptSettingsModal,
 } from "../imports";
+import {VariableDefaultValueConfiguration} from "../variables/Variable";
 
 export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
@@ -34,6 +35,7 @@ export class ExtraOptionsModal extends SC_Modal {
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
     public static EVENTS_SUMMARY = "Events";
+    public static VARIABLES_SUMMARY = "Default values for variables";
 
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
@@ -89,6 +91,13 @@ export class ExtraOptionsModal extends SC_Modal {
                 icon: "dice",
                 content_generator: (container_element: HTMLElement) => {
                     this.tabEvents(container_element);
+                },
+            },
+            "extra-options-variables": {
+                title: "Variables",
+                icon: "code-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabVariables(container_element);
                 },
             },
         });
@@ -387,6 +396,99 @@ export class ExtraOptionsModal extends SC_Modal {
             extra_settings_container.style.display = is_event_enabled ? "block" : "none";
             sc_event.createExtraSettingsFields(extra_settings_container, this.t_shell_command);
         });
+    }
+
+    private tabVariables(container_element: HTMLElement) {
+
+        // Default values for variables
+        new Setting(container_element)
+            .setName("Default values for variables")
+            .setDesc("Certain variables can be inaccessible during certain situations, e.g. {{file_name}} is not available when no file pane is focused. You can define default values that will be used when a variable is otherwise unavailable.")
+            .setHeading()
+        ;
+
+        // Add default value fields for each variable that can have a default value.
+        for (const variable of this.plugin.getVariables()) {
+            // Only add fields for variables that are not always accessible.
+            if (!variable.isAlwaysAvailable()) {
+
+                // Get an identifier for a variable (an id, if it's a CustomVariable, otherwise the variable's name).
+                const variable_identifier = variable.getIdentifier();
+
+                // If a default value has defined for this variable (and this TShellCommand), retrieve the configuration.
+                let default_value_configuration: VariableDefaultValueConfiguration | undefined = this.t_shell_command.getDefaultValueConfigurationForVariable(variable); // NOTE that this can be UNDEFINED!
+
+                // A function for creating configuration in onChange() callbacks if the variable does not yet have one for this TShellCommand.
+                const create_default_value_configuration = () => {
+                    const configuration: VariableDefaultValueConfiguration = {
+                        type: "show-errors",
+                        value: "",
+                    };
+                    this.t_shell_command.getConfiguration().variable_default_values[variable_identifier] = configuration;
+                    return configuration;
+                }
+
+                let textarea_component: TextAreaComponent;
+
+                // A function for updating textarea_component visibility.
+                const update_textarea_component_visibility = (type: string) => {
+                    if ("value" === type) {
+                        textarea_component.inputEl.removeClass("SC-hide");
+                    } else {
+                        textarea_component.inputEl.addClass("SC-hide");
+                    }
+                };
+
+                // Create the default value setting
+                new Setting(container_element)
+                    .setName(variable.getFullName())
+                    .setDesc("If not available, then:")
+                    .setTooltip(variable.getAvailabilityTextPlain())
+                    .addDropdown(dropdown => dropdown
+                        .addOptions({
+                            "show-errors": "Cancel execution and show errors",
+                            "cancel-silently": "Cancel execution silently",
+                            "value": "Execute with value:",
+                        })
+                        .setValue(default_value_configuration ? default_value_configuration.type : "show-errors")
+                        .onChange(async (new_type: string) => {
+                            if (!default_value_configuration) {
+                                default_value_configuration = create_default_value_configuration();
+                            }
+
+                            // Set the new type
+                            default_value_configuration.type = new_type as any;
+                            if ("show-errors" === new_type && default_value_configuration.value === "") {
+                                // If "show-errors" is selected and no text value is typed, the configuration file can be cleaned up by removing this configuration object completely.
+                                // Prevent deleting, if a text value is present, because the user might want to keep it if they will later change 'type' to 'value'.
+                                delete this.t_shell_command.getConfiguration().variable_default_values[variable_identifier];
+                            }
+
+                            // Show/hide the textarea
+                            update_textarea_component_visibility(new_type);
+
+                            // Save the settings
+                            await this.plugin.saveSettings();
+                        }),
+                    )
+                    .addTextArea(textarea => textarea_component = textarea
+                        .setValue(default_value_configuration ? default_value_configuration.value : "")
+                        .onChange(async (new_value: string) => {
+                            if (!default_value_configuration) {
+                                default_value_configuration = create_default_value_configuration();
+                            }
+
+                            // Set the new text value
+                            default_value_configuration.value = new_value;
+
+                            // Save the settings
+                            await this.plugin.saveSettings();
+                        }),
+                    )
+                ;
+                update_textarea_component_visibility(default_value_configuration ? default_value_configuration.type : "show-errors");
+            }
+        }
     }
 
     public activateTab(tab_id: string) {

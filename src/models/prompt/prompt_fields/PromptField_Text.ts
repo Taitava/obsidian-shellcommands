@@ -7,6 +7,7 @@ import {getVariableAutocompleteItems} from "../../../variables/getVariableAutoco
 import SC_Plugin from "../../../main";
 import {SC_Event} from "../../../events/SC_Event";
 import {parseVariables} from "../../../variables/parseVariables";
+import {TShellCommand} from "../../../TShellCommand";
 import {
     PromptField,
 } from "../../../imports";
@@ -15,13 +16,13 @@ export class PromptField_Text extends PromptField {
 
     private text_component: TextComponent;
 
-    protected _createField(container_element: HTMLElement, sc_event: SC_Event | null) {
+    protected _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         const plugin: SC_Plugin = this.prompt.model.plugin;
 
         // Create the field
-        const on_change = () => this.valueHasChanged(sc_event);
-        const label_parsing_result = parseVariables(this.prompt.model.plugin, this.configuration.label, null, sc_event);
-        const description_parsing_result = parseVariables(this.prompt.model.plugin, this.configuration.description, null, sc_event);
+        const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
+        const label_parsing_result = parseVariables(this.prompt.model.plugin, this.configuration.label, null, t_shell_command, sc_event);
+        const description_parsing_result = parseVariables(this.prompt.model.plugin, this.configuration.description, null, t_shell_command, sc_event);
         const setting = new Setting(container_element)
             .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content : label_parsing_result.original_content)
             .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content : description_parsing_result.original_content)

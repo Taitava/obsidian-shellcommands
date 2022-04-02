@@ -62,6 +62,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     }
 
     // Load CustomVariables
+    // TODO: Consider moving custom variables above built-in variables. This is to make them appear first in ExtraOptionsModal's 'Variables' tab.
     plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
         variables.add(custom_variable_instance.createCustomVariable())
     });

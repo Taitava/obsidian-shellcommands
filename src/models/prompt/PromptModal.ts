@@ -44,7 +44,7 @@ export class PromptModal extends SC_Modal {
         super.onOpen();
 
         // Parse and display title
-        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.sc_event);
+        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
         this.setTitle(
             title_parsing_result.succeeded
             ? title_parsing_result.parsed_content
@@ -84,7 +84,7 @@ export class PromptModal extends SC_Modal {
             // Decide what text to use in the preview
             if (this.t_shell_command) {
                 // Show a real shell command
-                shell_command_preview_text = this.t_shell_command.getShellCommand();
+                shell_command_preview_text = this.t_shell_command.getShellCommand(); // TODO: Use ParsingProcess instead.
             } else {
                 // Make up a fake "shell command" for previewing.
                 shell_command_preview_text = this.prompt.getExampleShellCommand();
@@ -112,6 +112,7 @@ export class PromptModal extends SC_Modal {
                             this.plugin,
                             shell_command_preview_text,
                             this.getShell(),
+                            this.t_shell_command,
                             this.sc_event,
                             undefined, // Use all variables.
                             (variable: Variable, raw_value: VariableValueResult): void => {
@@ -143,7 +144,7 @@ export class PromptModal extends SC_Modal {
                     // The preview should show the VARIABLE NAMES.
                     if (focused_prompt_field) {
                         shell_command_preview_text_final = shell_command_preview_text_final.replace(
-                            focused_prompt_field.getTargetVariableInstance().getFullName(),
+                            focused_prompt_field.getTargetVariableInstance().getFullName(), // TODO: Use focused_prompt_field.getTargetVariable().getPattern() instead. And make 'value' to be a callback.
                             "<strong>" + focused_prompt_field.getTargetVariableInstance().getFullName() + "</strong>",
                         );
                     }
@@ -154,7 +155,7 @@ export class PromptModal extends SC_Modal {
 
         // Parse and display description
         if (this.prompt.configuration.description) {
-            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.sc_event);
+            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
             const description =
                 description_parsing_result.succeeded
                 ? description_parsing_result.parsed_content
@@ -169,6 +170,7 @@ export class PromptModal extends SC_Modal {
         this.prompt_fields.forEach((prompt_field: PromptField) => {
             prompt_field.createField(
                 this.modalEl.createDiv({attr: {class: "SC-setting-group"}}),
+                this.t_shell_command,
                 this.sc_event
             );
             if (update_shell_command_preview) {

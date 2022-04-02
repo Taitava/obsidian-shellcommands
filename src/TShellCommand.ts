@@ -20,6 +20,10 @@ import {
     Preaction,
     PreactionConfiguration
 } from "./imports";
+import {
+    Variable,
+    VariableDefaultValueConfiguration,
+} from "./variables/Variable";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -306,7 +310,7 @@ export class TShellCommand {
                 "shell_command": this.getShellCommand(),
                 "alias": this.getAlias(),
             },
-            this.getShell(),
+            this,
             sc_event,
             [
                 this.getNonPreactionsDependentVariables(), // First set: All variables that are not tied to any preactions.
@@ -378,6 +382,13 @@ export class TShellCommand {
             dependent_variables = mergeSets(dependent_variables, preaction.getDependentVariables());
         }
         return dependent_variables;
+    }
+
+    /**
+     * @return Returns undefined, if no configuration is defined for this variable.
+     */
+    public getDefaultValueConfigurationForVariable(variable: Variable): VariableDefaultValueConfiguration | undefined {
+        return this.configuration.variable_default_values[variable.getIdentifier()];
     }
 }
 

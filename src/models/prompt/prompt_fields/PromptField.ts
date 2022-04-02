@@ -1,6 +1,7 @@
 import {Setting} from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
 import {parseVariables} from "../../../variables/parseVariables";
+import {TShellCommand} from "../../../TShellCommand";
 import {
     CustomVariable,
     CustomVariableInstance,
@@ -33,19 +34,21 @@ export abstract class PromptField extends Instance {
     /**
      *
      * @param container_element
+     * @param t_shell_command
      * @param sc_event Used when parsing variables for default_value and the inputted value. Needed so that also {{event_*}} variables can be used in prompts.
      */
-    public createField(container_element: HTMLElement, sc_event: SC_Event | null): void {
-        this._createField(container_element, sc_event);
+    public createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): void {
+        this._createField(container_element, t_shell_command, sc_event);
 
         // Create a preview setting element. It will not contain any actual setting elements, just text.
         this.preview_setting = new Setting(container_element);
 
         // Parse variables in the default value and insert it to the field.
-        this.applyDefaultValue(sc_event);
+        // Note that this is a different "default value" than what TShellCommand considers as variables' default values! This is about a _field's_ default value, not a variable's default value. t_shell_command is passed in order to allow any possible variables in the field's default value to access the variables' default values (which come from TShellCommand).
+        this.applyDefaultValue(t_shell_command, sc_event);
     }
 
-    protected abstract _createField(container_element: HTMLElement, sc_event: SC_Event | null): void;
+    protected abstract _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): void;
 
     public getTitle(): string {
         return this.configuration.label === "" ? "Unlabelled field" : this.configuration.label;
@@ -66,12 +69,13 @@ export abstract class PromptField extends Instance {
 
     /**
      * Parses the default value and sets it to the form element.
+     * @param t_shell_command
      * @param sc_event
      * @private
      */
-    private applyDefaultValue(sc_event: SC_Event | null) {
+    private applyDefaultValue(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         const default_value = this.configuration.default_value;
-        const parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, sc_event);
+        const parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, t_shell_command, sc_event);
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
@@ -79,7 +83,7 @@ export abstract class PromptField extends Instance {
             // Parsing succeeded.
             this.setValue(parsing_result.parsed_content);
         }
-        this.valueHasChanged(sc_event);
+        this.valueHasChanged(t_shell_command, sc_event);
     }
 
     public getParsedValue() {
@@ -93,18 +97,25 @@ export abstract class PromptField extends Instance {
     /**
      * Updates this.parsed_value, this.parsing_errors and this.preview_setting .
      *
+     * @param t_shell_command
      * @param sc_event
      * @protected
      */
-    protected valueHasChanged(sc_event: SC_Event) {
+    protected valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event) {
         let preview: string;
 
         // Parse variables in the value.
-        const parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, sc_event);
+        const parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, t_shell_command,sc_event);
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.parsed_value = null;
-            preview = parsing_result.error_messages[0]; // Display the first error message. If there are more, others can be omitted.
+            if (parsing_result.error_messages.length > 0) {
+                // Display the first error message. If there are more, others can be omitted.
+                preview = parsing_result.error_messages[0];
+            } else {
+                // If there are no error messages, then errors are silently ignored by user's variable configuration, in which case just show the original content.
+                preview = parsing_result.original_content;
+            }
             this.parsing_errors = parsing_result.error_messages;
         } else {
             // Parsing succeeded

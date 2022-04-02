@@ -5,6 +5,7 @@ import {
     IPlatformSpecificStringWithDefault,
 } from "./SC_MainSettings";
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
+import {VariableDefaultValueConfiguration} from "../variables/Variable";
 import {
     PreactionConfiguration
 } from "../imports";
@@ -32,6 +33,9 @@ export interface ShellCommandConfiguration {
     events: SC_EventConfigurations;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
+    variable_default_values: {
+        [variable_id_or_name: string]: VariableDefaultValueConfiguration,
+    };
 
     // LEGACY
     /** @deprecated Can only be used for migration. */
@@ -55,5 +59,6 @@ export function newShellCommandConfiguration(shell_command: string = ""): ShellC
         events: {},
         command_palette_availability: "enabled",
         preactions: [],
+        variable_default_values: {},
     }
 }
