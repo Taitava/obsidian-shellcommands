@@ -63,14 +63,15 @@ export class Prompt extends Instance {
      * @param t_shell_command Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables.
      * @param parsing_process
      * @param sc_event
+     * @return Promise The boolean value tells whether the user wants to execute a shell command (true) or cancel (false).
      */
-    public openPrompt(t_shell_command: TShellCommand | null, parsing_process: ShellCommandParsingProcess | null, sc_event: SC_Event | null): Promise<void> {
+    public openPrompt(t_shell_command: TShellCommand | null, parsing_process: ShellCommandParsingProcess | null, sc_event: SC_Event | null): Promise<boolean> {
         const can_open_prompt_result = this.canOpenPrompt();
         if (true !== can_open_prompt_result) {
             // Some error is preventing opening the prompt.
             // A human-readable error message is contained in can_open_prompt_result.
             this.plugin.newError(can_open_prompt_result);
-            return Promise.reject();
+            return Promise.resolve(false); // false: Cancel execution (pretends that a user cancelled it, but it's ok).
         }
 
         const modal = new PromptModal(

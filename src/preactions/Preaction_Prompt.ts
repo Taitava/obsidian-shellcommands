@@ -19,7 +19,19 @@ export class Preaction_Prompt extends Preaction {
     }
 
     protected doPreaction(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void> {
-        return this.getPrompt().openPrompt(this.t_shell_command, parsing_process, sc_event);
+        return new Promise<void>((resolve, reject) => {
+            this.getPrompt().openPrompt(this.t_shell_command, parsing_process, sc_event).then((execution_confirmed: boolean) => {
+                // The PromptModal has been closed.
+                // Check if user wanted to execute the shell command or cancel.
+                if (execution_confirmed) {
+                    // User wants to execute.
+                    resolve();
+                } else {
+                    // User wants to cancel.
+                    reject();
+                }
+            })
+        });
     }
 
     /**

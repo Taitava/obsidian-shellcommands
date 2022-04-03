@@ -17,10 +17,9 @@ import {
 
 export class PromptModal extends SC_Modal {
 
-    public promise: Promise<void>;
+    public promise: Promise<boolean>;
     private user_confirmed_ok = false;
-    private resolve_promise: (value: (void | PromiseLike<void>)) => void;
-    private reject_promise: (reason?: any) => void;
+    private resolve_promise: (value: (boolean | PromiseLike<boolean>)) => void;
 
     constructor(
         plugin: SC_Plugin,
@@ -35,9 +34,8 @@ export class PromptModal extends SC_Modal {
         private readonly validator: () => Promise<void>,
     ) {
         super(plugin);
-        this.promise = new Promise<void>((resolve, reject) => {
+        this.promise = new Promise<boolean>((resolve) => {
             this.resolve_promise = resolve;
-            this.reject_promise = reject;
         });
     }
 
@@ -214,7 +212,7 @@ export class PromptModal extends SC_Modal {
                     this.validator().then(() => {
                         // The form fields are filled ok
                         this.assignValuesToVariables();
-                        this.resolve_promise();
+                        this.resolve_promise(true);
                         this.user_confirmed_ok = true;
                         this.close();
                     }, (error_messages: string[] | any) => {
@@ -243,7 +241,7 @@ export class PromptModal extends SC_Modal {
         super.onClose();
 
         if (!this.user_confirmed_ok) { // TODO: Find out if there is a way to not use this kind of flag property. Can the status be checked from the promise itself?
-            this.reject_promise();
+            this.resolve_promise(false);
         }
     }
 
