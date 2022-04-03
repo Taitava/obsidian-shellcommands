@@ -213,7 +213,7 @@ export class PromptModal extends SC_Modal {
                         this.resolve_promise();
                         this.user_confirmed_ok = true;
                         this.close();
-                    }).catch((error_messages: string[]) => {
+                    }, (error_messages: string[]) => {
                         // There were some problems with the fields.
                         this.plugin.newErrors(error_messages);
                     });

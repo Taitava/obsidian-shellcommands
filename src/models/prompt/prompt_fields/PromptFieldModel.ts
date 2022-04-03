@@ -179,7 +179,7 @@ export class PromptFieldModel extends Model {
                             prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
                                 // It can be used.
                                 await this.plugin.saveSettings();
-                            }).catch((error_message: string) => {
+                            }, (error_message: string) => {
                                 // The target variable is reserved.
                                 dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
                                 this.plugin.newNotification(error_message);
