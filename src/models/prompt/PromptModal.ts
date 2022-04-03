@@ -217,9 +217,14 @@ export class PromptModal extends SC_Modal {
                         this.resolve_promise();
                         this.user_confirmed_ok = true;
                         this.close();
-                    }, (error_messages: string[]) => {
-                        // There were some problems with the fields.
-                        this.plugin.newErrors(error_messages);
+                    }, (error_messages: string[] | any) => {
+                        if (Array.isArray(error_messages)) {
+                            // There were some problems with the fields.
+                            this.plugin.newErrors(error_messages);
+                        } else {
+                            // Some other runtime error has occurred.
+                            throw error_messages;
+                        }
                     });
                 })
             )
