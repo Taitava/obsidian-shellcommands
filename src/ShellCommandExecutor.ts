@@ -72,7 +72,7 @@ export class ShellCommandExecutor {
                 parsing_process.displayErrorMessages();
             }
 
-        }).catch(() => {
+        }, () => {
             // Cancel execution
             debugLog("Shell command execution cancelled.")
         });
