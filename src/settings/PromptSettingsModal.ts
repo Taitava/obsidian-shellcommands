@@ -48,7 +48,7 @@ export class PromptSettingsModal extends SC_Modal {
                 .setIcon("run-command")
                 .onClick(() => {
                     // "Dry run" the Prompt
-                    this.prompt.openPrompt(null, null, null);
+                    this.prompt.openPrompt(null, null, null).then();
                 })
             )
             .addText(text => title_setting_component = text
@@ -119,7 +119,7 @@ export class PromptSettingsModal extends SC_Modal {
         });
 
         // New field button
-        createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt);
+        createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt).then();
 
         // Execute button text
         new Setting(container_element.createDiv({attr: {class: "SC-setting-group"}}))
