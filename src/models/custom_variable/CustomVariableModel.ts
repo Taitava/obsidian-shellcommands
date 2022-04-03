@@ -78,10 +78,16 @@ export class CustomVariableModel extends Model {
                         instance.getCustomVariable().variable_name = new_name; // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
                         this.plugin.updateCustomVariableViews();
-                    }, (reason: string) => {
+                    }, (reason: string | any) => {
                         // Not valid
-                        // Display a warning message.
-                        heading_setting.setName(reason + " The name was not saved.");
+                        if (typeof reason === "string") {
+                            // This is a validation error message.
+                            // Display a warning message.
+                            heading_setting.setName(reason + " The name was not saved.");
+                        } else {
+                            // Some other runtime error has occurred.
+                            throw reason;
+                        }
                     });
                 }),
             )
