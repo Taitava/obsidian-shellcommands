@@ -12,7 +12,7 @@ export class Preaction_Prompt extends Preaction {
 
     constructor(
         plugin: SC_Plugin,
-        protected readonly configuration: Preaction_Prompt_Configuration,
+        public readonly configuration: Preaction_Prompt_Configuration,
         t_shell_command: TShellCommand,
     ) {
         super(plugin, configuration, t_shell_command);

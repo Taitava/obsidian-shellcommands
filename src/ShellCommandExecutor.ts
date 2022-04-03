@@ -35,27 +35,37 @@ export class ShellCommandExecutor {
         if (!parsing_process) {
             // No ParsingProcess yet.
             // Create one and parse all variables that are safe to parse before preactions.
+            debugLog("Going to prepare possible Preactions, but will first start a variable parsing process. Depending on possible Preactions, this might not yet parse all variables.");
             parsing_process = this.t_shell_command.createParsingProcess(this.sc_event);
             // Parse the first set of variables, not all sets.
             if (!parsing_process.process()) {
                 // Some errors happened.
+                debugLog("Will not prepare possible Preactions, because the parsing process failed. Will cancel shell command execution.");
                 parsing_process.displayErrorMessages();
                 return;
             }
+        } else {
+            debugLog("Going to prepare possible Preactions with an already started variable parsing process.");
         }
 
         // Perform preactions
         let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
         preactions.forEach((preaction: Preaction) => {
+            debugLog(`Adding Preaction of type '${preaction.configuration.type}' to pipeline.`);
             preaction_pipeline = preaction_pipeline.then(() => {
+                debugLog(`Calling Preaction of type '${preaction.configuration.type}'.`);
                 // TODO: Pass parsing_process to preaction.perform() so that Prompt can display the partially parsed shell command.
                 return preaction.perform(this.sc_event);
             });
         });
-        preaction_pipeline.then(() => {
+        if (0 === preactions.length) {
+            debugLog("No Preactions to perform. This is ok.");
+        }
 
+        preaction_pipeline.then(() => {
             // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
             // all variables are already parsed.
+            debugLog("Parsing all the rest of the variables (if there are any left).")
             if (parsing_process.processRest()) {
                 // Parsing the rest of the variables succeeded
                 // Execute the shell command.
@@ -66,9 +76,11 @@ export class ShellCommandExecutor {
                     succeeded: true,
                     error_messages: [],
                 };
+                debugLog("Will call ShellCommandExecutor.executeShellCommand().");
                 this.executeShellCommand(shell_command_parsing_result);
             } else {
                 // Parsing has failed.
+                debugLog("Parsing the rest of the variables failed.")
                 parsing_process.displayErrorMessages();
             }
 

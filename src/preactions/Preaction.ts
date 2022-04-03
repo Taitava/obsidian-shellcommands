@@ -11,7 +11,7 @@ export abstract class Preaction {
 
     protected constructor(
         protected readonly plugin: SC_Plugin,
-        protected readonly configuration: PreactionConfiguration,
+        public readonly configuration: PreactionConfiguration,
         protected readonly t_shell_command: TShellCommand,
     ) {}
 
