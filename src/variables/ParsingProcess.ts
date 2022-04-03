@@ -96,11 +96,25 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      * @return True if parsing all sets succeeded, false otherwise.
      */
     public processRest(): boolean {
-        let success = true;
-        for (let i = 0; i < this.variable_sets.length; i++) {
-            success = this.process(); // Keep only the last success value. If any of these calls fail, the last one will return false anyway.
+        // 1. Check a previous parsing result (if exists).
+        for (const content_key of this.getContentKeys()) {
+            if (this.parsing_results[content_key]) {
+                // A previous parsing result exists.
+                // Ensure it has not failed.
+                if (!this.parsing_results[content_key].succeeded) {
+                    // The previous parsing result has failed.
+                    return false;
+                }
+            }
         }
-        return success;
+
+        // 2. Process the rest of the VariableSets.
+        for (let i = 0; i < this.variable_sets.length; i++) {
+            if (!this.process()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public getParsingResults() {
