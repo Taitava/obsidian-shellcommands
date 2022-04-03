@@ -48,16 +48,18 @@ export abstract class Model {
                         "Yes, delete",
                     );
                     confirmation_modal.open();
-                    confirmation_modal.promise.then(async () => {
-                        // User has confirmed the deletion.
-                        // Delete the configuration and remove the instance from custom collections.
-                        this.deleteInstance(instance);
+                    confirmation_modal.promise.then(async (deletion_confirmed: boolean) => {
+                        if (deletion_confirmed) {
+                            // User has confirmed the deletion.
+                            // Delete the configuration and remove the instance from custom collections.
+                            this.deleteInstance(instance);
 
-                        // Delete setting fields.
-                        setting_fields_container.remove();
+                            // Delete setting fields.
+                            setting_fields_container.remove();
 
-                        // Save settings
-                        await this.plugin.saveSettings();
+                            // Save settings
+                            await this.plugin.saveSettings();
+                        }
                     });
                 }),
             );

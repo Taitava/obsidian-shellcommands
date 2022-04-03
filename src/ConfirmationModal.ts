@@ -4,9 +4,8 @@ import {Setting} from "obsidian";
 
 export class ConfirmationModal extends SC_Modal {
 
-    public promise: Promise<void>;
-    private resolve_promise: (value: (void | PromiseLike<void>)) => void;
-    private reject_promise: (reason?: any) => void;
+    public promise: Promise<boolean>;
+    private resolve_promise: (value: (boolean | PromiseLike<boolean>)) => void;
     private yes_button_was_clicked = false;
 
     constructor(
@@ -17,9 +16,8 @@ export class ConfirmationModal extends SC_Modal {
     ) {
         super(plugin);
         this.setTitle(title);
-        this.promise = new Promise<void>((resolve, reject) => {
+        this.promise = new Promise<boolean>((resolve) => {
             this.resolve_promise = resolve;
-            this.reject_promise = reject;
         });
     }
 
@@ -35,7 +33,7 @@ export class ConfirmationModal extends SC_Modal {
                 .setButtonText(this.yes_button_text)
                 .onClick(() => {
                     // Got a confirmation from a user
-                    this.resolve_promise();
+                    this.resolve_promise(true);
                     this.yes_button_was_clicked = true;
                     this.close();
                 })
@@ -48,7 +46,7 @@ export class ConfirmationModal extends SC_Modal {
         super.onClose();
 
         if (!this.yes_button_was_clicked) { // TODO: Find out if there is a way to not use this kind of flag property. Can the status be checked from the promise itself?
-            this.reject_promise();
+            this.resolve_promise(false);
         }
     }
 }
