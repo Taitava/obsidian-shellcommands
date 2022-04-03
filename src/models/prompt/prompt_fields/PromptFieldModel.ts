@@ -179,10 +179,16 @@ export class PromptFieldModel extends Model {
                             prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
                                 // It can be used.
                                 await this.plugin.saveSettings();
-                            }, (error_message: string) => {
-                                // The target variable is reserved.
-                                dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
-                                this.plugin.newNotification(error_message);
+                            }, (error_message: string | any) => {
+                                if (typeof error_message === "string") {
+                                    // This is a validation error message.
+                                    // The target variable is reserved.
+                                    dropdown.setValue(prompt_field.configuration.target_variable_id); // Reset the dropdown selection.
+                                    this.plugin.newNotification(error_message);
+                                } else {
+                                    // Some other runtime error has occurred.
+                                    throw error_message;
+                                }
                             });
                         }
                     })
