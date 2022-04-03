@@ -1,5 +1,5 @@
 import SC_Plugin from "../main";
-import {TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
 import {VariableSet} from "../variables/loadVariables";
 import {
@@ -21,13 +21,13 @@ export abstract class Preaction {
      * promises return true, the shell command will be executed.
      * @protected
      */
-    protected abstract doPreaction(sc_event: SC_Event): Promise<void>;
+    protected abstract doPreaction(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void>;
 
     /**
      * Maybe this wrapper method is unneeded, but have it for a while at least.
      */
-    public perform(sc_event: SC_Event): Promise<void> {
-        return this.doPreaction(sc_event);
+    public perform(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void> {
+        return this.doPreaction(parsing_process, sc_event);
     }
 
     protected abstract getDefaultConfiguration(): PreactionConfiguration; // TODO: Remove if this won't be used.

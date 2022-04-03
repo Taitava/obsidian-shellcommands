@@ -48,7 +48,7 @@ export class PromptSettingsModal extends SC_Modal {
                 .setIcon("run-command")
                 .onClick(() => {
                     // "Dry run" the Prompt
-                    this.prompt.openPrompt(null, null);
+                    this.prompt.openPrompt(null, null, null);
                 })
             )
             .addText(text => title_setting_component = text

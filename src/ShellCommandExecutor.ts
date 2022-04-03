@@ -54,8 +54,7 @@ export class ShellCommandExecutor {
             debugLog(`Adding Preaction of type '${preaction.configuration.type}' to pipeline.`);
             preaction_pipeline = preaction_pipeline.then(() => {
                 debugLog(`Calling Preaction of type '${preaction.configuration.type}'.`);
-                // TODO: Pass parsing_process to preaction.perform() so that Prompt can display the partially parsed shell command.
-                return preaction.perform(this.sc_event);
+                return preaction.perform(parsing_process, this.sc_event);
             });
         });
         if (0 === preactions.length) {

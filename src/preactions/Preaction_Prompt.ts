@@ -6,7 +6,7 @@ import {
     Prompt,
 } from "../imports";
 import SC_Plugin from "../main";
-import {TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
 
 export class Preaction_Prompt extends Preaction {
 
@@ -18,8 +18,8 @@ export class Preaction_Prompt extends Preaction {
         super(plugin, configuration, t_shell_command);
     }
 
-    protected doPreaction(sc_event: SC_Event): Promise<void> {
-        return this.getPrompt().openPrompt(this.t_shell_command, sc_event);
+    protected doPreaction(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void> {
+        return this.getPrompt().openPrompt(this.t_shell_command, parsing_process, sc_event);
     }
 
     /**

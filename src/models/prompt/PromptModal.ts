@@ -1,5 +1,5 @@
 import {SC_Modal} from "../../SC_Modal";
-import {TShellCommand} from "../../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
@@ -27,6 +27,7 @@ export class PromptModal extends SC_Modal {
         private readonly prompt_fields: PromptFieldSet,
         /** Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables. */
         private readonly t_shell_command: TShellCommand | null,
+        private readonly parsing_process: ShellCommandParsingProcess | null,
         private readonly prompt: Prompt,
         private sc_event: SC_Event | null,
 
@@ -82,9 +83,12 @@ export class PromptModal extends SC_Modal {
             ;
 
             // Decide what text to use in the preview
-            if (this.t_shell_command) {
-                // Show a real shell command
-                shell_command_preview_text = this.t_shell_command.getShellCommand(); // TODO: Use ParsingProcess instead.
+            if (this.parsing_process) {
+                // Show a real shell command. Use preparsed content (= content that might have some variables already parsed).
+                shell_command_preview_text = this.parsing_process.getParsingResults().shell_command.parsed_content;
+            } else if (this.t_shell_command) {
+                // Show a real shell command. No preparsed content is available. This content does not have any variables parsed yet.
+                shell_command_preview_text = this.t_shell_command.getShellCommand();
             } else {
                 // Make up a fake "shell command" for previewing.
                 shell_command_preview_text = this.prompt.getExampleShellCommand();

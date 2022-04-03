@@ -1,5 +1,5 @@
 import SC_Plugin from "../../main";
-import {TShellCommand} from "../../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {SC_Event} from "../../events/SC_Event";
 import {
@@ -61,9 +61,10 @@ export class Prompt extends Instance {
 
     /**
      * @param t_shell_command Can be null, if wanted to just preview the Prompt modal without really executing a shell command. Inputted values will still be assigned to target variables.
+     * @param parsing_process
      * @param sc_event
      */
-    public openPrompt(t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
+    public openPrompt(t_shell_command: TShellCommand | null, parsing_process: ShellCommandParsingProcess | null, sc_event: SC_Event | null): Promise<void> {
         const can_open_prompt_result = this.canOpenPrompt();
         if (true !== can_open_prompt_result) {
             // Some error is preventing opening the prompt.
@@ -76,6 +77,7 @@ export class Prompt extends Instance {
             this.plugin,
             this.prompt_fields,
             t_shell_command,
+            parsing_process,
             this,
             sc_event,
             () => {return this.validateFields();}
