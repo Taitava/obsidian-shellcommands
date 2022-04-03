@@ -164,6 +164,14 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                         }
                     }, 500); // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
                 }
+            }, (error_message: string | any) => {
+                if (typeof error_message === "string") {
+                    // Opening the file has failed.
+                    this.plugin.newError(error_message);
+                } else {
+                    // Some other runtime error has occurred.
+                    throw error_message;
+                }
             });
         }
     }
@@ -177,8 +185,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             return this.app.workspace.openLinkText(file_path, source_path, new_pane);
         } else {
             // No, the file does not exist, and it may not be created.
-            this.plugin.newError("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
-            return Promise.reject();
+            return Promise.reject("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
         }
     }
 
