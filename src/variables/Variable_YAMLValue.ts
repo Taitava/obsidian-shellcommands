@@ -37,12 +37,17 @@ export class Variable_YAMLValue extends FileVariable {
         }
     }
 
-    private yaml_value_cache: string[] | string ;
+    private yaml_value_cache: string[] | string;
     private getFileYAMLValue(active_file: TFile): string[] | string {
         if (!this.yaml_value_cache) {
-            this.yaml_value_cache= getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
         }
         return this.yaml_value_cache;
+    }
+
+    public reset(): void {
+        super.reset();
+        this.yaml_value_cache = undefined;
     }
 
     public isAvailable(): boolean {

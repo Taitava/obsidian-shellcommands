@@ -43,9 +43,14 @@ export class Variable_EventYAMLValue extends EventVariable {
     private yaml_value_cache: string[] | string;
     private getFileYAMLValue(active_file: TFile): string[] | string {
         if (!this.yaml_value_cache) {
-            this.yaml_value_cache= getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
         }
         return this.yaml_value_cache;
+    }
+
+    public reset(): void {
+        super.reset();
+        this.yaml_value_cache = undefined;
     }
 
     public isAvailable(sc_event: SC_Event_FileMenu | null): boolean {
