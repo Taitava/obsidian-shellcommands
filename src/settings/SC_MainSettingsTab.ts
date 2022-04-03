@@ -229,7 +229,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
-        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings);
+        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings).then();
 
 
         // Built-in variable instructions

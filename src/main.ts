@@ -469,7 +469,7 @@ export default class SC_Plugin extends Plugin {
 		leaf.setViewState({
 			type: CustomVariableView.ViewType,
 			active: true,
-		});
+		}).then();
 		this.app.workspace.revealLeaf(leaf);
 	}
 
