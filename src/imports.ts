@@ -11,6 +11,7 @@
 // Miscellaneous files in the same folder as imports.ts
 export * from "./ConfirmationModal";
 export * from "./IDGenerator";
+export * from "./SC_Plugin";
 export * from "./ShellCommandExecutor";
 
 // Libraries by third parties (that are included in this repository).
