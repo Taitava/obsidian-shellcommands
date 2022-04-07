@@ -39,9 +39,7 @@ export * from "./models/prompt/prompt_fields/PromptField_Text";
 export * from "./models/prompt/Prompt";
 export * from "./models/prompt/PromptModal";
 export * from "./models/prompt/PromptModel";
-
-// Settings
-export * from "./settings/PromptSettingsModal"; // TODO: Move the file to models/prompt/.
+export * from "./models/prompt/PromptSettingsModal";
 
 // Variables
 export * from "./variables/ParsingProcess";

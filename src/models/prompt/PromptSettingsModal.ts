@@ -1,19 +1,19 @@
-import {SC_Modal} from "../SC_Modal";
-import SC_Plugin from "../main";
+import {SC_Modal} from "../../SC_Modal";
+import SC_Plugin from "../../main";
 import {
     Setting,
     TextAreaComponent,
     TextComponent,
 } from "obsidian";
-import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
+import {createNewModelInstanceButton} from "../createNewModelInstanceButton";
 import {
     getModel,
     Prompt,
     PromptField,
     PromptFieldModel,
-} from "../imports";
-import {createAutocomplete} from "./setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
+} from "../../imports";
+import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
+import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export class PromptSettingsModal extends SC_Modal {
 
