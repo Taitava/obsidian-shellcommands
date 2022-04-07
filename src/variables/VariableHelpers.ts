@@ -86,7 +86,7 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
     // Validate all property names along the path
     property_parts.forEach((property_name: string) => {
         if (0 === property_name.length) {
-            error_messages.push("YAML property '" + this.arguments.property_name + "' has an empty property name. Remove possible double dots or a preceding/trailing dot.");
+            error_messages.push("YAML property '" + property_path + "' has an empty property name. Remove possible double dots or a preceding/trailing dot.");
         }
     });
     if (error_messages.length > 0) {
