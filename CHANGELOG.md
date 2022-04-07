@@ -20,6 +20,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Fixed
  - [Bug: Output channel 'Open a file' causes an error in the console log if the file cannot be opened (#176)](https://github.com/Taitava/obsidian-shellcommands/issues/176).
    - This same issue also fixes autocomplete to be able to display an error message if a custom help text cannot be read at startup due to incorrect datatype in `autocomplete.yaml`.
+ - [Bug: An empty argument in {{yaml_value}}/{{event_yaml_value}} causes a crash (#181)](https://github.com/Taitava/obsidian-shellcommands/issues/181).
 
 ## [0.11.1] - 2022-03-05
 
