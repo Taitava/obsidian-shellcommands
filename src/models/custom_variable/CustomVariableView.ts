@@ -2,7 +2,9 @@ import {
     ItemView,
     WorkspaceLeaf,
 } from "obsidian";
-import SC_Plugin from "../../main";
+import {
+    SC_Plugin,
+} from "src/imports";
 
 export class CustomVariableView extends ItemView {
 

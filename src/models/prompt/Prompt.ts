@@ -1,7 +1,3 @@
-import SC_Plugin from "../../main";
-import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
-import {SC_MainSettings} from "../../settings/SC_MainSettings";
-import {SC_Event} from "../../events/SC_Event";
 import {
     getModel,
     Instance,
@@ -11,7 +7,12 @@ import {
     PromptFieldModel,
     PromptModal,
     PromptModel,
-} from "../../imports";
+    SC_Plugin,
+    SC_MainSettings,
+    TShellCommand,
+    ShellCommandParsingProcess,
+    SC_Event,
+} from "src/imports";
 
 export class Prompt extends Instance {
 

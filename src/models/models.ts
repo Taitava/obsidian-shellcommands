@@ -1,10 +1,10 @@
-import SC_Plugin from "../main";
 import {
     CustomVariableModel,
     introduceModelClass,
     PromptFieldModel,
     PromptModel,
-} from "../imports";
+    SC_Plugin,
+} from "src/imports";
 
 export function introduceModels(plugin: SC_Plugin) {
     // Keep in alphabetical order, if possible.

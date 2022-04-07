@@ -1,16 +1,19 @@
-import {ShellCommandConfiguration} from "../settings/ShellCommandConfiguration";
-import SC_Plugin from "../main";
-import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
-import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
-import {OutputChannel, OutputStream} from "./OutputChannel";
-import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
-import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
-import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
-import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
-import {OutputChannelDriver_OpenFiles} from "./OutputChannelDriver_OpenFiles";
+import {
+    OutputChannel,
+    OutputChannelDriver,
+    OutputChannelDriver_Clipboard,
+    OutputChannelDriver_CurrentFileBottom,
+    OutputChannelDriver_CurrentFileCaret,
+    OutputChannelDriver_CurrentFileTop,
+    OutputChannelDriver_Modal,
+    OutputChannelDriver_Notification,
+    OutputChannelDriver_OpenFiles,
+    OutputChannelDriver_StatusBar,
+    OutputStream,
+    SC_Plugin,
+    ShellCommandParsingResult,
+    TShellCommand,
+} from "src/imports";
 
 export interface OutputStreams {
     stdout?: string;

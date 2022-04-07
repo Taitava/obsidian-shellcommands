@@ -1,5 +1,7 @@
-import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile";
 import {Editor} from "obsidian";
+import {
+    OutputChannelDriver_CurrentFile,
+} from "src/imports";
 
 export class OutputChannelDriver_CurrentFileCaret extends OutputChannelDriver_CurrentFile {
     protected readonly title = "Current file: caret position";

@@ -1,10 +1,10 @@
-import {SC_Modal} from "../../SC_Modal";
-import SC_Plugin from "../../main";
 import {
     CustomVariableInstance,
     CustomVariableModel,
     getModel,
-} from "../../imports";
+    SC_Modal,
+    SC_Plugin,
+} from "src/imports";
 import {Setting} from "obsidian";
 
 export class CustomVariableSettingsModal extends SC_Modal {

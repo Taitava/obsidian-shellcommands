@@ -1,4 +1,6 @@
-import {Variable} from "./Variable";
+import {
+    Variable,
+} from "src/imports";
 
 export class Variable_Workspace extends Variable{
     public variable_name = "workspace";

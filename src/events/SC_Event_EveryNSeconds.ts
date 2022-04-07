@@ -1,7 +1,9 @@
-import {SC_Event} from "./SC_Event";
-import {TShellCommand} from "../TShellCommand";
-import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {Notice, Setting} from "obsidian";
+import {
+    SC_Event,
+    SC_EventConfiguration,
+    TShellCommand,
+} from "src/imports";
 
 
 export class SC_Event_EveryNSeconds extends SC_Event {

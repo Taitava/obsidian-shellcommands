@@ -1,33 +1,38 @@
 import {Setting, TextAreaComponent} from "obsidian";
-import SC_Plugin from "../main";
-import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
-import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
-import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
-import {TShellCommand} from "../TShellCommand";
-import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
+    CommandPaletteOptions,
+    createAutocomplete,
+    createPlatformSpecificShellCommandField,
+    createShellSelectionField,
+    createTabs,
     generateIgnoredErrorCodesIconTitle,
-    generateShellCommandFieldName
-} from "./setting_elements/CreateShellCommandField";
-import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
-import {createTabs, TabStructure} from "./setting_elements/Tabs";
-import {createAutocomplete} from "./setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
-import {getSC_Events} from "../events/SC_EventList";
-import {SC_Event} from "../events/SC_Event";
-import {gotoURL} from "../Common";
-import {SC_Modal} from "../SC_Modal";
-import {
+    generateShellCommandFieldName,
     getDefaultPreaction_Prompt_Configuration,
     getModel,
+    getOutputChannelDriversOptionList,
+    getSC_Events,
+    getVariableAutocompleteItems,
+    gotoURL,
+    ICommandPaletteOptions,
+    OutputChannel,
+    OutputChannelOrder,
+    OutputStream,
+    PlatformId,
+    PlatformNames,
     Preaction_Prompt_Configuration,
     PreactionConfiguration,
     Prompt,
     PromptModel,
     PromptSettingsModal,
-} from "../imports";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
+    SC_Event,
+    SC_MainSettingsTab,
+    SC_Modal,
+    SC_Plugin,
+    SettingFieldGroup,
+    TabStructure,
+    TShellCommand,
+    VariableDefaultValueConfiguration,
+} from "src/imports";
 
 export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";

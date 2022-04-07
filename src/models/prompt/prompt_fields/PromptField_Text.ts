@@ -2,15 +2,15 @@ import {
     Setting,
     TextComponent,
 } from "obsidian";
-import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
-import SC_Plugin from "../../../main";
-import {SC_Event} from "../../../events/SC_Event";
-import {parseVariables} from "../../../variables/parseVariables";
-import {TShellCommand} from "../../../TShellCommand";
 import {
+    createAutocomplete,
+    getVariableAutocompleteItems,
     PromptField,
-} from "../../../imports";
+    parseVariables,
+    SC_Event,
+    SC_Plugin,
+    TShellCommand,
+} from "src/imports";
 
 export class PromptField_Text extends PromptField {
 

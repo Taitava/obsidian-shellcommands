@@ -1,9 +1,11 @@
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {SC_Event_FolderMenu} from "../../events/SC_Event_FolderMenu";
-import {EventVariable} from "./EventVariable";
-import {getFolderPath} from "../VariableHelpers";
-import {IParameters} from "../Variable";
-import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {
+    EventVariable,
+    getFolderPath,
+    IAutocompleteItem,
+    IParameters,
+    SC_Event_FileMenu,
+    SC_Event_FolderMenu,
+} from "src/imports";
 
 export class Variable_EventFolderPath extends EventVariable {
     public variable_name = "event_folder_path";

@@ -1,4 +1,6 @@
-import {Escaper} from "./Escaper";
+import {
+    Escaper,
+} from "src/imports";
 
 /**
  * Prefixes all characters that are not letters, numbers or underscores with a prefix character that can be defined by child classes.

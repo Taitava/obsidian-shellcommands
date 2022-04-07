@@ -1,14 +1,13 @@
-import {OutputChannel, OutputChannelOrder} from "../output_channels/OutputChannel";
 import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
     IPlatformSpecificStringWithDefault,
-} from "./SC_MainSettings";
-import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
-import {
-    PreactionConfiguration
-} from "../imports";
+    OutputChannel,
+    OutputChannelOrder,
+    PreactionConfiguration,
+    SC_EventConfigurations,
+    VariableDefaultValueConfiguration,
+} from "src/imports";
 
 export interface ShellCommandsConfiguration {
     [key: string]: ShellCommandConfiguration;

@@ -1,5 +1,7 @@
-import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile";
 import {Editor, EditorPosition} from "obsidian";
+import {
+    OutputChannelDriver_CurrentFile,
+} from "src/imports";
 
 export class OutputChannelDriver_CurrentFileBottom extends OutputChannelDriver_CurrentFile {
     protected readonly title = "Current file: bottom";

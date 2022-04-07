@@ -1,29 +1,29 @@
 import {App, PluginSettingTab, Setting} from "obsidian";
-import SC_Plugin from "../main";
-import {getVaultAbsolutePath, gotoURL} from "../Common";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
-import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
-import {createTabs, TabStructure} from "./setting_elements/Tabs";
-import {debugLog} from "../Debug";
 import {
-    DocumentationAutocompleteLink,
-    DocumentationMainLink,
-    DocumentationBuiltInVariablesLink,
-    GitHubLink,
     ChangelogLink,
-} from "../Documentation";
-import {Variable} from "../variables/Variable";
-import {getSC_Events} from "../events/SC_EventList";
-import {SC_Event} from "../events/SC_Event";
-import {TShellCommand} from "../TShellCommand";
-import {
+    createNewModelInstanceButton,
+    createShellCommandField,
+    createShellSelectionField,
+    createTabs,
     CustomVariableInstance,
     CustomVariableModel,
+    debugLog,
+    DocumentationAutocompleteLink,
+    DocumentationBuiltInVariablesLink,
+    DocumentationMainLink,
     getModel,
+    getSC_Events,
+    getVaultAbsolutePath,
+    GitHubLink,
+    gotoURL,
     Prompt,
-    PromptModel
-} from "../imports";
-import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
+    PromptModel,
+    SC_Event,
+    SC_Plugin,
+    TabStructure,
+    TShellCommand,
+    Variable,
+} from "src/imports";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;

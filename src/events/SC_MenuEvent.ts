@@ -1,6 +1,9 @@
-import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
-import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
 import {Menu} from "obsidian";
+import {
+    SC_WorkspaceEvent,
+    ShellCommandParsingProcess,
+    TShellCommand,
+} from "src/imports";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
 

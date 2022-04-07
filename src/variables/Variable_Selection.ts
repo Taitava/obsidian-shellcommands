@@ -1,6 +1,9 @@
-import {getEditor, getView} from "../Common";
-import {Variable} from "./Variable";
-import {debugLog} from "../Debug";
+import {
+    debugLog,
+    getEditor,
+    getView,
+    Variable,
+} from "src/imports";
 
 export class Variable_Selection extends Variable{
     public variable_name = "selection";

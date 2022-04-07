@@ -1,4 +1,6 @@
-import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
+import {
+    SC_WorkspaceEvent
+} from "src/imports";
 
 export class SC_Event_onActiveLeafChanged extends SC_WorkspaceEvent {
     protected static readonly event_code = "on-active-leaf-changed";

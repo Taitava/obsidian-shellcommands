@@ -1,5 +1,7 @@
-import {EventVariable} from "./EventVariable";
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
+import {
+    EventVariable,
+    SC_Event_FileMenu,
+} from "src/imports";
 
 export class Variable_EventFileName extends EventVariable {
     public variable_name = "event_file_name";

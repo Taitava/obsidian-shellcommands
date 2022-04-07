@@ -1,6 +1,8 @@
 import {Hotkey, Modifier, Platform} from "obsidian";
-import SC_Plugin from "./main";
-import {debugLog} from "./Debug";
+import {
+    debugLog,
+    SC_Plugin,
+} from "./imports";
 
 /**
  * TODO: Move this to TShellCommand.

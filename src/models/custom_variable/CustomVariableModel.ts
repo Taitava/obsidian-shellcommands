@@ -1,11 +1,11 @@
 import {Setting} from "obsidian";
-import {SC_MainSettings} from "../../settings/SC_MainSettings";
-import {CustomVariableInstance} from "./CustomVariableInstance";
 import {
+    CustomVariableInstance,
     IDGenerator,
     Model,
     ParentModelOneToManyIdRelation,
-} from "../../imports";
+    SC_MainSettings,
+} from "src/imports";
 
 export class CustomVariableModel extends Model {
 

@@ -1,6 +1,9 @@
-import {getEditor} from "../Common";
-import {IParameters, Variable} from "./Variable";
-import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {
+    getEditor,
+    IAutocompleteItem,
+    IParameters,
+    Variable,
+} from "src/imports";
 
 export class Variable_CaretPosition extends Variable {
     public variable_name = "caret_position";

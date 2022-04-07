@@ -5,9 +5,9 @@ import {
     Prompt,
     PromptConfiguration,
     PromptSettingsModal,
-} from "../../imports";
+    SC_MainSettings,
+} from "src/imports";
 import {Setting} from "obsidian";
-import {SC_MainSettings} from "../../settings/SC_MainSettings";
 
 export class PromptModel extends Model {
 

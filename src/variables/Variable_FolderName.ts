@@ -1,4 +1,6 @@
-import {FolderVariable} from "./FolderVariable";
+import {
+    FolderVariable,
+} from "src/imports";
 
 export class Variable_FolderName extends FolderVariable {
     public variable_name = "folder_name";

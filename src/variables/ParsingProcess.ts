@@ -1,15 +1,13 @@
 import {
+    cloneObject,
     parseVariables,
     ParsingResult,
-} from "./parseVariables";
-import SC_Plugin from "../main";
-import {SC_Event} from "../events/SC_Event";
-import {VariableSet} from "./loadVariables";
-import {
-    cloneObject,
+    SC_Event,
+    SC_Plugin,
+    TShellCommand,
     uniqueArray,
-} from "../Common";
-import {TShellCommand} from "../TShellCommand";
+    VariableSet,
+} from "src/imports";
 
 /**
  * ParsingProcess instances can be used in situations where it's uncertain can all variables be parsed at the time being,

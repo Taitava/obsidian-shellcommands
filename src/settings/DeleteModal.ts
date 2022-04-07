@@ -1,8 +1,10 @@
-import {SC_Modal} from "../SC_Modal";
-import SC_Plugin from "../main";
-import {SettingFieldGroup} from "./SC_MainSettingsTab";
-import {TShellCommand} from "../TShellCommand";
-import {debugLog} from "../Debug";
+import {
+    debugLog,
+    SC_Modal,
+    SC_Plugin,
+    SettingFieldGroup,
+    TShellCommand,
+} from "src/imports";
 
 /**
  * TODO: Rename to DeleteShellCommandModal

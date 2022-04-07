@@ -1,11 +1,13 @@
 import {App} from "obsidian";
-import SC_Plugin from "../main";
-import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
-import {SC_Event} from "../events/SC_Event";
 import {escapeRegExp} from "../lib/escapeRegExp";
-import {TShellCommand} from "../TShellCommand";
-import {debugLog} from "../Debug";
-import {ParsingResult} from "./parseVariables";
+import {
+    debugLog,
+    IAutocompleteItem,
+    ParsingResult,
+    SC_Event,
+    SC_Plugin,
+    TShellCommand,
+} from "src/imports";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.

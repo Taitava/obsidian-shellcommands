@@ -1,14 +1,16 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {Setting, TextAreaComponent} from "obsidian";
 import {
     getOutputChannelDrivers,
+    getSelectionFromTextarea,
+    OutputChannel,
+    OutputChannelDriver,
+    OutputStream,
     OutputStreams,
-} from "./OutputChannelDriverFunctions";
-import {Setting, TextAreaComponent} from "obsidian";
-import {OutputChannel, OutputStream} from "./OutputChannel";
-import SC_Plugin from "../main";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
-import {SC_Modal} from "../SC_Modal";
-import {getSelectionFromTextarea} from "../Common";
+    SC_Modal,
+    SC_Plugin,
+    ShellCommandParsingResult,
+    TShellCommand,
+} from "src/imports";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected readonly title = "Ask after execution";

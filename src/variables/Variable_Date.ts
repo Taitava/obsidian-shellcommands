@@ -1,5 +1,8 @@
 import {moment} from "obsidian";
-import {IParameters, Variable} from "./Variable";
+import {
+    IParameters,
+    Variable,
+} from "src/imports";
 
 export class Variable_Date extends Variable {
     public variable_name = "date";

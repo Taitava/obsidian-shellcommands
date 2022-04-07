@@ -1,4 +1,6 @@
-import {FileVariable} from "./FileVariable";
+import {
+    FileVariable,
+} from "src/imports";
 
 export class Variable_Title extends FileVariable{
     public variable_name = "title";

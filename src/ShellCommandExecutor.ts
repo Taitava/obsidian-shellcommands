@@ -1,19 +1,19 @@
 import {exec, ExecException, ExecOptions} from "child_process";
-import {
-    getVaultAbsolutePath,
-} from "./Common";
 import * as path from "path";
 import * as fs from "fs";
-import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {BaseEncodingOptions} from "fs";
-import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {isShellSupported} from "./Shell";
-import {debugLog} from "./Debug";
-import {SC_Event} from "./events/SC_Event";
 import {
+    debugLog,
+    getVaultAbsolutePath,
+    handleShellCommandOutput,
+    isShellSupported,
     Preaction,
+    SC_Event,
+    SC_Plugin,
+    ShellCommandParsingProcess,
+    ShellCommandParsingResult,
+    TShellCommand,
 } from "./imports";
-import SC_Plugin from "./main";
 
 export class ShellCommandExecutor {
 

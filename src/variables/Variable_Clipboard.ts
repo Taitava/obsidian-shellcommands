@@ -1,6 +1,8 @@
-import {Variable} from "./Variable";
 // @ts-ignore "electron" is installed.
 import {clipboard} from "electron";
+import {
+    Variable,
+} from "src/imports";
 
 export class Variable_Clipboard extends Variable {
     public variable_name = "clipboard";

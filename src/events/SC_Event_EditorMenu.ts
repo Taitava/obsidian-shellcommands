@@ -1,6 +1,8 @@
-import {TShellCommand} from "../TShellCommand";
 import {Editor, MarkdownView, Menu} from "obsidian";
-import {SC_MenuEvent} from "./SC_MenuEvent";
+import {
+    SC_MenuEvent,
+    TShellCommand,
+} from "src/imports";
 
 export class SC_Event_EditorMenu extends SC_MenuEvent {
     protected static readonly event_code = "editor-menu";

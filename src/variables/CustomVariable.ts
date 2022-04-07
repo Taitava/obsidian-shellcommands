@@ -1,6 +1,8 @@
-import {Variable} from "./Variable";
-import SC_Plugin from "../main";
-import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
+import {
+    CustomVariableInstance,
+    SC_Plugin,
+    Variable,
+} from "src/imports";
 
 /**
  * This class serves as the actual operational variable class for custom variables. It's paired with the CustomVariableInstance class, which acts

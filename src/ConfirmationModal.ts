@@ -1,5 +1,7 @@
-import {SC_Modal} from "./SC_Modal";
-import SC_Plugin from "./main";
+import {
+    SC_Modal,
+    SC_Plugin,
+} from "./imports";
 import {Setting} from "obsidian";
 
 export class ConfirmationModal extends SC_Modal {

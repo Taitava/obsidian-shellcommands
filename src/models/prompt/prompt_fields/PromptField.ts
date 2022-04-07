@@ -1,15 +1,15 @@
 import {Setting} from "obsidian";
-import {SC_Event} from "../../../events/SC_Event";
-import {parseVariables} from "../../../variables/parseVariables";
-import {TShellCommand} from "../../../TShellCommand";
 import {
     CustomVariable,
     CustomVariableInstance,
     Instance,
+    parseVariables,
     Prompt,
     PromptConfiguration,
     PromptFieldModel,
-} from "../../../imports";
+    SC_Event,
+    TShellCommand,
+} from "src/imports";
 
 export abstract class PromptField extends Instance {
 

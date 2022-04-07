@@ -2,21 +2,21 @@ import {
     Setting,
     TextComponent,
 } from "obsidian";
-import {randomInteger} from "../../../Common";
-import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
 import {
+    createAutocomplete,
     CustomVariableInstance,
     CustomVariableModel,
     CustomVariableSettingsModal,
     getModel,
+    getVariableAutocompleteItems,
     Model,
     ParentModelOneToManyIndexRelation,
     Prompt,
     PromptField,
     PromptField_Text,
     PromptFieldConfiguration,
-} from "../../../imports";
+    randomInteger,
+} from "src/imports";
 
 export class PromptFieldModel extends Model {
 

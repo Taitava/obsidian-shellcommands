@@ -1,8 +1,10 @@
-import {Escaper} from "./Escaper";
-import {ShEscaper} from "./ShEscaper";
-import {PowerShellEscaper} from "./PowerShellEscaper";
 import {Notice} from "obsidian";
-import {extractFileName} from "../../Common";
+import {
+    Escaper,
+    extractFileName,
+    PowerShellEscaper,
+    ShEscaper,
+} from "src/imports";
 
 export function escapeValue(shell: string, raw_value: string) {
     shell = extractFileName(shell.toLowerCase());

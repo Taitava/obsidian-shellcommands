@@ -1,5 +1,7 @@
-import {SC_AbstractFileMenuEvent} from "./SC_AbstractFileMenuEvent";
 import {TFile, TFolder} from "obsidian";
+import {
+    SC_AbstractFileMenuEvent,
+} from "src/imports";
 
 export class SC_Event_FileMenu extends SC_AbstractFileMenuEvent {
     protected static readonly event_code = "file-menu";

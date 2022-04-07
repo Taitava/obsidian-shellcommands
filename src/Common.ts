@@ -6,13 +6,15 @@ import {
     MarkdownView,
     normalizePath,
 } from "obsidian";
-import {PlatformId} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
-import {debugLog} from "./Debug";
-import SC_Plugin from "./main";
 // @ts-ignore
 import {shell} from "electron";
+import {
+    debugLog,
+    PlatformId,
+    SC_Plugin,
+} from "./imports";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67

@@ -1,10 +1,10 @@
-import SC_Plugin from "../main";
 import {Setting} from "obsidian";
 import {
     ConfirmationModal,
     Instance,
     InstanceConfiguration,
-} from "../imports";
+    SC_Plugin,
+} from "src/imports";
 
 export abstract class Model {
 

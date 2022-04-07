@@ -1,5 +1,7 @@
-import {Variable} from "../Variable";
-import {SC_Event} from "../../events/SC_Event";
+import {
+    SC_Event,
+    Variable,
+} from "src/imports";
 
 export abstract class EventVariable extends Variable {
 

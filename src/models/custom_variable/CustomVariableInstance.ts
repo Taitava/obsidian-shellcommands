@@ -1,10 +1,10 @@
-import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {
     CustomVariable,
     CustomVariableConfiguration,
     CustomVariableModel,
     Instance,
-} from "../../imports";
+    SC_MainSettings,
+} from "src/imports";
 
 /**
  * This class serves as an accessor to CustomVariable configurations. It's paired with the CustomVariable class, which acts

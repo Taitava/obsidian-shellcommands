@@ -1,11 +1,12 @@
-import {Setting} from "obsidian";
-import SC_Plugin from "./main";
-import {ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {debugLog} from "./Debug";
-import {SC_Modal} from "./SC_Modal";
 import {
-    ShellCommandExecutor
+    debugLog,
+    SC_Modal,
+    SC_Plugin,
+    ShellCommandExecutor,
+    ShellCommandParsingResult,
+    TShellCommand,
 } from "./imports";
+import {Setting} from "obsidian";
 
 export class ConfirmExecutionModal extends SC_Modal {
 

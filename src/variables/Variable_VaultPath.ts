@@ -1,5 +1,7 @@
-import {getVaultAbsolutePath} from "../Common";
-import {Variable} from "./Variable";
+import {
+    getVaultAbsolutePath,
+    Variable,
+} from "src/imports";
 
 export class Variable_VaultPath extends Variable{
     public variable_name = "vault_path";

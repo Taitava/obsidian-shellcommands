@@ -1,8 +1,14 @@
-import {IPlatformSpecificString, PlatformId, PlatformNames} from "../SC_MainSettings";
-import {extractFileName, getOperatingSystem} from "../../Common";
-import {getUsersDefaultShell, PlatformShells} from "../../Shell";
 import {Setting} from "obsidian";
-import SC_Plugin from "../../main";
+import {
+    extractFileName,
+    getOperatingSystem,
+    getUsersDefaultShell,
+    IPlatformSpecificString,
+    PlatformId,
+    PlatformNames,
+    PlatformShells,
+    SC_Plugin,
+} from "src/imports";
 
 export function createShellSelectionField(plugin: SC_Plugin, container_element: HTMLElement, shells: IPlatformSpecificString, is_global_settings: boolean) {
     let platform_id: PlatformId;

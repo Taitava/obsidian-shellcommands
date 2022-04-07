@@ -1,7 +1,9 @@
-import {IParameters} from "./Variable";
-import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
-import {getFileExtension} from "./VariableHelpers";
-import {FileVariable} from "./FileVariable";
+import {
+    FileVariable,
+    getFileExtension,
+    IAutocompleteItem,
+    IParameters,
+} from "src/imports";
 
 export class Variable_FileExtension extends FileVariable {
     public variable_name = "file_extension";

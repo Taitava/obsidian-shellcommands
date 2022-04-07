@@ -1,6 +1,8 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {OutputStream} from "./OutputChannel";
+import {
+    OutputChannelDriver,
+    OutputStream,
+    OutputStreams,
+} from "src/imports";
 
 
 export class OutputChannelDriver_Notification extends OutputChannelDriver {

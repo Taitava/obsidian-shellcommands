@@ -1,14 +1,15 @@
-import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
-import {ExtraOptionsModal} from "../ExtraOptionsModal";
-import {DeleteModal} from "../DeleteModal";
-import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
-import SC_Plugin from "../../main";
-import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
-import {debugLog} from "../../Debug";
 import {
-    ShellCommandExecutor
-} from "../../imports";
+    CreateShellCommandFieldCore,
+    debugLog,
+    DeleteModal,
+    ExtraOptionsModal,
+    getHotkeysForShellCommand,
+    HotkeyToString,
+    SC_Plugin,
+    ShellCommandExecutor,
+    TShellCommand,
+} from "src/imports";
 
 /**
  *

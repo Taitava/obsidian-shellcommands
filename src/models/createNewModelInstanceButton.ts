@@ -1,10 +1,10 @@
-import SC_Plugin from "../main";
 import {Setting} from "obsidian";
 import {
     getModel,
     Instance,
     Model,
-} from "../imports";
+    SC_Plugin,
+} from "src/imports";
 
 /**
  * @return Promise<InstanceClass> A promise that gets resolved if a user clicks the button. The promise is supplied with the newly created instance.

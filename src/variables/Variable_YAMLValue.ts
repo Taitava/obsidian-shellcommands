@@ -1,6 +1,8 @@
-import {IParameters} from "./Variable";
-import {FileVariable} from "./FileVariable";
-import {getFileYAMLValue} from "./VariableHelpers";
+import {
+    FileVariable,
+    getFileYAMLValue,
+    IParameters,
+} from "src/imports";
 import {TFile} from "obsidian";
 
 export class Variable_YAMLValue extends FileVariable {

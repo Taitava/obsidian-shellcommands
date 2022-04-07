@@ -1,5 +1,7 @@
 import {Modal} from "obsidian";
-import SC_Plugin from "./main";
+import {
+    SC_Plugin,
+} from "./imports";
 
 export abstract class SC_Modal extends Modal {
 

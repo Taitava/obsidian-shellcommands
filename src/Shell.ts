@@ -1,4 +1,8 @@
-import {extractFileName, getOperatingSystem, isWindows} from "./Common";
+import {
+    extractFileName,
+    getOperatingSystem,
+    isWindows,
+} from "./imports";
 
 export const PlatformShells = {
     darwin: {

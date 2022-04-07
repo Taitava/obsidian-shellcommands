@@ -1,6 +1,8 @@
-import {IParameters} from "./Variable";
-import {FileVariable} from "./FileVariable";
-import {getFileTags} from "./VariableHelpers";
+import {
+    FileVariable,
+    getFileTags,
+    IParameters,
+} from "src/imports";
 
 export class Variable_Tags extends FileVariable {
     public variable_name = "tags";

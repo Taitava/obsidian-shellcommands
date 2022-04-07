@@ -1,45 +1,40 @@
 import {
+	addCustomAutocompleteItems,
+	combineObjects,
 	CustomVariableInstanceMap,
 	CustomVariableModel,
 	CustomVariableView,
-	getModel,
-	introduceModels,
-	PromptMap,
-	PromptModel,
-	ShellCommandExecutor,
-} from "./imports";
-import {Command, Notice, Plugin, WorkspaceLeaf} from 'obsidian';
-import {
-	combineObjects,
+	debugLog,
 	generateObsidianCommandName,
+	getDefaultSettings,
+	getModel,
 	getOperatingSystem,
 	getPluginAbsolutePath,
-} from "./Common";
-import {RunMigrations} from "./Migrations";
-import {
+	getSC_Events,
+	getUsersDefaultShell,
+	introduceModels,
+	loadVariables,
 	newShellCommandConfiguration,
-	ShellCommandsConfiguration
-} from "./settings/ShellCommandConfiguration";
-import {
-	getDefaultSettings,
-	SettingsVersionString,
+	ObsidianCommandsContainer,
+	PromptMap,
+	PromptModel,
+	RunMigrations,
+	SC_Event,
 	SC_MainSettings,
-} from "./settings/SC_MainSettings";
-import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
-import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
+	SC_MainSettingsTab,
+	setDEBUG_ON,
+	SettingsVersionString,
+	ShellCommandExecutor,
+	ShellCommandParsingProcess,
+	ShellCommandsConfiguration,
+	TShellCommand,
+	TShellCommandContainer,
+	VariableSet,
+} from "./imports";
+import {Command, Notice, Plugin, WorkspaceLeaf} from 'obsidian';
 import * as path from "path";
 import * as fs from "fs";
-import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./Shell";
 import {versionCompare} from "./lib/version_compare";
-import {debugLog, setDEBUG_ON} from "./Debug";
-import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
-import {getSC_Events} from "./events/SC_EventList";
-import {SC_Event} from "./events/SC_Event";
-import {
-	loadVariables,
-	VariableSet,
-} from "./variables/loadVariables";
 
 export class SC_Plugin extends Plugin {
 	/**

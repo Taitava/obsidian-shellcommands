@@ -1,17 +1,15 @@
-import SC_Plugin from "../main";
 import {App, EventRef} from "obsidian";
 import {
+    cloneObject,
+    DocumentationEventsFolderLink,
+    EventVariable,
+    SC_EventConfiguration,
+    SC_Plugin,
+    ShellCommandExecutor,
     ShellCommandParsingProcess,
     TShellCommand,
-} from "../TShellCommand";
-import {SC_EventConfiguration} from "./SC_EventConfiguration";
-import {cloneObject} from "../Common";
-import {Variable} from "../variables/Variable";
-import {EventVariable} from "../variables/event_variables/EventVariable";
-import {DocumentationEventsFolderLink} from "../Documentation";
-import {
-    ShellCommandExecutor
-} from "../imports";
+    Variable,
+} from "src/imports";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.

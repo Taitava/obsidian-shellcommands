@@ -1,10 +1,10 @@
 // SETTINGS AND DEFAULT VALUES
-import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
-import SC_Plugin from "../main";
 import {
     CustomVariableConfiguration,
     PromptConfiguration,
-} from "../imports";
+    SC_Plugin,
+    ShellCommandsConfiguration,
+} from "src/imports";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 

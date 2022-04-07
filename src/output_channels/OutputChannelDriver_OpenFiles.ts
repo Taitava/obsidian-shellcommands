@@ -1,19 +1,19 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {OutputStream} from "./OutputChannel";
 import {
     EditorSelectionOrCaret,
     normalizePath,
 } from "obsidian";
+import * as path from "path";
+import {EOL} from "os";
 import {
     getEditor,
     getVaultAbsolutePath,
     isInteger,
     isWindows,
+    OutputChannelDriver,
+    OutputStream,
+    OutputStreams,
     prepareEditorPosition,
-} from "../Common";
-import * as path from "path";
-import {EOL} from "os";
+} from "src/imports";
 
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
     protected readonly title = "Open a file";

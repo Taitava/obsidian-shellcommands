@@ -1,5 +1,9 @@
-import {getVaultAbsolutePath, normalizePath2, uniqueArray} from "../Common";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
+import {
+    getVaultAbsolutePath,
+    normalizePath2,
+    uniqueArray,
+} from "src/imports";
 
 /**
  * TODO: Consider creating a decorator class for TFolder and moving this function to be a method in it.

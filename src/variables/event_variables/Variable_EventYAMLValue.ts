@@ -1,8 +1,10 @@
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {EventVariable} from "./EventVariable";
-import {getFileYAMLValue} from "../VariableHelpers";
-import {IParameters} from "../Variable";
 import {TFile} from "obsidian";
+import {
+    EventVariable,
+    getFileYAMLValue,
+    IParameters,
+    SC_Event_FileMenu,
+} from "src/imports";
 
 export class Variable_EventYAMLValue extends EventVariable {
     public variable_name = "event_yaml_value";

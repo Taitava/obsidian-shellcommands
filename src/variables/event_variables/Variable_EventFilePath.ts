@@ -1,9 +1,11 @@
-import {EventVariable} from "./EventVariable";
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {getFilePath} from "../VariableHelpers";
 import {TFile} from "obsidian";
-import {IParameters} from "../Variable";
-import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {
+    EventVariable,
+    getFilePath,
+    IAutocompleteItem,
+    IParameters,
+    SC_Event_FileMenu,
+} from "src/imports";
 
 export class Variable_EventFilePath extends EventVariable {
     public variable_name = "event_file_path";

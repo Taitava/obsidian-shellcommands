@@ -1,4 +1,7 @@
-import {IParameters, Variable} from "./Variable";
+import {
+    IParameters,
+    Variable,
+} from "src/imports";
 
 export class Variable_Passthrough extends Variable {
     public variable_name = "passthrough";

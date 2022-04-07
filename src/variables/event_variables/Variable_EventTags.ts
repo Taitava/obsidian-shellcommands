@@ -1,7 +1,9 @@
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {EventVariable} from "./EventVariable";
-import {IParameters} from "../Variable";
-import {getFileTags} from "../VariableHelpers";
+import {
+    EventVariable,
+    getFileTags,
+    IParameters,
+    SC_Event_FileMenu,
+} from "src/imports";
 
 export class Variable_EventTags extends EventVariable {
     public variable_name = "event_tags";

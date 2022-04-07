@@ -1,11 +1,13 @@
-import SC_Plugin from "../../main";
-import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
-import {parseVariables} from "../../variables/parseVariables";
-import {createAutocomplete} from "./Autocomplete";
-import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
-import {SC_Event} from "../../events/SC_Event";
-import {TShellCommand} from "../../TShellCommand";
+import {
+    createAutocomplete,
+    getVariableAutocompleteItems,
+    parseVariables,
+    SC_Event,
+    SC_Plugin,
+    SettingFieldGroup,
+    TShellCommand,
+} from "src/imports";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,

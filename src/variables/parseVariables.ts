@@ -1,11 +1,14 @@
-import SC_Plugin from "../main";
-import {debugLog} from "../Debug";
-import {SC_Event} from "../events/SC_Event";
-import {escapeValue} from "./escapers/EscapeValue";
-import {VariableSet} from "./loadVariables";
-import {Variable, VariableValueResult} from "./Variable";
-import {TShellCommand} from "../TShellCommand";
-import {removeFromSet} from "../Common";
+import {
+    debugLog,
+    escapeValue,
+    removeFromSet,
+    SC_Event,
+    SC_Plugin,
+    TShellCommand,
+    Variable,
+    VariableSet,
+    VariableValueResult,
+} from "src/imports";
 
 /**
  * @param plugin

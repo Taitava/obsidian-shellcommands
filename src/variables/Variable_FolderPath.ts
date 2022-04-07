@@ -1,7 +1,9 @@
-import {IParameters} from "./Variable";
-import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
-import {FolderVariable} from "./FolderVariable";
-import {getFolderPath} from "./VariableHelpers";
+import {
+    FolderVariable,
+    getFolderPath,
+    IAutocompleteItem,
+    IParameters,
+} from "src/imports";
 
 export class Variable_FolderPath extends FolderVariable {
     public variable_name = "folder_path";

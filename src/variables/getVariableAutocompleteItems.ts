@@ -1,5 +1,7 @@
-import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
-import SC_Plugin from "../main";
+import {
+    IAutocompleteItem,
+    SC_Plugin,
+} from "src/imports";
 
 export function getVariableAutocompleteItems(plugin: SC_Plugin) {
     const autocomplete_items: IAutocompleteItem[] = [];

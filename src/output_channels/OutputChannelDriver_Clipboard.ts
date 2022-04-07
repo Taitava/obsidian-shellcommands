@@ -1,9 +1,11 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {joinObjectProperties} from "../Common";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
 // @ts-ignore "electron" is installed.
 import {clipboard} from "electron";
 import {EOL} from "os";
+import {
+    joinObjectProperties,
+    OutputChannelDriver,
+    OutputStreams,
+} from "src/imports";
 
 export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
     protected readonly title = "Clipboard";

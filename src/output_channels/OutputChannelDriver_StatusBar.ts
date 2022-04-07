@@ -1,7 +1,9 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {joinObjectProperties} from "../Common";
 import {EOL} from "os";
+import {
+    joinObjectProperties,
+    OutputChannelDriver,
+    OutputStreams,
+} from "src/imports";
 
 export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
     protected readonly title = "Status bar";

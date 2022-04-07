@@ -1,10 +1,14 @@
-import SC_Plugin from "./main";
-import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
-import {debugLog} from "./Debug";
 import * as fs from "fs";
-import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
-import {getDefaultSettings} from "./settings/SC_MainSettings";
+import {
+    combineObjects,
+    debugLog,
+    getDefaultSettings,
+    getPluginAbsolutePath,
+    newShellCommandConfiguration,
+    SC_Plugin,
+    ShellCommandConfiguration,
+} from "./imports";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.

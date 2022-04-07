@@ -1,15 +1,17 @@
-import {SC_Modal} from "../../SC_Modal";
-import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
-import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
-import {SC_Event} from "../../events/SC_Event";
-import {createMultilineTextElement} from "../../Common";
-import {Variable, VariableValueResult} from "../../variables/Variable";
 import {
+    createMultilineTextElement,
     Prompt,
     PromptField,
     PromptFieldSet,
-} from "../../imports";
+    SC_Event,
+    SC_Modal,
+    SC_Plugin,
+    ShellCommandParsingProcess,
+    TShellCommand,
+    Variable,
+    VariableValueResult,
+} from "src/imports";
 import {
     parseVariables,
     ParsingResult,

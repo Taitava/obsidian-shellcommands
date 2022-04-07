@@ -1,11 +1,12 @@
-import SC_Plugin from "../main";
-import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
-import {SC_Event} from "../events/SC_Event";
-import {VariableSet} from "../variables/loadVariables";
 import {
     Preaction_Prompt,
     Preaction_Prompt_Configuration,
-} from "../imports";
+    SC_Event,
+    SC_Plugin,
+    ShellCommandParsingProcess,
+    TShellCommand,
+    VariableSet,
+} from "src/imports";
 
 export abstract class Preaction {
 

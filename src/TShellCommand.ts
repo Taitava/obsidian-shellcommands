@@ -1,29 +1,21 @@
-import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
-import SC_Plugin from "./main";
-import {
-    generateObsidianCommandName,
-    getOperatingSystem,
-    mergeSets,
-    removeFromSet,
-} from "./Common";
-import {SC_Event} from "./events/SC_Event";
-import {getSC_Events} from "./events/SC_EventList";
-import {
-    parseVariables,
-} from "./variables/parseVariables";
-import {debugLog} from "./Debug";
 import {Command} from "obsidian";
-import {VariableSet} from "./variables/loadVariables";
 import {
     createPreaction,
+    getSC_Events,
+    getOperatingSystem,
     ParsingProcess,
     Preaction,
-    PreactionConfiguration
-} from "./imports";
-import {
+    PreactionConfiguration,
+    SC_Event,
+    SC_Plugin,
+    ShellCommandConfiguration,
+    generateObsidianCommandName,
+    VariableSet,
+    removeFromSet,
+    mergeSets,
     Variable,
     VariableDefaultValueConfiguration,
-} from "./variables/Variable";
+} from "./imports";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,

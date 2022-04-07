@@ -1,9 +1,12 @@
-import SC_Plugin from "../main";
 import {App} from "obsidian";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {OutputStream} from "./OutputChannel";
-import {debugLog} from "../Debug";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {
+    debugLog,
+    OutputStream,
+    OutputStreams,
+    SC_Plugin,
+    ShellCommandParsingResult,
+    TShellCommand,
+} from "src/imports";
 
 export abstract class OutputChannelDriver {
     /**

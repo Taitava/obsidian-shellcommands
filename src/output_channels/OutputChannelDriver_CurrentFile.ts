@@ -1,8 +1,12 @@
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {getEditor, getView, joinObjectProperties} from "../Common";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {Editor} from "obsidian";
-import {debugLog} from "../Debug";
+import {
+    debugLog,
+    getEditor,
+    getView,
+    joinObjectProperties,
+    OutputChannelDriver,
+    OutputStreams,
+} from "src/imports";
 
 export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
 

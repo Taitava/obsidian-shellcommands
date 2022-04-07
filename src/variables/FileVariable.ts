@@ -1,4 +1,6 @@
-import {Variable} from "./Variable";
+import {
+    Variable,
+} from "src/imports";
 
 export abstract class FileVariable extends Variable {
 

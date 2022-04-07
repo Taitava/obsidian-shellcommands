@@ -1,6 +1,8 @@
-import {TShellCommand} from "../TShellCommand";
 import {Menu, TAbstractFile, TFile, TFolder, WorkspaceLeaf} from "obsidian";
-import {SC_MenuEvent} from "./SC_MenuEvent";
+import {
+    SC_MenuEvent,
+    TShellCommand,
+} from "src/imports";
 
 export abstract class SC_AbstractFileMenuEvent extends SC_MenuEvent {
     protected abstract file_or_folder: "file" | "folder";
