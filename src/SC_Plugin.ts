@@ -41,7 +41,7 @@ import {
 	VariableSet,
 } from "./variables/loadVariables";
 
-export default class SC_Plugin extends Plugin {
+export class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
