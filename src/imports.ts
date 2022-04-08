@@ -19,7 +19,7 @@ export * from "./Shell";
 export * from "./ShellCommandExecutor";
 export * from "./TShellCommand";
 
-// Libraries by third parties (that are included in this repository).
+// Libraries by third parties (that are included in this repository). TODO: Remove from this file.
 export * from "./lib/escapeRegExp";
 
 // Models - must come before subclasses of Model and Instance
