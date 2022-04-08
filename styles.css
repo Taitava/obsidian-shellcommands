@@ -145,6 +145,7 @@ p.SC-prompt-dry-run-notice {
  *  - Changed/removed borders.
  *  - Removed button transition.
  *  - Changed button border-radiuses
+ *  - Added margin-right rule to .SC-tab-header-button .
  */
 
 /* Style the tab */
@@ -160,6 +161,7 @@ p.SC-prompt-dry-run-notice {
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
+    margin-right: 6px; /* Reduced margin. Obsidian's default margin-right for button is 12px (0 for other margins). */
     border-radius: 10px 10px 0 0; /* 0 0 = No border-radius at bottom */
 }
 
