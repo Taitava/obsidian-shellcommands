@@ -50,6 +50,18 @@ export class PromptModal extends SC_Modal {
             : title_parsing_result.original_content
         );
 
+        // Parse and display description
+        if (this.prompt.configuration.description) {
+            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
+            const description =
+                description_parsing_result.succeeded
+                ? description_parsing_result.parsed_content
+                : description_parsing_result.original_content
+            ;
+            const description_element = createMultilineTextElement("p", description, this.modalEl);
+            description_element.addClass("setting-item-description"); // A CSS class defined by Obsidian.
+        }
+
         // Preview the shell command (if wanted)
         // TODO: Extract to a separate method, as this is a big block of code.
         let update_shell_command_preview: (() => void) | null = null; // Stays null if .preview_shell_command is false.
@@ -153,18 +165,6 @@ export class PromptModal extends SC_Modal {
                 }
                 preview_variable_values_setting.descEl.innerHTML = shell_command_preview_text_final;
             };
-        }
-
-        // Parse and display description
-        if (this.prompt.configuration.description) {
-            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
-            const description =
-                description_parsing_result.succeeded
-                ? description_parsing_result.parsed_content
-                : description_parsing_result.original_content
-            ;
-            const description_element = createMultilineTextElement("p", description, this.modalEl);
-            description_element.addClass("setting-item-description"); // A CSS class defined by Obsidian.
         }
 
         // Create fields
