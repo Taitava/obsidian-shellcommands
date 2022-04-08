@@ -15,6 +15,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [Add autocomplete menu to Alias field (#182)](https://github.com/Taitava/obsidian-shellcommands/issues/182).
 
 ### To be Changed
+ - Settings: _Operating systems & shells_ tab names are shortened to _Environments_ ([#37](https://github.com/Taitava/obsidian-shellcommands/issues/37) / [commit 55e5de2b](https://github.com/Taitava/obsidian-shellcommands/commit/55e5de2b6774645883e8dd0cfa759f8e1c70f813)).
  - [Internal: Variable refactorings (#178)](https://github.com/Taitava/obsidian-shellcommands/issues/178).
 
 ### To be Fixed
