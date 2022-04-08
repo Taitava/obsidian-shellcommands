@@ -114,13 +114,13 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
             .setIcon("stacked-levels")
             .onClick(async () => {
-                // Open an extra options modal: Operating systems and shells tab
+                // Open an extra options modal: Environments tab
                 const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
-                modal.activateTab("extra-options-operating-systems-and-shells");
+                modal.activateTab("extra-options-environments");
             })
         )
         .addExtraButton(button => button

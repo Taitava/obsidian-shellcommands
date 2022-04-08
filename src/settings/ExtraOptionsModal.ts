@@ -33,7 +33,7 @@ export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
-    public static OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
+    public static ENVIRONMENTS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
     public static EVENTS_SUMMARY = "Events";
     public static VARIABLES_SUMMARY = "Default values for variables";
 
@@ -79,11 +79,11 @@ export class ExtraOptionsModal extends SC_Modal {
                     this.tabOutput(container_element);
                 },
             },
-            "extra-options-operating-systems-and-shells": {
-                title: "Operating systems & shells",
+            "extra-options-environments": {
+                title: "Environments",
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
-                    this.tabOperatingSystemsAndShells(container_element);
+                    this.tabEnvironments(container_element);
                 },
             },
             "extra-options-events": {
@@ -308,7 +308,7 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
     }
 
-    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
+    private tabEnvironments(container_element: HTMLElement) {
         // Platform specific shell commands
         let platform_id: PlatformId;
         let is_first = true;

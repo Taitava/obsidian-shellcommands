@@ -48,11 +48,11 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     this.tabShellCommands(container_element);
                 },
             },
-            "main-operating-systems-and-shells": {
-                title: "Operating systems & shells",
+            "main-environments": {
+                title: "Environments",
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
-                    this.tabOperatingSystemsAndShells(container_element);
+                    this.tabEnvironments(container_element);
                 },
             },
             "main-preactions": {
@@ -265,7 +265,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."});
     }
 
-    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
+    private tabEnvironments(container_element: HTMLElement) {
         // "Working directory" field
         new Setting(container_element)
             .setName("Working directory")

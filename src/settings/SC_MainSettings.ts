@@ -25,7 +25,7 @@ export interface SC_MainSettings {
     preview_variables_in_command_palette: boolean;
     show_autocomplete_menu: boolean;
 
-    // Operating systems & shells:
+    // Environments:
     working_directory: string;
     default_shells: IPlatformSpecificString;
 
@@ -67,7 +67,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         preview_variables_in_command_palette: true,
         show_autocomplete_menu: true,
 
-        // Operating systems and shells:
+        // Environments:
         working_directory: "",
         default_shells: {},
 
