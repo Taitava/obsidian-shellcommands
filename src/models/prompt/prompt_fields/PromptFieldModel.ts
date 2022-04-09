@@ -54,6 +54,9 @@ export class PromptFieldModel extends Model {
         // Store the configuration into the prompt's configuration
         prompt.configuration.fields.push(prompt_field_configuration);
 
+        // Store the PromptField instance into its parent Prompt's list of fields.
+        prompt.prompt_fields.add(prompt_field);
+
         // Return the PromptField
         return prompt_field;
     }
