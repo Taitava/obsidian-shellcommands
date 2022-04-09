@@ -40,7 +40,7 @@ export class PromptField_Text extends PromptField {
         // Show autocomplete menu (if enabled)
         if (plugin.settings.show_autocomplete_menu) {
             const input_element = setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(input_element, getVariableAutocompleteItems(plugin), on_change);
+            createAutocomplete(plugin, input_element, on_change);
         }
     }
 

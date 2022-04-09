@@ -1,6 +1,7 @@
 import {Variable} from "./Variable";
 import SC_Plugin from "../main";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
+import {resetVariableAutocompleteItems} from "./getVariableAutocompleteItems";
 
 /**
  * This class serves as the actual operational variable class for custom variables. It's paired with the CustomVariableInstance class, which acts
@@ -43,6 +44,7 @@ export class CustomVariable extends Variable {
     public updateProperties() {
         this.variable_name = this.custom_variable_instance.getPrefixedName();
         this.help_text = this.custom_variable_instance.configuration.description;
+        resetVariableAutocompleteItems(); // Make autocomplete lists reload their content in order to get the new variable name/help text.
     }
 
     public getIdentifier() {

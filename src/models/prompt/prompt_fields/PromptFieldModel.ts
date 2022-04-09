@@ -216,11 +216,11 @@ export class PromptFieldModel extends Model {
         if (this.plugin.settings.show_autocomplete_menu) {
             // Show autocomplete menu (= a list of available variables).
             const label_input_element = setting_group.label_setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(label_input_element, getVariableAutocompleteItems(this.plugin), label_setting_component.onChanged);
+            createAutocomplete(this.plugin, label_input_element, label_setting_component.onChanged);
             const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(default_value_input_element, getVariableAutocompleteItems(this.plugin), on_default_value_setting_change);
+            createAutocomplete(this.plugin, default_value_input_element, on_default_value_setting_change);
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(description_input_element, getVariableAutocompleteItems(this.plugin), description_setting_component.onChanged);
+            createAutocomplete(this.plugin, description_input_element, description_setting_component.onChanged);
         }
 
         return setting_group.heading_setting;

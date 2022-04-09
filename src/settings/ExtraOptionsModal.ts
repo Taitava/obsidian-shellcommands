@@ -133,7 +133,7 @@ export class ExtraOptionsModal extends SC_Modal {
         alias_input_element.addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
         if (this.plugin.settings.show_autocomplete_menu) {
             // Show autocomplete menu (= a list of available variables).
-            createAutocomplete(alias_input_element, getVariableAutocompleteItems(this.plugin), on_alias_change);
+            createAutocomplete(this.plugin, alias_input_element, on_alias_change);
         }
 
         container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
@@ -492,7 +492,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 if (this.plugin.settings.show_autocomplete_menu) {
                     const textarea_element: HTMLTextAreaElement = textarea_component.inputEl as HTMLTextAreaElement;
                     const forged_input_element: HTMLInputElement = textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
-                    createAutocomplete(forged_input_element, getVariableAutocompleteItems(this.plugin), textarea_component.onChanged);
+                    createAutocomplete(this.plugin, forged_input_element, textarea_component.onChanged);
                 }
             }
         }

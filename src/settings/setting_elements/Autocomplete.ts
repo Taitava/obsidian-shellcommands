@@ -1,18 +1,20 @@
 import autocomplete from "autocompleter";
 import {parseYaml} from "obsidian";
+import SC_Plugin from "../../main";
+import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 /**
  *
+ * @param plugin Used for getting a list of Variable autocomplete items.
  * @param input_element
- * @param autocomplete_items
  * @param call_on_completion A function that will be called when a user has selected a suggestion and performed the autocomplete action. onChange event will not be called, because it would trigger opening the autocomplete menu again, so that's why a separate callback is used.
  */
-export function createAutocomplete(input_element: HTMLInputElement, autocomplete_items: IAutocompleteItem[], call_on_completion: (field_value: string) => void) {
-    autocomplete_items = merge_and_sort_autocomplete_items(autocomplete_items, CustomAutocompleteItems);
+export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement, call_on_completion: (field_value: string) => void) {
 
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
+            const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems);
             const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
