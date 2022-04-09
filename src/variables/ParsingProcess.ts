@@ -26,7 +26,7 @@ import {TShellCommand} from "../TShellCommand";
  */
 export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
 
-    public readonly parsing_results: ParsingResultContainer<ParsingMap> = {};
+    private readonly parsing_results: ParsingResultContainer<ParsingMap> = {};
 
     constructor(
         private plugin: SC_Plugin,
