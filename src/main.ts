@@ -182,8 +182,10 @@ export default class SC_Plugin extends Plugin {
 		const executor = (parsing_process: ShellCommandParsingProcess | undefined) => {
 			if (!parsing_process) {
 				parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+				// Try to process variables that can be processed before performing preactions.
+				parsing_process.process();
 			}
-			if (parsing_process.process()) {
+			if (parsing_process.getParsingResults().shell_command.succeeded) {
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
