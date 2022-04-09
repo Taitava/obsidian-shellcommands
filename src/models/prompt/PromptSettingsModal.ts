@@ -122,9 +122,10 @@ export class PromptSettingsModal extends SC_Modal {
         createNewModelInstanceButton<PromptFieldModel, PromptField>(this.plugin, PromptFieldModel.name, container_element, fields_container, this.prompt).then();
 
         // Execute button text
+        let execute_button_text_component: TextComponent;
         new Setting(container_element.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Execute button text")
-            .addText(text => text
+            .addText(text => execute_button_text_component = text
                 .setValue(this.prompt.configuration.execute_button_text)
                 .onChange(async (new_execute_button_text) => {
                     this.prompt.configuration.execute_button_text = new_execute_button_text;
@@ -132,6 +133,12 @@ export class PromptSettingsModal extends SC_Modal {
                 }),
             )
         ;
+
+        // Autocomplete for the Execute button text.
+        if (this.plugin.settings.show_autocomplete_menu) {
+            const execute_button_text_input_element = execute_button_text_component.inputEl;
+            createAutocomplete(this.plugin, execute_button_text_input_element, execute_button_text_component.onChanged);
+        }
 
         // Ok button
         if (this.ok_button_text) {

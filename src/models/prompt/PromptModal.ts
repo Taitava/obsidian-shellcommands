@@ -204,10 +204,16 @@ export class PromptModal extends SC_Modal {
         }
 
         // Execute button
+        const execute_button_text_parsing_result = parseVariables(this.plugin, this.prompt.configuration.execute_button_text, null, this.t_shell_command, this.sc_event);
+        const execute_button_text =
+            execute_button_text_parsing_result.succeeded
+            ? execute_button_text_parsing_result.parsed_content
+            : execute_button_text_parsing_result.original_content
+        ;
         new Setting(this.modalEl)
             .setDesc(tip)
             .addButton(button => button
-                .setButtonText(this.prompt.configuration.execute_button_text)
+                .setButtonText(execute_button_text)
                 .onClick(() => {
                     this.validator().then(() => {
                         // The form fields are filled ok
