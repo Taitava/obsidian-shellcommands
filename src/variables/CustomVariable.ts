@@ -17,8 +17,7 @@ export class CustomVariable extends Variable {
         private custom_variable_instance: CustomVariableInstance
     ) {
         super(plugin);
-        this.variable_name = custom_variable_instance.getPrefixedName();
-        this.help_text = custom_variable_instance.configuration.description;
+        this.updateProperties();
     }
 
     public generateValue() {
@@ -35,6 +34,15 @@ export class CustomVariable extends Variable {
 
         // Call the onChange hook.
         this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
+    }
+
+    /**
+     * Retrieves variable_name and help_text properties from the associated CustomVariableInstance.
+     * Called when loading the CustomVariable and when the associated CustomVariableInstance's settings are changed.
+     */
+    public updateProperties() {
+        this.variable_name = this.custom_variable_instance.getPrefixedName();
+        this.help_text = this.custom_variable_instance.configuration.description;
     }
 
     public getIdentifier() {

@@ -75,7 +75,7 @@ export class CustomVariableModel extends Model {
                     instance.setIfValid("name", new_name).then(async () => {
                         // Valid
                         heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
-                        instance.getCustomVariable().variable_name = new_name; // Update the name also to the operational variable, not only in configuration.
+                        instance.getCustomVariable().updateProperties(); // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
                         this.plugin.updateCustomVariableViews();
                     }, (reason: string | any) => {
@@ -102,7 +102,7 @@ export class CustomVariableModel extends Model {
                 .onChange(async (new_description: string) => {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
                     instance.configuration.description = new_description;
-                    instance.getCustomVariable().help_text = new_description; // Update the description also to the operational variable, not only in configuration.
+                    instance.getCustomVariable().updateProperties(); // Update the description also to the operational variable, not only in configuration.
                     await this.plugin.saveSettings();
                     this.plugin.updateCustomVariableViews();
                 }),
