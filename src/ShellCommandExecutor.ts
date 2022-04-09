@@ -11,6 +11,7 @@ import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
+    ConfirmationModal,
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
@@ -48,8 +49,43 @@ export class ShellCommandExecutor {
             debugLog("Going to prepare possible Preactions with an already started variable parsing process.");
         }
 
-        // Perform preactions
+        // Create a pipeline for preactions.
         let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
+
+        // Confirm execution from a user, if needed.
+        // I haven't decided yet if I want to move this to be its own Preaction subclass. Might make sense, but requires configuration migration.
+        if (this.t_shell_command.getConfiguration().confirm_execution) {
+            preaction_pipeline = preaction_pipeline.then(() => {
+                debugLog("Asking a confirmation from a user to execute shell command #" + this.t_shell_command.getId());
+                return new Promise((resolve, reject) => {
+                    const confirmation_modal = new ConfirmationModal(
+                        this.plugin,
+                        this.t_shell_command.getAliasOrShellCommand(),
+                        "Execute this shell command?",
+                        "Yes, execute",
+                    );
+                    confirmation_modal.open();
+                    confirmation_modal.promise.then((execution_confirmed: boolean) => {
+                        if (execution_confirmed) {
+                            // The PromptModal has been closed.
+                            // Check if user wanted to execute the shell command or cancel.
+                            if (execution_confirmed) {
+                                // User wants to execute.
+                                debugLog("User confirmed to execute shell command #" + this.t_shell_command.getId());
+                                resolve();
+                            } else {
+                                // User wants to cancel.
+                                debugLog("User cancelled execution of shell command #" + this.t_shell_command.getId());
+                                reject();
+                            }
+                        }
+                    });
+                });
+
+            });
+        }
+
+        // Perform preactions
         preactions.forEach((preaction: Preaction) => {
             debugLog(`Adding Preaction of type '${preaction.configuration.type}' to pipeline.`);
             preaction_pipeline = preaction_pipeline.then(() => {
