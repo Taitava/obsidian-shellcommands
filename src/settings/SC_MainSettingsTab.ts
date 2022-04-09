@@ -11,6 +11,7 @@ import {
     DocumentationBuiltInVariablesLink,
     GitHubLink,
     ChangelogLink,
+    DocumentationCustomVariablesLink,
 } from "../Documentation";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
@@ -214,13 +215,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     this.plugin.createCustomVariableView();
                 }),
             )
-            // .addExtraButton(extra_button => extra_button
-            //     .setIcon("help")
-            //     .setTooltip("Documentation: Custom variables")
-            //     .onClick(() => {
-            //         gotoURL(DocumentationCustomVariablesLink) // TODO: Create the documentation link
-            //     }),
-            // )
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Custom variables")
+                .onClick(() => {
+                    gotoURL(DocumentationCustomVariablesLink);
+                }),
+            )
         ;
 
         // Settings for each CustomVariable
