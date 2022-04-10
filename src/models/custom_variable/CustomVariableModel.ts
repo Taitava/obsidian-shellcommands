@@ -174,6 +174,9 @@ export class CustomVariableModel extends Model {
 
         // Delete CustomVariableInstance
         this.custom_variable_instances.delete(custom_variable_instance.getID());
+
+        // remove the variable from custom variable side panes.
+        this.plugin.updateCustomVariableViews();
     }
 
     /**
