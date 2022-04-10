@@ -480,7 +480,6 @@ export default class SC_Plugin extends Plugin {
 	 */
 	public updateCustomVariableViews() {
 		for (const leaf of this.app.workspace.getLeavesOfType(CustomVariableView.ViewType)) {
-			debugLog("leaf"); // TODO: Do not commit.
 			(leaf.view as CustomVariableView).updateContent();
 		}
 	}
