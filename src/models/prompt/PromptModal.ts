@@ -157,9 +157,12 @@ export class PromptModal extends SC_Modal {
                 } else {
                     // The preview should show the VARIABLE NAMES.
                     if (focused_prompt_field) {
+                        const pattern = new RegExp(focused_prompt_field.getTargetVariable().getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
                         shell_command_preview_text_final = shell_command_preview_text_final.replace(
-                            focused_prompt_field.getTargetVariableInstance().getFullName(), // TODO: Use focused_prompt_field.getTargetVariable().getPattern() instead. And make 'value' to be a callback.
-                            "<strong>" + focused_prompt_field.getTargetVariableInstance().getFullName() + "</strong>",
+                            pattern,
+                            (replaceable_variable_name) => {
+                                return "<strong>" + replaceable_variable_name + "</strong>";
+                            },
                         );
                     }
                 }
