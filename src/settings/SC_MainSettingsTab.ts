@@ -18,6 +18,7 @@ import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {
+    CustomVariable,
     CustomVariableInstance,
     CustomVariableModel,
     getModel,
@@ -248,15 +249,17 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         const variables = this.plugin.getVariables();
         variables.forEach((variable: Variable) => {
-            const paragraph = container_element.createEl("p");
-            paragraph.insertAdjacentHTML("afterbegin",
-                variable.getHelpName() +
-                "<br>" +
-                variable.help_text
-            );
-            const availability_text: string = variable.getAvailabilityText();
-            if (availability_text) {
-                paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+            if (!(variable instanceof CustomVariable)) {
+                const paragraph = container_element.createEl("p");
+                paragraph.insertAdjacentHTML("afterbegin",
+                    variable.getHelpName() +
+                    "<br>" +
+                    variable.help_text
+                );
+                const availability_text: string = variable.getAvailabilityText();
+                if (availability_text) {
+                    paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+                }
             }
         });
 
