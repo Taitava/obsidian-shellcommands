@@ -2,6 +2,7 @@ import {Variable} from "./Variable";
 import SC_Plugin from "../main";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {resetVariableAutocompleteItems} from "./getVariableAutocompleteItems";
+import {debugLog} from "../Debug";
 
 /**
  * This class serves as the actual operational variable class for custom variables. It's paired with the CustomVariableInstance class, which acts
@@ -19,6 +20,7 @@ export class CustomVariable extends Variable {
     ) {
         super(plugin);
         this.updateProperties();
+        debugLog(`Loaded CustomVariable ${this.variable_name}.`);
     }
 
     public generateValue() {
@@ -31,6 +33,7 @@ export class CustomVariable extends Variable {
 
     public setValue(value: string) {
         const old_value = this.value;
+        debugLog(`CustomVariable ${this.variable_name}: Setting value to: ${value} (old was: ${old_value}).`);
         this.value = value;
 
         // Call the onChange hook.
@@ -42,6 +45,7 @@ export class CustomVariable extends Variable {
      * Called when loading the CustomVariable and when the associated CustomVariableInstance's settings are changed.
      */
     public updateProperties() {
+        debugLog(`CustomVariable ${this.variable_name}: Updating variable name and help text.`);
         this.variable_name = this.custom_variable_instance.getPrefixedName();
         this.help_text = this.custom_variable_instance.configuration.description;
         resetVariableAutocompleteItems(); // Make autocomplete lists reload their content in order to get the new variable name/help text.
@@ -61,6 +65,7 @@ export class CustomVariable extends Variable {
     private on_change_callbacks = new Set<TCustomVariableOnChangeCallback>();
 
     private callOnChangeCallbacks(new_value: string, old_value: string) {
+        debugLog(`CustomVariable ${this.variable_name}: Calling onChange callbacks.`);
         for (const on_change_callback of this.on_change_callbacks) {
             on_change_callback(this, new_value, old_value);
         }

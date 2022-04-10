@@ -5,6 +5,7 @@ import {
     CustomVariableModel,
     Instance,
 } from "../../imports";
+import {debugLog} from "../../Debug";
 
 /**
  * This class serves as an accessor to CustomVariable configurations. It's paired with the CustomVariable class, which acts
@@ -26,6 +27,8 @@ export class CustomVariableInstance extends Instance {
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new CustomVariableInstances.
         this.model.id_generator.addCurrentID(configuration.id);
+
+        debugLog(`Loaded CustomVariableInstance ${this.getID()}.`);
     }
 
     public getID() {
@@ -49,12 +52,14 @@ export class CustomVariableInstance extends Instance {
 
     public getCustomVariable(): CustomVariable {
         if (!this.custom_variable) {
+            debugLog(`CustomVariableInstance ${this.getID()}: Cannot find a CustomVariable. Maybe it's not loaded?`);
             throw new Error(this.constructor.name + ".getVariable(): Cannot find a CustomVariable. Maybe it's not loaded?");
         }
         return this.custom_variable;
     }
 
     public createCustomVariable(): CustomVariable {
+        debugLog(`CustomVariableInstance ${this.getID()}: Creating an operational CustomVariable.`);
         this.custom_variable = new CustomVariable(this.model.plugin, this);
         this.custom_variable.onChange(() => this.model.plugin.updateCustomVariableViews());
         return this.custom_variable;

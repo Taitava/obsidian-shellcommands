@@ -6,6 +6,7 @@ import {
     Model,
     ParentModelOneToManyIdRelation,
 } from "../../imports";
+import {debugLog} from "../../Debug";
 
 export class CustomVariableModel extends Model {
 
@@ -18,6 +19,7 @@ export class CustomVariableModel extends Model {
     public readonly id_generator = new IDGenerator();
 
     protected defineParentConfigurationRelation(custom_variable_instance: CustomVariableInstance): ParentModelOneToManyIdRelation {
+        debugLog(`CustomVariableModel: Defining parent configuration relation for CustomVariableInstance ${custom_variable_instance.getID()}.`);
         return {
             type: "one-to-many-id",
             key: "custom_variables",
@@ -26,6 +28,7 @@ export class CustomVariableModel extends Model {
     }
 
     public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceMap {
+        debugLog(`CustomVariableModel: Loading CustomVariableInstances.`);
         this.custom_variable_instances = new CustomVariableInstanceMap;
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration) => {
             this.custom_variable_instances.set(
@@ -37,6 +40,7 @@ export class CustomVariableModel extends Model {
     }
 
     public newInstance(parent_configuration: SC_MainSettings): CustomVariableInstance {
+        debugLog(`CustomVariableModel: Creating a new CustomVariableInstance.`);
 
         // Create a default configuration object
         const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
@@ -54,6 +58,8 @@ export class CustomVariableModel extends Model {
     }
 
     protected _createSettingFields(instance: CustomVariableInstance, container_element: HTMLElement): Setting {
+        debugLog(`CustomVariableModel: Creating setting fields for CustomVariableInstance ${instance.getID()}.`);
+
         // Make the fields appear closer together.
         container_element.addClass("SC-setting-group");
 
@@ -112,6 +118,7 @@ export class CustomVariableModel extends Model {
     }
 
     public validateValue(custom_variable_instance: CustomVariableInstance, field: keyof CustomVariableInstance["configuration"], custom_variable_name: string): Promise<void> {
+        debugLog(`CustomVariableModel: Validating ${field} value ${custom_variable_name} for CustomVariableInstance ${custom_variable_instance.getID()}.`);
         return new Promise<void>((resolve, reject) => {
             switch (field) {
                 case "name":
@@ -155,6 +162,7 @@ export class CustomVariableModel extends Model {
     }
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
+        debugLog(`CustomVariableModel: Deleting CustomVariableInstance ${custom_variable_instance.getID()}.`);
         // TODO: The custom variable should be removed from all Prompts that use it.
 
         // Delete CustomVariable

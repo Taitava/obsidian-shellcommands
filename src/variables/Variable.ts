@@ -209,6 +209,7 @@ export abstract class Variable {
     protected newErrorMessage(message: string) {
         const prefix = "{{" + this.variable_name + "}}: ";
         this.error_messages.push(prefix + message);
+        debugLog(prefix + message);
     }
 
     protected newErrorMessages(messages: string[]) {
