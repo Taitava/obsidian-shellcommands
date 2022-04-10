@@ -178,7 +178,7 @@ export class ExtraOptionsModal extends SC_Modal {
         this.plugin.getPrompts().forEach((prompt: Prompt) => {
             prompt_options[prompt.getID()] = prompt.getTitle();
         });
-        let old_selected_prompt_option: string = preaction_prompt_configuration === null ? "no-prompt" : preaction_prompt_configuration.prompt_id;
+        let old_selected_prompt_option: string = (preaction_prompt_configuration?.enabled) ? preaction_prompt_configuration.prompt_id : "no-prompt";
         new Setting(container_element)
             .setName("Prompt")
             .setDesc("Prompts are used to ask values from the user right before shell command execution. The values can be accessed in the shell command via custom variables. You can manage all prompts in the plugin's main settings view, under the 'Preactions' tab.")
