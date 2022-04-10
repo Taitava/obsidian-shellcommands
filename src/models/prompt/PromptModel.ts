@@ -2,6 +2,7 @@ import {
     IDGenerator,
     Model,
     ParentModelOneToManyIdRelation,
+    Preaction_Prompt_Configuration,
     Prompt,
     PromptConfiguration,
     PromptSettingsModal,
@@ -90,6 +91,26 @@ export class PromptModel extends Model {
     }
 
     protected _deleteInstance(prompt: Prompt): void {
+
+        // Remove the Prompt from all TShellCommands that use it.
+        const shell_commands = this.plugin.getTShellCommands();
+        for (const shell_command_id in shell_commands) {
+            const t_shell_command = shell_commands[shell_command_id];
+            for (const preaction_configuration of t_shell_command.getConfiguration().preactions) {
+                if ("prompt" === preaction_configuration.type) {
+                    const preaction_prompt_configuration = preaction_configuration as Preaction_Prompt_Configuration;
+                    if (prompt.getID() === preaction_prompt_configuration.prompt_id) {
+                        // This TShellCommand uses this Prompt.
+                        // Remove the Prompt from use.
+                        preaction_prompt_configuration.enabled = false;
+                        preaction_prompt_configuration.prompt_id = undefined;
+                        t_shell_command.resetPreactions();
+                        // Saving is done later, after the _deleteInstance() call.
+                    }
+                }
+            }
+        }
+
         this.prompts.delete(prompt.getID());
     }
 }

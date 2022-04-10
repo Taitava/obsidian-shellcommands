@@ -29,6 +29,9 @@ export interface TShellCommandContainer {
     [key: string]: TShellCommand,
 }
 
+/**
+ * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Maybe ShellCommandInstance? It's not the best name, but I can't come up with a better one now.
+ */
 export class TShellCommand {
 
     private readonly id: string;
