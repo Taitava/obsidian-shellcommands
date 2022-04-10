@@ -109,16 +109,12 @@ class OutputModal extends Modal {
             .setClass("SC-no-top-border")
             .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
         ;
-        const excluded_output_channels: OutputChannel[] = [
-            "notification", // Would not make sense to create a temporary balloon for text that is already visible.
-            "modal",        // Would not make sense to open a new modal for the same thing.
-        ];
         const output_channel_drivers = getOutputChannelDrivers();
-        let hotkey_counter = 1;
         Object.getOwnPropertyNames(output_channel_drivers).forEach((output_channel_name: OutputChannel) => {
-            // Ensure this channel is not excluded
-            if (!excluded_output_channels.contains(output_channel_name)) {
-                const output_channel_driver = output_channel_drivers[output_channel_name];
+            const output_channel_driver = output_channel_drivers[output_channel_name];
+
+            // Ensure this channel is not excluded by checking that is has a hotkey defined.
+            if (output_channel_driver.hotkey_letter) {
                 // Ensure the output channel accepts this output stream. E.g. OutputChannelDriver_OpenFiles does not accept "stderr".
                 if (output_channel_driver.acceptsOutputStream(output_stream)) {
 
@@ -160,37 +156,25 @@ class OutputModal extends Modal {
 
                     // Define button texts and assign hotkeys
                     const output_channel_name: string = output_channel_driver.getTitle(output_stream);
-                    if (hotkey_counter <= 10) {
-                        // Can assign a hotkey.
 
-                        // Button text
-                        redirect_button.setButtonText(
-                            OutputModal.toHotkeyString(hotkey_counter) + ". " +
-                            output_channel_name
-                        );
+                    // Button text
+                    redirect_button.setButtonText(output_channel_name);
 
-                        // Tips about hotkeys
-                        redirect_button.setTooltip(
-                            `Normal click OR ${CmdOrCtrl()} + ${OutputModal.toHotkeyString(hotkey_counter)}: Redirect to ${output_channel_name.toLocaleLowerCase()}.`
-                            + EOL + EOL +
-                            CmdOrCtrl() + ` + click OR ${CmdOrCtrl()} + Alt + ${OutputModal.toHotkeyString(hotkey_counter)}: Redirect and close the modal.` // If you change this, remember to change the one below, too!
-                        );
+                    // Tips about hotkeys
+                    redirect_button.setTooltip(
+                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${output_channel_driver.hotkey_letter}.`
+                        + EOL + EOL +
+                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${output_channel_driver.hotkey_letter}.`
+                    );
 
-                        // 1. hotkey: Ctrl/Cmd + number: handle output
-                        this.scope.register(["Ctrl"], OutputModal.toHotkeyString(hotkey_counter), handle_output);
+                    // 1. hotkey: Ctrl/Cmd + number: handle output
+                    this.scope.register(["Ctrl"], output_channel_driver.hotkey_letter, handle_output);
 
-                        // 2. hotkey: Ctrl/Cmd + Alt + number: handle output and close the modal.
-                        this.scope.register(["Ctrl", "Alt"], OutputModal.toHotkeyString(hotkey_counter), () => {
-                            handle_output();
-                            this.close();
-                        });
-                    } else {
-                        // Cannot assign a hotkey because there's already a hotkey assigned for each number between 0 - 9.
-
-                        redirect_button.setButtonText(output_channel_name);
-                        redirect_button.setTooltip(CmdOrCtrl() + ` + click: Redirect and close the modal.`); // If you change this, remember to change the one above, too!
-                    }
-                    hotkey_counter++;
+                    // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
+                    this.scope.register(["Ctrl", "Shift"], output_channel_driver.hotkey_letter, () => {
+                        handle_output();
+                        this.close();
+                    });
                 }
             }
         });
@@ -205,10 +189,5 @@ class OutputModal extends Modal {
      */
     public setExitCode(exit_code: number) {
         this.exit_code = exit_code;
-    }
-
-    private static toHotkeyString(hotkey_counter: number): string {
-        // Allow ten hotkeys: if hotkey_counter is 10, make the hotkey to become 0. At the time of writing this, there is just 6 output channels in the modal, but this code allows some future flexibility.
-        return String(hotkey_counter > 9 ? 0 : hotkey_counter);
     }
 }

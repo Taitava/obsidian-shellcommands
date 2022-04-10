@@ -18,6 +18,8 @@ import {EOL} from "os";
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
     protected readonly title = "Open a file";
 
+    public hotkey_letter = "O";
+
     /**
      * This output channel is not suitable for stderr, as stderr can contain unexpected messages.
      * @protected

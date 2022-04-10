@@ -8,6 +8,8 @@ import {EOL} from "os";
 export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
     protected readonly title = "Clipboard";
 
+    public hotkey_letter = "L";
+
     protected _handle(output: OutputStreams) {
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
         // will be joined together with " " as a separator.
