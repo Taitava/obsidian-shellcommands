@@ -7,6 +7,8 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
     protected readonly title = "Status bar";
     protected accepts_empty_output = true;
 
+    public hotkey_letter = "S";
+
     private status_bar_element: HTMLElement;
 
     public _handle(output: OutputStreams) {

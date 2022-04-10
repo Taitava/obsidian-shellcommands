@@ -4,6 +4,8 @@ import {Editor} from "obsidian";
 export class OutputChannelDriver_CurrentFileTop extends OutputChannelDriver_CurrentFile {
     protected readonly title = "Current file: top";
 
+    public hotkey_letter = "T";
+
     /**
      * Inserts text into the given editor, at top.
      *

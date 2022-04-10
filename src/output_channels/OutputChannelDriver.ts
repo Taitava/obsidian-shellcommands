@@ -19,6 +19,12 @@ export abstract class OutputChannelDriver {
     protected accepts_empty_output = false;
 
     /**
+     * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
+     * excluded from OutputModal.
+     */
+    public hotkey_letter: string = undefined;
+
+    /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
      * @param output_stream
      */
