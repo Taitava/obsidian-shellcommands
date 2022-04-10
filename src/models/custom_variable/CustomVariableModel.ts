@@ -163,7 +163,18 @@ export class CustomVariableModel extends Model {
 
     protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
         debugLog(`CustomVariableModel: Deleting CustomVariableInstance ${custom_variable_instance.getID()}.`);
-        // TODO: The custom variable should be removed from all Prompts that use it.
+
+        // Remove the CustomVariableInstance from all PromptFields that use it.
+        for (const prompt of this.plugin.getPrompts().values()) {
+            for (const prompt_field of prompt.prompt_fields) {
+                if (custom_variable_instance.getID() === prompt_field.configuration.target_variable_id) {
+                    // This prompt field uses this CustomVariableInstance.
+                    // Remove the variable from use.
+                    prompt_field.configuration.target_variable_id = "";
+                    // Saving is done later, after the _deleteInstance() call.
+                }
+            }
+        }
 
         // Delete CustomVariable
         try {
