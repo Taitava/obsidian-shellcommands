@@ -1,3 +1,5 @@
+import {debugLog} from "./Debug";
+
 export class IDGenerator {
     constructor(
         private current_ids: string[] = [], // TODO: Rename to reserved_ids
@@ -6,6 +8,7 @@ export class IDGenerator {
     ) {}
 
     public addCurrentID(id: string) {
+        debugLog(IDGenerator.name + ": Adding id " + id + " to the list of reserved ids.");
         this.current_ids.push(id);
     }
 
@@ -15,6 +18,7 @@ export class IDGenerator {
             generated_id += this.generateCharacter();
         }
         this.current_ids.push(generated_id);
+        debugLog(IDGenerator.name + ": Generated id " + generated_id);
         return generated_id;
     }
 
