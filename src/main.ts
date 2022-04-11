@@ -2,6 +2,7 @@ import {
 	CustomVariableInstanceMap,
 	CustomVariableModel,
 	CustomVariableView,
+	getIDGenerator,
 	getModel,
 	introduceModels,
 	PromptMap,
@@ -122,6 +123,10 @@ export default class SC_Plugin extends Plugin {
 
 		// Make it possible to create CustomVariableViews.
 		this.registerView(CustomVariableView.ViewType, (leaf: WorkspaceLeaf) => new CustomVariableView(this, leaf));
+
+		// Debug reserved IDs
+		debugLog("IDGenerator's reserved IDs:");
+		debugLog(getIDGenerator().getReservedIDs());
 	}
 
 	private loadTShellCommands() {

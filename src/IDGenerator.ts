@@ -1,13 +1,9 @@
 export class IDGenerator {
     constructor(
-        private current_ids: string[] = [],
+        private current_ids: string[] = [], // TODO: Rename to reserved_ids
         private readonly min_length = 10,
         private readonly characters = "abcdefghijklmnopqrstuvwxyz0123456789",
     ) {}
-
-    public setCurrentIDs(ids: string[]) {
-        this.current_ids = ids;
-    }
 
     public addCurrentID(id: string) {
         this.current_ids.push(id);
@@ -22,6 +18,10 @@ export class IDGenerator {
         return generated_id;
     }
 
+    public getReservedIDs() {
+        return this.current_ids;
+    }
+
     private generateCharacter(): string {
         return this.characters.charAt(
             Math.floor(Math.random() * this.characters.length)
@@ -31,4 +31,10 @@ export class IDGenerator {
     private isIDReserved(id: string): boolean {
         return this.current_ids.contains(id);
     }
+}
+
+const id_generator: IDGenerator = new IDGenerator();
+
+export function getIDGenerator() {
+    return id_generator;
 }

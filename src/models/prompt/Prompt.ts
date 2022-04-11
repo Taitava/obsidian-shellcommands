@@ -11,6 +11,7 @@ import {
     PromptFieldModel,
     PromptModal,
     PromptModel,
+    getIDGenerator,
 } from "../../imports";
 
 export class Prompt extends Instance {
@@ -26,7 +27,7 @@ export class Prompt extends Instance {
         super(model, configuration, parent_configuration);
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new Prompts.
-        this.model.id_generator.addCurrentID(configuration.id);
+        getIDGenerator().addCurrentID(configuration.id);
 
         this.createFields();
     }

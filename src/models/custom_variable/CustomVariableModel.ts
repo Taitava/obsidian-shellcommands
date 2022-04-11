@@ -2,7 +2,7 @@ import {Setting} from "obsidian";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {CustomVariableInstance} from "./CustomVariableInstance";
 import {
-    IDGenerator,
+    getIDGenerator,
     Model,
     ParentModelOneToManyIdRelation,
 } from "../../imports";
@@ -15,8 +15,6 @@ export class CustomVariableModel extends Model {
     public getSingularName(): string {
         return "Custom variable";
     }
-
-    public readonly id_generator = new IDGenerator();
 
     protected defineParentConfigurationRelation(custom_variable_instance: CustomVariableInstance): ParentModelOneToManyIdRelation {
         debugLog(`CustomVariableModel: Defining parent configuration relation for CustomVariableInstance ${custom_variable_instance.getID()}.`);
@@ -155,7 +153,7 @@ export class CustomVariableModel extends Model {
 
         // Create a configuration object.
         return {
-            id: this.id_generator.generateID(),
+            id: getIDGenerator().generateID(),
             name: String(sequential_number),
             description: "",
         };

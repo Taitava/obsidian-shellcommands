@@ -3,6 +3,7 @@ import {
     CustomVariable,
     CustomVariableConfiguration,
     CustomVariableModel,
+    getIDGenerator,
     Instance,
 } from "../../imports";
 import {debugLog} from "../../Debug";
@@ -26,7 +27,7 @@ export class CustomVariableInstance extends Instance {
         super(model, configuration, parent_configuration);
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new CustomVariableInstances.
-        this.model.id_generator.addCurrentID(configuration.id);
+        getIDGenerator().addCurrentID(configuration.id);
 
         debugLog(`Loaded CustomVariableInstance ${this.getID()}.`);
     }

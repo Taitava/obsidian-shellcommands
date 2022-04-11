@@ -1,5 +1,5 @@
 import {
-    IDGenerator,
+    getIDGenerator,
     Model,
     ParentModelOneToManyIdRelation,
     Preaction_Prompt_Configuration,
@@ -12,7 +12,6 @@ import {SC_MainSettings} from "../../settings/SC_MainSettings";
 
 export class PromptModel extends Model {
 
-    public readonly id_generator = new IDGenerator();
     private prompts = new PromptMap();
 
     public getSingularName(): string {
@@ -81,7 +80,7 @@ export class PromptModel extends Model {
 
     private _getDefaultConfiguration(): PromptConfiguration {
         return {
-            id: this.id_generator.generateID(),
+            id: getIDGenerator().generateID(),
             title: "",
             description: "",
             preview_shell_command: false,
