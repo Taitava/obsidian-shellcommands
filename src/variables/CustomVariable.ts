@@ -25,6 +25,7 @@ export class CustomVariable extends Variable {
 
     public generateValue() {
         if (null === this.value) {
+            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
             this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
             return null;
         }
