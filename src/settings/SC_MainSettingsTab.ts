@@ -31,6 +31,7 @@ import {
     GitHubLink,
     ChangelogLink,
     DocumentationCustomVariablesLink,
+    LicenseLink,
 } from "../Documentation";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
@@ -112,6 +113,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
             "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
+
+        // Copyright notice
+        const copyright_paragraph = containerEl.createEl("p");
+        copyright_paragraph.addClass("SC-small-font");
+        copyright_paragraph.insertAdjacentHTML("beforeend", `
+            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2022 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
+        `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
         this.rememberLastPosition(containerEl);
