@@ -19,6 +19,7 @@
 
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
+import {debugLog} from "../Debug";
 import {
     getModel,
     Instance,
@@ -39,6 +40,7 @@ export function createNewModelInstanceButton<
         parent_instance_or_configuration: InstanceClass["parent_configuration"] | InstanceClass["parent_instance"]
     ): Promise<{instance: InstanceClass, main_setting: Setting}> {
 
+    debugLog("Creating a button for creating a new instance for model " + model_class_name + ".");
     return new Promise((resolve_promise) => {
         const model = getModel<ModelClass>(model_class_name);
         new Setting(button_container_element)

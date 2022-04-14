@@ -19,6 +19,7 @@
 
 import SC_Plugin from "../main";
 import {Setting} from "obsidian";
+import {debugLog} from "../Debug";
 import {
     ConfirmationModal,
     Instance,
@@ -49,6 +50,8 @@ export abstract class Model {
     public abstract newInstance(parent_instance_or_configuration: Instance | InstanceConfiguration): Instance;
 
     public createSettingFields(instance: Instance, parent_element: HTMLElement, with_deletion = true) {
+        debugLog(this.constructor.name + ": Creating setting fields.");
+
         // Create a container
         const setting_fields_container = parent_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
 
@@ -102,6 +105,7 @@ export abstract class Model {
      * Can be made public if needed.
      */
     public deleteInstance(instance: Instance) {
+        debugLog(this.constructor.name + ": Deleting an instance.");
         this._deleteInstance(instance);
         const relation = this.defineParentConfigurationRelation(instance);
         switch (relation.type) {

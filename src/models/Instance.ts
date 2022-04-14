@@ -17,6 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+import {debugLog} from "../Debug";
 import {
     Model
 } from "../imports";
@@ -40,6 +41,8 @@ export abstract class Instance {
         public readonly configuration: InstanceConfiguration,
         parent_instance_or_configuration: Instance | InstanceConfiguration,
     ) {
+        debugLog(this.constructor.name + ": Creating a new instance.");
+
         // Determine parent type
         if (parent_instance_or_configuration instanceof Instance) {
             // It's an instance object
