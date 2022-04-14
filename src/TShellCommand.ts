@@ -27,9 +27,6 @@ import {
 } from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
-import {
-    parseVariables,
-} from "./variables/parseVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {VariableSet} from "./variables/loadVariables";
