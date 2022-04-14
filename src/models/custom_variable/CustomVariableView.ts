@@ -58,7 +58,15 @@ export class CustomVariableView extends ItemView {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
         for (const custom_variable_instance of this.plugin.getCustomVariableInstances().values()) {
-            const custom_variable_value: string = custom_variable_instance.getCustomVariable().getValue().value ?? "[No value yet]";
+            let custom_variable_value = custom_variable_instance.getCustomVariable().getValue().value;
+            let emphasize = false;
+            if (null === custom_variable_value) {
+                custom_variable_value = "No value yet.";
+                emphasize = true;
+            } else if ("" === custom_variable_value) {
+                custom_variable_value = "An empty text.";
+                emphasize = true;
+            }
             const variable_list_element: any = this.container_element.createEl("ul");
             const variable_list_item_element = variable_list_element.createEl("li", {
                 text: custom_variable_instance.getFullName(),
@@ -67,7 +75,14 @@ export class CustomVariableView extends ItemView {
                 },
             });
             variable_list_item_element.createEl("br");
-            variable_list_item_element.insertAdjacentText("beforeend", custom_variable_value);
+            let variable_list_item_element_child: HTMLElement;
+            if (emphasize) {
+                variable_list_item_element_child = variable_list_item_element.createEl("em");
+            } else {
+                // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
+                variable_list_item_element_child = variable_list_item_element.createEl("strong");
+            }
+            variable_list_item_element_child.insertAdjacentText("beforeend", custom_variable_value);
         }
     }
 
