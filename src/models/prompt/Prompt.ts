@@ -32,6 +32,7 @@ import {
     PromptModel,
     getIDGenerator,
 } from "../../imports";
+import {debugLog} from "../../Debug";
 
 export class Prompt extends Instance {
 
@@ -90,9 +91,12 @@ export class Prompt extends Instance {
         if (true !== can_open_prompt_result) {
             // Some error is preventing opening the prompt.
             // A human-readable error message is contained in can_open_prompt_result.
+            debugLog("Could not open Prompt " + this.getID() + " because of error: " + can_open_prompt_result);
             this.plugin.newError(can_open_prompt_result);
             return Promise.resolve(false); // false: Cancel execution (pretends that a user cancelled it, but it's ok).
         }
+
+        debugLog("Opening Prompt " + this.getID());
 
         const modal = new PromptModal(
             this.plugin,
@@ -130,6 +134,7 @@ export class Prompt extends Instance {
      * Creates PromptField instances, NOT setting fields!
      */
     private createFields() {
+        debugLog("Creating fields for Prompt " + this.getID());
         const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
         this.prompt_fields = prompt_field_model.loadInstances(this)
     }
@@ -138,6 +143,7 @@ export class Prompt extends Instance {
      * Validates values in PromptField instances, NOT setting fields!
      */
     private validateFields(): Promise<void> {
+        debugLog("Validating fields for Prompt " + this.getID());
 
         // Iterate all fields and check their validity.
         const error_messages: string[] = [];

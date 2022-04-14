@@ -28,6 +28,7 @@ import {
 } from "../../imports";
 import {Setting} from "obsidian";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
+import {debugLog} from "../../Debug";
 
 export class PromptModel extends Model {
 
@@ -46,6 +47,7 @@ export class PromptModel extends Model {
     }
 
     public loadInstances(parent_configuration: SC_MainSettings): PromptMap {
+        debugLog("Loading Prompt instances.");
         this.prompts = new PromptMap();
         parent_configuration.prompts.forEach((prompt_configuration: PromptConfiguration) => {
             const prompt: Prompt = new Prompt(this, this.plugin, prompt_configuration, parent_configuration);
@@ -55,6 +57,7 @@ export class PromptModel extends Model {
     }
 
     public newInstance(parent_configuration: SC_MainSettings): Prompt {
+        debugLog("Creating a new Prompt instance.");
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration and generate an ID
@@ -73,6 +76,7 @@ export class PromptModel extends Model {
     }
 
     protected _createSettingFields(prompt: Prompt, container_element: HTMLElement): Setting {
+        debugLog("Creating setting fields for a Prompt instance.");
         const prompt_name_setting = new Setting(container_element)
             // Configuration button
             .setName(prompt.getTitle())
@@ -93,6 +97,7 @@ export class PromptModel extends Model {
     }
 
     public openSettingsModal(prompt: Prompt, prompt_name_setting: Setting) {
+        debugLog("Opening settings modal for a Prompt instance.");
         const modal = new PromptSettingsModal(this.plugin, prompt, prompt_name_setting);
         modal.open();
     }
@@ -109,6 +114,7 @@ export class PromptModel extends Model {
     }
 
     protected _deleteInstance(prompt: Prompt): void {
+        debugLog("Deleting a Prompt instance.");
 
         // Remove the Prompt from all TShellCommands that use it.
         const shell_commands = this.plugin.getTShellCommands();

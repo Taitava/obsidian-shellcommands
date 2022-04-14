@@ -367,11 +367,13 @@ export class TShellCommand {
      * when modifying properties in existing PreactionConfigurations.
      */
     public resetPreactions() {
+        debugLog(`TShellCommand ${this.id}: Resetting preactions.`);
         delete this.cached_preactions;
     }
 
     private cached_preactions: Preaction[];
     public getPreactions(): Preaction[] {
+        debugLog(`TShellCommand ${this.id}: Getting preactions.`);
         if (!this.cached_preactions) {
             this.cached_preactions = [];
             this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
@@ -391,6 +393,7 @@ export class TShellCommand {
      * @private Can be made public if needed.
      */
     private getNonPreactionsDependentVariables(): VariableSet {
+        debugLog(`TShellCommand ${this.id}: Getting non preactions dependent variables.`);
         const all_variables = this.plugin.getVariables();
         return removeFromSet(all_variables, this.getPreactionsDependentVariables());
     }
@@ -399,6 +402,7 @@ export class TShellCommand {
      * @private Can be made public if needed.
      */
     private getPreactionsDependentVariables(): VariableSet {
+        debugLog(`TShellCommand ${this.id}: Getting preactions dependent variables.`);
         let dependent_variables = new VariableSet();
         for (const preaction of this.getPreactions()) {
             dependent_variables = mergeSets(dependent_variables, preaction.getDependentVariables());
