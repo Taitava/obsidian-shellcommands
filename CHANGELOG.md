@@ -4,8 +4,17 @@ All notable changes to this plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+
+
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
+
+## [Unreleased] (for 0.13.0)
+### To be Added:
+- [Execute shell commands via Obsidian URI (#202)](https://github.com/Taitava/obsidian-shellcommands/issues/202).
+
+## [Unreleased] (for 0.12.0)
 
 ### To be Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
