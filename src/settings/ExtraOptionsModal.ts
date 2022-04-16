@@ -502,17 +502,17 @@ export class ExtraOptionsModal extends SC_Modal {
 
                             // Save the settings
                             await this.plugin.saveSettings();
+                        }).then((textarea_component) => {
+                            // Autocomplete for the textarea.
+                            if (this.plugin.settings.show_autocomplete_menu) {
+                                const description_textarea_element: HTMLTextAreaElement = textarea_component.inputEl as HTMLTextAreaElement;
+                                const forged_input_element: HTMLInputElement = description_textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
+                                createAutocomplete(this.plugin, forged_input_element, () => textarea_component.onChanged());
+                            }
                         }),
                     )
                 ;
                 update_textarea_component_visibility(default_value_configuration ? default_value_configuration.type : "show-errors");
-
-                // Autocomplete for the textarea.
-                if (this.plugin.settings.show_autocomplete_menu) {
-                    const textarea_element: HTMLTextAreaElement = textarea_component.inputEl as HTMLTextAreaElement;
-                    const forged_input_element: HTMLInputElement = textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
-                    createAutocomplete(this.plugin, forged_input_element, textarea_component.onChanged);
-                }
             }
         }
     }
