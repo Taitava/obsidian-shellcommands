@@ -152,7 +152,7 @@ export class ShellCommandExecutor {
      *
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      */
-    public executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
+    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
         const working_directory = this.getWorkingDirectory();
 
         // Check that the shell command is not empty
