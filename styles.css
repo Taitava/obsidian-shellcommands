@@ -114,8 +114,10 @@ div.SC-shell-command-setting div.setting-item-info {
  * SHELL COMMAND SETTING FIELDS
  */
 
-div.SC-shell-command-setting input[type=text] {
+div.SC-shell-command-setting textarea {
     width: 100%;
+    padding: 2px 5px; /* Shrink the padding all around the textarea. */
+    resize: vertical;
 }
 
 div.SC-hotkey-info svg {

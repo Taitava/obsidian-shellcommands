@@ -335,7 +335,7 @@ export class ExtraOptionsModal extends SC_Modal {
             const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
             if (is_first) {
                 // Focus on the first OS specific shell command field
-                setting_group.shell_command_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening");
+                setting_group.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
                 is_first = false;
             }
         }

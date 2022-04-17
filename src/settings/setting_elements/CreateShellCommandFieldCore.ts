@@ -46,6 +46,27 @@ export function CreateShellCommandFieldCore(
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
+
+        // Resize the shell command textarea to match the amount of lines in it.
+        update_textarea_height(shell_command, shell_command_placeholder);
+    }
+
+    function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
+        let newlines_pattern = /\r\n|\r|\n/;
+        const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
+        const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
+        let count_lines_final = Math.max(
+            count_lines_in_shell_command,
+            count_lines_in_shell_command_placeholder,
+        );
+        if (plugin.settings.max_visible_lines_in_shell_command_fields) {
+            // Limit the height so that the field will not take up too much space.
+            count_lines_final = Math.min(
+                plugin.settings.max_visible_lines_in_shell_command_fields,
+                count_lines_final,
+            );
+        }
+        (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
     setting_group = {
@@ -56,7 +77,7 @@ export function CreateShellCommandFieldCore(
         ,
         shell_command_setting:
             new Setting(container_element)
-                .addText(text => text
+                .addTextArea(text => text
                     .setPlaceholder(shell_command_placeholder)
                     .setValue(shell_command)
                     .onChange(on_change)
@@ -69,12 +90,13 @@ export function CreateShellCommandFieldCore(
                 .setClass("SC-preview-setting")
         ,
     };
+    update_textarea_height(shell_command, shell_command_placeholder);
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
         // @ts-ignore
-        const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
-        createAutocomplete(plugin, input_element, on_change);
+        const input_element: HTMLTextAreaElement = setting_group.shell_command_setting.settingEl.find("textarea");
+        createAutocomplete(plugin, input_element as unknown as HTMLInputElement /* Forge the datatype until kraaden/autocomplete starts to support HTMLTextAreaElement. */, on_change);
     }
 
     return setting_group;
