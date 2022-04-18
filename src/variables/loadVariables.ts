@@ -44,6 +44,7 @@ import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileE
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
+import {Variable_Environment} from "./Variable_Environment";
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
 
@@ -61,6 +62,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_CaretPosition(plugin),
         new Variable_Clipboard(plugin),
         new Variable_Date(plugin),
+        new Variable_Environment(plugin),
         new Variable_FileExtension(plugin),
         new Variable_FileName(plugin),
         new Variable_FilePath(plugin),
