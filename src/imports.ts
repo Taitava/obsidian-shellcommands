@@ -60,5 +60,8 @@ export * from "./models/prompt/PromptModal";
 export * from "./models/prompt/PromptModel";
 export * from "./models/prompt/PromptSettingsModal";
 
+// Settings
+export * from "./settings/setting_elements/PathEnvironmentVariableFunctions";
+
 // Variables
 export * from "./variables/ParsingProcess";

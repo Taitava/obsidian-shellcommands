@@ -19,6 +19,8 @@
 
 import {exec, ExecException, ExecOptions} from "child_process";
 import {
+    cloneObject,
+    getOperatingSystem,
     getVaultAbsolutePath,
 } from "./Common";
 import * as path from "path";
@@ -31,6 +33,9 @@ import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
     ConfirmationModal,
+    convertNewlinesToPATHSeparators,
+    getPATHEnvironmentVariableName,
+    getPATHSeparator,
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
@@ -127,6 +132,7 @@ export class ShellCommandExecutor {
                 const shell_command_parsing_result: ShellCommandParsingResult = {
                     shell_command: parsing_results["shell_command"].parsed_content,
                     alias: parsing_results["alias"].parsed_content,
+                    environment_variable_path_augmentation: parsing_results.environment_variable_path_augmentation.parsed_content,
                     succeeded: true,
                     error_messages: [],
                 };
@@ -174,6 +180,14 @@ export class ShellCommandExecutor {
             return;
         }
 
+        // Define an object for environment variables.
+        const environment_variables = cloneObject(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
+
+        // Augment the PATH environment variable (if wanted)
+        const augmented_path = this.augmentPATHEnvironmentVariable(shell_command_parsing_result.environment_variable_path_augmentation);
+        if (augmented_path.length > 0) {
+            environment_variables[getPATHEnvironmentVariableName()] = augmented_path;
+        }
 
         // Check that the working directory exists and is a folder
         if (!fs.existsSync(working_directory)) {
@@ -193,6 +207,7 @@ export class ShellCommandExecutor {
             const options: BaseEncodingOptions & ExecOptions = {
                 "cwd": working_directory,
                 "shell": shell,
+                "env": environment_variables,
             };
 
             // Execute the shell command
@@ -263,4 +278,32 @@ export class ShellCommandExecutor {
         return working_directory;
     }
 
+    private augmentPATHEnvironmentVariable(path_augmentation: string): string {
+        path_augmentation = convertNewlinesToPATHSeparators(path_augmentation, getOperatingSystem());
+        // Check if there's anything to augment.
+        if (path_augmentation.length > 0) {
+            // Augment.
+            const original_path = process.env[getPATHEnvironmentVariableName()];
+            let augmented_path: string;
+            if (path_augmentation.contains(original_path)) {
+                // The augmentation contains the original PATH.
+                // Simply replace the whole original PATH with the augmented one, as there's no need to care about including
+                // the original content.
+                debugLog("Augmenting environment variable PATH so it will become " + path_augmentation);
+                augmented_path = path_augmentation;
+            } else {
+                // The augmentation does not contain the original PATH.
+                // Instead of simply replacing the original PATH, append the augmentation after it.
+                const separator = getPATHSeparator(getOperatingSystem());
+                debugLog("Augmenting environment variable PATH by adding " + separator + path_augmentation + " after it.");
+                augmented_path = original_path + separator + path_augmentation;
+            }
+            debugLog("PATH augmentation result: " + augmented_path);
+            return augmented_path;
+        } else {
+            // No augmenting is needed.
+            debugLog("No augmentation is defined for environment variable PATH. This is completely ok.");
+            return "";
+        }
+    }
 }

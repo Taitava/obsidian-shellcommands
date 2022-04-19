@@ -47,6 +47,7 @@ export interface SC_MainSettings {
     // Environments:
     working_directory: string;
     default_shells: IPlatformSpecificString;
+    environment_variable_path_augmentations: IPlatformSpecificString;
 
     // Output:
     error_message_duration: number;
@@ -89,6 +90,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Environments:
         working_directory: "",
         default_shells: {},
+        environment_variable_path_augmentations: {},
 
         // Output:
         error_message_duration: 20,
