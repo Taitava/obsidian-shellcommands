@@ -101,7 +101,7 @@ export class PromptFieldModel extends Model {
             ["Very big, and still expanding", "93 billion light-years"],
             ["Infinite", "Too long to wait for"],
             [String(randomInteger(0, 9)), "I don't have one"],
-            ["We are the world (USA for Africa)", "Heal the world (Michael Jackson)", "Imagine (John Lennon)"],
+            ["We are the world (USA for Africa)", "Heal the world (Michael Jackson)", "Imagine (John Lennon)", "Circle of life (Elton John)"],
             ["Blue as deep as an ocean", "Red as love", "Grass-green", "Snow-white"],
             ["Thousands", "Many", "Countless", "None"],
             ["Thinking", "Being a being", "42"],
