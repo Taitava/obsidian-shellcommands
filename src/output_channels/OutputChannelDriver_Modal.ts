@@ -108,6 +108,34 @@ class OutputModal extends SC_Modal {
             .setName(output_stream)
             .setHeading()
             .setClass("SC-no-bottom-border")
+
+            // Search
+            .addSearch(search_component => search_component
+                .setPlaceholder("Search in " + output_stream)
+                .onChange((search_term) => {
+                    const search_position = output_textarea.inputEl.value.toLocaleLowerCase().indexOf(search_term.toLocaleLowerCase());
+                    if (search_position > -1) {
+                        // Found
+                        // Scroll to the caret position.
+                        // This trick was copied 2022-04-18 from https://stackoverflow.com/a/40951875/2754026
+                        output_textarea.inputEl.setSelectionRange(search_position, search_position);
+                        output_textarea.inputEl.blur();
+                        output_textarea.inputEl.focus();
+
+                        // Select the search term.
+                        output_textarea.inputEl.setSelectionRange(search_position, search_position + search_term.length);
+
+                        // Bring focus back to the search field.
+                        search_component.inputEl.focus();
+                    } else {
+                        // Not found
+                    }
+                })
+                .then((search_component) => {
+                    // Search hotkey
+                    this.scope.register(["Ctrl"], "F", () => search_component.inputEl.focus());
+                }),
+            )
         ;
 
         // Textarea
