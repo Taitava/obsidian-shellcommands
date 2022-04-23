@@ -1,5 +1,9 @@
 <div style="margin-top: -40px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
 
+# 0.12.0-beta test
+
+If you are willing to try out _prompts_, which can be used to ask values from users when a shell command is about to be executed, you can [participate in a beta test](https://github.com/Taitava/obsidian-shellcommands/discussions/201).
+
 # Shell commands plugin for Obsidian
 
 This plugin lets you define shell/terminal commands in settings and run them quickly via Obsidian's command palette, or via hotkeys. Use note related variables as part of the commands, and insert output back to your notes, if you wish. This is a Swiss army knife when it comes to accessing external applications from Obsidian, and you are the one who defines its tools.
