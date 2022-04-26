@@ -402,6 +402,7 @@ export default class SC_Plugin extends Plugin {
 					case "": // For some reason Obsidian 0.14.5 adds an empty-named parameter if there are no ?query=parameters present.
 					case "action": // Not needed in parameter_names.
 					case "execute": // Not needed in parameter_names.
+					case "vault": // Obsidian handles this parameter automatically. Just make sure no error message is displayed when this is present.
 						// Do nothing
 						break;
 					default:
