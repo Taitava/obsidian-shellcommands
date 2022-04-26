@@ -374,6 +374,7 @@ export default class SC_Plugin extends Plugin {
 				if (undefined !== parameters.execute) {
 					// Execute a shell command.
 					const executable_shell_command_id = parameters.execute;
+					parameter_names.remove("execute"); // Mark the parameter as handled. Prevents showing an error message for an unrecognised parameter.
 
 					// Find the executable shell command
 					let found_t_shell_command = false;
@@ -400,8 +401,7 @@ export default class SC_Plugin extends Plugin {
 			for (const parameter_name of parameter_names) {
 				switch (parameter_name) {
 					case "": // For some reason Obsidian 0.14.5 adds an empty-named parameter if there are no ?query=parameters present.
-					case "action": // Not needed in parameter_names.
-					case "execute": // Not needed in parameter_names.
+					case "action": // Obsidian provides this always. Don't show an error message for this.
 					case "vault": // Obsidian handles this parameter automatically. Just make sure no error message is displayed when this is present.
 						// Do nothing
 						break;
