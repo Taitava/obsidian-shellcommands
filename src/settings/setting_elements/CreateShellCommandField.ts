@@ -218,6 +218,27 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         }),
     );
 
+    setting_group.preview_setting.addExtraButton(button => button
+        .setIcon("any-key")
+        .setTooltip("Go to hotkey settings.")
+        .onClick(() => {
+            // The most important parts of this closure function are copied 2022-04-27 from https://github.com/pjeby/hotkey-helper/blob/c8a032e4c52bd9ce08cb909cec15d1ed9d0a3439/src/plugin.js#L436-L442 (also from other lines of the same file).
+
+            // @ts-ignore This is private API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
+            plugin.app.setting?.openTabById("hotkeys");
+
+            // @ts-ignore
+            const hotkeys_settings_tab = plugin.app.setting.settingTabs.filter(tab => tab.id === "hotkeys").shift();
+            if (hotkeys_settings_tab && hotkeys_settings_tab.searchInputEl && hotkeys_settings_tab.updateHotkeyVisibility) {
+                debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
+                hotkeys_settings_tab.searchInputEl.value = t_shell_command.getObsidianCommand().name;
+                hotkeys_settings_tab.updateHotkeyVisibility();
+            } else {
+                debugLog("Hotkeys: Cannot do filtering due to API changes.");
+            }
+        }),
+    );
+
     // Add hotkey information
     if (!is_new) {
         const hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);

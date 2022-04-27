@@ -40,7 +40,7 @@ export function getHotkeysForShellCommand(plugin: SC_Plugin, shell_command_id: s
 }
 
 /**
- * TODO: Is there a way to make Obsidian do this conversion for us?
+ * TODO: Is there a way to make Obsidian do this conversion for us? Check this: https://github.com/pjeby/hotkey-helper/blob/c8a032e4c52bd9ce08cb909cec15d1ed9d0a3439/src/plugin.js#L4-L6
  *
  * @param hotkey
  * @constructor

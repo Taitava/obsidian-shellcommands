@@ -344,6 +344,10 @@ export class TShellCommand {
         this.obsidian_command = obsidian_command;
     }
 
+    public getObsidianCommand() {
+        return this.obsidian_command;
+    }
+
     /**
      * No renaming is done if the shell command is excluded from the command palette.
      */
