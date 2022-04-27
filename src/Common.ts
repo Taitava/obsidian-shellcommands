@@ -290,3 +290,17 @@ export function randomInteger(min: number, max: number) {
     const range = max - min + 1;
     return min + Math.floor(Math.random() * range);
 }
+
+/**
+ * Does the following prefixings:
+ *   \ will become \\
+ *   [ will become \[
+ *   ] will become \]
+ *   ( will become \(
+ *   ) will become \)
+ *
+ * @param content
+ */
+export function escapeMarkdownLinkCharacters(content: string) {
+    return content.replace(/[\\()\[\]]/gu, "\\$&");
+}

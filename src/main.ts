@@ -89,6 +89,10 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ShellCommandParsingProcess,
 	} = {};
 
+	private static readonly BASE_URI_ACTION = "shell-commands"
+
+	public static readonly BASE_URI = `obsidian://${SC_Plugin.BASE_URI_ACTION}/`;
+
 	public async onload() {
 		debugLog('loading plugin');
 
@@ -340,7 +344,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private registerURIHandler() {
-		this.registerObsidianProtocolHandler("shell-commands", (parameters: ObsidianProtocolData) => {
+		this.registerObsidianProtocolHandler(SC_Plugin.BASE_URI_ACTION, (parameters: ObsidianProtocolData) => {
 			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
 
 			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
