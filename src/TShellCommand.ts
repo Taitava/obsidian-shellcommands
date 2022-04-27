@@ -421,7 +421,7 @@ export class TShellCommand {
      * contains stubs for any possible CustomVariables that might be used in the shell command (if any).
      */
     public getExecutionURI() {
-        const execution_uri = SC_Plugin.BASE_URI + "?execute=" + this.getId();
+        const execution_uri = SC_Plugin.BASE_URI + "?vault="+encodeURIComponent(this.plugin.app.vault.getName())+"&execute=" + this.getId();
 
         // Get a list CustomVariables that the shell command uses.
         const custom_variables = new VariableSet();
