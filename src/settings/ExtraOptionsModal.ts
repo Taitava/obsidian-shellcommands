@@ -17,6 +17,8 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+// @ts-ignore
+import {clipboard} from "electron";
 import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
@@ -176,6 +178,32 @@ export class ExtraOptionsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 })
             )
+        ;
+
+        // Shell command id
+        new Setting(container_element)
+            .setDesc(`Shell command id: ${this.shell_command_id}`)
+            .addExtraButton(button => button
+                .setIcon("documents")
+                .setTooltip(`Copy ${this.shell_command_id} to the clipboard.`)
+                .onClick(() => {
+                    clipboard.writeText(this.shell_command_id);
+                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`)
+                }),
+            )
+        ;
+        const obsidian_command_id = this.t_shell_command.getObsidianCommand().id;
+        new Setting(container_element)
+            .setDesc(`Obsidian command palette id: ${obsidian_command_id}`)
+            .addExtraButton(button => button
+                .setIcon("documents")
+                .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
+                .onClick(() => {
+                    clipboard.writeText(obsidian_command_id);
+                    this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                }),
+            )
+            .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
         ;
     }
 
