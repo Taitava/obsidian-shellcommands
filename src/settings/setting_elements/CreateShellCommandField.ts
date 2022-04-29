@@ -202,6 +202,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         .setTooltip("Copy this shell command's Obsidian URI to the clipboard. Visiting the URI executes the shell command.")
         .onClick(() => {
             const ctrl_clicked = false; // TODO: Implement Ctrl/Cmd + clicking! Add to the end of the tooltip text: CmdOrCtrl() + " + click to include the alias text, too."
+            // TODO: Implement also Ctrl/Cmd + Shift + clicking to copy the link in HTML format: <a href=""></a>
             // I asked about the Ctrl+click support here: https://discord.com/channels/686053708261228577/840286264964022302/968834348637888562
             const execution_uri = t_shell_command.getExecutionURI();
             let result: string;
