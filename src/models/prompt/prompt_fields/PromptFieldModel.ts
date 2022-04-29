@@ -101,7 +101,7 @@ export class PromptFieldModel extends Model {
             ["Very big, and still expanding", "93 billion light-years"],
             ["Infinite", "Too long to wait for"],
             [String(randomInteger(0, 9)), "I don't have one"],
-            ["We are the world (USA for Africa)", "Heal the world (Michael Jackson)", "Imagine (John Lennon)"],
+            ["We are the world (USA for Africa)", "Heal the world (Michael Jackson)", "Imagine (John Lennon)", "Circle of life (Elton John)"],
             ["Blue as deep as an ocean", "Red as love", "Grass-green", "Snow-white"],
             ["Thousands", "Many", "Countless", "None"],
             ["Thinking", "Being a being", "42"],
@@ -238,11 +238,11 @@ export class PromptFieldModel extends Model {
         if (this.plugin.settings.show_autocomplete_menu) {
             // Show autocomplete menu (= a list of available variables).
             const label_input_element = setting_group.label_setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(this.plugin, label_input_element, label_setting_component.onChanged);
+            createAutocomplete(this.plugin, label_input_element, () => label_setting_component.onChanged());
             const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, default_value_input_element, on_default_value_setting_change);
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(this.plugin, description_input_element, description_setting_component.onChanged);
+            createAutocomplete(this.plugin, description_input_element, () => description_setting_component.onChanged());
         }
 
         return setting_group.heading_setting;

@@ -69,7 +69,7 @@ export class ShellCommandExecutor {
         }
 
         // Create a pipeline for preactions.
-        let preaction_pipeline = Promise.resolve(); // Will contain a series of preaction performs.
+        let preaction_pipeline = Promise.resolve(true); // Will contain a series of preaction performs.
 
         // Confirm execution from a user, if needed.
         // I haven't decided yet if I want to move this to be its own Preaction subclass. Might make sense, but requires configuration migration.
@@ -91,11 +91,11 @@ export class ShellCommandExecutor {
                             if (execution_confirmed) {
                                 // User wants to execute.
                                 debugLog("User confirmed to execute shell command #" + this.t_shell_command.getId());
-                                resolve();
+                                resolve(true);
                             } else {
                                 // User wants to cancel.
                                 debugLog("User cancelled execution of shell command #" + this.t_shell_command.getId());
-                                reject();
+                                resolve(false);
                             }
                         }
                     });
@@ -116,31 +116,32 @@ export class ShellCommandExecutor {
             debugLog("No Preactions to perform. This is ok.");
         }
 
-        preaction_pipeline.then(() => {
-            // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
-            // all variables are already parsed.
-            debugLog("Parsing all the rest of the variables (if there are any left).")
-            if (parsing_process.processRest()) {
-                // Parsing the rest of the variables succeeded
-                // Execute the shell command.
-                const parsing_results = parsing_process.getParsingResults();
-                const shell_command_parsing_result: ShellCommandParsingResult = {
-                    shell_command: parsing_results["shell_command"].parsed_content,
-                    alias: parsing_results["alias"].parsed_content,
-                    succeeded: true,
-                    error_messages: [],
-                };
-                debugLog("Will call ShellCommandExecutor.executeShellCommand().");
-                this.executeShellCommand(shell_command_parsing_result);
+        preaction_pipeline.then((can_execute: boolean) => {
+            if (can_execute) {
+                // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
+                // all variables are already parsed.
+                debugLog("Parsing all the rest of the variables (if there are any left).");
+                if (parsing_process.processRest()) {
+                    // Parsing the rest of the variables succeeded
+                    // Execute the shell command.
+                    const parsing_results = parsing_process.getParsingResults();
+                    const shell_command_parsing_result: ShellCommandParsingResult = {
+                        shell_command: parsing_results["shell_command"].parsed_content,
+                        alias: parsing_results["alias"].parsed_content,
+                        succeeded: true,
+                        error_messages: [],
+                    };
+                    debugLog("Will call ShellCommandExecutor.executeShellCommand().");
+                    this.executeShellCommand(shell_command_parsing_result);
+                } else {
+                    // Parsing has failed.
+                    debugLog("Parsing the rest of the variables failed.")
+                    parsing_process.displayErrorMessages();
+                }
             } else {
-                // Parsing has failed.
-                debugLog("Parsing the rest of the variables failed.")
-                parsing_process.displayErrorMessages();
+                // Cancel execution
+                debugLog("Shell command execution cancelled.")
             }
-
-        }, () => {
-            // Cancel execution
-            debugLog("Shell command execution cancelled.")
         });
 
 
@@ -152,7 +153,7 @@ export class ShellCommandExecutor {
      *
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      */
-    public executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
+    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
         const working_directory = this.getWorkingDirectory();
 
         // Check that the shell command is not empty
