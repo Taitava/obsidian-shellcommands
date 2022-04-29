@@ -391,7 +391,7 @@ export default class SC_Plugin extends Plugin {
 
 							// Execute it.
 							const executor = new ShellCommandExecutor(this, t_shell_command, null);
-							executor.doPreactionsAndExecuteShellCommand(t_shell_command.createParsingProcess(null));
+							executor.doPreactionsAndExecuteShellCommand();
 
 						}
 					}
