@@ -306,6 +306,13 @@ export class TShellCommand {
     }
 
     /**
+     * Another name for canAddToCommandPalette().
+     */
+    public canHaveHotkeys(): boolean {
+        return this.canAddToCommandPalette();
+    }
+
+    /**
      * Checks the configuration for command_palette_availability and returns:
      *  - true, if the value is "enabled"
      *  - false, if the value is "disabled" or "unlisted"
