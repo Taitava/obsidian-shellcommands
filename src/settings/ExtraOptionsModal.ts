@@ -192,19 +192,22 @@ export class ExtraOptionsModal extends SC_Modal {
                 }),
             )
         ;
-        const obsidian_command_id = this.t_shell_command.getObsidianCommand().id;
-        new Setting(container_element)
-            .setDesc(`Obsidian command palette id: ${obsidian_command_id}`)
-            .addExtraButton(button => button
-                .setIcon("documents")
-                .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
-                .onClick(() => {
-                    clipboard.writeText(obsidian_command_id);
-                    this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
-                }),
-            )
-            .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
-        ;
+        if (this.t_shell_command.canAddToCommandPalette()) {
+            // Only show Obsidian command palette id if the shell command is available in the command palette.
+            const obsidian_command_id = this.t_shell_command.getObsidianCommand().id;
+            new Setting(container_element)
+                .setDesc(`Obsidian command palette id: ${obsidian_command_id}`)
+                .addExtraButton(button => button
+                    .setIcon("documents")
+                    .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
+                    .onClick(() => {
+                        clipboard.writeText(obsidian_command_id);
+                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                    }),
+                )
+                .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
+            ;
+        }
     }
 
     private tabPreactions(container_element: HTMLElement) {
