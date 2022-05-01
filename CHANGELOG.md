@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 ## [Unreleased] (for 0.13.0)
 ### To be Added:
 - [Execute shell commands via Obsidian URI (#202)](https://github.com/Taitava/obsidian-shellcommands/issues/202).
+- [Settings: Add directories to the `PATH` environment variable (#204)](https://github.com/Taitava/obsidian-shellcommands/issues/204).
 - [Settings: Add a shortcut icon for defining hotkeys (#210)](https://github.com/Taitava/obsidian-shellcommands/issues/210).
    - From now on, hotkeys are not displayed for shell commands that are completely _excluded_ from Obsidian's command palette (even if a shell command had hotkeys defined before it was configured as _excluded_ from the command palette).
 - [Settings: Display shell command id in extra options modal (#205)](https://github.com/Taitava/obsidian-shellcommands/issues/205).
