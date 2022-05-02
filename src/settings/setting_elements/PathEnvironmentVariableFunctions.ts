@@ -41,7 +41,7 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
     new Setting(container_element)
         .setName(`Add directories to the ${path_variable_name} environment variable`)
         .setHeading()
-        .setDesc(`This is sometimes needed in order to be able to call some user installed applications. The directories will be appended AFTER the default directories in ${path_variable_name}, unless {{environment:${path_variable_name}}} is included. Other {{variables}} can be used, too, but they don't affect the appending order.`)
+        .setDesc(`This is sometimes needed in order to be able to call some user installed applications. The directories will be appended AFTER the default directories in ${path_variable_name}, unless {{!environment:${path_variable_name}}} is included. Other {{variables}} can be used, too, but they don't affect the appending order.`)
 
         // An icon for showing the current PATH content.
         .addExtraButton(button => button
