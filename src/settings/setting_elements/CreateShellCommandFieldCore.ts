@@ -25,6 +25,7 @@ import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
+import {createMultilineTextElement} from "../../Common";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -42,7 +43,12 @@ export function CreateShellCommandFieldCore(
 
     function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
+        setting_group.preview_setting.descEl.innerHTML = ""; // Remove previous content.
+        createMultilineTextElement(
+            "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
+            getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+            setting_group.preview_setting.descEl,
+        );
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -86,8 +92,15 @@ export function CreateShellCommandFieldCore(
         ,
         preview_setting:
             new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command, shell, t_shell_command, null /* No event is available during preview. */))
                 .setClass("SC-preview-setting")
+                .then((setting: Setting) => {
+                    setting.descEl.innerHTML = ""; // Remove previous content. Not actually needed here because it's empty already, but do it just in case.
+                    createMultilineTextElement(
+                        "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
+                        getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+                        setting.descEl,
+                    );
+                })
         ,
     };
     update_textarea_height(shell_command, shell_command_placeholder);
