@@ -18,6 +18,9 @@ Features that are in development, but are not released yet. Does not include stu
    - From now on, hotkeys are not displayed for shell commands that are completely _excluded_ from Obsidian's command palette (even if a shell command had hotkeys defined before it was configured as _excluded_ from the command palette).
 - [Settings: Display shell command id in extra options modal (#205)](https://github.com/Taitava/obsidian-shellcommands/issues/205).
 
+### To be Changed:
+ - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
+
 ## [Unreleased] (for 0.12.0)
 
 ### To be Added
