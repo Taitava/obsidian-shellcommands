@@ -26,6 +26,7 @@ import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompl
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
+import {EOL} from "os";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -129,8 +130,8 @@ export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string,
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {
-            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-            return parsing_result.error_messages[0];
+            // Return all error messages, each in its own line. (Usually there's just one message).
+            return parsing_result.error_messages.join(EOL); // Newlines are converted to <br>'s by the consumers of this function.
         } else {
             // If there are no error messages, then errors are silently ignored by user's variable configuration.
             // The preview can then show the original, unparsed shell command.
