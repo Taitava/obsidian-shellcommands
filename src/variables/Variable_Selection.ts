@@ -1,10 +1,31 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {getEditor, getView} from "../Common";
 import {Variable} from "./Variable";
 import {debugLog} from "../Debug";
 
 export class Variable_Selection extends Variable{
-    public static variable_name = "selection";
-    public static help_text = "Gives the currently selected text.";
+    public variable_name = "selection";
+    public help_text = "Gives the currently selected text.";
+
+    protected always_available = false;
 
     protected generateValue(): string {
 
@@ -42,12 +63,16 @@ export class Variable_Selection extends Variable{
                 }
                 return "";
             default:
-                Error("ShellCommandVariable_Selection: Unrecognised view mode: "+view_mode);
-                break;
+                throw new Error("ShellCommandVariable_Selection: Unrecognised view mode: " + view_mode);
         }
     }
 
-    public static getAvailabilityText(): string {
+    public isAvailable(): boolean {
+        const view = getView(this.app);
+        return view && getEditor(this.app) && view.getMode() === "source";
+    }
+
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
     }
 }

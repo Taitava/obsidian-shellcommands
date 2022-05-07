@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
@@ -17,6 +36,8 @@ import {EOL} from "os";
 
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
     protected readonly title = "Open a file";
+
+    public hotkey_letter = "O";
 
     /**
      * This output channel is not suitable for stderr, as stderr can contain unexpected messages.
@@ -164,6 +185,14 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                         }
                     }, 500); // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
                 }
+            }, (error_message: string | any) => {
+                if (typeof error_message === "string") {
+                    // Opening the file has failed.
+                    this.plugin.newError(error_message);
+                } else {
+                    // Some other runtime error has occurred.
+                    throw error_message;
+                }
             });
         }
     }
@@ -177,7 +206,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             return this.app.workspace.openLinkText(file_path, source_path, new_pane);
         } else {
             // No, the file does not exist, and it may not be created.
-            this.plugin.newError("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
+            return Promise.reject("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
         }
     }
 

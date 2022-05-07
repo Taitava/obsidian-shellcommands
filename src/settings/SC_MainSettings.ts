@@ -1,6 +1,29 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 // SETTINGS AND DEFAULT VALUES
 import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
 import SC_Plugin from "../main";
+import {
+    CustomVariableConfiguration,
+    PromptConfiguration,
+} from "../imports";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -21,7 +44,7 @@ export interface SC_MainSettings {
     preview_variables_in_command_palette: boolean;
     show_autocomplete_menu: boolean;
 
-    // Operating systems & shells:
+    // Environments:
     working_directory: string;
     default_shells: IPlatformSpecificString;
 
@@ -35,6 +58,12 @@ export interface SC_MainSettings {
 
     // Shell commands:
     shell_commands: ShellCommandsConfiguration;
+
+    // Prompts:
+    prompts: PromptConfiguration[];
+
+    // Custom variables
+    custom_variables: CustomVariableConfiguration[];
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -57,7 +86,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         preview_variables_in_command_palette: true,
         show_autocomplete_menu: true,
 
-        // Operating systems and shells:
+        // Environments:
         working_directory: "",
         default_shells: {},
 
@@ -71,6 +100,12 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Shell commands:
         shell_commands: {},
+
+        // Prompts:
+        prompts: [],
+
+        // Custom variables
+        custom_variables: [],
     }
 }
 

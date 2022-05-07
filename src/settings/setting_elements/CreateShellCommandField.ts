@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
 import {ExtraOptionsModal} from "../ExtraOptionsModal";
@@ -6,6 +25,9 @@ import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
+import {
+    ShellCommandExecutor
+} from "../../imports";
 
 /**
  *
@@ -39,6 +61,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         generateShellCommandFieldName(shell_command_id, t_shell_command),
         shell_command,
         t_shell_command.getShell(),
+        t_shell_command,
         show_autocomplete_menu,
         async (shell_command: string) => {
             if (is_new) {
@@ -71,11 +94,12 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .onClick(() => {
                 // Execute the shell command now (for trying it out in the settings)
                 const t_shell_command = plugin.getTShellCommands()[shell_command_id]; // TODO: Is this redundant? Could the t_shell_command defined in lines 22 / 26 (near 'const is_new') be used?
-                const parsing_result = t_shell_command.parseVariables();
-                if (parsing_result.succeeded) {
-                    plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+                const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
+                if (parsing_process.process()) {
+                    const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
+                    executor.doPreactionsAndExecuteShellCommand(parsing_process);
                 } else {
-                    plugin.newErrors(parsing_result.error_messages);
+                    parsing_process.displayErrorMessages();
                 }
             })
         )
@@ -83,9 +107,19 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-general");
+            })
+        )
+        .addExtraButton(button => button
+            .setTooltip(ExtraOptionsModal.PREACTIONS_OPTIONS_SUMMARY)
+            .setIcon("note-glyph")
+            .onClick(async () => {
+                // Open an extra options modal: Preactions tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                modal.open();
+                modal.activateTab("extra-options-preactions");
             })
         )
         .addExtraButton(button => button
@@ -93,29 +127,39 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.OPERATING_SYSTEMS_AND_SHELLS_OPTIONS_SUMMARY)
+            .setTooltip(ExtraOptionsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
             .setIcon("stacked-levels")
             .onClick(async () => {
-                // Open an extra options modal: Operating systems and shells tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                // Open an extra options modal: Environments tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
-                modal.activateTab("extra-options-operating-systems-and-shells");
+                modal.activateTab("extra-options-environments");
             })
         )
         .addExtraButton(button => button
             .setTooltip(ExtraOptionsModal.EVENTS_SUMMARY)
             .setIcon("dice")
             .onClick(async () => {
-                // Open an extra options modal: Operating systems and shells tab
-                const modal = new ExtraOptionsModal(plugin.app, plugin, shell_command_id, setting_group, this);
+                // Open an extra options modal: Events tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
                 modal.open();
                 modal.activateTab("extra-options-events");
+            })
+        )
+        .addExtraButton(button => button
+            .setTooltip(ExtraOptionsModal.VARIABLES_SUMMARY)
+            .setIcon("code-glyph")
+            .onClick(async () => {
+                // Open an extra options modal: Variables tab
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                modal.open();
+                modal.activateTab("extra-options-variables");
             })
         )
         .addExtraButton(button => button

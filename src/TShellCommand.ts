@@ -1,16 +1,53 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import SC_Plugin from "./main";
-import {generateObsidianCommandName, getOperatingSystem} from "./Common";
+import {
+    generateObsidianCommandName,
+    getOperatingSystem,
+    mergeSets,
+    removeFromSet,
+} from "./Common";
 import {SC_Event} from "./events/SC_Event";
 import {getSC_Events} from "./events/SC_EventList";
-import { parseShellCommandVariables } from "./variables/parseShellCommandVariables";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
+import {VariableSet} from "./variables/loadVariables";
+import {
+    createPreaction,
+    ParsingProcess,
+    Preaction,
+    PreactionConfiguration
+} from "./imports";
+import {
+    Variable,
+    VariableDefaultValueConfiguration,
+} from "./variables/Variable";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
 }
 
+/**
+ * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Maybe ShellCommandInstance? It's not the best name, but I can't come up with a better one now.
+ */
 export class TShellCommand {
 
     private readonly id: string;
@@ -275,46 +312,30 @@ export class TShellCommand {
         return this.getConfiguration().command_palette_availability === "enabled";
     }
 
-    public parseVariables(sc_event?: SC_Event): ParsingResult {
-        // Parse variables in the actual shell command
-        const parsing_result: ParsingResult = {
-            shell_command: "",
-            alias: "",
-            succeeded: false,
-            error_messages: [],
-        };
-
-        const parsed_shell_command = parseShellCommandVariables(this.plugin, this.getShellCommand(), this.getShell(), sc_event);
-
-        if (Array.isArray(parsed_shell_command)) {
-            // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for shell command " + this.getShellCommand());
-            parsing_result.succeeded = false;
-            parsing_result.error_messages = parsed_shell_command;
-            return parsing_result;
-        } else {
-            // Variable parsing succeeded.
-            // Use the parsed values.
-            parsing_result.shell_command = parsed_shell_command;
-        }
-
-        // Also parse variables in an alias, in case the command has one. Variables in aliases do not do anything practical, but they can reveal the user what variables are used in the command.
-        const parsed_alias = parseShellCommandVariables(this.plugin, this.getAlias(), this.getShell(), sc_event);
-        if (Array.isArray(parsed_alias)) {
-            // Variable parsing failed, because an array was returned, which contains error messages.
-            debugLog("Shell command preview: Variable parsing failed for alias " + this.getAlias());
-            parsing_result.succeeded = false;
-            parsing_result.error_messages = parsed_alias;
-            return parsing_result;
-        } else {
-            // Variable parsing succeeded.
-            // Use the parsed values.
-            parsing_result.alias = parsed_alias;
-        }
-
-        // All ok
-        parsing_result.succeeded = true;
-        return parsing_result;
+    /**
+     * Creates a new ParsingProcess instance and defines two sets of variables:
+     *  - First set: All variables that are not tied to any preactions.
+     *  - Second set: Variables that are tied to preactions. Can be an empty set.
+     * You need to still call ParsingProcess.process() to parse the first set. ShellCommandExecutor takes care of calling
+     * ParsingProcess.processRest() to process all non-processed sets.
+     *
+     * @See ParsingProcess class for a description of the process.
+     * @param sc_event Needed to get {{event_*}} variables parsed. Can be left out if working outside any SC_Event context, in which case {{event_*}} variables are inaccessible.
+     */
+    public createParsingProcess(sc_event: SC_Event | null): ShellCommandParsingProcess {
+        return new ParsingProcess<shell_command_parsing_map>(
+            this.plugin,
+            {
+                "shell_command": this.getShellCommand(),
+                "alias": this.getAlias(),
+            },
+            this,
+            sc_event,
+            [
+                this.getNonPreactionsDependentVariables(), // First set: All variables that are not tied to any preactions.
+                this.getPreactionsDependentVariables(), // Second set: Variables that are tied to preactions. Can be an empty set.
+            ]
+        );
     }
 
     public setObsidianCommand(obsidian_command: Command) {
@@ -336,11 +357,74 @@ export class TShellCommand {
         }
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
+
+    /**
+     * Clears an internal cache used by .getPreactions().
+     * Only needed to be called after creating new PreactionConfigurations or deleting old ones. Should not need to be called
+     * when modifying properties in existing PreactionConfigurations.
+     */
+    public resetPreactions() {
+        debugLog(`TShellCommand ${this.id}: Resetting preactions.`);
+        delete this.cached_preactions;
+    }
+
+    private cached_preactions: Preaction[];
+    public getPreactions(): Preaction[] {
+        debugLog(`TShellCommand ${this.id}: Getting preactions.`);
+        if (!this.cached_preactions) {
+            this.cached_preactions = [];
+            this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
+                // Only create the preaction if it's enabled.
+                if (preaction_configuration.enabled) {
+                    // Yes, it's enabled.
+                    // Instantiate the Preaction.
+                    this.cached_preactions.push(createPreaction(this.plugin, preaction_configuration, this));
+                }
+            });
+        }
+        return this.cached_preactions;
+    }
+
+    /**
+     * Returns Variables that are not dependent on any Preaction.
+     * @private Can be made public if needed.
+     */
+    private getNonPreactionsDependentVariables(): VariableSet {
+        debugLog(`TShellCommand ${this.id}: Getting non preactions dependent variables.`);
+        const all_variables = this.plugin.getVariables();
+        return removeFromSet(all_variables, this.getPreactionsDependentVariables());
+    }
+
+    /**
+     * @private Can be made public if needed.
+     */
+    private getPreactionsDependentVariables(): VariableSet {
+        debugLog(`TShellCommand ${this.id}: Getting preactions dependent variables.`);
+        let dependent_variables = new VariableSet();
+        for (const preaction of this.getPreactions()) {
+            dependent_variables = mergeSets(dependent_variables, preaction.getDependentVariables());
+        }
+        return dependent_variables;
+    }
+
+    /**
+     * @return Returns undefined, if no configuration is defined for this variable.
+     */
+    public getDefaultValueConfigurationForVariable(variable: Variable): VariableDefaultValueConfiguration | undefined {
+        return this.configuration.variable_default_values[variable.getIdentifier()];
+    }
 }
 
-export interface ParsingResult {
-    shell_command: string;
-    alias: string;
+export interface ShellCommandParsingResult {
+    shell_command: string,
+    alias: string,
     succeeded: boolean;
     error_messages: string[];
 }
+
+export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
+
+type shell_command_parsing_map = {
+    "shell_command": string,
+    "alias": string,
+};

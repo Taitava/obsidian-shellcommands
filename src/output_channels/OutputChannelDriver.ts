@@ -1,9 +1,28 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
 import {debugLog} from "../Debug";
-import {ParsingResult, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 
 export abstract class OutputChannelDriver {
     /**
@@ -14,9 +33,15 @@ export abstract class OutputChannelDriver {
 
     protected plugin: SC_Plugin;
     protected app: App;
-    protected shell_command_parsing_result: ParsingResult;
+    protected shell_command_parsing_result: ShellCommandParsingResult;
     protected t_shell_command: TShellCommand;
     protected accepts_empty_output = false;
+
+    /**
+     * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
+     * excluded from OutputModal.
+     */
+    public hotkey_letter: string = undefined;
 
     /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
@@ -26,7 +51,7 @@ export abstract class OutputChannelDriver {
         return this.title;
     }
 
-    public initialize(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ParsingResult) {
+    public initialize(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
         this.plugin = plugin;
         this.app = plugin.app;
         this.t_shell_command = t_shell_command;

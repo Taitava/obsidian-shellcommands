@@ -1,11 +1,31 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {EventVariable} from "./EventVariable";
 import {getFileYAMLValue} from "../VariableHelpers";
 import {IParameters} from "../Variable";
+import {TFile} from "obsidian";
 
 export class Variable_EventYAMLValue extends EventVariable {
-    public static variable_name = "event_yaml_value";
-    public static help_text = "Reads a single value from the selected file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
+    public variable_name = "event_yaml_value";
+    public help_text = "Reads a single value from the selected file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
 
     protected static readonly parameters: IParameters = {
         property_name: {
@@ -18,17 +38,17 @@ export class Variable_EventYAMLValue extends EventVariable {
         property_name: string;
     }
 
-    protected static supported_sc_events = [
+    protected supported_sc_events = [
         SC_Event_FileMenu,
     ];
 
-    protected generateValue(): string | null {
-        if (!this.checkSC_EventSupport()) {
+    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const file = (this.sc_event as SC_Event_FileMenu).getFile();
-        const result = getFileYAMLValue(this.app, file, this.arguments.property_name);
+        const file = sc_event.getFile();
+        const result = this.getFileYAMLValue(file);
         if (Array.isArray(result)) {
             // The result contains error message(s).
             this.newErrorMessages(result as string[]);
@@ -37,5 +57,27 @@ export class Variable_EventYAMLValue extends EventVariable {
             // The result is ok, it's a string.
             return result as string;
         }
+    }
+
+    private yaml_value_cache: string[] | string;
+    private getFileYAMLValue(active_file: TFile): string[] | string {
+        if (!this.yaml_value_cache) {
+            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+        }
+        return this.yaml_value_cache;
+    }
+
+    public reset(): void {
+        super.reset();
+        this.yaml_value_cache = undefined;
+    }
+
+    public isAvailable(sc_event: SC_Event_FileMenu | null): boolean {
+        if (!super.isAvailable(sc_event)) {
+            return false;
+        }
+
+        const active_file = sc_event.getFile();
+        return typeof this.getFileYAMLValue(active_file) === "string";
     }
 }

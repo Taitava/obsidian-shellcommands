@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {
     App,
     Editor,
@@ -91,6 +110,28 @@ export function cloneObject(object: Object) {
  */
 export function combineObjects(...objects: Object[]) {
     return Object.assign({}, ...objects);
+}
+
+export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<SetType> {
+    return new Set<SetType>([...set1, ...set2]);
+}
+
+/**
+ * Returns a new Set cloned from 'from_set', with all items presented in 'remove' removed from it.
+ *
+ * @param from_set
+ * @param remove Can be either a Set of removable items, or a single item.
+ */
+export function removeFromSet<SetType>(from_set: Set<SetType>, remove: Set<SetType> | SetType): Set<SetType> {
+    const reduced_set = new Set(from_set);
+    if (remove instanceof Set) {
+        for (const removable of remove) {
+            reduced_set.delete(removable);
+        }
+    } else {
+        reduced_set.delete(remove);
+    }
+    return reduced_set;
 }
 
 /**
@@ -218,4 +259,34 @@ export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, 
 export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: boolean): string | null {
     const selected_text = textarea_element.value.substring(textarea_element.selectionStart, textarea_element.selectionEnd);
     return "" === selected_text && return_null_if_empty ? null : selected_text;
+}
+
+/**
+ * Creates an HTMLElement (with freely decidable tag) and adds the given content into it as normal text. No HTML formatting
+ * is supported, i.e. possible HTML special characters are shown as-is. Newline characters are converted to <br> elements.
+ *
+ * @param tag
+ * @param content
+ * @param parent_element
+ */
+export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, content: string, parent_element: HTMLElement) {
+    const content_element = parent_element.createEl(tag);
+
+    // Insert content line-by-line
+    const content_lines = content.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
+    content_lines.forEach((content_line: string, content_line_index: number) => {
+        // Insert the line.
+        content_element.insertAdjacentText("beforeend", content_line);
+
+        // Insert a linebreak <br> if needed.
+        if (content_line_index < content_lines.length - 1) {
+            content_element.insertAdjacentHTML("beforeend", "<br>");
+        }
+    });
+    return content_element;
+}
+
+export function randomInteger(min: number, max: number) {
+    const range = max - min + 1;
+    return min + Math.floor(Math.random() * range);
 }

@@ -1,9 +1,30 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import SC_Plugin from "../../main";
 import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
-import {parseShellCommandVariables} from "../../variables/parseShellCommandVariables";
+import {parseVariables} from "../../variables/parseVariables";
 import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
+import {SC_Event} from "../../events/SC_Event";
+import {TShellCommand} from "../../TShellCommand";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -11,6 +32,7 @@ export function CreateShellCommandFieldCore(
     setting_name: string,
     shell_command: string,
     shell: string,
+    t_shell_command: TShellCommand,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
     shell_command_placeholder: string = "Enter your command"
@@ -20,7 +42,7 @@ export function CreateShellCommandFieldCore(
 
     function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell));
+        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -43,7 +65,7 @@ export function CreateShellCommandFieldCore(
         ,
         preview_setting:
             new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command, shell))
+                .setDesc(getShellCommandPreview(plugin,shell_command, shell, t_shell_command, null /* No event is available during preview. */))
                 .setClass("SC-preview-setting")
         ,
     };
@@ -52,7 +74,7 @@ export function CreateShellCommandFieldCore(
     if (show_autocomplete_menu) {
         // @ts-ignore
         const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
-        createAutocomplete(input_element, getVariableAutocompleteItems(), on_change);
+        createAutocomplete(plugin, input_element, on_change);
     }
 
     return setting_group;
@@ -62,15 +84,24 @@ export function CreateShellCommandFieldCore(
  *
  * @param plugin
  * @param shell_command
+ * @param shell
+ * @param t_shell_command
+ * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string) {
-    const parsed_shell_command = parseShellCommandVariables(plugin, shell_command, shell);
-    if (Array.isArray(parsed_shell_command)) {
+export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null) {
+    const parsing_result = parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
+    if (!parsing_result.succeeded) {
         // Variable parsing failed.
-        // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-        return parsed_shell_command[0];
+        if (parsing_result.error_messages.length > 0) {
+            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
+            return parsing_result.error_messages[0];
+        } else {
+            // If there are no error messages, then errors are silently ignored by user's variable configuration.
+            // The preview can then show the original, unparsed shell command.
+            return shell_command;
+        }
     }
     // Variable parsing succeeded
-    return parsed_shell_command;
+    return parsing_result.parsed_content;
 }

@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {getVaultAbsolutePath, normalizePath2, uniqueArray} from "../Common";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
 
@@ -9,7 +28,7 @@ import {App, getAllTags, TFile, TFolder} from "obsidian";
  * @param mode
  */
 export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "relative") {
-    switch (mode.toLowerCase()) {
+    switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
             return normalizePath2(getVaultAbsolutePath(app) + "/" + folder.path);
         case "relative":
@@ -32,7 +51,7 @@ export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "rel
  * @param mode
  */
 export function getFilePath(app: App, file: TFile, mode: "absolute" | "relative") {
-    switch (mode.toLowerCase()) {
+    switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
             return normalizePath2(getVaultAbsolutePath(app) + "/" + file.path);
         case "relative":
@@ -86,7 +105,7 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
     // Validate all property names along the path
     property_parts.forEach((property_name: string) => {
         if (0 === property_name.length) {
-            error_messages.push("YAML property '" + this.arguments.property_name + "' has an empty property name. Remove possible double dots or a preceding/trailing dot.");
+            error_messages.push("YAML property '" + property_path + "' has an empty property name. Remove possible double dots or a preceding/trailing dot.");
         }
     });
     if (error_messages.length > 0) {

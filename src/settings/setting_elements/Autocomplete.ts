@@ -1,18 +1,39 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import autocomplete from "autocompleter";
 import {parseYaml} from "obsidian";
+import SC_Plugin from "../../main";
+import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 /**
  *
+ * @param plugin Used for getting a list of Variable autocomplete items.
  * @param input_element
- * @param autocomplete_items
  * @param call_on_completion A function that will be called when a user has selected a suggestion and performed the autocomplete action. onChange event will not be called, because it would trigger opening the autocomplete menu again, so that's why a separate callback is used.
  */
-export function createAutocomplete(input_element: HTMLInputElement, autocomplete_items: IAutocompleteItem[], call_on_completion: (field_value: string) => void) {
-    autocomplete_items = merge_and_sort_autocomplete_items(autocomplete_items, CustomAutocompleteItems);
+export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement, call_on_completion: (field_value: string) => void) {
 
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
+            const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems);
             const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
@@ -84,8 +105,10 @@ export function createAutocomplete(input_element: HTMLInputElement, autocomplete
         render: (item) => {
             const div_element = document.createElement("div");
             div_element.createSpan({text: item.value, attr: {class: "SC-autocomplete-value"}});
-            div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
-            div_element.createSpan({attr: {class: "SC-autocomplete-help-text"}}).insertAdjacentHTML("beforeend", item.help_text);
+            if (item.help_text) {
+                div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
+                div_element.createSpan({attr: {class: "SC-autocomplete-help-text"}}).insertAdjacentHTML("beforeend", item.help_text);
+            }
             return div_element;
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
@@ -164,6 +187,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
 
     // Iterate autocomplete item groups
     const group_names = Object.getOwnPropertyNames(yaml);
+    const error_messages: string[] = [];
     group_names.forEach((group_name: string) => {
         const group_items = yaml[group_name];
         const group_item_values = Object.getOwnPropertyNames(group_items);
@@ -172,7 +196,8 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
         group_item_values.forEach((autocomplete_item_value: string) => {
             const autocomplete_item_label = group_items[autocomplete_item_value];
             if (typeof autocomplete_item_label !== "string") {
-                return "Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + typeof autocomplete_item_label;
+                error_messages.push("Autocomplete item '" + autocomplete_item_value + "' has an incorrect help text type: " + autocomplete_item_label + " is a " + typeof autocomplete_item_label + ", but it should be a string.");
+                return;
             }
 
             // Determine a correct type for the item
@@ -201,6 +226,10 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
             }
         });
     });
+    if (error_messages.length > 0) {
+        // Something failed
+        return error_messages.join("; ");
+    }
 
     // All ok
     return true;

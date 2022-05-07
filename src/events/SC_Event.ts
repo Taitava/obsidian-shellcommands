@@ -1,12 +1,36 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import SC_Plugin from "../main";
 import {App, EventRef} from "obsidian";
-import {ParsingResult, TShellCommand} from "../TShellCommand";
+import {
+    ShellCommandParsingProcess,
+    TShellCommand,
+} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
-import {getVariables} from "../variables/VariableLists";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 import {DocumentationEventsFolderLink} from "../Documentation";
+import {
+    ShellCommandExecutor
+} from "../imports";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -93,23 +117,13 @@ export abstract class SC_Event {
 
     /**
      * Executes a shell command.
+     * @param t_shell_command
+     * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
-    protected trigger(t_shell_command: TShellCommand, parsing_result: ParsingResult | undefined = undefined) {
-        // Check if variables are not yet parsed. (They might be parsed already by SC_MenuEvent).
-        if (undefined === parsing_result) {
-            // No preparsed shell command exists, so parse now.
-            parsing_result = t_shell_command.parseVariables(this);
-
-            // Check the parsing result.
-            if (!parsing_result.succeeded) {
-                // Errors occurred when parsing variables.
-                this.plugin.newErrors(parsing_result.error_messages);
-                return;
-            }
-        }
-
+    protected trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
         // Execute the shell command.
-        this.plugin.confirmAndExecuteShellCommand(t_shell_command, parsing_result);
+        const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
+        executor.doPreactionsAndExecuteShellCommand(parsing_process);
     }
 
     public static getCode() {
@@ -120,25 +134,22 @@ export abstract class SC_Event {
         return this.event_title;
     }
 
-    /**
-     * @param shell Needed just for being able to instantiate variables.
-     */
-    public getSummaryOfEventVariables(shell: string): string {
+    public getSummaryOfEventVariables(): string {
         const variable_names: string[] = [];
-        this.getEventVariables(shell).forEach((variable: Variable) => {
-            variable_names.push("{{" + variable.getVariableName() + "}}");
+        this.getEventVariables().forEach((variable: Variable) => {
+            variable_names.push("{{" + variable.variable_name + "}}");
         });
         return variable_names.join(", ");
     }
 
-    private getEventVariables(shell: string) {
+    private getEventVariables() {
         const event_variables: EventVariable[] = [];
-        getVariables(this.plugin, shell).forEach((variable: Variable) => {
+        this.plugin.getVariables().forEach((variable: Variable) => {
             // Check if the variable is an EventVariable
             if (variable instanceof EventVariable) {
                 // Yes it is.
                 // Check if the variable supports this particular event.
-                if (variable.static().supportsSC_Event(this.getClass())) {
+                if (variable.supportsSC_Event(this.getClass())) {
                     // Yes it supports.
                     event_variables.push(variable);
                 }

@@ -1,4 +1,23 @@
 /*
+'Shell commands' plugin for Obsidian.
+Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, version 3 of the License.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+*/
+
+/*
  * COMMON
  */
 
@@ -21,6 +40,43 @@
 .SC-wrappable {
     white-space: normal;
 }
+
+.SC-small-font {
+    font-size: 80%;
+}
+
+/*
+ * SETTING GROUPS
+ * Related setting fields combined together.
+ */
+
+div.SC-setting-group div.setting-item:not(div.setting-item-heading+div.setting-item) {
+    /* Remove top border from all settings in the group, except settings that come AFTER a heading setting, as it looks
+     * good when there is a border line below a heading setting.
+     */
+    border-top: none;
+}
+
+div.SC-setting-group div.setting-item {
+    padding: 5px; /* Shrink the padding. */
+}
+
+div.SC-setting-group div.setting-item div.setting-item-info,
+div.SC-setting-group div.setting-item div.setting-item-control {
+    width: 50%; /* Make sure description does not take over 50% of the space. */
+}
+
+div.SC-setting-group div.setting-item input[type=text],
+div.SC-setting-group div.setting-item textarea,
+div.SC-setting-group div.setting-item select {
+    width: 100%; /* Enlarge fields. */
+    max-width: 100%; /* Remove a maximum width limitation, at least <select> elements had one. */
+}
+
+div.SC-setting-group div.setting-item textarea {
+    resize: both; /* Allow resizing multiline text fields freely. */
+}
+
 
 /*
  * SHELL COMMAND SETTING CONTAINERS
@@ -76,6 +132,29 @@ span.SC-main-icon-container {
 
 
 /*
+ * CUSTOM VARIABLE SETTINGS
+ */
+
+div.setting-item.SC-custom-variable-name-setting div.setting-item-control::before {
+    content: "{{_"; /* Wrap custom variable name field in {{_ }} */
+}
+
+div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after {
+    content: "}}"; /* Wrap custom variable name field in {{_ }} */
+}
+
+
+/*
+ * PROMPT MODALS
+ */
+
+p.SC-prompt-dry-run-notice {
+    font-style: italic;
+    font-weight: bold;
+}
+
+
+/*
  * Tab elements
  * This CSS is copied 2021-10-21 from https://www.w3schools.com/howto/howto_js_tabs.asp
  * Modifications:
@@ -85,6 +164,7 @@ span.SC-main-icon-container {
  *  - Changed/removed borders.
  *  - Removed button transition.
  *  - Changed button border-radiuses
+ *  - Added margin-right rule to .SC-tab-header-button .
  */
 
 /* Style the tab */
@@ -100,6 +180,7 @@ span.SC-main-icon-container {
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
+    margin-right: 6px; /* Reduced margin. Obsidian's default margin-right for button is 12px (0 for other margins). */
     border-radius: 10px 10px 0 0; /* 0 0 = No border-radius at bottom */
 }
 

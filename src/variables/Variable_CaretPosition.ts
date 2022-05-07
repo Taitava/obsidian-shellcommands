@@ -1,10 +1,35 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022:
+ *  - Vinay Rajur (created most of the content of the Variable_CaretPosition class)
+ *  - Jarkko Linnanvirta (some minor/structural changes)
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact:
+ *  - Vinay Rajur: https://github.com/vrajur
+ *  - Jarkko Linnanvirta: https://github.com/Taitava/
+ */
+
 import {getEditor} from "../Common";
 import {IParameters, Variable} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 
 export class Variable_CaretPosition extends Variable {
-    public static variable_name = "caret_position";
-    public static help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
+    public variable_name = "caret_position";
+    public help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
+
+    protected always_available = false;
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -46,7 +71,7 @@ export class Variable_CaretPosition extends Variable {
         }
     }
 
-    public static getAutocompleteItems() {
+    public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{
@@ -94,7 +119,11 @@ export class Variable_CaretPosition extends Variable {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
     }
 
-    public static getAvailabilityText(): string {
+    public isAvailable(): boolean {
+        return !!getEditor(this.app);
+    }
+
+    public getAvailabilityText(): string {
         return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
     }
 }

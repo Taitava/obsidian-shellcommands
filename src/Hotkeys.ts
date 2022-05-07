@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {Hotkey, Modifier, Platform} from "obsidian";
 import SC_Plugin from "./main";
 import {debugLog} from "./Debug";
@@ -32,10 +51,14 @@ export function HotkeyToString(hotkey: Hotkey) {
         let modifier_key = modifier.toString(); // This is one of 'Mod' | 'Ctrl' | 'Meta' | 'Shift' | 'Alt'
         if ("Mod" === modifier_key) {
             // Change "Mod" to something more meaningful.
-            modifier_key = Platform.isMacOS ? "Cmd" : "Ctrl"; // isMacOS should also be true if the device is iPhone/iPad. Can be handy if this plugin gets mobile support some day.
+            modifier_key = CmdOrCtrl(); // isMacOS should also be true if the device is iPhone/iPad. Can be handy if this plugin gets mobile support some day.
         }
         keys.push(modifier_key);
     });
     keys.push(hotkey.key); // This is something like a letter ('A', 'B' etc) or space/enter/whatever.
     return keys.join(" + ");
+}
+
+export function CmdOrCtrl(): "Cmd" | "Ctrl" {
+    return Platform.isMacOS ? "Cmd" : "Ctrl"
 }

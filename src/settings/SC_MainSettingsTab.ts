@@ -1,3 +1,22 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {App, PluginSettingTab, Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
@@ -8,15 +27,25 @@ import {debugLog} from "../Debug";
 import {
     DocumentationAutocompleteLink,
     DocumentationMainLink,
-    DocumentationVariablesLink,
+    DocumentationBuiltInVariablesLink,
     GitHubLink,
     ChangelogLink,
+    DocumentationCustomVariablesLink,
+    LicenseLink,
 } from "../Documentation";
-import {getVariables} from "../variables/VariableLists";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
+import {
+    CustomVariable,
+    CustomVariableInstance,
+    CustomVariableModel,
+    getModel,
+    Prompt,
+    PromptModel
+} from "../imports";
+import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -41,11 +70,18 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     this.tabShellCommands(container_element);
                 },
             },
-            "main-operating-systems-and-shells": {
-                title: "Operating systems & shells",
+            "main-environments": {
+                title: "Environments",
                 icon: "stacked-levels",
                 content_generator: (container_element: HTMLElement) => {
-                    this.tabOperatingSystemsAndShells(container_element);
+                    this.tabEnvironments(container_element);
+                },
+            },
+            "main-preactions": {
+                title: "Preactions",
+                icon: "note-glyph",
+                content_generator: (container_element: HTMLElement) => {
+                    this.tabPreactions(container_element);
                 },
             },
             "main-output": {
@@ -77,6 +113,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
             "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
+
+        // Copyright notice
+        const copyright_paragraph = containerEl.createEl("p");
+        copyright_paragraph.addClass("SC-small-font");
+        copyright_paragraph.insertAdjacentHTML("beforeend", `
+            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2022 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
+        `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
         this.rememberLastPosition(containerEl);
@@ -189,31 +232,61 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        // Variable instructions
-
+        // Custom variables
         new Setting(container_element)
-            .setName("Variables")
+            .setName("Custom variables")
             .setHeading() // Make the "Variables" text bold.
             .addExtraButton(extra_button => extra_button
-                .setIcon("help")
-                .setTooltip("Documentation: Variables")
+                .setIcon("pane-layout")
+                .setTooltip("Open a pane that displays all custom variables and their values.")
                 .onClick(() => {
-                    gotoURL(DocumentationVariablesLink)
+                    this.plugin.createCustomVariableView();
+                }),
+            )
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Custom variables")
+                .onClick(() => {
+                    gotoURL(DocumentationCustomVariablesLink);
                 }),
             )
         ;
 
-        const variables = getVariables(this.plugin, this.plugin.getDefaultShell());
+        // Settings for each CustomVariable
+        const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
+        const custom_variable_container = container_element.createDiv();
+        this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
+            custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
+        });
+        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings).then();
+
+
+        // Built-in variable instructions
+        new Setting(container_element)
+            .setName("Built-in variables")
+            .setHeading() // Make the "Variables" text bold.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Built-in variables")
+                .onClick(() => {
+                    gotoURL(DocumentationBuiltInVariablesLink)
+                }),
+            )
+        ;
+
+        const variables = this.plugin.getVariables();
         variables.forEach((variable: Variable) => {
-            const paragraph = container_element.createEl("p");
-            paragraph.insertAdjacentHTML("afterbegin",
-                variable.getHelpName() +
-                "<br>" +
-                variable.getHelpText()
-            );
-            const availability_text: string = variable.static().getAvailabilityText();
-            if (availability_text) {
-                paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+            if (!(variable instanceof CustomVariable)) {
+                const paragraph = container_element.createEl("p");
+                paragraph.insertAdjacentHTML("afterbegin",
+                    variable.getHelpName() +
+                    "<br>" +
+                    variable.help_text
+                );
+                const availability_text: string = variable.getAvailabilityText();
+                if (availability_text) {
+                    paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+                }
             }
         });
 
@@ -223,7 +296,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."});
     }
 
-    private tabOperatingSystemsAndShells(container_element: HTMLElement) {
+    private tabEnvironments(container_element: HTMLElement) {
         // "Working directory" field
         new Setting(container_element)
             .setName("Working directory")
@@ -241,6 +314,26 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Platforms' default shells
         createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+    }
+
+    private tabPreactions(container_element: HTMLElement) {
+
+        // Prompts
+        const prompt_model = getModel<PromptModel>(PromptModel.name);
+        new Setting(container_element)
+            .setName("Prompts")
+            .setHeading() // Make the "Prompts" text to appear as a heading.
+        ;
+        const prompts_container_element = container_element.createDiv();
+        this.plugin.getPrompts().forEach((prompt: Prompt) => {
+            prompt_model.createSettingFields(prompt, prompts_container_element);
+        });
+
+        // 'New prompt' button
+        const new_prompt_button_promise = createNewModelInstanceButton<PromptModel, Prompt>(this.plugin, PromptModel.name, container_element, prompts_container_element, this.plugin.settings);
+        new_prompt_button_promise.then((result: {instance: Prompt, main_setting: Setting}) => {
+            prompt_model.openSettingsModal(result.instance, result.main_setting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
+        });
     }
 
     private tabOutput(container_element: HTMLElement) {
