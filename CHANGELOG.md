@@ -21,20 +21,20 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed:
  - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
 
-## [Unreleased] (for 0.12.0)
+## [0.12.0] - 2022-05-07
 
-### To be Added
+### Added
  - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
  - [Custom variables, part 1 (#159)](https://github.com/Taitava/obsidian-shellcommands/issues/159): Used to store inputted values from prompts.
  - [Default values for variables (#190)](https://github.com/Taitava/obsidian-shellcommands/issues/190): If a variable cannot be accessed at a given moment, another value can be used instead.
  - [Hotkeys for output channel: Ask after execution (#145)](https://github.com/Taitava/obsidian-shellcommands/issues/145).
  - [Add autocomplete menu to Alias field (#182)](https://github.com/Taitava/obsidian-shellcommands/issues/182).
 
-### To be Changed
+### Changed
  - Settings: _Operating systems & shells_ tab names are shortened to _Environments_ ([#37](https://github.com/Taitava/obsidian-shellcommands/issues/37) / [commit 55e5de2b](https://github.com/Taitava/obsidian-shellcommands/commit/55e5de2b6774645883e8dd0cfa759f8e1c70f813)).
  - [Internal: Variable refactorings (#178)](https://github.com/Taitava/obsidian-shellcommands/issues/178).
 
-### To be Fixed
+### Fixed
  - [Bug: Output channel 'Open a file' causes an error in the console log if the file cannot be opened (#176)](https://github.com/Taitava/obsidian-shellcommands/issues/176).
    - This same issue also fixes autocomplete to be able to display an error message if a custom help text cannot be read at startup due to incorrect datatype in `autocomplete.yaml`.
  - [Bug: An empty argument in {{yaml_value}}/{{event_yaml_value}} causes a crash (#181)](https://github.com/Taitava/obsidian-shellcommands/issues/181).
@@ -238,7 +238,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...0.10.0
