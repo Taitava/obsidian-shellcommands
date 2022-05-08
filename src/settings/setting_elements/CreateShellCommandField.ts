@@ -23,7 +23,7 @@ import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
 import {ExtraOptionsModal} from "../ExtraOptionsModal";
 import {DeleteModal} from "../DeleteModal";
-import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
+import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
@@ -199,11 +199,11 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
     // Secondary icon buttons
     setting_group.preview_setting.addExtraButton(button => button
         .setIcon("link")
-        .setTooltip("Copy this shell command's Obsidian URI to the clipboard. Visiting the URI executes the shell command.")
-        .onClick(() => {
-            const ctrl_clicked = false; // TODO: Implement Ctrl/Cmd + clicking! Add to the end of the tooltip text: CmdOrCtrl() + " + click to include the alias text, too."
-            // TODO: Implement also Ctrl/Cmd + Shift + clicking to copy the link in HTML format: <a href=""></a>
-            // I asked about the Ctrl+click support here: https://discord.com/channels/686053708261228577/840286264964022302/968834348637888562
+        .setTooltip("Copy this shell command's Obsidian URI to the clipboard. Visiting the URI executes the shell command. " + CmdOrCtrl() + " + click: Copy a markdown link.")
+
+        // onClick() handler - use a custom one instead of ExtraButtonComponent.onClick(), because Obsidian API (at least v. 0.14.8) does not support detecting CTRL press. https://forum.obsidian.md/t/fr-settings-pass-mouseevent-to-extrabuttoncomponent-onclick/37177
+        .extraSettingsEl.addEventListener("click", (event: MouseEvent) => {
+            const ctrl_clicked = event.ctrlKey;
             const execution_uri = t_shell_command.getExecutionURI();
             let result: string;
             if (ctrl_clicked) {
