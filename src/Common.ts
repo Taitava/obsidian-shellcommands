@@ -32,6 +32,8 @@ import {debugLog} from "./Debug";
 import SC_Plugin from "./main";
 // @ts-ignore
 import {shell} from "electron";
+// @ts-ignore Electron is installed.
+import {clipboard} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -303,4 +305,8 @@ export function randomInteger(min: number, max: number) {
  */
 export function escapeMarkdownLinkCharacters(content: string) {
     return content.replace(/[\\()\[\]]/gu, "\\$&");
+}
+
+export function copyToClipboard(text: string) {
+    clipboard.writeText(text);
 }

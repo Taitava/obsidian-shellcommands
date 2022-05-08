@@ -17,8 +17,6 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-// @ts-ignore
-import {clipboard} from "electron";
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
 import {ExtraOptionsModal} from "../ExtraOptionsModal";
@@ -28,7 +26,10 @@ import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
 import {EOL} from "os";
-import {escapeMarkdownLinkCharacters} from "../../Common";
+import {
+    escapeMarkdownLinkCharacters,
+    copyToClipboard,
+} from "../../Common";
 import {
     ShellCommandExecutor
 } from "../../imports";
@@ -214,7 +215,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
                 result = execution_uri;
             }
 
-            clipboard.writeText(result);
+            copyToClipboard(result);
             plugin.newNotification("Copied to clipboard: " + EOL + result);
         }),
     );
