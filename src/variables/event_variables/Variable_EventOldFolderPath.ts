@@ -18,20 +18,19 @@
  */
 
 import {EventVariable} from "./EventVariable";
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
-import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
-import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
-import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
-import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
-import {getFilePath} from "../VariableHelpers";
-import {TFile} from "obsidian";
+import {
+    getVaultAbsolutePath,
+    normalizePath2,
+} from "../../Common";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
+import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
+import {SC_Event_FolderMoved} from "../../events/SC_Event_FolderMoved";
 
-export class Variable_EventFilePath extends EventVariable {
-    public variable_name = "event_file_path";
-    public help_text = "Gives path to the event related file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+export class Variable_EventOldFolderPath extends EventVariable {
+    public variable_name = "event_old_folder_path";
+    public help_text = "File events: Gives the moved file's parent folder's old path. Folder events: Gives the renamed/moved folder's old path. The path is either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -45,21 +44,26 @@ export class Variable_EventFilePath extends EventVariable {
     }
 
     protected supported_sc_events = [
-        SC_Event_FileMenu,
-        SC_Event_FileCreated,
-        SC_Event_FileModified,
-        SC_Event_FileDeleted,
         SC_Event_FileMoved,
-        SC_Event_FileRenamed,
+        SC_Event_FolderMoved,
+        SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        const file: TFile = sc_event.getFile();
-        return getFilePath(this.app, file, this.arguments.mode);
+        const folder_old_relative_path = sc_event.getFolderOldRelativePath();
+        switch (this.arguments.mode.toLowerCase()) {
+            case "relative":
+                return normalizePath2(folder_old_relative_path);
+            case "absolute":
+                return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path);
+        }
+
+        this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);
+        return null;
     }
 
     public getAutocompleteItems() {
@@ -67,13 +71,13 @@ export class Variable_EventFilePath extends EventVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the event related file, absolute from the root of the file system. " + this.getAvailabilityText(),
+                help_text: "File events: Gives the moved file's parent folder's old path. Folder events: Gives the renamed/moved folder's old path. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the event related file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                help_text: "File events: Gives the moved file's parent folder's old path. Folder events: Gives the renamed/moved folder's old path. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -81,13 +85,13 @@ export class Variable_EventFilePath extends EventVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the event related file, absolute from the root of the file system. " + this.getAvailabilityText(),
+                help_text: "File events: Gives the moved file's parent folder's old path. Folder events: Gives the renamed/moved folder's old path. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the event related file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                help_text: "File events: Gives the moved file's parent folder's old path. Folder events: Gives the renamed/moved folder's old path. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

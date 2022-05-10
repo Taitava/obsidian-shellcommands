@@ -18,16 +18,26 @@
  */
 
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
+import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
+import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
+import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
+import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
+import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
 import {IParameters} from "../Variable";
 import {getFileTags} from "../VariableHelpers";
 
 export class Variable_EventTags extends EventVariable {
     public variable_name = "event_tags";
-    public help_text = "Gives all tags defined in the selected note. Replace the \"separator\" part with a comma, space or whatever characters you want to use as a separator between tags. A separator is always needed to be defined.";
+    public help_text = "Gives all tags defined in the event related note. Replace the \"separator\" part with a comma, space or whatever characters you want to use as a separator between tags. A separator is always needed to be defined.";
 
     protected supported_sc_events = [
         SC_Event_FileMenu,
+        SC_Event_FileCreated,
+        SC_Event_FileModified,
+        SC_Event_FileDeleted,
+        SC_Event_FileMoved,
+        SC_Event_FileRenamed,
     ];
 
     protected static readonly parameters: IParameters = {
@@ -41,7 +51,7 @@ export class Variable_EventTags extends EventVariable {
         separator: string,
     };
 
-    protected generateValue(sc_event: SC_Event_FileMenu): string {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }

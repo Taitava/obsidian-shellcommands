@@ -19,13 +19,18 @@
 
 import {EventVariable} from "./EventVariable";
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
+import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
+import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
+import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
+import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
+import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {getFileExtension} from "../VariableHelpers";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
 export class Variable_EventFileExtension extends EventVariable {
     public variable_name = "event_file_extension";
-    public help_text = "Gives the selected file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
+    public help_text = "Gives the event related file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
 
     protected static parameters: IParameters = {
         "dot": {
@@ -40,9 +45,14 @@ export class Variable_EventFileExtension extends EventVariable {
 
     protected supported_sc_events = [
         SC_Event_FileMenu,
+        SC_Event_FileCreated,
+        SC_Event_FileModified,
+        SC_Event_FileDeleted,
+        SC_Event_FileMoved,
+        SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
@@ -56,13 +66,13 @@ export class Variable_EventFileExtension extends EventVariable {
             // Normal variables
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the selected file name's ending without a preceding dot. " + this.getAvailabilityText(),
+                help_text: "Gives the event related file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
+                help_text: "Gives the event related file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
             },
@@ -70,13 +80,13 @@ export class Variable_EventFileExtension extends EventVariable {
             // Unescaped variables
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the selected file name's ending without a preceding dot. " + this.getAvailabilityText(),
+                help_text: "Gives the event related file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the selected file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
+                help_text: "Gives the event related file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
             },

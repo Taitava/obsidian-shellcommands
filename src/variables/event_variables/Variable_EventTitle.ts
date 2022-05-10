@@ -18,17 +18,27 @@
  */
 
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
+import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
+import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
+import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
+import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
+import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
 
 export class Variable_EventTitle extends EventVariable {
     public variable_name = "event_title";
-    public help_text = "Gives the current file name without a file extension. If you need it with the extension, use {{event_file_name}} instead.";
+    public help_text = "Gives the event related file name without a file extension. If you need it with the extension, use {{event_file_name}} instead.";
 
     protected supported_sc_events = [
         SC_Event_FileMenu,
+        SC_Event_FileCreated,
+        SC_Event_FileModified,
+        SC_Event_FileDeleted,
+        SC_Event_FileMoved,
+        SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu): string | null {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }

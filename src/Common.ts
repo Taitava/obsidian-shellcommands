@@ -170,8 +170,16 @@ export function normalizePath2(path: string) {
     return path;
 }
 
-export function extractFileName(file_path: string) {
-    return path.parse(file_path).base;
+export function extractFileName(file_path: string, with_extension = true) {
+    if (with_extension) {
+        return path.parse(file_path).base;
+    } else {
+        return path.parse(file_path).name;
+    }
+}
+
+export function extractFileParentPath(file_path: string) {
+    return path.parse(file_path).dir;
 }
 
 export function joinObjectProperties(object: {}, glue: string) {

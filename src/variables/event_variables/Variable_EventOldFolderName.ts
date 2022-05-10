@@ -18,31 +18,26 @@
  */
 
 import {EventVariable} from "./EventVariable";
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
-import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
-import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
-import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
+import {extractFileName} from "../../Common";
+import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
+import {SC_Event_FolderMoved} from "../../events/SC_Event_FolderMoved";
 
-export class Variable_EventFileName extends EventVariable {
-    public variable_name = "event_file_name";
-    public help_text = "Gives the event related file name with a file extension. If you need it without the extension, use {{event_title}} instead.";
+export class Variable_EventOldFolderName extends EventVariable {
+    public variable_name = "event_old_folder_name";
+    public help_text = "File events: Gives the moved file's parent folder's old name. Folder events: Gives the renamed/moved folder's old name.";
 
     protected supported_sc_events = [
-        SC_Event_FileMenu,
-        SC_Event_FileCreated,
-        SC_Event_FileModified,
-        SC_Event_FileDeleted,
         SC_Event_FileMoved,
-        SC_Event_FileRenamed,
+        SC_Event_FolderMoved,
+        SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        return sc_event.getFile().name;
+        return extractFileName(sc_event.getFolderOldRelativePath());
     }
 }

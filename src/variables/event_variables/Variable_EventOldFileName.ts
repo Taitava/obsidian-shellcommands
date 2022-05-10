@@ -18,31 +18,24 @@
  */
 
 import {EventVariable} from "./EventVariable";
-import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
-import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
-import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
-import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
+import {extractFileName} from "../../Common";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 
-export class Variable_EventFileName extends EventVariable {
-    public variable_name = "event_file_name";
-    public help_text = "Gives the event related file name with a file extension. If you need it without the extension, use {{event_title}} instead.";
+export class Variable_EventOldFileName extends EventVariable {
+    public variable_name = "event_old_file_name";
+    public help_text = "Gives the renamed/moved file's old name with a file extension. If you need it without the extension, use {{event_old_title}} instead.";
 
     protected supported_sc_events = [
-        SC_Event_FileMenu,
-        SC_Event_FileCreated,
-        SC_Event_FileModified,
-        SC_Event_FileDeleted,
         SC_Event_FileMoved,
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
 
-        return sc_event.getFile().name;
+        return extractFileName(sc_event.getFileOldRelativePath(), true);
     }
 }
