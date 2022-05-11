@@ -21,19 +21,17 @@ import {EventVariable} from "./EventVariable";
 import {extractFileName} from "../../Common";
 import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
-import {SC_Event_FolderMoved} from "../../events/SC_Event_FolderMoved";
 
 export class Variable_EventOldFolderName extends EventVariable {
     public variable_name = "event_old_folder_name";
-    public help_text = "File events: Gives the moved file's parent folder's old name. Folder events: Gives the renamed/moved folder's old name.";
+    public help_text = "File events: Gives the moved file's old parent folder's name. Folder events: Gives the renamed folder's old name.";
 
     protected supported_sc_events = [
         SC_Event_FileMoved,
-        SC_Event_FolderMoved,
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): string | null {
+    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }

@@ -20,18 +20,16 @@
 import {EventVariable} from "./EventVariable";
 import {extractFileName} from "../../Common";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
-import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 
 export class Variable_EventOldTitle extends EventVariable {
     public variable_name = "event_old_title";
-    public help_text = "Gives the renamed/moved file's old name without a file extension. If you need it with the extension, use {{event_old_file_name}} instead.";
+    public help_text = "Gives the renamed file's old name without a file extension. If you need it with the extension, use {{event_old_file_name}} instead.";
 
     protected supported_sc_events = [
-        SC_Event_FileMoved,
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }
