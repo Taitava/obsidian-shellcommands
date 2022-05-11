@@ -12,6 +12,16 @@ Features that are in development, but are not released yet. Does not include stu
 
 ## [Unreleased] (for 0.13.0)
 ### To be Added:
+- [New events (#218)](https://github.com/Taitava/obsidian-shellcommands/issues/218):
+   - File content modified
+   - File created
+   - File deleted
+   - File moved
+   - File renamed
+   - Folder created
+   - Folder deleted
+   - Folder moved
+   - Folder renamed
 - [Execute shell commands via Obsidian URI (#202)](https://github.com/Taitava/obsidian-shellcommands/issues/202).
 - [Settings: Add directories to the `PATH` environment variable (#204)](https://github.com/Taitava/obsidian-shellcommands/issues/204).
 - [Settings: Add a shortcut icon for defining hotkeys (#210)](https://github.com/Taitava/obsidian-shellcommands/issues/210).
