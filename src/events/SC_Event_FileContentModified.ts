@@ -19,9 +19,9 @@
 
 import {SC_VaultEvent} from "./SC_VaultEvent";
 
-export class SC_Event_FileModified extends SC_VaultEvent {
+export class SC_Event_FileContentModified extends SC_VaultEvent {
     protected static readonly event_code = "file-modified";
-    protected static readonly event_title = "File modified";
+    protected static readonly event_title = "File content modified";
     protected readonly vault_event = "modify";
     protected file_or_folder: "file" = "file";
 }

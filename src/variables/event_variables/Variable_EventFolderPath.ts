@@ -21,7 +21,7 @@ import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {SC_Event_FolderMenu} from "../../events/SC_Event_FolderMenu";
 import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
 import {SC_Event_FolderCreated} from "../../events/SC_Event_FolderCreated";
-import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
+import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentModified";
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FolderDeleted} from "../../events/SC_Event_FolderDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
@@ -52,7 +52,7 @@ export class Variable_EventFolderPath extends EventVariable {
         SC_Event_FileMenu,
         SC_Event_FolderMenu,
         SC_Event_FileCreated,
-        SC_Event_FileModified,
+        SC_Event_FileContentModified,
         SC_Event_FileDeleted,
         SC_Event_FileMoved,
         SC_Event_FileRenamed,
@@ -62,7 +62,7 @@ export class Variable_EventFolderPath extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }

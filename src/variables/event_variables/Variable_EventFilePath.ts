@@ -20,7 +20,7 @@
 import {EventVariable} from "./EventVariable";
 import {SC_Event_FileMenu} from "../../events/SC_Event_FileMenu";
 import {SC_Event_FileCreated} from "../../events/SC_Event_FileCreated";
-import {SC_Event_FileModified} from "../../events/SC_Event_FileModified";
+import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentModified";
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
@@ -47,13 +47,13 @@ export class Variable_EventFilePath extends EventVariable {
     protected supported_sc_events = [
         SC_Event_FileMenu,
         SC_Event_FileCreated,
-        SC_Event_FileModified,
+        SC_Event_FileContentModified,
         SC_Event_FileDeleted,
         SC_Event_FileMoved,
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
         if (!this.checkSC_EventSupport(sc_event)) {
             return null;
         }

@@ -27,7 +27,7 @@ import {SC_Event_FolderMenu} from "./SC_Event_FolderMenu";
 import {SC_Event_EditorMenu} from "./SC_Event_EditorMenu";
 import {SC_Event_FileCreated} from "./SC_Event_FileCreated";
 import {SC_Event_FileDeleted} from "./SC_Event_FileDeleted";
-import {SC_Event_FileModified} from "./SC_Event_FileModified";
+import {SC_Event_FileContentModified} from "./SC_Event_FileContentModified";
 import {SC_Event_FileMoved} from "./SC_Event_FileMoved";
 import {SC_Event_FileRenamed} from "./SC_Event_FileRenamed";
 import {SC_Event_FolderCreated} from "./SC_Event_FolderCreated";
@@ -47,9 +47,9 @@ export function getSC_Events(plugin: SC_Plugin) {
             new SC_Event_FileMenu(plugin),
             new SC_Event_FolderMenu(plugin),
             new SC_Event_EditorMenu(plugin),
+            new SC_Event_FileContentModified(plugin),
             new SC_Event_FileCreated(plugin),
             new SC_Event_FileDeleted(plugin),
-            new SC_Event_FileModified(plugin),
             new SC_Event_FileMoved(plugin),
             new SC_Event_FileRenamed(plugin),
             new SC_Event_FolderCreated(plugin),
