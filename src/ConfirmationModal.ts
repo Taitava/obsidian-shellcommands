@@ -25,7 +25,7 @@ export class ConfirmationModal extends SC_Modal {
 
     public promise: Promise<boolean>;
     private resolve_promise: (value: (boolean | PromiseLike<boolean>)) => void;
-    private yes_button_was_clicked = false;
+    private approved = false;
 
     constructor(
         plugin: SC_Plugin,
@@ -50,21 +50,23 @@ export class ConfirmationModal extends SC_Modal {
         new Setting(this.modalEl)
             .addButton(button => button
                 .setButtonText(this.yes_button_text)
-                .onClick(() => {
-                    // Got a confirmation from a user
-                    this.resolve_promise(true);
-                    this.yes_button_was_clicked = true;
-                    this.close();
-                })
+                .onClick(() => this.approve())
             )
         ;
 
     }
 
+    protected approve(): void {
+        // Got a confirmation from a user
+        this.resolve_promise(true);
+        this.approved = true;
+        this.close();
+    }
+
     public onClose(): void {
         super.onClose();
 
-        if (!this.yes_button_was_clicked) { // TODO: Find out if there is a way to not use this kind of flag property. Can the status be checked from the promise itself?
+        if (!this.approved) { // TODO: Find out if there is a way to not use this kind of flag property. Can the status be checked from the promise itself?
             this.resolve_promise(false);
         }
     }

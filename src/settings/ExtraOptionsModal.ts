@@ -539,4 +539,9 @@ export class ExtraOptionsModal extends SC_Modal {
             )
         ;
     }
+
+    protected approve(): void {
+        // No need to perform any action, just close the modal.
+        this.close();
+    }
 }

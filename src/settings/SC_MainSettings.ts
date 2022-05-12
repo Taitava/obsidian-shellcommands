@@ -56,6 +56,9 @@ export interface SC_MainSettings {
     // Events:
     enable_events: boolean;
 
+    // Modals:
+    approve_modals_by_pressing_enter_key: boolean;
+
     // Shell commands:
     shell_commands: ShellCommandsConfiguration;
 
@@ -97,6 +100,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Events:
         enable_events: true,
+
+        // Modals:
+        approve_modals_by_pressing_enter_key: true,
 
         // Shell commands:
         shell_commands: {},

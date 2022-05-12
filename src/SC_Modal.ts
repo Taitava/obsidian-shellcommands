@@ -33,10 +33,28 @@ export abstract class SC_Modal extends Modal {
         // Make the modal scrollable if it has more content than what fits in the screen.
         this.modalEl.addClass("SC-scrollable");
 
+        // Approve the modal by pressing the enter key (if enabled).
+        if (this.plugin.settings.approve_modals_by_pressing_enter_key) {
+            this.scope.register([], "enter", () => {
+                // Check that no textarea is focused.
+                if (0 === document.querySelectorAll("textarea:focus").length) {
+                    // No textareas with focus were found.
+                    this.approve();
+                }
+            });
+        }
     }
 
     protected setTitle(title: string) {
         this.titleEl.innerText = title;
     }
+
+    /**
+     * Called after a user presses the enter key (if approving modals by enter key press is enabled in settings). The purpose
+     * of the method is to approve/perform the action the modal is asking/preparing. The method should then close the modal
+     * by calling this.close() .
+     * @protected
+     */
+    protected abstract approve(): void;
 
 }

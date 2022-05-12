@@ -48,13 +48,15 @@ export class CustomVariableSettingsModal extends SC_Modal {
         new Setting(this.modalEl)
             .addButton(button => button
                 .setButtonText("Create")
-                .onClick(() => {
-                    this.created = true;
-                    this.on_after_creation();
-                    this.close();
-                }),
+                .onClick(() => this.approve()),
             )
         ;
+    }
+
+    protected approve(): void {
+        this.created = true;
+        this.on_after_creation();
+        this.close();
     }
 
     public onClose(): void {
