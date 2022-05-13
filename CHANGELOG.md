@@ -33,6 +33,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed:
  - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
 
+### To be Fixed:
+ - [Bug: {{event_yaml_value}} gives wrong error message when the wanted property is not found (#220)](https://github.com/Taitava/obsidian-shellcommands/issues/220).
+
 ## [0.12.0] - 2022-05-07
 
 ### Added
