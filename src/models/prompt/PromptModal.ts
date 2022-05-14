@@ -236,23 +236,7 @@ export class PromptModal extends SC_Modal {
             .setDesc(tip)
             .addButton(button => button
                 .setButtonText(execute_button_text)
-                .onClick(() => {
-                    this.validator().then(() => {
-                        // The form fields are filled ok
-                        this.assignValuesToVariables();
-                        this.resolve_promise(true);
-                        this.user_confirmed_ok = true;
-                        this.close();
-                    }, (error_messages: string[] | any) => {
-                        if (Array.isArray(error_messages)) {
-                            // There were some problems with the fields.
-                            this.plugin.newErrors(error_messages);
-                        } else {
-                            // Some other runtime error has occurred.
-                            throw error_messages;
-                        }
-                    });
-                })
+                .onClick(() => this.approve())
             )
         ;
 
@@ -263,6 +247,24 @@ export class PromptModal extends SC_Modal {
 
         // Add CSS classes so that custom styling can be done on a per-prompt modal basis (or for all prompt modals via a common class).
         this.modalEl.addClasses(this.prompt.getCSSClasses());
+    }
+
+    protected approve(): void {
+        this.validator().then(() => {
+            // The form fields are filled ok
+            this.assignValuesToVariables();
+            this.resolve_promise(true);
+            this.user_confirmed_ok = true;
+            this.close();
+        }, (error_messages: string[] | any) => {
+            if (Array.isArray(error_messages)) {
+                // There were some problems with the fields.
+                this.plugin.newErrors(error_messages);
+            } else {
+                // Some other runtime error has occurred.
+                throw error_messages;
+            }
+        });
     }
 
     public onClose(): void {

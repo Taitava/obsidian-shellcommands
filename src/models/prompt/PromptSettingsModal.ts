@@ -36,7 +36,7 @@ import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompl
 
 export class PromptSettingsModal extends SC_Modal {
 
-    private ok_button_clicked = false;
+    private approved = false;
 
     constructor(
         plugin: SC_Plugin,
@@ -45,9 +45,9 @@ export class PromptSettingsModal extends SC_Modal {
         /** Can be undefined if the modal is created from a place where there is no name element. */
         private readonly prompt_name_setting?: Setting,
 
-        /** If defined, a button will be added and on_after_ok() / on_after_cancelling() will be called depending on whether the button was clicked or not. */
+        /** If defined, a button will be added and on_after_approval() / on_after_cancelling() will be called depending on whether the button was clicked or not. */
         private readonly ok_button_text?: string,
-        private readonly on_after_ok?: () => void,
+        private readonly on_after_approval?: () => void,
         private readonly on_after_cancelling?: () => void,
     ) {
         super(plugin);
@@ -161,11 +161,7 @@ export class PromptSettingsModal extends SC_Modal {
             new Setting(container_element)
                 .addButton(button => button
                     .setButtonText(this.ok_button_text)
-                    .onClick(() => {
-                        this.ok_button_clicked = true;
-                        this.on_after_ok();
-                        this.close();
-                    }),
+                    .onClick(() => this.approve()),
                 )
             ;
         }
@@ -176,11 +172,19 @@ export class PromptSettingsModal extends SC_Modal {
         ;
     }
 
+    protected approve(): void {
+        if (this.on_after_approval) {
+            this.approved = true;
+            this.on_after_approval();
+        }
+        this.close();
+    }
+
     public onClose(): void {
         super.onClose();
 
         // Call a cancelling hook if one is defined (and if the closing happens due to cancelling, i.e. the ok button is NOT clicked).
-        if (!this.ok_button_clicked && this.on_after_cancelling) {
+        if (!this.approved && this.on_after_cancelling) {
             this.on_after_cancelling();
         }
     }

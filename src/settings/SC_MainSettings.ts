@@ -56,6 +56,9 @@ export interface SC_MainSettings {
     // Events:
     enable_events: boolean;
 
+    // Modals:
+    approve_modals_by_pressing_enter_key: boolean;
+
     // Shell commands:
     /** If it's a number, limit the max height of a textarea. If it's false, don't limit at all. */
     max_visible_lines_in_shell_command_fields: number | false;
@@ -99,6 +102,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Events:
         enable_events: true,
+
+        // Modals:
+        approve_modals_by_pressing_enter_key: true,
 
         // Shell commands:
         max_visible_lines_in_shell_command_fields: false, // No limit by default.
