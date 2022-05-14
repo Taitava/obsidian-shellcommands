@@ -505,9 +505,7 @@ export class ExtraOptionsModal extends SC_Modal {
                         }).then((textarea_component) => {
                             // Autocomplete for the textarea.
                             if (this.plugin.settings.show_autocomplete_menu) {
-                                const description_textarea_element: HTMLTextAreaElement = textarea_component.inputEl as HTMLTextAreaElement;
-                                const forged_input_element: HTMLInputElement = description_textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
-                                createAutocomplete(this.plugin, forged_input_element, () => textarea_component.onChanged());
+                                createAutocomplete(this.plugin, textarea_component.inputEl, () => textarea_component.onChanged());
                             }
                         }),
                     )

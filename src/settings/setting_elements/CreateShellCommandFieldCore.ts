@@ -108,9 +108,7 @@ export function CreateShellCommandFieldCore(
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
-        // @ts-ignore
-        const input_element: HTMLTextAreaElement = setting_group.shell_command_setting.settingEl.find("textarea");
-        createAutocomplete(plugin, input_element as unknown as HTMLInputElement /* Forge the datatype until kraaden/autocomplete starts to support HTMLTextAreaElement. */, on_change);
+        createAutocomplete(plugin, setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement, on_change);
     }
 
     return setting_group;

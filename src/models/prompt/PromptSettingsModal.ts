@@ -104,9 +104,7 @@ export class PromptSettingsModal extends SC_Modal {
                 .then((description_component: TextAreaComponent) => {
                     // Autocomplete for Description.
                     if (this.plugin.settings.show_autocomplete_menu) {
-                        const description_textarea_element: HTMLTextAreaElement = description_component.inputEl as HTMLTextAreaElement;
-                        const forged_input_element: HTMLInputElement = description_textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
-                        createAutocomplete(this.plugin, forged_input_element, () => description_component.onChanged());
+                        createAutocomplete(this.plugin, description_component.inputEl, () => description_component.onChanged());
                     }
                 }),
             )
