@@ -40,12 +40,12 @@ export abstract class Preaction {
      * promises return true, the shell command will be executed.
      * @protected
      */
-    protected abstract doPreaction(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void>;
+    protected abstract doPreaction(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<boolean>;
 
     /**
      * Maybe this wrapper method is unneeded, but have it for a while at least.
      */
-    public perform(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<void> {
+    public perform(parsing_process: ShellCommandParsingProcess, sc_event: SC_Event): Promise<boolean> {
         return this.doPreaction(parsing_process, sc_event);
     }
 

@@ -4,16 +4,55 @@ All notable changes to this plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+
+
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-### To be Added
- - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
- - [Hotkeys for output channel: Ask after execution (#145)](https://github.com/Taitava/obsidian-shellcommands/issues/145).
+## [Unreleased] (for 0.13.0)
+### To be Added:
+- [New events (#218)](https://github.com/Taitava/obsidian-shellcommands/issues/218):
+   - File content modified
+   - File created
+   - File deleted
+   - File moved
+   - File renamed
+   - Folder created
+   - Folder deleted
+   - Folder moved
+   - Folder renamed
+- [Execute shell commands via Obsidian URI (#202)](https://github.com/Taitava/obsidian-shellcommands/issues/202).
+- [Settings: Add directories to the `PATH` environment variable (#204)](https://github.com/Taitava/obsidian-shellcommands/issues/204).
+- [Modals, such as prompts, can now be approved by pressing enter (#216)](https://github.com/Taitava/obsidian-shellcommands/issues/216).
+   - The feature can be turned off via a [hidden setting](https://publish.obsidian.md/shellcommands/Hidden+settings) to prevent accidental executions/deletions etc, but it's on by default.
+- [Settings: Add a shortcut icon for defining hotkeys (#210)](https://github.com/Taitava/obsidian-shellcommands/issues/210).
+   - From now on, hotkeys are not displayed for shell commands that are completely _excluded_ from Obsidian's command palette (even if a shell command had hotkeys defined before it was configured as _excluded_ from the command palette).
+- [Settings: Display shell command id in extra options modal (#205)](https://github.com/Taitava/obsidian-shellcommands/issues/205).
 
-### To be Fixed
+### To be Changed:
+ - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
+
+### To be Fixed:
+ - [Bug: {{event_yaml_value}} gives wrong error message when the wanted property is not found (#220)](https://github.com/Taitava/obsidian-shellcommands/issues/220).
+
+## [0.12.0] - 2022-05-07
+
+### Added
+ - [A modal for asking values from user (= prompt) (#37)](https://github.com/Taitava/obsidian-shellcommands/issues/37).
+ - [Custom variables, part 1 (#159)](https://github.com/Taitava/obsidian-shellcommands/issues/159): Used to store inputted values from prompts.
+ - [Default values for variables (#190)](https://github.com/Taitava/obsidian-shellcommands/issues/190): If a variable cannot be accessed at a given moment, another value can be used instead.
+ - [Hotkeys for output channel: Ask after execution (#145)](https://github.com/Taitava/obsidian-shellcommands/issues/145).
+ - [Add autocomplete menu to Alias field (#182)](https://github.com/Taitava/obsidian-shellcommands/issues/182).
+
+### Changed
+ - Settings: _Operating systems & shells_ tab names are shortened to _Environments_ ([#37](https://github.com/Taitava/obsidian-shellcommands/issues/37) / [commit 55e5de2b](https://github.com/Taitava/obsidian-shellcommands/commit/55e5de2b6774645883e8dd0cfa759f8e1c70f813)).
+ - [Internal: Variable refactorings (#178)](https://github.com/Taitava/obsidian-shellcommands/issues/178).
+
+### Fixed
  - [Bug: Output channel 'Open a file' causes an error in the console log if the file cannot be opened (#176)](https://github.com/Taitava/obsidian-shellcommands/issues/176).
    - This same issue also fixes autocomplete to be able to display an error message if a custom help text cannot be read at startup due to incorrect datatype in `autocomplete.yaml`.
+ - [Bug: An empty argument in {{yaml_value}}/{{event_yaml_value}} causes a crash (#181)](https://github.com/Taitava/obsidian-shellcommands/issues/181).
 
 ## [0.11.1] - 2022-03-05
 
@@ -214,7 +253,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.0...HEAD
+[0.12.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.9.0...0.10.0
