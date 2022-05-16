@@ -100,7 +100,7 @@ export abstract class Variable {
                 case "show-errors":
                     // Generate error messages by calling generateValue().
                     debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
-                    this.generateValue(); // No need to use the return value, it's null anyway.
+                    this.generateValue(sc_event); // No need to use the return value, it's null anyway.
                     return {
                         value: null,
                         error_messages: this.error_messages,
@@ -144,7 +144,7 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method, but that method might be removed some day.
      */
-    protected abstract generateValue(sc_event?: SC_Event): string|null;
+    protected abstract generateValue(sc_event: SC_Event): string|null;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;

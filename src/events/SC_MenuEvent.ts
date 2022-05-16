@@ -35,6 +35,7 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
                 const parsing_results = parsing_process.getParsingResults();
                 title = parsing_results["alias"].parsed_content || parsing_results["shell_command"].parsed_content; // Try to use a parsed alias, but if no alias is available, use a parsed shell command instead.
             }
+            // If parsing process fails, the failed process can be passed to this.trigger(). The execution will eventually be cancelled and error messages displayed (if displaying is allowed).
         }
 
         // Add a menu item.
