@@ -36,6 +36,7 @@ Features that are in development, but are not released yet. Does not include stu
 ## [Unreleased] (for 0.12.1)
 
 ### To be Fixed:
+ - [Bug: Autocomplete menu caused some unintended console logging (#223)](https://github.com/Taitava/obsidian-shellcommands/issues/223). 
  - [Bug: {{event_yaml_value}} gives wrong error message when the wanted property is not found (#220)](https://github.com/Taitava/obsidian-shellcommands/issues/220).
 
 ## [0.12.0] - 2022-05-07
