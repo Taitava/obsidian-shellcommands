@@ -33,7 +33,10 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed:
  - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
 
-### To be Fixed:
+## [0.12.1] - 2022-05-16
+
+### Fixed:
+ - [Bug: Autocomplete menu caused some unintended console logging (#223)](https://github.com/Taitava/obsidian-shellcommands/issues/223). 
  - [Bug: {{event_yaml_value}} gives wrong error message when the wanted property is not found (#220)](https://github.com/Taitava/obsidian-shellcommands/issues/220).
 
 ## [0.12.0] - 2022-05-07
@@ -253,7 +256,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.1...HEAD
+[0.12.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...0.11.1
 [0.11.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.10.0...0.11.0
