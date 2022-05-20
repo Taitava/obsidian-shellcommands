@@ -35,7 +35,7 @@ export abstract class SC_Modal extends Modal {
 
         // Approve the modal by pressing the enter key (if enabled).
         if (this.plugin.settings.approve_modals_by_pressing_enter_key) {
-            this.scope.register([], "enter", () => {
+            this.scope.register([], "enter", (event: KeyboardEvent) => {
                 // Check that no textarea is focused and no autocomplete menu is open.
                 if (
                     0 === document.querySelectorAll("textarea:focus").length &&
@@ -43,6 +43,8 @@ export abstract class SC_Modal extends Modal {
                 ) {
                     // No textareas with focus and no open autocomplete menus were found.
                     this.approve();
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
             });
         }
