@@ -17,6 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+// @ts-ignore
 import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
@@ -35,7 +36,10 @@ import {createAutocomplete} from "./setting_elements/Autocomplete";
 import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
-import {gotoURL} from "../Common";
+import {
+    copyToClipboard,
+    gotoURL,
+} from "../Common";
 import {SC_Modal} from "../SC_Modal";
 import {
     getDefaultPreaction_Prompt_Configuration,
@@ -177,6 +181,35 @@ export class ExtraOptionsModal extends SC_Modal {
                 })
             )
         ;
+
+        // Shell command id
+        new Setting(container_element)
+            .setDesc(`Shell command id: ${this.shell_command_id}`)
+            .addExtraButton(button => button
+                .setIcon("documents")
+                .setTooltip(`Copy ${this.shell_command_id} to the clipboard.`)
+                .onClick(() => {
+                    copyToClipboard(this.shell_command_id);
+                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`)
+                }),
+            )
+        ;
+        if (this.t_shell_command.canAddToCommandPalette()) {
+            // Only show Obsidian command palette id if the shell command is available in the command palette.
+            const obsidian_command_id = this.t_shell_command.getObsidianCommand().id;
+            new Setting(container_element)
+                .setDesc(`Obsidian command palette id: ${obsidian_command_id}`)
+                .addExtraButton(button => button
+                    .setIcon("documents")
+                    .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
+                    .onClick(() => {
+                        copyToClipboard(obsidian_command_id);
+                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                    }),
+                )
+                .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
+            ;
+        }
     }
 
     private tabPreactions(container_element: HTMLElement) {

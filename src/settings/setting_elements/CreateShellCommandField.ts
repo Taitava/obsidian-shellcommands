@@ -21,10 +21,15 @@ import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
 import {ExtraOptionsModal} from "../ExtraOptionsModal";
 import {DeleteModal} from "../DeleteModal";
-import {getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
+import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
+import {EOL} from "os";
+import {
+    escapeMarkdownLinkCharacters,
+    copyToClipboard,
+} from "../../Common";
 import {
     ShellCommandExecutor
 } from "../../imports";
@@ -86,7 +91,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         },
     );
 
-    // Icon buttons
+    // Primary icon buttons
     setting_group.name_setting
         .addExtraButton(button => button
             .setTooltip("Execute now")
@@ -192,8 +197,54 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         ignored_error_codes_icon_container.addClass("SC-hide");
     }
 
+    // Secondary icon buttons
+    setting_group.preview_setting.addExtraButton(button => button
+        .setIcon("link")
+        .setTooltip("Copy this shell command's Obsidian URI to the clipboard. Visiting the URI executes the shell command. " + CmdOrCtrl() + " + click: Copy a markdown link.")
+
+        // onClick() handler - use a custom one instead of ExtraButtonComponent.onClick(), because Obsidian API (at least v. 0.14.8) does not support detecting CTRL press. https://forum.obsidian.md/t/fr-settings-pass-mouseevent-to-extrabuttoncomponent-onclick/37177
+        .extraSettingsEl.addEventListener("click", (event: MouseEvent) => {
+            const ctrl_clicked = event.ctrlKey;
+            const execution_uri = t_shell_command.getExecutionURI();
+            let result: string;
+            if (ctrl_clicked) {
+                // A full link is wanted.
+                result = `[${escapeMarkdownLinkCharacters(t_shell_command.getAlias())}](${escapeMarkdownLinkCharacters(execution_uri)})`;
+            } else {
+                // Only the URI is wanted.
+                result = execution_uri;
+            }
+
+            copyToClipboard(result);
+            plugin.newNotification("Copied to clipboard: " + EOL + result);
+        }),
+    );
+
+    if (t_shell_command.canHaveHotkeys()) {
+        setting_group.preview_setting.addExtraButton(button => button
+            .setIcon("any-key")
+            .setTooltip("Go to hotkey settings.")
+            .onClick(() => {
+                // The most important parts of this closure function are copied 2022-04-27 from https://github.com/pjeby/hotkey-helper/blob/c8a032e4c52bd9ce08cb909cec15d1ed9d0a3439/src/plugin.js#L436-L442 (also from other lines of the same file).
+
+                // @ts-ignore This is private API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
+                plugin.app.setting?.openTabById("hotkeys");
+
+                // @ts-ignore
+                const hotkeys_settings_tab = plugin.app.setting.settingTabs.filter(tab => tab.id === "hotkeys").shift();
+                if (hotkeys_settings_tab && hotkeys_settings_tab.searchInputEl && hotkeys_settings_tab.updateHotkeyVisibility) {
+                    debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
+                    hotkeys_settings_tab.searchInputEl.value = t_shell_command.getObsidianCommand().name;
+                    hotkeys_settings_tab.updateHotkeyVisibility();
+                } else {
+                    debugLog("Hotkeys: Cannot do filtering due to API changes.");
+                }
+            }),
+        );
+    }
+
     // Add hotkey information
-    if (!is_new) {
+    if (!is_new && t_shell_command.canHaveHotkeys()) {
         const hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);
         if (hotkeys) {
             let hotkeys_joined: string = "";

@@ -18,6 +18,7 @@
  */
 
 import {
+	CustomVariable,
 	CustomVariableInstanceMap,
 	CustomVariableModel,
 	CustomVariableView,
@@ -28,7 +29,7 @@ import {
 	PromptModel,
 	ShellCommandExecutor,
 } from "./imports";
-import {Command, Notice, Plugin, WorkspaceLeaf} from 'obsidian';
+import {Command, Notice, ObsidianProtocolData, Plugin, WorkspaceLeaf} from 'obsidian';
 import {
 	combineObjects,
 	generateObsidianCommandName,
@@ -88,6 +89,10 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ShellCommandParsingProcess,
 	} = {};
 
+	private static readonly BASE_URI_ACTION = "shell-commands"
+
+	public static readonly BASE_URI = `obsidian://${SC_Plugin.BASE_URI_ACTION}/`;
+
 	public async onload() {
 		debugLog('loading plugin');
 
@@ -146,6 +151,9 @@ export default class SC_Plugin extends Plugin {
 		// Debug reserved IDs
 		debugLog("IDGenerator's reserved IDs:");
 		debugLog(getIDGenerator().getReservedIDs());
+
+		// Register an URI handler.
+		this.registerURIHandler();
 	}
 
 	private loadTShellCommands() {
@@ -327,6 +335,90 @@ export default class SC_Plugin extends Plugin {
 			for (const shell_command_id in shell_commands) {
 				const t_shell_command = shell_commands[shell_command_id];
 				sc_event.unregister(t_shell_command);
+			}
+		});
+	}
+
+	/**
+	 * Defines an Obsidian protocol handler that allows receiving requests via obsidian://shell-commands URI.
+	 * @private
+	 */
+	private registerURIHandler() {
+		this.registerObsidianProtocolHandler(SC_Plugin.BASE_URI_ACTION, (parameters: ObsidianProtocolData) => {
+			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
+
+			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
+			let custom_variable_assignments_failed = false;
+			for (const parameter_index in parameter_names) {
+				const parameter_name = parameter_names[parameter_index];
+
+				// Check if the parameter name is a custom variable
+				if (parameter_name.match(/^_/)) {
+					// This parameter defines a value for a custom variable
+					// Find the variable.
+					let found_custom_variable = false;
+					for (const variable of this.getVariables()) {
+						if (variable instanceof CustomVariable && variable.variable_name === parameter_name) {
+							// Found the correct variable.
+							found_custom_variable = true;
+
+							// Assign the given value to the variable.
+							variable.setValue(parameters[parameter_name]);
+						}
+					}
+					if (!found_custom_variable) {
+						this.newError("Shell commands URI: A custom variable does not exist: " + parameter_name);
+						custom_variable_assignments_failed = true;
+					}
+				}
+			}
+
+			if (!custom_variable_assignments_failed) {
+				// Determine action
+				if (undefined !== parameters.execute) {
+					// Execute a shell command.
+					const executable_shell_command_id = parameters.execute;
+					parameter_names.remove("execute"); // Mark the parameter as handled. Prevents showing an error message for an unrecognised parameter.
+
+					// Find the executable shell command
+					let found_t_shell_command = false;
+					const shell_commands = this.getTShellCommands();
+					for (const shell_command_id in shell_commands) {
+						const t_shell_command = shell_commands[shell_command_id];
+						if (t_shell_command.getId() === executable_shell_command_id) {
+							// This is the correct shell command.
+							found_t_shell_command = true;
+
+							// Execute it.
+							const executor = new ShellCommandExecutor(this, t_shell_command, null);
+							executor.doPreactionsAndExecuteShellCommand();
+
+						}
+					}
+					if (!found_t_shell_command) {
+						this.newError("Shell commands URI: A shell command id does not exist: " + executable_shell_command_id);
+					}
+				}
+			}
+
+			// Raise errors for any left-over parameters, if exists.
+			for (const parameter_name of parameter_names) {
+				switch (parameter_name) {
+					case "": // For some reason Obsidian 0.14.5 adds an empty-named parameter if there are no ?query=parameters present.
+					case "action": // Obsidian provides this always. Don't show an error message for this.
+					case "vault": // Obsidian handles this parameter automatically. Just make sure no error message is displayed when this is present.
+						// Do nothing
+						break;
+					default:
+						if (parameter_name.match(/^_/)) {
+							// Custom variable parameters (and any possible errors related to them) are already handled above.
+							// Do nothing.
+						} else {
+							// Throw an error for everything else.
+							this.newError("Shell commands URI: Unrecognised parameter: " + parameter_name);
+						}
+				}
+
 			}
 		});
 	}
