@@ -45,6 +45,11 @@ import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {Variable_Environment} from "./Variable_Environment";
+import {Variable_EventOldFileName} from "./event_variables/Variable_EventOldFileName";
+import {Variable_EventOldFilePath} from "./event_variables/Variable_EventOldFilePath";
+import {Variable_EventOldFolderName} from "./event_variables/Variable_EventOldFolderName";
+import {Variable_EventOldFolderPath} from "./event_variables/Variable_EventOldFolderPath";
+import {Variable_EventOldTitle} from "./event_variables/Variable_EventOldTitle";
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
 
@@ -81,6 +86,11 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_EventFilePath(plugin),
         new Variable_EventFolderName(plugin),
         new Variable_EventFolderPath(plugin),
+        new Variable_EventOldFileName(plugin),
+        new Variable_EventOldFilePath(plugin),
+        new Variable_EventOldFolderName(plugin),
+        new Variable_EventOldFolderPath(plugin),
+        new Variable_EventOldTitle(plugin),
         new Variable_EventTags(plugin),
         new Variable_EventTitle(plugin),
         new Variable_EventYAMLValue(plugin),

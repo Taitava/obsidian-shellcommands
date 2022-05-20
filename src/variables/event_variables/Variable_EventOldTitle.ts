@@ -17,10 +17,23 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
+import {EventVariable} from "./EventVariable";
+import {extractFileName} from "../../Common";
+import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 
-export class SC_Event_onActiveLeafChanged extends SC_WorkspaceEvent {
-    protected static readonly event_code = "on-active-leaf-changed";
-    protected static readonly event_title = "Switching the active pane";
-    protected readonly workspace_event = "active-leaf-change";
+export class Variable_EventOldTitle extends EventVariable {
+    public variable_name = "event_old_title";
+    public help_text = "Gives the renamed file's old name without a file extension. If you need it with the extension, use {{event_old_file_name}} instead.";
+
+    protected supported_sc_events = [
+        SC_Event_FileRenamed,
+    ];
+
+    protected generateValue(sc_event: SC_Event_FileRenamed): string | null {
+        if (!this.checkSC_EventSupport(sc_event)) {
+            return null;
+        }
+
+        return extractFileName(sc_event.getFileOldRelativePath(), false);
+    }
 }

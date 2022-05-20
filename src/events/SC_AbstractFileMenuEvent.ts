@@ -29,7 +29,7 @@ export abstract class SC_AbstractFileMenuEvent extends SC_MenuEvent {
 
     protected getTrigger(t_shell_command: TShellCommand) {
         return (menu: Menu, file: TAbstractFile, source: string, leaf?: WorkspaceLeaf) => {
-            // Check that it's the correct menu: if the SC_Event requires a folder menu, 'file' needs to be a TFile, otherwise it needs to be a TFolder.
+            // Check that it's the correct menu: if the SC_Event requires a file menu, 'file' needs to be a TFile, otherwise it needs to be a TFolder.
             if ((this.file_or_folder === "folder" && file instanceof TFolder) || (this.file_or_folder === "file" && file instanceof TFile)) {
                 // The menu is correct.
 

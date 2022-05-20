@@ -376,7 +376,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Events
         new Setting(container_element)
-            .setName("Execute this shell command automatically on:")
+            .setName("Execute this shell command automatically when:")
             .setHeading() // Make the name bold
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
