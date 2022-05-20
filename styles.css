@@ -74,7 +74,7 @@ div.SC-setting-group div.setting-item select {
 }
 
 div.SC-setting-group div.setting-item textarea {
-    resize: both; /* Allow resizing multiline text fields freely. */
+    resize: vertical; /* Allow resizing multiline text fields vertically. Don't allow horizontal resizing, because the width is already maxed out (to 50%), and horizontal resizing would just make the field accidentally narrower. */
 }
 
 div.SC-setting-group div.SC-no-description div.setting-item-info { /* .SC-no-description is used by the 'alias' setting field. */

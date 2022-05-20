@@ -42,6 +42,7 @@ import {
     CustomVariableInstance,
     CustomVariableModel,
     getModel,
+    createPATHAugmentationFields,
     Prompt,
     PromptModel
 } from "../imports";
@@ -314,6 +315,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Platforms' default shells
         createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+
+        // PATH environment variable fields
+        createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
     }
 
     private tabPreactions(container_element: HTMLElement) {

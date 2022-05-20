@@ -32,6 +32,7 @@ import {Command} from "obsidian";
 import {VariableSet} from "./variables/loadVariables";
 import {
     createPreaction,
+    getPATHAugmentation,
     ParsingProcess,
     Preaction,
     PreactionConfiguration
@@ -326,8 +327,9 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                "shell_command": this.getShellCommand(),
-                "alias": this.getAlias(),
+                shell_command: this.getShellCommand(),
+                alias: this.getAlias(),
+                environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
             },
             this,
             sc_event,
@@ -418,6 +420,7 @@ export class TShellCommand {
 export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,
+    environment_variable_path_augmentation: string,
     succeeded: boolean;
     error_messages: string[];
 }
@@ -425,6 +428,7 @@ export interface ShellCommandParsingResult {
 export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
 
 type shell_command_parsing_map = {
-    "shell_command": string,
-    "alias": string,
+    shell_command: string,
+    alias: string,
+    environment_variable_path_augmentation: string,
 };
