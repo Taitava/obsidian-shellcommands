@@ -124,9 +124,9 @@ export class ExtraOptionsModal extends SC_Modal {
 
     private tabGeneral(container_element: HTMLElement) {
         // Alias field
-        new Setting(container_element)
+        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        new Setting(alias_container)
             .setName("Alias")
-            .setClass("SC-name-setting")
         ;
         const on_alias_change = async (value: string) => {
             // Change the actual alias value
@@ -141,12 +141,12 @@ export class ExtraOptionsModal extends SC_Modal {
             // Save
             await this.plugin.saveSettings();
         };
-        const alias_setting = new Setting(container_element)
+        const alias_setting = new Setting(alias_container)
             .addText(text => text
                 .setValue(this.t_shell_command.getAlias())
                 .onChange(on_alias_change)
             )
-            .setClass("SC-shell-command-setting")
+            .setClass("SC-no-description")
         ;
         const alias_input_element: HTMLInputElement = alias_setting.controlEl.find("input") as HTMLInputElement;
         alias_input_element.addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
@@ -155,8 +155,8 @@ export class ExtraOptionsModal extends SC_Modal {
             createAutocomplete(this.plugin, alias_input_element, on_alias_change);
         }
 
-        container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
-        container_element.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
+        alias_container.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
+        alias_container.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
 
         // Confirm execution field
         new Setting(container_element)
