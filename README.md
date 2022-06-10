@@ -1,5 +1,15 @@
 <div style="margin-top: -40px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
 
+# 0.13.0-beta test
+
+If you are willing to try out some new features, you can [participate in a beta test](https://github.com/Taitava/obsidian-shellcommands/discussions/228). New:
+- Execute shell commands via Obsidian URI
+- `PATH` additions
+- New file and folder events
+- Multiline shell commands
+- Submit/accept modals by pressing enter
+- Read more in the link mentioned above.
+
 # Shell commands plugin for Obsidian
 
 This plugin lets you define shell/terminal commands in settings and run them quickly via Obsidian's command palette, or via hotkeys. Use note related variables as part of the commands, and insert output back to your notes, if you wish. This is a Swiss army knife when it comes to accessing external applications from Obsidian, and you are the one who defines its tools.
