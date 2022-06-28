@@ -32,6 +32,8 @@ import {debugLog} from "./Debug";
 import SC_Plugin from "./main";
 // @ts-ignore
 import {shell} from "electron";
+// @ts-ignore Electron is installed.
+import {clipboard} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -170,8 +172,16 @@ export function normalizePath2(path: string) {
     return path;
 }
 
-export function extractFileName(file_path: string) {
-    return path.parse(file_path).base;
+export function extractFileName(file_path: string, with_extension = true) {
+    if (with_extension) {
+        return path.parse(file_path).base;
+    } else {
+        return path.parse(file_path).name;
+    }
+}
+
+export function extractFileParentPath(file_path: string) {
+    return path.parse(file_path).dir;
 }
 
 export function joinObjectProperties(object: {}, glue: string) {
@@ -289,4 +299,22 @@ export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, con
 export function randomInteger(min: number, max: number) {
     const range = max - min + 1;
     return min + Math.floor(Math.random() * range);
+}
+
+/**
+ * Does the following prefixings:
+ *   \ will become \\
+ *   [ will become \[
+ *   ] will become \]
+ *   ( will become \(
+ *   ) will become \)
+ *
+ * @param content
+ */
+export function escapeMarkdownLinkCharacters(content: string) {
+    return content.replace(/[\\()\[\]]/gu, "\\$&");
+}
+
+export function copyToClipboard(text: string) {
+    clipboard.writeText(text);
 }

@@ -28,7 +28,7 @@ import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompl
  * @param input_element
  * @param call_on_completion A function that will be called when a user has selected a suggestion and performed the autocomplete action. onChange event will not be called, because it would trigger opening the autocomplete menu again, so that's why a separate callback is used.
  */
-export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement, call_on_completion: (field_value: string) => void) {
+export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement | HTMLTextAreaElement, call_on_completion: (field_value: string) => void) {
 
     autocomplete<IAutocompleteItem>({
         input: input_element,
@@ -113,7 +113,8 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
         className: "SC-autocomplete", // The component always has a class 'autocomplete', but add 'SC-autocomplete' so that SC's CSS can target 'SC-autocomplete', so it will not mess up stuff if Obsidian happens to have an element with class 'autocomplete'.
-        keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ] // Defined just to prevent ignoring left and right keys.
+        keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ], // Defined just to prevent ignoring left and right keys.
+        preventSubmit: true, // Prevents creating newlines in textareas when enter is pressed in the autocomplete menu.
     });
 }
 

@@ -74,7 +74,16 @@ div.SC-setting-group div.setting-item select {
 }
 
 div.SC-setting-group div.setting-item textarea {
-    resize: both; /* Allow resizing multiline text fields freely. */
+    resize: vertical; /* Allow resizing multiline text fields vertically. Don't allow horizontal resizing, because the width is already maxed out (to 50%), and horizontal resizing would just make the field accidentally narrower. */
+}
+
+div.SC-setting-group div.SC-no-description div.setting-item-info { /* .SC-no-description is used by the 'alias' setting field. */
+    width: 0;
+    margin: 0;
+}
+
+div.SC-setting-group div.SC-no-description div.setting-item-control { /* .SC-no-description is used by the 'alias' setting field. */
+    width: 100%;
 }
 
 
@@ -114,8 +123,10 @@ div.SC-shell-command-setting div.setting-item-info {
  * SHELL COMMAND SETTING FIELDS
  */
 
-div.SC-shell-command-setting input[type=text] {
+div.SC-shell-command-setting textarea {
     width: 100%;
+    padding: 2px 5px; /* Shrink the padding all around the textarea. */
+    resize: vertical;
 }
 
 div.SC-hotkey-info svg {

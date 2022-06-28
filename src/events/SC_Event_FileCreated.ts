@@ -4,7 +4,7 @@
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,10 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
+import {SC_VaultEvent} from "./SC_VaultEvent";
 
-export class SC_Event_onActiveLeafChanged extends SC_WorkspaceEvent {
-    protected static readonly event_code = "on-active-leaf-changed";
-    protected static readonly event_title = "Switching the active pane";
-    protected readonly workspace_event = "active-leaf-change";
+export class SC_Event_FileCreated extends SC_VaultEvent {
+    protected static readonly event_code = "file-created";
+    protected static readonly event_title = "File created";
+    protected readonly vault_event = "create";
+    protected file_or_folder: "file" = "file";
 }

@@ -30,8 +30,11 @@ import {getSC_Events} from "./events/SC_EventList";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {VariableSet} from "./variables/loadVariables";
+import {getUsedVariables} from "./variables/parseVariables";
 import {
     createPreaction,
+    CustomVariable,
+    getPATHAugmentation,
     ParsingProcess,
     Preaction,
     PreactionConfiguration
@@ -304,6 +307,13 @@ export class TShellCommand {
     }
 
     /**
+     * Another name for canAddToCommandPalette().
+     */
+    public canHaveHotkeys(): boolean {
+        return this.canAddToCommandPalette();
+    }
+
+    /**
      * Checks the configuration for command_palette_availability and returns:
      *  - true, if the value is "enabled"
      *  - false, if the value is "disabled" or "unlisted"
@@ -326,8 +336,9 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                "shell_command": this.getShellCommand(),
-                "alias": this.getAlias(),
+                shell_command: this.getShellCommand(),
+                alias: this.getAlias(),
+                environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
             },
             this,
             sc_event,
@@ -340,6 +351,10 @@ export class TShellCommand {
 
     public setObsidianCommand(obsidian_command: Command) {
         this.obsidian_command = obsidian_command;
+    }
+
+    public getObsidianCommand() {
+        return this.obsidian_command;
     }
 
     /**
@@ -413,11 +428,41 @@ export class TShellCommand {
     public getDefaultValueConfigurationForVariable(variable: Variable): VariableDefaultValueConfiguration | undefined {
         return this.configuration.variable_default_values[variable.getIdentifier()];
     }
+
+    /**
+     * Returns an URI that can be used in links (in or outside of Obsidian) to execute this shell command. The URI also
+     * contains stubs for any possible CustomVariables that might be used in the shell command (if any).
+     */
+    public getExecutionURI() {
+        const execution_uri = SC_Plugin.BASE_URI + "?vault="+encodeURIComponent(this.plugin.app.vault.getName())+"&execute=" + this.getId();
+
+        // Get a list CustomVariables that the shell command uses.
+        const custom_variables = new VariableSet();
+        for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommand())) {
+            // Check that the variable IS a CustomVariable.
+            if (custom_variable instanceof CustomVariable) {
+                custom_variables.add(custom_variable);
+            }
+        }
+
+        // Exclude variables whose values will come from Preactions - they will not probably be needed in the URI.
+        const custom_variables_suitable_for_uri = removeFromSet(custom_variables, this.getPreactionsDependentVariables());
+
+        // Append the suitable custom variable names to the uri.
+        let execution_uri_with_variables = execution_uri;
+        for (const custom_variable of custom_variables_suitable_for_uri) {
+            execution_uri_with_variables += "&" + custom_variable.variable_name + "=";
+        }
+
+        // Finished.
+        return execution_uri_with_variables;
+    }
 }
 
 export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,
+    environment_variable_path_augmentation: string,
     succeeded: boolean;
     error_messages: string[];
 }
@@ -425,6 +470,7 @@ export interface ShellCommandParsingResult {
 export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
 
 type shell_command_parsing_map = {
-    "shell_command": string,
-    "alias": string,
+    shell_command: string,
+    alias: string,
+    environment_variable_path_augmentation: string,
 };

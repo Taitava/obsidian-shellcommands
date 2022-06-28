@@ -17,6 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+// @ts-ignore
 import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
@@ -35,7 +36,10 @@ import {createAutocomplete} from "./setting_elements/Autocomplete";
 import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
-import {gotoURL} from "../Common";
+import {
+    copyToClipboard,
+    gotoURL,
+} from "../Common";
 import {SC_Modal} from "../SC_Modal";
 import {
     getDefaultPreaction_Prompt_Configuration,
@@ -124,9 +128,9 @@ export class ExtraOptionsModal extends SC_Modal {
 
     private tabGeneral(container_element: HTMLElement) {
         // Alias field
-        new Setting(container_element)
+        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        new Setting(alias_container)
             .setName("Alias")
-            .setClass("SC-name-setting")
         ;
         const on_alias_change = async (value: string) => {
             // Change the actual alias value
@@ -141,12 +145,12 @@ export class ExtraOptionsModal extends SC_Modal {
             // Save
             await this.plugin.saveSettings();
         };
-        const alias_setting = new Setting(container_element)
+        const alias_setting = new Setting(alias_container)
             .addText(text => text
                 .setValue(this.t_shell_command.getAlias())
                 .onChange(on_alias_change)
             )
-            .setClass("SC-shell-command-setting")
+            .setClass("SC-no-description")
         ;
         const alias_input_element: HTMLInputElement = alias_setting.controlEl.find("input") as HTMLInputElement;
         alias_input_element.addClass("SC-focus-element-on-tab-opening"); // Focus without a need to click the field.
@@ -155,8 +159,8 @@ export class ExtraOptionsModal extends SC_Modal {
             createAutocomplete(this.plugin, alias_input_element, on_alias_change);
         }
 
-        container_element.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
-        container_element.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
+        alias_container.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
+        alias_container.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
 
         // Confirm execution field
         new Setting(container_element)
@@ -177,6 +181,35 @@ export class ExtraOptionsModal extends SC_Modal {
                 })
             )
         ;
+
+        // Shell command id
+        new Setting(container_element)
+            .setDesc(`Shell command id: ${this.shell_command_id}`)
+            .addExtraButton(button => button
+                .setIcon("documents")
+                .setTooltip(`Copy ${this.shell_command_id} to the clipboard.`)
+                .onClick(() => {
+                    copyToClipboard(this.shell_command_id);
+                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`)
+                }),
+            )
+        ;
+        if (this.t_shell_command.canAddToCommandPalette()) {
+            // Only show Obsidian command palette id if the shell command is available in the command palette.
+            const obsidian_command_id = this.t_shell_command.getObsidianCommand().id;
+            new Setting(container_element)
+                .setDesc(`Obsidian command palette id: ${obsidian_command_id}`)
+                .addExtraButton(button => button
+                    .setIcon("documents")
+                    .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
+                    .onClick(() => {
+                        copyToClipboard(obsidian_command_id);
+                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                    }),
+                )
+                .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
+            ;
+        }
     }
 
     private tabPreactions(container_element: HTMLElement) {
@@ -335,7 +368,7 @@ export class ExtraOptionsModal extends SC_Modal {
             const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
             if (is_first) {
                 // Focus on the first OS specific shell command field
-                setting_group.shell_command_setting.controlEl.find("input").addClass("SC-focus-element-on-tab-opening");
+                setting_group.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
                 is_first = false;
             }
         }
@@ -376,7 +409,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Events
         new Setting(container_element)
-            .setName("Execute this shell command automatically on:")
+            .setName("Execute this shell command automatically when:")
             .setHeading() // Make the name bold
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
@@ -505,9 +538,7 @@ export class ExtraOptionsModal extends SC_Modal {
                         }).then((textarea_component) => {
                             // Autocomplete for the textarea.
                             if (this.plugin.settings.show_autocomplete_menu) {
-                                const description_textarea_element: HTMLTextAreaElement = textarea_component.inputEl as HTMLTextAreaElement;
-                                const forged_input_element: HTMLInputElement = description_textarea_element as unknown as HTMLInputElement; // Make TypeScript believe this is an HTMLInputElement, because 'kraaden/autocomplete' library does not officially support textareas. This can be problematic!
-                                createAutocomplete(this.plugin, forged_input_element, () => textarea_component.onChanged());
+                                createAutocomplete(this.plugin, textarea_component.inputEl, () => textarea_component.onChanged());
                             }
                         }),
                     )
@@ -538,5 +569,10 @@ export class ExtraOptionsModal extends SC_Modal {
                 })
             )
         ;
+    }
+
+    protected approve(): void {
+        // No need to perform any action, just close the modal.
+        this.close();
     }
 }

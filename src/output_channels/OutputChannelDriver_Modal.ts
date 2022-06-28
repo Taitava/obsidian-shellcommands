@@ -206,4 +206,9 @@ class OutputModal extends SC_Modal {
     public setExitCode(exit_code: number) {
         this.exit_code = exit_code;
     }
+
+    protected approve(): void {
+        // No need to perform any action, just close the modal.
+        this.close();
+    }
 }

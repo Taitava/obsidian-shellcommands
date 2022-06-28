@@ -25,6 +25,8 @@ import {createAutocomplete} from "./Autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
+import {createMultilineTextElement} from "../../Common";
+import {EOL} from "os";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -42,10 +44,36 @@ export function CreateShellCommandFieldCore(
 
     function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.setDesc(getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
+        setting_group.preview_setting.descEl.innerHTML = ""; // Remove previous content.
+        createMultilineTextElement(
+            "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
+            getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+            setting_group.preview_setting.descEl,
+        );
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
+
+        // Resize the shell command textarea to match the amount of lines in it.
+        update_textarea_height(shell_command, shell_command_placeholder);
+    }
+
+    function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
+        let newlines_pattern = /\r\n|\r|\n/;
+        const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
+        const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
+        let count_lines_final = Math.max(
+            count_lines_in_shell_command,
+            count_lines_in_shell_command_placeholder,
+        );
+        if (plugin.settings.max_visible_lines_in_shell_command_fields) {
+            // Limit the height so that the field will not take up too much space.
+            count_lines_final = Math.min(
+                plugin.settings.max_visible_lines_in_shell_command_fields,
+                count_lines_final,
+            );
+        }
+        (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
     setting_group = {
@@ -56,7 +84,7 @@ export function CreateShellCommandFieldCore(
         ,
         shell_command_setting:
             new Setting(container_element)
-                .addText(text => text
+                .addTextArea(text => text
                     .setPlaceholder(shell_command_placeholder)
                     .setValue(shell_command)
                     .onChange(on_change)
@@ -65,16 +93,22 @@ export function CreateShellCommandFieldCore(
         ,
         preview_setting:
             new Setting(container_element)
-                .setDesc(getShellCommandPreview(plugin,shell_command, shell, t_shell_command, null /* No event is available during preview. */))
                 .setClass("SC-preview-setting")
+                .then((setting: Setting) => {
+                    setting.descEl.innerHTML = ""; // Remove previous content. Not actually needed here because it's empty already, but do it just in case.
+                    createMultilineTextElement(
+                        "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
+                        getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+                        setting.descEl,
+                    );
+                })
         ,
     };
+    update_textarea_height(shell_command, shell_command_placeholder);
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
-        // @ts-ignore
-        const input_element: HTMLInputElement = setting_group.shell_command_setting.settingEl.find("input");
-        createAutocomplete(plugin, input_element, on_change);
+        createAutocomplete(plugin, setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement, on_change);
     }
 
     return setting_group;
@@ -94,8 +128,8 @@ export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string,
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {
-            // Return just the first error message, even if there are multiple errors, because the preview space is limited.
-            return parsing_result.error_messages[0];
+            // Return all error messages, each in its own line. (Usually there's just one message).
+            return parsing_result.error_messages.join(EOL); // Newlines are converted to <br>'s by the consumers of this function.
         } else {
             // If there are no error messages, then errors are silently ignored by user's variable configuration.
             // The preview can then show the original, unparsed shell command.

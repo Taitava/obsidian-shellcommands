@@ -174,6 +174,34 @@ export function parseVariables(
     return parsing_result;
 }
 
+/**
+ * Reads all variables from the content string, and returns a VariableSet containing all the found variables.
+ *
+ * This is needed in situations where variables will not be parsed (= variable values are not needed), but where it's just
+ * needed to know what variables e.g. a shell command relies on.
+ *
+ * @param plugin
+ * @param content
+ */
+export function getUsedVariables(
+        plugin: SC_Plugin,
+        content: string,
+    ): VariableSet {
+    const search_for_variables: VariableSet = plugin.getVariables()
+    const found_variables = new VariableSet();
+    
+    for (const variable of search_for_variables)
+    {
+        const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+        if (pattern.exec(content) !== null) {
+            // This variable was found.
+            found_variables.add(variable);
+        }
+    }
+
+    return found_variables;
+}
+
 export interface ParsingResult {
     original_content: string;
     parsed_content: string;

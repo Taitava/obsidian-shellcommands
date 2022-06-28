@@ -47,6 +47,7 @@ export interface SC_MainSettings {
     // Environments:
     working_directory: string;
     default_shells: IPlatformSpecificString;
+    environment_variable_path_augmentations: IPlatformSpecificString;
 
     // Output:
     error_message_duration: number;
@@ -56,7 +57,12 @@ export interface SC_MainSettings {
     // Events:
     enable_events: boolean;
 
+    // Modals:
+    approve_modals_by_pressing_enter_key: boolean;
+
     // Shell commands:
+    /** If it's a number, limit the max height of a textarea. If it's false, don't limit at all. */
+    max_visible_lines_in_shell_command_fields: number | false;
     shell_commands: ShellCommandsConfiguration;
 
     // Prompts:
@@ -89,6 +95,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Environments:
         working_directory: "",
         default_shells: {},
+        environment_variable_path_augmentations: {},
 
         // Output:
         error_message_duration: 20,
@@ -98,7 +105,11 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Events:
         enable_events: true,
 
+        // Modals:
+        approve_modals_by_pressing_enter_key: true,
+
         // Shell commands:
+        max_visible_lines_in_shell_command_fields: false, // No limit by default.
         shell_commands: {},
 
         // Prompts:

@@ -22,6 +22,7 @@ export const DocumentationBuiltInVariablesLink = "https://publish.obsidian.md/sh
 export const DocumentationCustomVariablesLink = "https://publish.obsidian.md/shellcommands/Variables/Custom+variables";
 export const DocumentationAutocompleteLink = "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete";
 export const DocumentationEventsFolderLink = "https://publish.obsidian.md/shellcommands/Events/";
+export const DocumentationPATHAugmentationsLink = "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable";
 export const GitHubLink = "https://github.com/Taitava/obsidian-shellcommands";
 export const ChangelogLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/CHANGELOG.md";
 export const LicenseLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/LICENSE";
