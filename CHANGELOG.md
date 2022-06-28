@@ -10,8 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
-## [Unreleased] (for 0.13.0)
-### To be Added:
+- Nothing at the moment.
+
+## [0.13.0] - 2022-06-28
+### Added:
 - [New events (#218)](https://github.com/Taitava/obsidian-shellcommands/issues/218):
    - File content modified
    - File created
@@ -30,7 +32,7 @@ Features that are in development, but are not released yet. Does not include stu
    - From now on, hotkeys are not displayed for shell commands that are completely _excluded_ from Obsidian's command palette (even if a shell command had hotkeys defined before it was configured as _excluded_ from the command palette).
 - [Settings: Display shell command id in extra options modal (#205)](https://github.com/Taitava/obsidian-shellcommands/issues/205).
 
-### To be Changed:
+### Changed:
  - [Multiple lines are now supported in shell command fields (#203)](https://github.com/Taitava/obsidian-shellcommands/issues/203).
 
 ## [0.12.1] - 2022-05-16
@@ -256,7 +258,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.13.0...HEAD
+[0.13.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.1...0.13.0
 [0.12.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.12.0...0.12.1
 [0.12.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.1...0.12.0
 [0.11.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.11.0...0.11.1
