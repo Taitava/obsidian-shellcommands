@@ -18,6 +18,7 @@ You can customise your commands with built-in variables that can provide the cur
 - **Windows & PowerShell: Non-English characters can be corrupted in output**. Input _might_ work ok. Read more: #157. Linux and Mac users should not have this issue.
 - Special characters in `{{variable}}` values are escaped (except if CMD.EXE is used as a shell), but it's **still experimental**. Potential escaping problems can be dangerous. [Documentation about how special characters are escaped in variable values](https://publish.obsidian.md/shellcommands/Variables/Escaping+special+characters+in+variable+values). Edit 2022-03-11: Now that the escaping system has been in use for a few months, it seems that it works quite nicely. However, more experience is still welcome. Edit 2022-06-10: Changed the link to point to documentation that contains newer information than [issue #11](https://github.com/Taitava/obsidian-shellcommands/issues/11).
 - **No mobile support**, because the plugin uses NodeJS's `child_process`, so I've flagged this plugin as desktop only. I do not have any plans at the moment to research an ability to make this work on mobile. If you have some clues, please start a discussion in GitHub.
+- [If you have installed Obsidian using Flatpak, shell commands are executed in an isolated environment, which may cause unexpected behaviour or error messages.](https://github.com/Taitava/obsidian-shellcommands/discussions/225)
 
 For future ideas, see the [Discussions section](https://github.com/Taitava/obsidian-shellcommands/discussions).
 
