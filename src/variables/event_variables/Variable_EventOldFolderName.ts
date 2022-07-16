@@ -36,6 +36,6 @@ export class Variable_EventOldFolderName extends EventVariable {
             return null;
         }
 
-        return extractFileName(sc_event.getFolderOldRelativePath());
+        return extractFileName(sc_event.getFolderOldRelativePath());  // TODO: Consider changing `sc_event.getFolderOldRelativePath()` to `return folder.isRoot() ? "." : sc_event.getFolderOldRelativePath()` as is done in Variable_NewNoteFileName.
     }
 }
