@@ -131,16 +131,26 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         const command_fields_container = container_element.createEl("div");
 
         // Fields for modifying existing commands
+        let shell_commands_exist = false;
         for (const command_id in this.plugin.getTShellCommands()) {
             createShellCommandField(this.plugin, command_fields_container, command_id, this.plugin.settings.show_autocomplete_menu);
+            shell_commands_exist = true;
+        }
+
+        // 'No shell commands yet' paragraph.
+        const no_shell_commands_paragraph = container_element.createEl("p", {text: "No shell commands yet, click the 'New shell command' button below."});
+        if (shell_commands_exist) {
+            // Shell commands exist, so do not show the "No shell commands yet" text.
+            no_shell_commands_paragraph.hide();
         }
 
         // "New command" button
         new Setting(container_element)
             .addButton(button => button
-                .setButtonText("New command")
+                .setButtonText("New shell command")
                 .onClick(async () => {
                     createShellCommandField(this.plugin, command_fields_container, "new", this.plugin.settings.show_autocomplete_menu);
+                    no_shell_commands_paragraph.hide();
                     debugLog("New empty command created.");
                 })
             )
