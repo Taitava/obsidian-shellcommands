@@ -39,6 +39,7 @@ import {
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
+import {PlatformNames} from "./settings/SC_MainSettings";
 
 export class ShellCommandExecutor {
 
@@ -166,8 +167,9 @@ export class ShellCommandExecutor {
         const shell_command = shell_command_parsing_result.shell_command.trim();
         if (!shell_command.length) {
             // It is empty
-            debugLog("The shell command is empty. :(");
-            this.plugin.newError("The shell command is empty :(");
+            const error_message = this.getErrorMessageForEmptyShellCommand();
+            debugLog(error_message);
+            this.plugin.newError(error_message);
             return;
         }
 
@@ -305,6 +307,24 @@ export class ShellCommandExecutor {
             // No augmenting is needed.
             debugLog("No augmentation is defined for environment variable PATH. This is completely ok.");
             return "";
+        }
+    }
+
+    /**
+     * This method should only be called if it's first checked that neither shell command version for the current platform nor a 'default' version exists.
+     *
+     * @private
+     */
+    private getErrorMessageForEmptyShellCommand(): string {
+        if (this.t_shell_command.getNonEmptyPlatformIds().length > 0) {
+            // The shell command contains versions for other platforms, but not for the current one.
+            const current_platform_name = PlatformNames[getOperatingSystem()];
+            const version_word = this.t_shell_command.getNonEmptyPlatformIds().length > 1 ? "versions" : "a version";
+            const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => PlatformNames[platform_id]).join(" and ");
+            return `The shell command does not have a version for ${current_platform_name}, it only has ${version_word} for ${other_platform_names}.`;
+        } else {
+            // The shell command doesn't contain a version for any platforms, it's completely empty.
+            return "The shell command is empty. :(";
         }
     }
 }

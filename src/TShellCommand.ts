@@ -43,6 +43,10 @@ import {
     Variable,
     VariableDefaultValueConfiguration,
 } from "./variables/Variable";
+import {
+    PlatformId,
+    PlatformNames,
+} from "./settings/SC_MainSettings";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -126,6 +130,24 @@ export class TShellCommand {
 
     public getPlatformSpecificShellCommands() {
         return this.configuration.platform_specific_commands;
+    }
+
+    /**
+     * Returns a list of PlatformIds that have a shell command version defined. 'default' is never included in the list.
+     *
+     * TODO: Invent a better name for this method.
+     */
+    public getNonEmptyPlatformIds() {
+        const platform_specific_shell_commands = this.getPlatformSpecificShellCommands();
+        const platform_ids_with_non_empty_shell_commands: PlatformId[] = [];
+        let platform_id: PlatformId;
+        for (platform_id in PlatformNames) { // Note that this loop does not iterate 'default' platform id (= the fallback platform id that is used when a shell command does not have a version for the current platform).
+            const platform_specific_shell_command = platform_specific_shell_commands[platform_id as PlatformId];
+            if (platform_specific_shell_command && "" !== platform_specific_shell_command.trim()) {
+                platform_ids_with_non_empty_shell_commands.push(platform_id);
+            }
+        }
+        return platform_ids_with_non_empty_shell_commands;
     }
 
     public getAlias() {
