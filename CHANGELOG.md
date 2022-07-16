@@ -12,6 +12,10 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### Added
 - [New variables: `{{new_note_folder_name}}` and `{{new_note_folder_path}}` (#235)](https://github.com/Taitava/obsidian-shellcommands/issues/235).
+- [Settings: Display a text when no shell commands exist (#231)](https://github.com/Taitava/obsidian-shellcommands/issues/231).
+
+### Changed
+- [Improve an error message when a shell command does not exist for the current OS (but exist for some other OS) (#239)](https://github.com/Taitava/obsidian-shellcommands/issues/239).
 
 ## [0.13.0] - 2022-06-28
 ### Added:
