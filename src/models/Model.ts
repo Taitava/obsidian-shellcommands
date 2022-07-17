@@ -113,11 +113,11 @@ export abstract class Model {
                 // This is a relation where 'key' points directly to the instance's configuration.
                 // delete this.parent_configuration[this.relation.key];
                 // break;
-            case "one-to-many-index":
+            case "one-to-many-index": {
                 // This is a relation where 'key' points to an indexed array of instance configurations. Use 'index' to pick the correct instance configuration.
                 instance.parent_configuration[relation.key].splice(relation.index, 1); // Do not use delete, as it would place null in the list.
                 break;
-            case "one-to-many-id":
+            } case "one-to-many-id": {
                 // This is a relation where 'key' points to an indexed array of instance configurations. Use 'id' to determine the correct index.
                 const index = this.idToIndex(instance.parent_configuration[relation.key], relation.id);
                 if (null === index) {
@@ -126,6 +126,7 @@ export abstract class Model {
                 }
                 instance.parent_configuration[relation.key].splice(index, 1); // Do not use delete, as it would place null in the list.
                 break;
+			}
         }
     }
 

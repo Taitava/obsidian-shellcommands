@@ -283,7 +283,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
                     // Interpret the selection
                     switch (new_prompt_id) {
-                        case "new":
+                        case "new": {
                             // Create a new Prompt.
                             const model = getModel<PromptModel>(PromptModel.name)
                             const new_prompt = model.newInstance(this.plugin.settings);
@@ -312,20 +312,21 @@ export class ExtraOptionsModal extends SC_Modal {
                                 modal.open();
                             });
                             break;
-                        case "no-prompt":
+                        } case "no-prompt": {
                             // Disable the prompt.
                             preaction_prompt_configuration.enabled = false;
                             this.t_shell_command.resetPreactions();
                             await this.plugin.saveSettings();
                             old_selected_prompt_option = dropdown.getValue();
                             break;
-                        default:
+                        } default: {
                             // Use an existing prompt.
                             preaction_prompt_configuration.enabled = true;
                             preaction_prompt_configuration.prompt_id = new_prompt_id;
                             await this.plugin.saveSettings();
                             old_selected_prompt_option = dropdown.getValue();
                             break;
+                        }
                     }
                 }),
             )
