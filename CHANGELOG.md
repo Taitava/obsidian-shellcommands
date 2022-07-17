@@ -18,6 +18,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Changed
 - [Improve an error message when a shell command does not exist for the current OS (but exist for some other OS) (#239)](https://github.com/Taitava/obsidian-shellcommands/issues/239).
+- [Internal: Miscellaneous updates from Obsidian Sample plugin (#196)](https://github.com/Taitava/obsidian-shellcommands/issues/196).
 
 ## [0.13.0] - 2022-06-28
 ### Added:
