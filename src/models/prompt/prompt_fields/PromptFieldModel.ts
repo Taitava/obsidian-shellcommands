@@ -200,7 +200,7 @@ export class PromptFieldModel extends Model {
                             prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
                                 // It can be used.
                                 await this.plugin.saveSettings();
-                            }, (error_message: string | any) => {
+                            }, (error_message: string | unknown) => {
                                 if (typeof error_message === "string") {
                                     // This is a validation error message.
                                     // The target variable is reserved.

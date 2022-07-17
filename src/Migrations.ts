@@ -103,7 +103,7 @@ function EnsureShellCommandsHaveAllFields(plugin: SC_Plugin) {
         const shell_command_configuration = shell_command_configurations[shell_command_id];
         for (const property_name in shell_command_default_configuration) {
             // @ts-ignore property_default_value can have (almost) whatever datatype
-            const property_default_value: any = shell_command_default_configuration[property_name];
+            const property_default_value = shell_command_default_configuration[property_name];
             // @ts-ignore
             if (undefined === shell_command_configuration[property_name]) {
                 // This shell command does not have this property.

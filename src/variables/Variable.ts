@@ -323,7 +323,7 @@ export abstract class Variable {
 }
 
 interface IArguments {
-    [key: string]: any;
+    [key: string]: unknown;
 }
 
 /**

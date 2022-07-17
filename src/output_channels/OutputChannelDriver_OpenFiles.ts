@@ -185,7 +185,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                         }
                     }, 500); // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
                 }
-            }, (error_message: string | any) => {
+            }, (error_message: string | unknown) => {
                 if (typeof error_message === "string") {
                     // Opening the file has failed.
                     this.plugin.newError(error_message);

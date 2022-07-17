@@ -537,13 +537,13 @@ export class ExtraOptionsModal extends SC_Modal {
                             "value": "Execute with value:",
                         })
                         .setValue(default_value_configuration ? default_value_configuration.type : "show-errors")
-                        .onChange(async (new_type: string) => {
+                        .onChange(async (new_type: typeof default_value_configuration.type) => {
                             if (!default_value_configuration) {
                                 default_value_configuration = create_default_value_configuration();
                             }
 
                             // Set the new type
-                            default_value_configuration.type = new_type as any;
+                            default_value_configuration.type = new_type;
                             if ("show-errors" === new_type && default_value_configuration.value === "") {
                                 // If "show-errors" is selected and no text value is typed, the configuration file can be cleaned up by removing this configuration object completely.
                                 // Prevent deleting, if a text value is present, because the user might want to keep it if they will later change 'type' to 'value'.

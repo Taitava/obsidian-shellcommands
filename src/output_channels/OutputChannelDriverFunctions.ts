@@ -155,7 +155,7 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (const name in output_channel_drivers) {
-        const output_channel_driver: any = output_channel_drivers[name];
+        const output_channel_driver: OutputChannelDriver = output_channel_drivers[name];
         // Check that the stream is suitable for the channel
         if (output_channel_driver.acceptsOutputStream(output_stream)) {
             list[name] = output_channel_driver.getTitle(output_stream);

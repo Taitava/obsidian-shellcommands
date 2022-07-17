@@ -69,7 +69,7 @@ export function parseVariables(
             parsing_result.count_parsed_variables++;
 
             // Remove stuff that should not be iterated in a later loop.
-            const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {
+            const _arguments = argument_matches.filter((value: unknown /* Won't be used */, key: unknown) => {
                 return "number" === typeof key;
                 // This leaves out for example the following non-numeric keys (and their values):
                 // - "groups"
