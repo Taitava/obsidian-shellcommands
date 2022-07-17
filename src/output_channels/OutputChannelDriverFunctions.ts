@@ -17,7 +17,6 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {ShellCommandConfiguration} from "../settings/ShellCommandConfiguration";
 import SC_Plugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
 import {OutputChannelDriver} from "./OutputChannelDriver";

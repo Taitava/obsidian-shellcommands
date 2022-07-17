@@ -22,7 +22,6 @@ import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseVariables} from "../../variables/parseVariables";
 import {createAutocomplete} from "./Autocomplete";
-import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";

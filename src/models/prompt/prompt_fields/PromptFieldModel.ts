@@ -23,7 +23,6 @@ import {
 } from "obsidian";
 import {randomInteger} from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
 import {
     CustomVariableInstance,
     CustomVariableModel,

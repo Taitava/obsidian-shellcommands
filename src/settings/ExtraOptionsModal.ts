@@ -33,7 +33,6 @@ import {
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {createAutocomplete} from "./setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../variables/getVariableAutocompleteItems";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {
