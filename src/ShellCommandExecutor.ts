@@ -184,7 +184,7 @@ export class ShellCommandExecutor {
         }
 
         // Define an object for environment variables.
-        const environment_variables = cloneObject(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
+        const environment_variables = cloneObject<typeof process.env>(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
 
         // Augment the PATH environment variable (if wanted)
         const augmented_path = this.augmentPATHEnvironmentVariable(shell_command_parsing_result.environment_variable_path_augmentation);

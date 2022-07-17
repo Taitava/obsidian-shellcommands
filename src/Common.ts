@@ -101,8 +101,8 @@ export function getEditor(app: App): Editor {
     return null;
 }
 
-export function cloneObject(object: Object) {
-    return Object.assign({}, object);
+export function cloneObject<ObjectType>(object: Object): ObjectType{
+    return Object.assign({}, object) as ObjectType;
 }
 
 /**
