@@ -39,8 +39,6 @@ export function CreateShellCommandFieldCore(
     shell_command_placeholder = "Enter your command"
     ) {
 
-    let setting_group: SettingFieldGroup;
-
     function on_change(shell_command: string) {
         // Update preview
         setting_group.preview_setting.descEl.innerHTML = ""; // Remove previous content.
@@ -75,7 +73,7 @@ export function CreateShellCommandFieldCore(
         (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
-    setting_group = {
+    const setting_group: SettingFieldGroup = {
         name_setting:
             new Setting(container_element)
                 .setClass("SC-name-setting")
