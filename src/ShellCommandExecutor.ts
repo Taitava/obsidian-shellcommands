@@ -40,6 +40,7 @@ import {
 } from "./imports";
 import SC_Plugin from "./main";
 import {PlatformNames} from "./settings/SC_MainSettings";
+import {OutputChannel} from "./output_channels/OutputChannel";
 
 export class ShellCommandExecutor {
 
@@ -54,7 +55,7 @@ export class ShellCommandExecutor {
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
      */
-    public doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess) {
+    public doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
         const preactions = this.t_shell_command.getPreactions();
 
         // Does an already started ParsingProcess exist?
@@ -139,7 +140,7 @@ export class ShellCommandExecutor {
                         error_messages: [],
                     };
                     debugLog("Will call ShellCommandExecutor.executeShellCommand().");
-                    this.executeShellCommand(shell_command_parsing_result);
+                    this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
                 } else {
                     // Parsing has failed.
                     debugLog("Parsing the rest of the variables failed.")
@@ -159,8 +160,9 @@ export class ShellCommandExecutor {
      * Use confirmAndExecuteShellCommand() instead to have a confirmation asked before the execution.
      *
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
+     * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
-    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult) {
+    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannel) {
         const working_directory = this.getWorkingDirectory();
 
         // Check that the shell command is not empty
@@ -228,7 +230,7 @@ export class ShellCommandExecutor {
                         debugLog("User has ignored this error, so won't display it.");
 
                         // Handle only stdout output stream
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null);
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
                     } else {
                         // Show the error.
                         debugLog("Will display the error to user.");
@@ -241,7 +243,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle both stdout and stderr output streams
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code);
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
                     }
                 } else {
                     // Probably no errors, but do one more check.
@@ -261,7 +263,7 @@ export class ShellCommandExecutor {
                     }
 
                     // Handle output
-                    handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                    handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                 }
             });
         }
