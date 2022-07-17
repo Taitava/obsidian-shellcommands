@@ -28,7 +28,7 @@ import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
     generateIgnoredErrorCodesIconTitle,
-    generateShellCommandFieldName
+    generateShellCommandFieldIconAndName
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
@@ -51,9 +51,13 @@ import {
     PromptSettingsModal,
 } from "../imports";
 import {VariableDefaultValueConfiguration} from "../variables/Variable";
+import {
+    getIconHTML,
+    ICON_LIST_SORTED_UNIQUE,
+} from "../Icons";
 
 export class ExtraOptionsModal extends SC_Modal {
-    public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static ENVIRONMENTS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
@@ -140,7 +144,7 @@ export class ExtraOptionsModal extends SC_Modal {
             this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
 
             // UpdateShell commands settings panel
-            this.name_setting.setName(generateShellCommandFieldName(this.shell_command_id, this.t_shell_command));
+            this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.shell_command_id, this.t_shell_command);
 
             // Save
             await this.plugin.saveSettings();
@@ -161,6 +165,37 @@ export class ExtraOptionsModal extends SC_Modal {
 
         alias_container.createEl("p", {text: "If not empty, the alias will be displayed in the command palette instead of the actual command. An alias is never executed as a command."});
         alias_container.createEl("p", {text: "You can also use the same {{}} style variables in aliases that are used in shell commands. When variables are used in aliases, they do not affect the command execution in any way, but it's a nice way to reveal what values your command will use, even when an alias hides most of the other technical details. Starting a variable with {{! will prevent escaping special characters in command palette."});
+
+        // Icon field
+        const current_icon = this.t_shell_command.getConfiguration().icon;
+        const icon_setting = new Setting(container_element)
+            .setDesc("If defined, the icon will be shown in file menu, folder menu, and editor menu in front of the alias text. It's also shown in the settings. It makes it easier to distinguish different shell commands visually from each other.")
+            .addDropdown(dropdown => dropdown
+                .addOption("", "No icon")
+                .then((dropdown) => {
+                    // Iterate all available icons.
+                    for (const icon_id of ICON_LIST_SORTED_UNIQUE) {
+                        // Create an option for the icon.
+                        dropdown.addOption(icon_id, icon_id);
+                    }
+                    dropdown.setValue(current_icon ?? ""); // "" == the 'No icon' option.
+                })
+                .onChange(async (new_icon) => {
+                    // Change the icon
+                    this.t_shell_command.getConfiguration().icon = new_icon;
+
+                    // Update the icon in the modal
+                    icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(new_icon);
+
+                    // Update the icon in the main settings panel
+                    this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.shell_command_id, this.t_shell_command);
+
+                    // Save settings
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+        icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(current_icon)
 
         // Confirm execution field
         new Setting(container_element)

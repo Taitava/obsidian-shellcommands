@@ -47,6 +47,7 @@ import {
     PlatformId,
     PlatformNames,
 } from "./settings/SC_MainSettings";
+import {getIconHTML} from "./Icons";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -148,6 +149,20 @@ export class TShellCommand {
             }
         }
         return platform_ids_with_non_empty_shell_commands;
+    }
+
+    public getIconId() {
+        return this.configuration.icon;
+    }
+
+    public getIconHTML() {
+        if (this.configuration.icon) {
+            // An icon is defined.
+            return getIconHTML(this.configuration.icon);
+        } else {
+            // No icon is defined.
+            return "";
+        }
     }
 
     public getAlias() {

@@ -40,6 +40,7 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
 
         // Add a menu item.
         menu.addItem(item => item
+            .setIcon(t_shell_command.getIconId()) // Icon id can be null.
             .setTitle(title)
             .onClick(() => {
                 this.trigger(

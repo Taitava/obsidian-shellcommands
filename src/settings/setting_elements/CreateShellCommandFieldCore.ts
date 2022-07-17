@@ -31,7 +31,7 @@ import {EOL} from "os";
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
     container_element: HTMLElement,
-    setting_name: string,
+    setting_icon_and_name: string,
     shell_command: string,
     shell: string,
     t_shell_command: TShellCommand,
@@ -79,8 +79,10 @@ export function CreateShellCommandFieldCore(
     setting_group = {
         name_setting:
             new Setting(container_element)
-                .setName(setting_name)
                 .setClass("SC-name-setting")
+                .then((name_setting) => {
+                    name_setting.nameEl.innerHTML = setting_icon_and_name;
+                })
         ,
         shell_command_setting:
             new Setting(container_element)

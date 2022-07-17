@@ -63,7 +63,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
     const setting_group = CreateShellCommandFieldCore(
         plugin,
         container_element,
-        generateShellCommandFieldName(shell_command_id, t_shell_command),
+        generateShellCommandFieldIconAndName(shell_command_id, t_shell_command),
         shell_command,
         t_shell_command.getShell(),
         t_shell_command,
@@ -268,11 +268,12 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
  * @param t_shell_command
  * @public Exported because ShellCommandExtraOptionsModal uses this too.
  */
-export function generateShellCommandFieldName(shell_command_id: string, t_shell_command: TShellCommand) {
+export function generateShellCommandFieldIconAndName(shell_command_id: string, t_shell_command: TShellCommand) {
+    const icon_html = t_shell_command.getIconHTML() + " ";
     if (t_shell_command.getAlias()) {
-        return t_shell_command.getAlias();
+        return icon_html + t_shell_command.getAlias();
     }
-    return "Command #" + shell_command_id;
+    return icon_html + "Command #" + shell_command_id;
 }
 
 /**
