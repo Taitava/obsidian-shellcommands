@@ -27,7 +27,7 @@ export function createShellSelectionField(plugin: SC_Plugin, container_element: 
     let platform_id: PlatformId;
     for (platform_id in PlatformNames) {
         const platform_name = PlatformNames[platform_id];
-        let options: {};
+        let options: Record<string, string>;
         if (is_global_settings) {
             const current_system_default = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShell()) + ")" : "";
             options = {"default": "Use system default" + current_system_default};
