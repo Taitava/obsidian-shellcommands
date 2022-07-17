@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
 - [New variables: `{{new_note_folder_name}}` and `{{new_note_folder_path}}` (#235)](https://github.com/Taitava/obsidian-shellcommands/issues/235).
 - [Menu icons for shell commands (#240)](https://github.com/Taitava/obsidian-shellcommands/issues/240).
+- [Settings: 'Execute now' button: Ctrl/Cmd + click to temporarily direct output to the 'Ask after execution' modal (#241)](https://github.com/Taitava/obsidian-shellcommands/issues/241).
 - [Settings: Display a text when no shell commands exist (#231)](https://github.com/Taitava/obsidian-shellcommands/issues/231).
 
 ### To be Changed
