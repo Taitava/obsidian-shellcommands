@@ -82,8 +82,8 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
 
             // Special features
             const caret_parts: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column. If more parts are present, they will be used for making selections.
-            let new_pane: boolean = false;
-            let can_create_file: boolean = false;
+            let new_pane = false;
+            let can_create_file = false;
             let file_definition_interpreting_failed = false;
 
             file_definition_parts.forEach((file_definition_part: string) => {
@@ -115,7 +115,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             if (path.isAbsolute(open_file_path)) {
                 // The path is absolute.
                 // Check if it can be converted to relative.
-                let vault_absolute_path: string = getVaultAbsolutePath(this.app);
+                const vault_absolute_path: string = getVaultAbsolutePath(this.app);
                 if (open_file_path.toLocaleLowerCase().startsWith(vault_absolute_path.toLocaleLowerCase())) {
                     // Converting to relative is possible
                     open_file_path = open_file_path.substr(vault_absolute_path.length); // Get everything after the point where the vault path ends.
@@ -132,7 +132,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
             this.openFileInTab(open_file_path,  new_pane, can_create_file).then(() => {
                 // The file is now open
                 // Check, did we have a caret position available. If not, do nothing.
-                let count_caret_parts: number = caret_parts.length;
+                const count_caret_parts: number = caret_parts.length;
                 if (count_caret_parts > 0) {
                     // Yes, a caret position was defined in the output.
 

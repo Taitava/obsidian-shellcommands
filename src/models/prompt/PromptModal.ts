@@ -62,7 +62,7 @@ export class PromptModal extends SC_Modal {
         super.onOpen();
 
         // Parse and display title
-        let title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
+        const title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
         this.setTitle(
             title_parsing_result.succeeded
             ? title_parsing_result.parsed_content
@@ -71,7 +71,7 @@ export class PromptModal extends SC_Modal {
 
         // Parse and display description
         if (this.prompt.configuration.description) {
-            let description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
+            const description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
             const description =
                 description_parsing_result.succeeded
                 ? description_parsing_result.parsed_content
@@ -92,9 +92,9 @@ export class PromptModal extends SC_Modal {
             }
 
             // Create "Show variable values" toggle
-            let preview_variable_values: boolean = true;
-            const variable_names_visible_icon: string = "code-glyph";
-            const variable_values_visible_glyph: string = "price-tag-glyph";
+            let preview_variable_values = true;
+            const variable_names_visible_icon = "code-glyph";
+            const variable_values_visible_glyph = "price-tag-glyph";
             const preview_variable_values_setting = new Setting(this.modalEl)
                 .addExtraButton(button => button
                     .setIcon(variable_values_visible_glyph)

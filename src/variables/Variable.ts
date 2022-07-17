@@ -240,7 +240,7 @@ export abstract class Variable {
     public getAutocompleteItems(): IAutocompleteItem[] {
 
         // Check if the variable has at least one _mandatory_ parameter.
-        let parameters = ""
+        const parameters = ""
         let parameter_indicator = "";
         const parameter_names =
             Object.getOwnPropertyNames(this.getParameters())

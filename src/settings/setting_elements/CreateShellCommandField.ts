@@ -247,7 +247,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
     if (!is_new && t_shell_command.canHaveHotkeys()) {
         const hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);
         if (hotkeys) {
-            let hotkeys_joined: string = "";
+            let hotkeys_joined = "";
             hotkeys.forEach((hotkey: Hotkey) => {
                 if (hotkeys_joined) {
                     hotkeys_joined += "<br>"

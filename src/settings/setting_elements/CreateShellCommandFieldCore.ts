@@ -37,7 +37,7 @@ export function CreateShellCommandFieldCore(
     t_shell_command: TShellCommand,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
-    shell_command_placeholder: string = "Enter your command"
+    shell_command_placeholder = "Enter your command"
     ) {
 
     let setting_group: SettingFieldGroup;
@@ -59,7 +59,7 @@ export function CreateShellCommandFieldCore(
     }
 
     function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
-        let newlines_pattern = /\r\n|\r|\n/;
+        const newlines_pattern = /\r\n|\r|\n/;
         const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
         const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
         let count_lines_final = Math.max(

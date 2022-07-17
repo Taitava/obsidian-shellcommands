@@ -261,7 +261,7 @@ export class ExtraOptionsModal extends SC_Modal {
         });
 
         // Preaction: Prompt
-        let prompt_options: {[key: string]: string} = {};
+        const prompt_options: {[key: string]: string} = {};
         this.plugin.getPrompts().forEach((prompt: Prompt) => {
             prompt_options[prompt.getID()] = prompt.getTitle();
         });
@@ -590,7 +590,7 @@ export class ExtraOptionsModal extends SC_Modal {
         this.tab_structure.buttons[tab_id].click();
     }
 
-    private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description: string = "") {
+    private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description = "") {
         const output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
         return new Setting(container_element)
             .setName(title)

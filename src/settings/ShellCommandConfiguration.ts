@@ -62,7 +62,7 @@ export interface ShellCommandConfiguration {
     shell_command?: string;
 }
 
-export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
+export function newShellCommandConfiguration(shell_command = ""): ShellCommandConfiguration {
     return {
         platform_specific_commands: {
             default: shell_command,

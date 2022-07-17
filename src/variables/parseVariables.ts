@@ -133,7 +133,7 @@ export function parseVariables(
                 // The augmenter can modify the content of the variable_value_result object.
                 raw_value_augmenter(variable, variable_value_result);
             }
-            let raw_variable_value = variable_value_result.value;
+            const raw_variable_value = variable_value_result.value;
 
             // Check possible error messages that might have come from rendering.
             if (variable_value_result.succeeded) {

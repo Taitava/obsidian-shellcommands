@@ -32,7 +32,7 @@ export class IDGenerator {
     }
 
     public generateID(): string {
-        let generated_id: string = "";
+        let generated_id = "";
         while (generated_id.length < this.min_length || this.isIDReserved(generated_id)) {
             generated_id += this.generateCharacter();
         }

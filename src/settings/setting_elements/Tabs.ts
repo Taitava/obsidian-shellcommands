@@ -102,8 +102,8 @@ function tab_button_clicked(event: MouseEvent) {
     const container_element = tab_header.parentElement;
     const tab_contents = container_element.findAll("div.SC-tab-content"); // Do not get all tab contents that exist, because there might be multiple tab systems open at the same time.
     const is_main_settings_modal = container_element.hasClass("vertical-tab-content");
-    for (let index in tab_contents) {
-        let tab_content = tab_contents[index];
+    for (const index in tab_contents) {
+        const tab_content = tab_contents[index];
 
         // Get the maximum tab dimensions so that all tabs can have the same dimensions.
         // But don't do it if this is the main settings modal
@@ -124,7 +124,7 @@ function tab_button_clicked(event: MouseEvent) {
     // Remove active status from all buttons
     const adjacent_tab_buttons = tab_header.findAll(".SC-tab-header-button"); // Do not get all tab buttons that exist, because there might be multiple tab systems open at the same time.
     for (const index in adjacent_tab_buttons) {
-        let tab_button = adjacent_tab_buttons[index];
+        const tab_button = adjacent_tab_buttons[index];
         tab_button.removeClass("SC-tab-active");
     }
 
