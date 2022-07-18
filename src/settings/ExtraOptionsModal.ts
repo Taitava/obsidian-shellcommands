@@ -53,7 +53,7 @@ import {
 import {VariableDefaultValueConfiguration} from "../variables/Variable";
 import {
     getIconHTML,
-    ICON_LIST_SORTED_UNIQUE,
+    AUGMENTED_ICON_LIST,
 } from "../Icons";
 
 export class ExtraOptionsModal extends SC_Modal {
@@ -174,7 +174,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 .addOption("", "No icon")
                 .then((dropdown) => {
                     // Iterate all available icons.
-                    for (const icon_id of ICON_LIST_SORTED_UNIQUE) {
+                    for (const icon_id of AUGMENTED_ICON_LIST) {
                         // Create an option for the icon.
                         dropdown.addOption(icon_id, icon_id);
                     }
