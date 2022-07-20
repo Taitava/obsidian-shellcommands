@@ -27,6 +27,7 @@ export interface Tab {
 
 export interface TabStructure {
     header: HTMLElement,
+    active_tab_id: string,
     buttons: {
         [key: string]: HTMLElement,
     }
@@ -51,6 +52,12 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
     const tab_header = container_element.createEl("div", {attr: {class: "SC-tab-header"}});
     const tab_content_containers: TabContentContainers = {};
     const tab_buttons: TabButtons = {};
+    const tab_structure = {
+        header: tab_header,
+        active_tab_id: Object.keys(tabs)[0] as string, // Indicate that the first tab is active. This does not affect what tab is active in practise, it just reports the active tab.
+        buttons: tab_buttons,
+        contentContainers: tab_content_containers,
+    };
     let first_button: HTMLElement;
     for (const tab_id in tabs) {
         const tab = tabs[tab_id];
@@ -104,6 +111,9 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
             const tab_content = document.getElementById(activate_tab_id);
             tab_content.addClass("SC-tab-active");
 
+            // Mark the clicked tab as active in TabStructure (just to report which tab is currently active)
+            tab_structure.active_tab_id = activate_tab_id.replace(/^SC-tab-/, ""); // Remove "SC-tab" prefix.
+
             // Focus an element (if a focusable element is present)
             tab_content.find(".SC-focus-element-on-tab-opening")?.focus() // ? = If not found, do nothing.
 
@@ -138,11 +148,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
         first_button.click();
     }
 
-    // Return a TabStructure
-    return {
-        header: tab_header,
-        buttons: tab_buttons,
-        contentContainers: tab_content_containers,
-    };
+    // Return the TabStructure
+    return tab_structure;
 }
 

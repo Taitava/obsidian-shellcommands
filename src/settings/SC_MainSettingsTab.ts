@@ -53,6 +53,8 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
     private tab_structure: TabStructure;
 
+    public setting_groups: SettingFieldGroupContainer = {};
+
     constructor(app: App, plugin: SC_Plugin) {
         super(app, plugin);
         this.plugin = plugin;
@@ -425,4 +427,8 @@ export interface SettingFieldGroup {
     name_setting: Setting;
     shell_command_setting: Setting;
     preview_setting: Setting;
+}
+
+export interface SettingFieldGroupContainer {
+    [key: string]: SettingFieldGroup,
 }

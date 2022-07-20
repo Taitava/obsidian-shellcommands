@@ -51,6 +51,7 @@ import {
     PromptSettingsModal,
 } from "../imports";
 import {VariableDefaultValueConfiguration} from "../variables/Variable";
+import {CmdOrCtrl} from "../Hotkeys";
 
 export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Confirmation";
@@ -66,11 +67,11 @@ export class ExtraOptionsModal extends SC_Modal {
     private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
-    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, setting_tab: SC_MainSettingsTab) {
+    constructor(plugin: SC_Plugin, shell_command_id: string, setting_tab: SC_MainSettingsTab) {
         super(plugin);
         this.shell_command_id = shell_command_id;
         this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
-        this.name_setting = setting_group.name_setting;
+        this.name_setting = setting_tab.setting_groups[shell_command_id].name_setting;
         this.setting_tab = setting_tab;
     }
 
@@ -124,6 +125,27 @@ export class ExtraOptionsModal extends SC_Modal {
                 },
             },
         });
+
+        // Hotkeys for moving to next/previous shell command
+        const switch_to_t_shell_command = (t_shell_command: TShellCommand) => {
+            const new_modal = new ExtraOptionsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
+            this.close(); // Needs to be closed before the new one is opened, otherwise the new one's tab content won't be shown.
+            new_modal.open();
+            new_modal.activateTab(this.tab_structure.active_tab_id);
+        };
+        this.scope.register(["Mod"], "ArrowUp", () => {
+            if (this.t_shell_command.previousTShellCommand()) {
+                switch_to_t_shell_command(this.t_shell_command.previousTShellCommand());
+            }
+        });
+        this.scope.register(["Mod"], "ArrowDown", () => {
+            if (this.t_shell_command.nextTShellCommand()) {
+                switch_to_t_shell_command(this.t_shell_command.nextTShellCommand());
+            }
+        });
+        new Setting(this.modalEl)
+            .setDesc("Tip! Hit " + CmdOrCtrl() + " + up/down to switch to previous/next shell command.")
+        ;
     }
 
     private tabGeneral(container_element: HTMLElement) {

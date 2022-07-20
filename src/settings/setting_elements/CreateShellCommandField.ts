@@ -92,6 +92,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             await plugin.saveSettings();
         },
     );
+    setting_tab.setting_groups[shell_command_id] = setting_group;
 
     // Primary icon buttons
     setting_group.name_setting
@@ -114,7 +115,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
@@ -124,7 +125,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("note-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Preactions tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-preactions");
             })
@@ -134,7 +135,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
@@ -144,7 +145,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Environments tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-environments");
             })
@@ -154,7 +155,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Events tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
@@ -164,7 +165,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("code-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Variables tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, setting_tab);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
             })
