@@ -16,6 +16,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [New variables: `{{new_note_folder_name}}` and `{{new_note_folder_path}}` (#235)](https://github.com/Taitava/obsidian-shellcommands/issues/235).
 - [Menu icons for shell commands (#240)](https://github.com/Taitava/obsidian-shellcommands/issues/240).
    - In order to support a wider range of icons, the SC plugin's minimum required version of Obsidian is raised from `0.12.12` to `0.15.4`. In theory, I could have raised the requirement only to `0.13.27`, but I thought that when increasing it once, let's increase to the newest API version, so that future development maybe does not need to increase it soon again. :)
+- [Settings: Extra options modal: Add hotkeys to switch between shell commands (#243)](https://github.com/Taitava/obsidian-shellcommands/issues/243).
 - [Settings: 'Execute now' button: Ctrl/Cmd + click to temporarily direct output to the 'Ask after execution' modal (#241)](https://github.com/Taitava/obsidian-shellcommands/issues/241).
 - [Settings: Display a text when no shell commands exist (#231)](https://github.com/Taitava/obsidian-shellcommands/issues/231).
 
