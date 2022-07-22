@@ -192,7 +192,7 @@ export class ExtraOptionsModal extends SC_Modal {
         const icon_setting = new Setting(container_element)
             .setDesc("If defined, the icon will be shown in file menu, folder menu, and editor menu in front of the alias text. It's also shown in the settings. It makes it easier to distinguish different shell commands visually from each other.")
             .addDropdown(dropdown => dropdown
-                .addOption("", "No icon")
+                .addOption("no-icon", "No icon") // Need to use a non-empty string like "no-icon", because if 'value' would be "" then it becomes the same as 'display' from some reason, i.e. "No icon".
                 .then((dropdown) => {
                     // Iterate all available icons.
                     for (const icon_id of ICON_LIST_SORTED_UNIQUE) {
@@ -202,13 +202,21 @@ export class ExtraOptionsModal extends SC_Modal {
                     dropdown.setValue(current_icon ?? ""); // "" == the 'No icon' option.
                 })
                 .onChange(async (new_icon) => {
-                    // Change the icon
-                    this.t_shell_command.getConfiguration().icon = new_icon;
+                    if ("no-icon" === new_icon) {
+                        // Disable icon
+                        this.t_shell_command.getConfiguration().icon = null;
 
-                    // Update the icon in the modal
-                    icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(new_icon);
+                        // Remove the icon from the modal
+                        icon_setting.nameEl.innerHTML = "Icon";
+                    } else {
+                        // Set or change the icon
+                        this.t_shell_command.getConfiguration().icon = new_icon;
 
-                    // Update the icon in the main settings panel
+                        // Update the icon in the modal
+                        icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(new_icon);
+                    }
+
+                    // Update (or remove) the icon in the main settings panel
                     this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.shell_command_id, this.t_shell_command);
 
                     // Save settings
