@@ -494,6 +494,32 @@ export class TShellCommand {
         // Finished.
         return execution_uri_with_variables;
     }
+
+    /**
+     * Returns an adjacent TShellCommand that appears next in the configuration list. Returns undefined, if this is the
+     * last TShellCommand. Used in settings to switch quickly from one TShellCommand to another.
+     */
+    public nextTShellCommand() {
+        const t_shell_commands = Object.values(this.plugin.getTShellCommands());
+        const this_index = t_shell_commands.indexOf(this);
+        if (this_index === t_shell_commands.length - 1) {
+            return undefined;
+        }
+        return t_shell_commands[this_index + 1];
+    }
+
+    /**
+     * Returns an adjacent TShellCommand that appears before in the configuration list. Returns undefined, if this is the
+     * first TShellCommand. Used in settings to switch quickly from one TShellCommand to another.
+     */
+    public previousTShellCommand() {
+        const t_shell_commands = Object.values(this.plugin.getTShellCommands());
+        const this_index = t_shell_commands.indexOf(this);
+        if (this_index === 0) {
+            return undefined;
+        }
+        return t_shell_commands[this_index - 1];
+    }
 }
 
 export interface ShellCommandParsingResult {
