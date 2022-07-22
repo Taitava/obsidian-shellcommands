@@ -20,7 +20,7 @@
 // @ts-ignore
 import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
-import {SettingFieldGroup, SC_MainSettingsTab} from "./SC_MainSettingsTab";
+import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
