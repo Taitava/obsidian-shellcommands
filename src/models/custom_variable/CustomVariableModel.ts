@@ -101,7 +101,7 @@ export class CustomVariableModel extends Model {
                         instance.getCustomVariable().updateProperties(); // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
                         this.plugin.updateCustomVariableViews();
-                    }, (reason: string | any) => {
+                    }, (reason: string | unknown) => {
                         // Not valid
                         if (typeof reason === "string") {
                             // This is a validation error message.

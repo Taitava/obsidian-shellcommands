@@ -22,7 +22,6 @@ import {
     TextComponent,
 } from "obsidian";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
 import SC_Plugin from "../../../main";
 import {SC_Event} from "../../../events/SC_Event";
 import {parseVariables} from "../../../variables/parseVariables";

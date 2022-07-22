@@ -67,7 +67,7 @@ export class CustomVariableView extends ItemView {
                 custom_variable_value = "An empty text.";
                 emphasize = true;
             }
-            const variable_list_element: any = this.container_element.createEl("ul");
+            const variable_list_element: HTMLUListElement = this.container_element.createEl("ul");
             const variable_list_item_element = variable_list_element.createEl("li", {
                 text: custom_variable_instance.getFullName(),
                 attr: {

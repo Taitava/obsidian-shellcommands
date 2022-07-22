@@ -33,15 +33,17 @@ import {
 import {
     ShellCommandExecutor
 } from "../../imports";
+import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
 
 /**
  *
  * @param plugin
  * @param container_element
+ * @param setting_tab
  * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
  */
-export function createShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, shell_command_id: string, show_autocomplete_menu: boolean) {
+export function createShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, setting_tab: SC_MainSettingsTab, shell_command_id: string, show_autocomplete_menu: boolean) {
     const is_new = "new" === shell_command_id;
     let t_shell_command: TShellCommand;
     if (is_new) {
@@ -63,7 +65,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
     const setting_group = CreateShellCommandFieldCore(
         plugin,
         container_element,
-        generateShellCommandFieldName(shell_command_id, t_shell_command),
+        generateShellCommandFieldIconAndName(shell_command_id, t_shell_command),
         shell_command,
         t_shell_command.getShell(),
         t_shell_command,
@@ -90,19 +92,23 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             await plugin.saveSettings();
         },
     );
+    setting_tab.setting_groups[shell_command_id] = setting_group;
 
     // Primary icon buttons
     setting_group.name_setting
         .addExtraButton(button => button
-            .setTooltip("Execute now")
+            .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
             .setIcon("run-command")
-            .onClick(() => {
+            .extraSettingsEl.addEventListener("click", (event: MouseEvent) => {
+                const ctrl_clicked = event.ctrlKey;
                 // Execute the shell command now (for trying it out in the settings)
-                const t_shell_command = plugin.getTShellCommands()[shell_command_id]; // TODO: Is this redundant? Could the t_shell_command defined in lines 22 / 26 (near 'const is_new') be used?
                 const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
                 if (parsing_process.process()) {
                     const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
-                    executor.doPreactionsAndExecuteShellCommand(parsing_process);
+                    executor.doPreactionsAndExecuteShellCommand(
+                        parsing_process,
+                        ctrl_clicked ? "modal" : undefined // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
+                    );
                 } else {
                     parsing_process.displayErrorMessages();
                 }
@@ -112,7 +118,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
@@ -122,7 +128,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("note-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Preactions tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-preactions");
             })
@@ -132,7 +138,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
@@ -142,7 +148,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Environments tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-environments");
             })
@@ -152,7 +158,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Events tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
@@ -162,7 +168,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("code-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Variables tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_group, this);
+                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
             })
@@ -247,7 +253,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
     if (!is_new && t_shell_command.canHaveHotkeys()) {
         const hotkeys = getHotkeysForShellCommand(plugin, shell_command_id);
         if (hotkeys) {
-            let hotkeys_joined: string = "";
+            let hotkeys_joined = "";
             hotkeys.forEach((hotkey: Hotkey) => {
                 if (hotkeys_joined) {
                     hotkeys_joined += "<br>"
@@ -268,11 +274,12 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
  * @param t_shell_command
  * @public Exported because ShellCommandExtraOptionsModal uses this too.
  */
-export function generateShellCommandFieldName(shell_command_id: string, t_shell_command: TShellCommand) {
+export function generateShellCommandFieldIconAndName(shell_command_id: string, t_shell_command: TShellCommand) {
+    const icon_html = t_shell_command.getIconHTML() + " ";
     if (t_shell_command.getAlias()) {
-        return t_shell_command.getAlias();
+        return icon_html + t_shell_command.getAlias();
     }
-    return "Command #" + shell_command_id;
+    return icon_html + "Command #" + shell_command_id;
 }
 
 /**

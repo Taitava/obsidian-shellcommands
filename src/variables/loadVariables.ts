@@ -50,6 +50,9 @@ import {Variable_EventOldFilePath} from "./event_variables/Variable_EventOldFile
 import {Variable_EventOldFolderName} from "./event_variables/Variable_EventOldFolderName";
 import {Variable_EventOldFolderPath} from "./event_variables/Variable_EventOldFolderPath";
 import {Variable_EventOldTitle} from "./event_variables/Variable_EventOldTitle";
+import {Variable_NewNoteFolderName} from "./Variable_NewNoteFolderName";
+import {Variable_NewNoteFolderPath} from "./Variable_NewNoteFolderPath";
+
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
 
@@ -73,6 +76,8 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_FilePath(plugin),
         new Variable_FolderName(plugin),
         new Variable_FolderPath(plugin),
+        new Variable_NewNoteFolderName(plugin),
+        new Variable_NewNoteFolderPath(plugin),
         new Variable_Selection(plugin),
         new Variable_Tags(plugin),
         new Variable_Title(plugin),

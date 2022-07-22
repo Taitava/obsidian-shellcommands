@@ -54,6 +54,6 @@ export class Variable_EventFolderName extends EventVariable {
         }
 
         const folder = sc_event.getFolder();
-        return folder.name;
+        return folder.name; // TODO: Consider changing to `return folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
     }
 }

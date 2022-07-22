@@ -42,6 +42,7 @@ export interface ShellCommandConfiguration {
     platform_specific_commands: IPlatformSpecificStringWithDefault;
     shells: IPlatformSpecificString;
     alias: string;
+    icon: string | null;
     confirm_execution: boolean;
     ignore_error_codes: number[];
     output_channels: {
@@ -61,13 +62,14 @@ export interface ShellCommandConfiguration {
     shell_command?: string;
 }
 
-export function newShellCommandConfiguration(shell_command: string = ""): ShellCommandConfiguration {
+export function newShellCommandConfiguration(shell_command = ""): ShellCommandConfiguration {
     return {
         platform_specific_commands: {
             default: shell_command,
         },
         shells: {},
         alias: "",
+        icon: null,
         confirm_execution: false,
         ignore_error_codes: [],
         output_channels: {

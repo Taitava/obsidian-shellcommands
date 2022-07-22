@@ -32,7 +32,6 @@ import {
     PromptFieldModel,
 } from "../../imports";
 import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 
 export class PromptSettingsModal extends SC_Modal {
 

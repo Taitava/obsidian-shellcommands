@@ -164,7 +164,7 @@ export abstract class SC_Event {
      * @param enabled
      */
     public getDefaultConfiguration(enabled: boolean): SC_EventConfiguration {
-        const configuration = cloneObject(this.default_configuration);
+        const configuration = cloneObject<SC_EventConfiguration>(this.default_configuration);
         configuration.enabled = enabled;
         return configuration
     }

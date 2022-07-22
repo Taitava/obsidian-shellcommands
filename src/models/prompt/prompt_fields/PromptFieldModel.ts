@@ -23,7 +23,6 @@ import {
 } from "obsidian";
 import {randomInteger} from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
-import {getVariableAutocompleteItems} from "../../../variables/getVariableAutocompleteItems";
 import {
     CustomVariableInstance,
     CustomVariableModel,
@@ -201,7 +200,7 @@ export class PromptFieldModel extends Model {
                             prompt_field.setIfValid("target_variable_id", new_target_variable_id).then(async () => {
                                 // It can be used.
                                 await this.plugin.saveSettings();
-                            }, (error_message: string | any) => {
+                            }, (error_message: string | unknown) => {
                                 if (typeof error_message === "string") {
                                     // This is a validation error message.
                                     // The target variable is reserved.
@@ -250,7 +249,7 @@ export class PromptFieldModel extends Model {
 
     public validateValue(prompt_field: PromptField, field: keyof PromptFieldConfiguration, value: unknown): Promise<void> {
         switch (field) {
-            case "target_variable_id":
+            case "target_variable_id": {
                 const new_target_variable_id: string = value as string; // A more descriptive name for 'value'.
 
                 // Always allow an empty target_variable_id. A Prompt cannot be opened if a field lacks a target_variable_id, but it's allowed to be stored in the configuration, because new Prompts cannot have a default selected target variable.
@@ -272,10 +271,10 @@ export class PromptFieldModel extends Model {
                 }
                 // All fields have been checked and no collisions were found.
                 return Promise.resolve();
-
-            default:
+            } default: {
                 // No validation for other fields.
                 throw new Error(this.constructor.name + ".validateValue(): No validation is implemented for other fields.");
+            }
         }
     }
 

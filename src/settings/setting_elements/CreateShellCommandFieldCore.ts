@@ -22,7 +22,6 @@ import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseVariables} from "../../variables/parseVariables";
 import {createAutocomplete} from "./Autocomplete";
-import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
@@ -31,16 +30,14 @@ import {EOL} from "os";
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
     container_element: HTMLElement,
-    setting_name: string,
+    setting_icon_and_name: string,
     shell_command: string,
     shell: string,
     t_shell_command: TShellCommand,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
-    shell_command_placeholder: string = "Enter your command"
+    shell_command_placeholder = "Enter your command"
     ) {
-
-    let setting_group: SettingFieldGroup;
 
     function on_change(shell_command: string) {
         // Update preview
@@ -59,7 +56,7 @@ export function CreateShellCommandFieldCore(
     }
 
     function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
-        let newlines_pattern = /\r\n|\r|\n/;
+        const newlines_pattern = /\r\n|\r|\n/;
         const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
         const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
         let count_lines_final = Math.max(
@@ -76,11 +73,13 @@ export function CreateShellCommandFieldCore(
         (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
-    setting_group = {
+    const setting_group: SettingFieldGroup = {
         name_setting:
             new Setting(container_element)
-                .setName(setting_name)
                 .setClass("SC-name-setting")
+                .then((name_setting) => {
+                    name_setting.nameEl.innerHTML = setting_icon_and_name;
+                })
         ,
         shell_command_setting:
             new Setting(container_element)

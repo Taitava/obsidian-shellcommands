@@ -175,7 +175,8 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
     }
 
     // Try to parse YAML syntax
-    let yaml: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let yaml: any; // 'any' is defined in obsidian.d.ts for the return type of parseYaml(), so I made ESLint ignore it.
     try {
         yaml = parseYaml(custom_autocomplete_yaml);
     } catch (error) {

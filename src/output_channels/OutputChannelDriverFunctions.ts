@@ -17,7 +17,6 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {ShellCommandConfiguration} from "../settings/ShellCommandConfiguration";
 import SC_Plugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
 import {OutputChannelDriver} from "./OutputChannelDriver";
@@ -50,7 +49,17 @@ registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
 registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
 registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
 
-export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null) {
+/**
+ *
+ * @param plugin
+ * @param t_shell_command
+ * @param shell_command_parsing_result
+ * @param stdout
+ * @param stderr
+ * @param error_code
+ * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from t_shell_command.
+ */
+export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null, overriding_output_channel?: OutputChannel) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
     const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
@@ -92,15 +101,31 @@ export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TSh
         };
     }
 
+    // Check if output channels should be overridden?
+    let output_channels: {
+        stdout: OutputChannel,
+        stderr: OutputChannel,
+    };
+    if (overriding_output_channel) {
+        // Override output channels
+        output_channels = {
+            "stdout": overriding_output_channel,
+            "stderr": overriding_output_channel,
+        };
+    } else {
+        // Use the normal output channels.
+        output_channels = shell_command_configuration.output_channels;
+    }
+
     // Should stderr be processed same time with stdout?
-    if (shell_command_configuration.output_channels.stdout === shell_command_configuration.output_channels.stderr) {
+    if (output_channels.stdout === output_channels.stderr) {
         // Stdout and stderr use the same channel.
         // Make one handling call.
         handle_stream(
             plugin,
             t_shell_command,
             shell_command_parsing_result,
-            shell_command_configuration.output_channels.stdout,
+            output_channels.stdout,
             output,
             error_code,
         );
@@ -109,7 +134,7 @@ export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TSh
         // Make two handling calls.
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            const output_channel_name = shell_command_configuration.output_channels[output_stream_name];
+            const output_channel_name = output_channels[output_stream_name];
             const output_message = output[output_stream_name];
             const separated_output: OutputStreams = {};
             separated_output[output_stream_name] = output_message;
@@ -156,7 +181,7 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (const name in output_channel_drivers) {
-        const output_channel_driver: any = output_channel_drivers[name];
+        const output_channel_driver: OutputChannelDriver = output_channel_drivers[name];
         // Check that the stream is suitable for the channel
         if (output_channel_driver.acceptsOutputStream(output_stream)) {
             list[name] = output_channel_driver.getTitle(output_stream);

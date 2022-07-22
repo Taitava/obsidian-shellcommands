@@ -69,7 +69,7 @@ export function parseVariables(
             parsing_result.count_parsed_variables++;
 
             // Remove stuff that should not be iterated in a later loop.
-            const _arguments = argument_matches.filter((value: any/* Won't be used */, key: any) => {
+            const _arguments = argument_matches.filter((value: unknown /* Won't be used */, key: unknown) => {
                 return "number" === typeof key;
                 // This leaves out for example the following non-numeric keys (and their values):
                 // - "groups"
@@ -133,7 +133,7 @@ export function parseVariables(
                 // The augmenter can modify the content of the variable_value_result object.
                 raw_value_augmenter(variable, variable_value_result);
             }
-            let raw_variable_value = variable_value_result.value;
+            const raw_variable_value = variable_value_result.value;
 
             // Check possible error messages that might have come from rendering.
             if (variable_value_result.succeeded) {

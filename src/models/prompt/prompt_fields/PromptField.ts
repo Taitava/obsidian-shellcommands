@@ -77,14 +77,14 @@ export abstract class PromptField extends Instance {
      * Gets a value from the form field.
      * @protected
      */
-    protected abstract getValue(): any;
+    protected abstract getValue(): string;
 
     /**
      * Sets a value to the form field.
      * @param value
      * @protected
      */
-    protected abstract setValue(value: any): void;
+    protected abstract setValue(value: string): void;
 
     /**
      * Parses the default value and sets it to the form element.

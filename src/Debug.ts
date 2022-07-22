@@ -32,7 +32,7 @@ export function setDEBUG_ON(value: boolean) {
  * Calls console.log(), but only if debugging is enabled.
  * @param message
  */
-export function debugLog(message: any) {
+export function debugLog(message: unknown) {
     if (DEBUG_ON) {
         console.log(message);
     }

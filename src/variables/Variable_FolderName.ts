@@ -28,6 +28,6 @@ export class Variable_FolderName extends FolderVariable {
         if (!folder) {
             return null; // null indicates that getting a value has failed and the command should not be executed.
         }
-        return folder.name;
+        return folder.name; // TODO: Consider changing to `return folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
     }
 }
