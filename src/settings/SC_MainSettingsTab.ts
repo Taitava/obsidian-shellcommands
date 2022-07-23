@@ -129,6 +129,11 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     }
 
     private tabShellCommands(container_element: HTMLElement) {
+        // Show a search field if there are a lot of shell commands
+        if (Object.values(this.plugin.getTShellCommands()).length > 5) {
+            this.createSearchField(container_element);
+        }
+
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         const command_fields_container = container_element.createEl("div");
 
@@ -155,6 +160,83 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     no_shell_commands_paragraph.hide();
                     debugLog("New empty command created.");
                 })
+            )
+        ;
+    }
+
+    private createSearchField(container_element: HTMLElement) {
+        const search_container = container_element.createDiv();
+        const search_title: any = "Search shell commands";
+        const search_setting = new Setting(search_container)
+            .setName(search_title)
+            .setDesc("Looks up shell commands' aliases, commands, ids and icons.")
+            .addSearch(search_component => search_component
+                .onChange((search_term: string) => {
+                    let count_matches = 0;
+                    for (const shell_command_id in this.plugin.getTShellCommands()) {
+                        let matched = false;
+                        // Check if a search term was defined.
+                        if ("" == search_term) {
+                            // Show all shell commands.
+                            matched = true;
+                        } else {
+                            // A search term is defined.
+                            // Define fields where to look for the search term
+                            const t_shell_command = this.plugin.getTShellCommands()[shell_command_id];
+                            const search_targets: string[] = [
+                                t_shell_command.getId(),
+                                t_shell_command.getConfiguration().alias,
+                            ];
+                            search_targets.push(...Object.values(t_shell_command.getPlatformSpecificShellCommands()));
+                            // Only include icon in the search if it's defined.
+                            if (t_shell_command.getConfiguration().icon) {
+                                search_targets.push(t_shell_command.getConfiguration().icon);
+                            }
+
+                            // Check if it's a match
+                            search_targets.forEach((search_target: string) => {
+                                if (search_target.toLocaleLowerCase().contains(search_term.toLocaleLowerCase())) {
+                                    matched = true;
+                                    debugLog("Search " + search_term + " MATCHED " + search_target);
+                                }
+                            });
+                        }
+
+                        // Show or hide the shell command.
+                        const shell_command_element = document.querySelector("div.SC-id-" + shell_command_id);
+                        if (!shell_command_element) {
+                            throw new Error("Shell command setting element does not exist with selector div.SC-id-" + shell_command_id);
+                        }
+                        if (matched) {
+                            shell_command_element.removeClass("SC-hide");
+                            count_matches++;
+                        } else {
+                            shell_command_element.addClass("SC-hide");
+                        }
+                    }
+
+                    // Display match count
+                    if ("" == search_term) {
+                        // Don't show match count.
+                        search_setting.setName(search_title);
+                    } else {
+                        // Show match count.
+                        switch (count_matches) {
+                            case 0: {
+                                search_setting.setName("No matches");
+                                break;
+                            }
+                            case 1: {
+                                search_setting.setName("1 match");
+                                break;
+                            }
+                            default: {
+                                search_setting.setName(count_matches + " matches");
+                                break;
+                            }
+                        }
+                    }
+                }),
             )
         ;
     }
