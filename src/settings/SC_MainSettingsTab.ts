@@ -405,10 +405,12 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Go to last position now
         this.tab_structure.buttons[last_position.tab_name].click();
-        container_element.scrollTo({
-            top: this.last_position.scroll_position,
-            behavior: "auto",
-        });
+        window.setTimeout(() => { // Need to delay the scrolling a bit. Without this, something else would override scrolling and scroll back to 0.
+            container_element.scrollTo({
+                top: this.last_position.scroll_position,
+                behavior: "auto",
+            });
+        }, 0); // 'timeout' can be 0 ms, no need to wait any longer.
 
         // Listen to changes
         container_element.addEventListener("scroll", (event) => {
