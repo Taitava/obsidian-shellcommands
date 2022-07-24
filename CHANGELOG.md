@@ -16,6 +16,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
 - [Autocomplete: sort items more intelligently (#249)](https://github.com/Taitava/obsidian-shellcommands/issues/249).
 
+### To be Fixed
+- [Fix: Scroll position is not always remembered in settings (#245)](https://github.com/Taitava/obsidian-shellcommands/issues/245).
+
 ## [0.14.0] - 2022-07-22
 
 **SC VERSION `0.14.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `0.15.4`. Older versions of Obsidian cannot upgrade SC to `0.14.0`. Read more below.**
