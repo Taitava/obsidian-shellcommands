@@ -21,14 +21,14 @@ import {debugLog} from "./Debug";
 
 export class IDGenerator {
     constructor(
-        private current_ids: string[] = [], // TODO: Rename to reserved_ids
+        private reserved_ids: string[] = [],
         private readonly min_length = 10,
         private readonly characters = "abcdefghijklmnopqrstuvwxyz0123456789",
     ) {}
 
-    public addCurrentID(id: string) {
+    public addReservedID(id: string) {
         debugLog(IDGenerator.name + ": Adding id " + id + " to the list of reserved ids.");
-        this.current_ids.push(id);
+        this.reserved_ids.push(id);
     }
 
     public generateID(): string {
@@ -36,13 +36,13 @@ export class IDGenerator {
         while (generated_id.length < this.min_length || this.isIDReserved(generated_id)) {
             generated_id += this.generateCharacter();
         }
-        this.current_ids.push(generated_id);
+        this.reserved_ids.push(generated_id);
         debugLog(IDGenerator.name + ": Generated id " + generated_id);
         return generated_id;
     }
 
     public getReservedIDs() {
-        return this.current_ids;
+        return this.reserved_ids;
     }
 
     private generateCharacter(): string {
@@ -52,7 +52,7 @@ export class IDGenerator {
     }
 
     private isIDReserved(id: string): boolean {
-        return this.current_ids.contains(id);
+        return this.reserved_ids.contains(id);
     }
 }
 
