@@ -129,10 +129,8 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     }
 
     private tabShellCommands(container_element: HTMLElement) {
-        // Show a search field if there are a lot of shell commands
-        if (Object.values(this.plugin.getTShellCommands()).length > 5) {
-            this.createSearchField(container_element);
-        }
+        // Show a search field
+        this.createSearchField(container_element);
 
         // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
         const command_fields_container = container_element.createEl("div");
