@@ -33,6 +33,7 @@ import {
 } from "../Common";
 import * as path from "path";
 import {EOL} from "os";
+import {debugLog} from "../Debug";
 
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
     protected readonly title = "Open a file";
@@ -48,21 +49,29 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
     protected _handle(output: OutputStreams, error_code: number | null): void {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            // Get parts that define different details about how the file should be opened
-            const file_definition = output[output_stream_name].trim(); // Contains at least a file name, and MAYBE: a caret position, new pane option, and view state
-            const file_definition_parts = file_definition.split(":");
 
-            // Future compatibility: Ensure there is no newline characters in-between the output.
-            // This is to reserve newline usage to future when this output channel will support opening multiple files at once.
-            // TODO: Remove this check when multi-file support is implemented.
-            if (file_definition.match(/[\r\n]/u)) {
-                // Bad, the output contains a newline.
-                this.plugin.newErrors([
-                    "Cannot open file: The output contains linebreaks: " + file_definition,
-                    "Linebreaks will be supported in a future version of SC that allows defining multiple files to open at once.",
-                ]);
-                return;
+            // Read file definitions. Usually there's just one, but there can be many. Definitions are separated by newline
+            // characters. Each file definition defines one file to be opened.
+            const file_definitions_string = output[output_stream_name].trim(); // Contains at least file name(s), and MAYBE: a caret position, new pane option, and view state
+            const file_definitions = file_definitions_string.split(/[\r\n]+/u);
+
+            // Iterate all file definitions that should be opened.
+            let opening_pipeline = Promise.resolve();
+            for (const file_definition of file_definitions) {
+                // Chain each file opening to happen one after another. If one file opening fails for whatever reason, it
+                // is ok to continue to open the next file. This is why .finally() is used instead of .then().
+                opening_pipeline = opening_pipeline.finally(() => {
+                    return this.interpretFileOpeningDefinition(file_definition);
+                });
             }
+        }
+    }
+
+    private interpretFileOpeningDefinition(file_definition: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            debugLog("OutputChannelDriver_OpenFiles: Interpreting file opening definition: " + file_definition);
+            // Get parts that define different details about how the file should be opened
+            const file_definition_parts = file_definition.split(":");
 
             // The first part is always the file path
             let open_file_path = file_definition_parts.shift();
@@ -108,6 +117,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                 }
             });
             if (file_definition_interpreting_failed) {
+                reject();
                 return;
             }
 
@@ -122,6 +132,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                 } else {
                     // Cannot convert to relative, because the file does not reside in the vault
                     this.plugin.newError("Cannot open file '" + open_file_path + "' as the path is outside this vault.")
+                    reject();
                     return;
                 }
             }
@@ -147,10 +158,12 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                     if (count_caret_parts == 3) {
                         // Incorrect amount of caret parts
                         this.plugin.newError(error_message_base + "Three numeric parts is an incorrect amount, correct would be 1,2 or 4 parts.");
+                        reject();
                         return;
                     } else if (count_caret_parts > 4 && count_caret_parts % 4 !== 0) {
                         // Incorrect amount of caret parts
                         this.plugin.newError(error_message_base + "Perhaps too many numeric parts are defined? If more than four parts are defined, make sure to define complete sets of four parts. The amount of numeric parts needs to be dividable by 4.");
+                        reject();
                         return;
                     }
 
@@ -182,8 +195,18 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                                 const caret_column: number = caret_parts[1] ?? 1;
                                 editor.setCursor(prepareEditorPosition(editor, caret_line, caret_column));
                             }
+
+                            // After placing carets / selecting text, have a small delay after allowing to open another file (in case multiple files are opened in a row). This allows the selection to be remembered in the pane's history.
+                            window.setTimeout(resolve, 300); // If you change this ADDITIONAL delay, remember to change it in the documentation, too.
+                        } else {
+                            // No editor
+                            this.plugin.newError("File opened, but caret cannot be positioned because no editor was found.");
+                            reject();
                         }
                     }, 500); // 500ms is probably long enough even if a new tab is opened (takes more time than opening a file into an existing tab). This can be made into a setting sometime. If you change this, remember to change it in the documentation, too.
+                } else {
+                    // No caret parts exist. All is done now.
+                    resolve();
                 }
             }, (error_message: string | unknown) => {
                 if (typeof error_message === "string") {
@@ -193,8 +216,9 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                     // Some other runtime error has occurred.
                     throw error_message;
                 }
+                reject();
             });
-        }
+        });
     }
 
     private openFileInTab(file_path: string, new_pane: boolean, can_create_file: boolean): Promise<void> {
