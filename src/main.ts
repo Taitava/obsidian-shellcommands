@@ -190,7 +190,7 @@ export default class SC_Plugin extends Plugin {
 	 * configuration to disk. To save the addition, call saveSettings().
 	 */
 	public newTShellCommand() {
-		const shell_command_id = this.generateNewShellCommandID();
+		const shell_command_id = getIDGenerator().generateID();
 		const shell_command_configuration = newShellCommandConfiguration();
 		this.settings.shell_commands[shell_command_id] = shell_command_configuration;
 		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_id, shell_command_configuration);
@@ -534,21 +534,6 @@ export default class SC_Plugin extends Plugin {
 		// This unfortunately accesses a private API.
 		// @ts-ignore
 		await this.app.plugins.disablePlugin(this.manifest.id);
-	}
-
-	/**
-	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
-	 */
-	private generateNewShellCommandID() {
-		const existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
-		let new_id = 0;
-		for (const i in existing_ids) {
-			const existing_id = parseInt(existing_ids[i]);
-			if (existing_id >= new_id) {
-				new_id = existing_id + 1;
-			}
-		}
-		return String(new_id);
 	}
 
 	public getPluginId() {

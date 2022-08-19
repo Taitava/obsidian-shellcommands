@@ -34,6 +34,7 @@ import {getUsedVariables} from "./variables/parseVariables";
 import {
     createPreaction,
     CustomVariable,
+    getIDGenerator,
     getPATHAugmentation,
     ParsingProcess,
     Preaction,
@@ -67,6 +68,9 @@ export class TShellCommand {
         this.plugin = plugin;
         this.id = shell_command_id;
         this.configuration = configuration;
+
+        // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new shell commands.
+        getIDGenerator().addReservedID(shell_command_id);
     }
 
     public getPlugin() {
