@@ -165,7 +165,7 @@ export class ExtraOptionsModal extends SC_Modal {
             this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
 
             // UpdateShell commands settings panel
-            this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.shell_command_id, this.t_shell_command);
+            this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);
 
             // Save
             await this.plugin.saveSettings();
@@ -217,7 +217,7 @@ export class ExtraOptionsModal extends SC_Modal {
                     }
 
                     // Update (or remove) the icon in the main settings panel
-                    this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.shell_command_id, this.t_shell_command);
+                    this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);
 
                     // Save settings
                     await this.plugin.saveSettings();
