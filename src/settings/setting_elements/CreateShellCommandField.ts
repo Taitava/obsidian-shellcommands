@@ -62,9 +62,13 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         shell_command = t_shell_command.getDefaultShellCommand();
     }
 
+    // Wrap all shell command setting elements in a single div.
+    const shell_command_element = container_element.createDiv();
+    shell_command_element.addClass("SC-id-" + shell_command_id);
+
     const setting_group = CreateShellCommandFieldCore(
         plugin,
-        container_element,
+        shell_command_element,
         generateShellCommandFieldIconAndName(t_shell_command),
         shell_command,
         t_shell_command.getShell(),
@@ -178,7 +182,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             .setIcon("trash")
             .onClick(async () => {
                 // Open a delete modal
-                const modal = new DeleteModal(plugin, shell_command_id, setting_group, container_element);
+                const modal = new DeleteModal(plugin, shell_command_id, setting_group, shell_command_element);
                 modal.open();
             })
         )

@@ -31,14 +31,14 @@ export class DeleteModal extends SC_Modal {
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
     private setting_group: SettingFieldGroup;
-    private container_element: HTMLElement;
+    private shell_command_element: HTMLElement;
 
-    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, container_element: HTMLElement) {
+    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, shell_command_element: HTMLElement) {
         super(plugin);
         this.shell_command_id = shell_command_id;
         this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
         this.setting_group = setting_group;
-        this.container_element = container_element;
+        this.shell_command_element = shell_command_element;
     }
 
     public onOpen() {
@@ -65,9 +65,7 @@ export class DeleteModal extends SC_Modal {
         this.plugin.settings.shell_commands.splice(shell_command_index,1); // Remove from the plugin's settings.
 
         // Remove the setting fields
-        this.container_element.removeChild(this.setting_group.name_setting.settingEl);
-        this.container_element.removeChild(this.setting_group.shell_command_setting.settingEl);
-        this.container_element.removeChild(this.setting_group.preview_setting.settingEl);
+        this.shell_command_element.remove();
 
         await this.plugin.saveSettings();
         debugLog("Command removed.");
