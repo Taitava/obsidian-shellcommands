@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
 ### To be Added
+- [New variables: {{file_uri}} and {{event_file_uri}} (#258)](https://github.com/Taitava/obsidian-shellcommands/issues/258).
 - [Settings: Add a search field for shell commands (#246)](https://github.com/Taitava/obsidian-shellcommands/issues/246).
 
 ### To be Changed
