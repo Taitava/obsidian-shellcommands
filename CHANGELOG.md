@@ -14,6 +14,8 @@ Features that are in development, but are not released yet. Does not include stu
 - [Settings: Add a search field for shell commands (#246)](https://github.com/Taitava/obsidian-shellcommands/issues/246).
 
 ### To be Changed
+- [New shell commands will have alphanumeric ids instead of numeric (#253)](https://github.com/Taitava/obsidian-shellcommands/issues/253).
+- [Output channel 'Open file' supports opening multiple files (#255)](https://github.com/Taitava/obsidian-shellcommands/issues/255).
 - [Autocomplete: sort items more intelligently (#249)](https://github.com/Taitava/obsidian-shellcommands/issues/249).
 
 ### To be Fixed
