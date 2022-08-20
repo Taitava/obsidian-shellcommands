@@ -89,9 +89,7 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ShellCommandParsingProcess,
 	} = {};
 
-	private static readonly BASE_URI_ACTION = "shell-commands"
-
-	public static readonly BASE_URI = `obsidian://${SC_Plugin.BASE_URI_ACTION}/`;
+	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
 
 	public async onload() {
 		debugLog('loading plugin');
@@ -199,6 +197,37 @@ export default class SC_Plugin extends Plugin {
         return this.settings.shell_commands.findIndex((shell_command_configuration: ShellCommandConfiguration) => {
             return shell_command_configuration.id == shell_command_id;
         });
+    }
+
+    /**
+     * Returns an Obsidian URI that complies with the format obsidian://action/?vault=XYZ and that may contain possible
+     * custom arguments at the end.
+     *
+     * Note that if 'action' is 'open' and a 'file' argument is present in 'uri_arguments', the URI will use the shorthand syntax described here: https://help.obsidian.md/Advanced+topics/Using+obsidian+URI#Shorthand+formats
+     *
+     * @param action
+     * @param uri_arguments
+     */
+    public getObsidianURI(action: string, uri_arguments: Record<string, string> = {}): string {
+        const encoded_vault_name: string = encodeURIComponent(this.app.vault.getName());
+        let base_uri: string;
+
+        // Check which kind of uri type should be used: shorthand or normal
+        if ("open" === action && uri_arguments.file !== undefined) {
+            // Use shorthand uri type for opening a file.
+            const encoded_file = encodeURIComponent(uri_arguments.file);
+            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`
+            delete uri_arguments.file; // Prevent adding an extra '&file=' argument to the end of the URI.
+        } else {
+            // Use normal uri type for everything else.
+            base_uri = `obsidian://${action}/?vault=${encoded_vault_name}`;
+        }
+        let concatenated_uri_arguments = "";
+        for (const uri_argument_name in uri_arguments) {
+            const uri_argument_value = encodeURIComponent(uri_arguments[uri_argument_name]);
+            concatenated_uri_arguments += `&${uri_argument_name}=${uri_argument_value}`;
+        }
+        return base_uri + concatenated_uri_arguments;
     }
 
 	/**
@@ -360,7 +389,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private registerURIHandler() {
-		this.registerObsidianProtocolHandler(SC_Plugin.BASE_URI_ACTION, (parameters: ObsidianProtocolData) => {
+		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, (parameters: ObsidianProtocolData) => {
 			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
 
 			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
