@@ -47,6 +47,7 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
             } else {
                 // The word is not empty, so can suggest something.
                 let matched_items = autocomplete_items.filter(item => item_match(item, search_query));
+                sort_autocomplete_items(matched_items, search_query);
                 matched_items = matched_items.slice(0, max_suggestions); // Limit to a reasonable amount of suggestions.
                 update(matched_items);
             }
@@ -162,6 +163,46 @@ function find_starting_position(typed_text: string, supplement: string) {
         }
     }
     return false;
+}
+
+/**
+ * Sorts in place, does not make a copy.
+ * @param autocomplete_items
+ * @param search_query
+ */
+function sort_autocomplete_items(autocomplete_items: IAutocompleteItem[], search_query: IAutocompleteSearchQuery): void {
+
+    const search_text_excluding_curly_brackets = search_query.search_text.replace(/^{{!?/, "");
+
+    function get_common_beginning_length(autocomplete_item: IAutocompleteItem, search_query: IAutocompleteSearchQuery) {
+        const search_text = search_query.search_text.toLocaleLowerCase();
+        const item_value = autocomplete_item.value.toLocaleLowerCase();
+        const shortest_length = Math.min(search_text.length, item_value.length);
+        for (let character_index = 0; character_index < shortest_length; character_index++) {
+            const search_character = search_text[character_index];
+            const item_character = item_value[character_index];
+            if (search_character !== item_character) {
+                // The common beginning has ended.
+                return character_index;
+            }
+        }
+        return shortest_length;
+    }
+
+    autocomplete_items.sort((a: IAutocompleteItem, b: IAutocompleteItem) => {
+        const boost_a = Math.max(get_common_beginning_length(a, search_query), 1); // Boosts are used as multipliers,
+        const boost_b = Math.max(get_common_beginning_length(b, search_query), 1); // so they cannot be zero.
+        const a_length = a.value.length * boost_b; // boost_b worsens A (= makes it artificially "longer")
+        const b_length = b.value.length * boost_a; // boost_a worsens B
+        // Determine sorting method. If the search query is just a couple of characters, the matches would be quite vague, sorting by the matched items' length would not tell much, and the list would just look strangely ordered.
+        if (search_text_excluding_curly_brackets.length < 2 || a_length === b_length) {
+            // Sort alphabetically.
+            return a.value > b.value ? 1 : -1;
+        } else {
+            // Sort by lengths. The shortest item is preferred. If an item has a long common beginning with the search query, boost the item up.
+            return a_length - b_length;
+        }
+    });
 }
 
 
