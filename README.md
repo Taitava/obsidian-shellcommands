@@ -66,6 +66,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | ----------------------| ---------- | --------------------- | --- |
+| SC 0.15.0 | Obsidian 0.15.9<br>Works | Obsidian 0.15.9<br>Works | |
 | SC 0.14.0 | Obsidian 0.15.6<br>Works | Obsidian 0.15.6<br>Works | macOS: Monterey 12.4 (21F79) <br>Obsidian: 0.15.9<br>[Works otherwise but there's a newline bug](https://github.com/Taitava/obsidian-shellcommands/issues/1#issuecomment-1197307219). Tested by [gapmiss](https://github.com/gapmiss), thank you! 🙂 |
 | SC 0.13.0 | Obsidian 0.14.15<br>Works | Obsidian 0.14.15<br>Works | |
 | SC 0.12.1 | Obsidian 0.14.6<br>Works | Obsidian 0.14.6<br>Works | |
