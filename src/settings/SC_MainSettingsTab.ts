@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {App, PluginSettingTab, Setting} from "obsidian";
+import {App, PluginSettingTab, SearchComponent, Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
@@ -164,7 +164,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
     private createSearchField(container_element: HTMLElement) {
         const search_container = container_element.createDiv();
-        const search_title: any = "Search shell commands";
+        const search_title = "Search shell commands";
         const search_setting = new Setting(search_container)
             .setName(search_title)
             .setDesc("Looks up shell commands' aliases, commands, ids and icons.")
@@ -234,6 +234,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                             }
                         }
                     }
+                }).then((search_component: SearchComponent) => {
+                    // Focus on the search field.
+                    search_component.inputEl.addClass("SC-focus-element-on-tab-opening")
                 }),
             )
         ;
