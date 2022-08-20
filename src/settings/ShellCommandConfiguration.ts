@@ -29,11 +29,8 @@ import {
     PreactionConfiguration
 } from "../imports";
 
-export interface ShellCommandsConfiguration {
-    [key: string]: ShellCommandConfiguration;
-}
-
 export interface ShellCommandConfiguration {
+    id: string,
     /**
      * Contains operating system specific shell commands.
      *  - key: platform (= OS) name
@@ -62,8 +59,9 @@ export interface ShellCommandConfiguration {
     shell_command?: string;
 }
 
-export function newShellCommandConfiguration(shell_command = ""): ShellCommandConfiguration {
+export function newShellCommandConfiguration(shell_command_id: string, shell_command = ""): ShellCommandConfiguration {
     return {
+        id: shell_command_id,
         platform_specific_commands: {
             default: shell_command,
         },

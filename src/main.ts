@@ -38,8 +38,8 @@ import {
 } from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
-	newShellCommandConfiguration,
-	ShellCommandsConfiguration
+    newShellCommandConfiguration,
+    ShellCommandConfiguration,
 } from "./settings/ShellCommandConfiguration";
 import {
 	getDefaultSettings,
@@ -67,9 +67,9 @@ export default class SC_Plugin extends Plugin {
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.14.0";
+	public static SettingsVersion: SettingsVersionString = "0.15.0";
 
-	public settings: SC_MainSettings; // TODO: Make private and add a getter.
+	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
@@ -157,11 +157,11 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	private loadTShellCommands() {
-		this.t_shell_commands = {};
+		this.t_shell_commands = {}; // TODO: Consider changing this to either an array or a Map.
 		const shell_command_configurations = this.getShellCommandConfigurations();
 
-		for (const shell_command_id in shell_command_configurations) {
-			this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configurations[shell_command_id]);
+		for (const shell_command_configuration of shell_command_configurations) {
+			this.t_shell_commands[shell_command_configuration.id] = new TShellCommand(this, shell_command_configuration);
 		}
 	}
 
@@ -181,9 +181,25 @@ export default class SC_Plugin extends Plugin {
 		return this.custom_variable_instances;
 	}
 
-	private getShellCommandConfigurations(): ShellCommandsConfiguration {
+	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
 		return this.settings.shell_commands;
 	}
+
+    /**
+     * Tries to find an index at which a ShellCommandConfiguration object is located in this.settings.shell_commands.
+     * Returns undefined, if it's not found.
+     *
+     * DO NOT EXPOSE THE INDEX OUTSIDE THE PLUGIN! It's not a stable reference to a shell command, because shell commands
+     * can be reordered (well, at least in some future version of the plugin). Always use the ID as a stable, externally
+     * safe reference!
+     *
+     * @param shell_command_id
+     */
+    public getShellCommandConfigurationIndex(shell_command_id: string): number | undefined {
+        return this.settings.shell_commands.findIndex((shell_command_configuration: ShellCommandConfiguration) => {
+            return shell_command_configuration.id == shell_command_id;
+        });
+    }
 
 	/**
 	 * Creates a new shell command object and registers it to Obsidian's command palette, but does not save the modified
@@ -191,9 +207,9 @@ export default class SC_Plugin extends Plugin {
 	 */
 	public newTShellCommand() {
 		const shell_command_id = getIDGenerator().generateID();
-		const shell_command_configuration = newShellCommandConfiguration();
-		this.settings.shell_commands[shell_command_id] = shell_command_configuration;
-		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_id, shell_command_configuration);
+		const shell_command_configuration = newShellCommandConfiguration(shell_command_id);
+        this.settings.shell_commands.push(shell_command_configuration);
+		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_configuration);
 		this.t_shell_commands[shell_command_id] = t_shell_command;
 		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
 			this.registerShellCommand(t_shell_command);

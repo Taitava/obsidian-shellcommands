@@ -59,18 +59,16 @@ export interface TShellCommandContainer {
  */
 export class TShellCommand {
 
-    private readonly id: string;
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
-    constructor (plugin: SC_Plugin, shell_command_id: string, configuration: ShellCommandConfiguration) {
+    constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
         this.plugin = plugin;
-        this.id = shell_command_id;
         this.configuration = configuration;
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new shell commands.
-        getIDGenerator().addReservedID(shell_command_id);
+        getIDGenerator().addReservedID(configuration.id);
     }
 
     public getPlugin() {
@@ -85,7 +83,7 @@ export class TShellCommand {
     }
 
     public getId() {
-        return this.id;
+        return this.configuration.id;
     }
 
     public getShell(): string {
@@ -420,13 +418,13 @@ export class TShellCommand {
      * when modifying properties in existing PreactionConfigurations.
      */
     public resetPreactions() {
-        debugLog(`TShellCommand ${this.id}: Resetting preactions.`);
+        debugLog(`TShellCommand ${this.getId()}: Resetting preactions.`);
         delete this.cached_preactions;
     }
 
     private cached_preactions: Preaction[];
     public getPreactions(): Preaction[] {
-        debugLog(`TShellCommand ${this.id}: Getting preactions.`);
+        debugLog(`TShellCommand ${this.getId()}: Getting preactions.`);
         if (!this.cached_preactions) {
             this.cached_preactions = [];
             this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
@@ -446,7 +444,7 @@ export class TShellCommand {
      * @private Can be made public if needed.
      */
     private getNonPreactionsDependentVariables(): VariableSet {
-        debugLog(`TShellCommand ${this.id}: Getting non preactions dependent variables.`);
+        debugLog(`TShellCommand ${this.getId()}: Getting non preactions dependent variables.`);
         const all_variables = this.plugin.getVariables();
         return removeFromSet(all_variables, this.getPreactionsDependentVariables());
     }
@@ -455,7 +453,7 @@ export class TShellCommand {
      * @private Can be made public if needed.
      */
     private getPreactionsDependentVariables(): VariableSet {
-        debugLog(`TShellCommand ${this.id}: Getting preactions dependent variables.`);
+        debugLog(`TShellCommand ${this.getId()}: Getting preactions dependent variables.`);
         let dependent_variables = new VariableSet();
         for (const preaction of this.getPreactions()) {
             dependent_variables = mergeSets(dependent_variables, preaction.getDependentVariables());
