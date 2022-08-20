@@ -18,7 +18,7 @@
  */
 
 // SETTINGS AND DEFAULT VALUES
-import {ShellCommandsConfiguration} from "./ShellCommandConfiguration";
+import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import SC_Plugin from "../main";
 import {
     CustomVariableConfiguration,
@@ -63,7 +63,12 @@ export interface SC_MainSettings {
     // Shell commands:
     /** If it's a number, limit the max height of a textarea. If it's false, don't limit at all. */
     max_visible_lines_in_shell_command_fields: number | false;
-    shell_commands: ShellCommandsConfiguration;
+
+    /**
+     * Was before 0.15.0: An object where the key was an id and value was a ShellCommandConfiguration object.
+     * Now it's an array of ShellCommandConfiguration objects.
+     */
+    shell_commands: ShellCommandConfiguration[];
 
     // Prompts:
     prompts: PromptConfiguration[];
@@ -110,7 +115,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Shell commands:
         max_visible_lines_in_shell_command_fields: false, // No limit by default.
-        shell_commands: {},
+        shell_commands: [],
 
         // Prompts:
         prompts: [],

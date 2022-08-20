@@ -38,8 +38,8 @@ import {
 } from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
-	newShellCommandConfiguration,
-	ShellCommandsConfiguration
+    newShellCommandConfiguration,
+    ShellCommandConfiguration,
 } from "./settings/ShellCommandConfiguration";
 import {
 	getDefaultSettings,
@@ -67,9 +67,9 @@ export default class SC_Plugin extends Plugin {
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.14.0";
+	public static SettingsVersion: SettingsVersionString = "0.15.0";
 
-	public settings: SC_MainSettings; // TODO: Make private and add a getter.
+	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
@@ -89,9 +89,7 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ShellCommandParsingProcess,
 	} = {};
 
-	private static readonly BASE_URI_ACTION = "shell-commands"
-
-	public static readonly BASE_URI = `obsidian://${SC_Plugin.BASE_URI_ACTION}/`;
+	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
 
 	public async onload() {
 		debugLog('loading plugin');
@@ -157,11 +155,11 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	private loadTShellCommands() {
-		this.t_shell_commands = {};
+		this.t_shell_commands = {}; // TODO: Consider changing this to either an array or a Map.
 		const shell_command_configurations = this.getShellCommandConfigurations();
 
-		for (const shell_command_id in shell_command_configurations) {
-			this.t_shell_commands[shell_command_id] = new TShellCommand(this, shell_command_id, shell_command_configurations[shell_command_id]);
+		for (const shell_command_configuration of shell_command_configurations) {
+			this.t_shell_commands[shell_command_configuration.id] = new TShellCommand(this, shell_command_configuration);
 		}
 	}
 
@@ -181,19 +179,66 @@ export default class SC_Plugin extends Plugin {
 		return this.custom_variable_instances;
 	}
 
-	private getShellCommandConfigurations(): ShellCommandsConfiguration {
+	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
 		return this.settings.shell_commands;
 	}
+
+    /**
+     * Tries to find an index at which a ShellCommandConfiguration object is located in this.settings.shell_commands.
+     * Returns undefined, if it's not found.
+     *
+     * DO NOT EXPOSE THE INDEX OUTSIDE THE PLUGIN! It's not a stable reference to a shell command, because shell commands
+     * can be reordered (well, at least in some future version of the plugin). Always use the ID as a stable, externally
+     * safe reference!
+     *
+     * @param shell_command_id
+     */
+    public getShellCommandConfigurationIndex(shell_command_id: string): number | undefined {
+        return this.settings.shell_commands.findIndex((shell_command_configuration: ShellCommandConfiguration) => {
+            return shell_command_configuration.id == shell_command_id;
+        });
+    }
+
+    /**
+     * Returns an Obsidian URI that complies with the format obsidian://action/?vault=XYZ and that may contain possible
+     * custom arguments at the end.
+     *
+     * Note that if 'action' is 'open' and a 'file' argument is present in 'uri_arguments', the URI will use the shorthand syntax described here: https://help.obsidian.md/Advanced+topics/Using+obsidian+URI#Shorthand+formats
+     *
+     * @param action
+     * @param uri_arguments
+     */
+    public getObsidianURI(action: string, uri_arguments: Record<string, string> = {}): string {
+        const encoded_vault_name: string = encodeURIComponent(this.app.vault.getName());
+        let base_uri: string;
+
+        // Check which kind of uri type should be used: shorthand or normal
+        if ("open" === action && uri_arguments.file !== undefined) {
+            // Use shorthand uri type for opening a file.
+            const encoded_file = encodeURIComponent(uri_arguments.file);
+            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`
+            delete uri_arguments.file; // Prevent adding an extra '&file=' argument to the end of the URI.
+        } else {
+            // Use normal uri type for everything else.
+            base_uri = `obsidian://${action}/?vault=${encoded_vault_name}`;
+        }
+        let concatenated_uri_arguments = "";
+        for (const uri_argument_name in uri_arguments) {
+            const uri_argument_value = encodeURIComponent(uri_arguments[uri_argument_name]);
+            concatenated_uri_arguments += `&${uri_argument_name}=${uri_argument_value}`;
+        }
+        return base_uri + concatenated_uri_arguments;
+    }
 
 	/**
 	 * Creates a new shell command object and registers it to Obsidian's command palette, but does not save the modified
 	 * configuration to disk. To save the addition, call saveSettings().
 	 */
 	public newTShellCommand() {
-		const shell_command_id = this.generateNewShellCommandID();
-		const shell_command_configuration = newShellCommandConfiguration();
-		this.settings.shell_commands[shell_command_id] = shell_command_configuration;
-		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_id, shell_command_configuration);
+		const shell_command_id = getIDGenerator().generateID();
+		const shell_command_configuration = newShellCommandConfiguration(shell_command_id);
+        this.settings.shell_commands.push(shell_command_configuration);
+		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_configuration);
 		this.t_shell_commands[shell_command_id] = t_shell_command;
 		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
 			this.registerShellCommand(t_shell_command);
@@ -344,7 +389,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private registerURIHandler() {
-		this.registerObsidianProtocolHandler(SC_Plugin.BASE_URI_ACTION, (parameters: ObsidianProtocolData) => {
+		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, (parameters: ObsidianProtocolData) => {
 			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
 
 			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
@@ -534,21 +579,6 @@ export default class SC_Plugin extends Plugin {
 		// This unfortunately accesses a private API.
 		// @ts-ignore
 		await this.app.plugins.disablePlugin(this.manifest.id);
-	}
-
-	/**
-	 * @return string Returns "0" if there are no shell commands yet, otherwise returns the max ID + 1, as a string.
-	 */
-	private generateNewShellCommandID() {
-		const existing_ids = Object.getOwnPropertyNames(this.getTShellCommands());
-		let new_id = 0;
-		for (const i in existing_ids) {
-			const existing_id = parseInt(existing_ids[i]);
-			if (existing_id >= new_id) {
-				new_id = existing_id + 1;
-			}
-		}
-		return String(new_id);
 	}
 
 	public getPluginId() {

@@ -61,7 +61,8 @@ export class DeleteModal extends SC_Modal {
         debugLog("Command " + this.shell_command_id + " gonna be removed.");
         this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.
         delete this.plugin.getTShellCommands()[this.shell_command_id]; // Remove the TShellCommand object.
-        delete this.plugin.settings.shell_commands[this.shell_command_id]; // Remove from the plugin's settings.
+        const shell_command_index = this.plugin.getShellCommandConfigurationIndex(this.shell_command_id);
+        this.plugin.settings.shell_commands.splice(shell_command_index,1); // Remove from the plugin's settings.
 
         // Remove the setting fields
         this.container_element.removeChild(this.setting_group.name_setting.settingEl);

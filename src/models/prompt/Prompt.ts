@@ -47,7 +47,7 @@ export class Prompt extends Instance {
         super(model, configuration, parent_configuration);
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new Prompts.
-        getIDGenerator().addCurrentID(configuration.id);
+        getIDGenerator().addReservedID(configuration.id);
 
         this.createFields();
     }
