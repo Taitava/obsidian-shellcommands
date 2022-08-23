@@ -49,7 +49,6 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {OutputChannel} from "./output_channels/OutputChannel";
-import {Notice} from "obsidian";
 
 export class ShellCommandExecutor {
 
