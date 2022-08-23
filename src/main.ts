@@ -67,7 +67,7 @@ export default class SC_Plugin extends Plugin {
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.15.0";
+	public static SettingsVersion: SettingsVersionString = "0.16.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
@@ -599,8 +599,16 @@ export default class SC_Plugin extends Plugin {
 		});
 	}
 
-	public newNotification(message: string) {
-		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+    /**
+     *
+     * @param message
+     * @param timeout Custom timeout in milliseconds. If not set, the timeout will be fetched from user configurable settings. Use 0 if you want to disable the timeout, i.e. show the notification until it's explicitly hidden by clinking it, or via code.
+     */
+	public newNotification(
+        message: string,
+        timeout = this.settings.notification_message_duration * 1000, // * 1000 = convert seconds to milliseconds.
+    ) {
+		return new Notice(message, timeout);
 	}
 
 	public getDefaultShell(): string {

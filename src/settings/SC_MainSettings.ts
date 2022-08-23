@@ -52,6 +52,7 @@ export interface SC_MainSettings {
     // Output:
     error_message_duration: number;
     notification_message_duration: number;
+    execution_notification_mode: ExecutionNotificationMode;
     output_channel_clipboard_also_outputs_to_notification: boolean;
 
     // Events:
@@ -105,6 +106,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Output:
         error_message_duration: 20,
         notification_message_duration: 10,
+        execution_notification_mode: "disabled",
         output_channel_clipboard_also_outputs_to_notification: true,
 
         // Events:
@@ -172,3 +174,5 @@ export const CommandPaletteOptions: ICommandPaletteOptions = {
     unlisted: "Hotkeys only",
     disabled: "Excluded",
 }
+
+export type ExecutionNotificationMode = "disabled" | "quick" | "permanent" | "if-long";

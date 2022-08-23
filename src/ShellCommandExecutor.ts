@@ -17,7 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {exec, ExecException, ExecOptions} from "child_process";
+import {
+    ChildProcess,
+    exec,
+    ExecException,
+    ExecOptions,
+} from "child_process";
 import {
     cloneObject,
     getOperatingSystem,
@@ -39,8 +44,12 @@ import {
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
-import {PlatformNames} from "./settings/SC_MainSettings";
+import {
+    ExecutionNotificationMode,
+    PlatformNames,
+} from "./settings/SC_MainSettings";
 import {OutputChannel} from "./output_channels/OutputChannel";
+import {Notice} from "obsidian";
 
 export class ShellCommandExecutor {
 
@@ -217,7 +226,7 @@ export class ShellCommandExecutor {
 
             // Execute the shell command
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
-            exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
+            const child_process = exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 
                 // Did the shell command execute successfully?
                 if (null !== error) {
@@ -266,6 +275,11 @@ export class ShellCommandExecutor {
                     handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                 }
             });
+
+            // Display a notification of the execution (if wanted).
+            if ("disabled" !== this.plugin.settings.execution_notification_mode) {
+                this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode);
+            }
         }
     }
 
@@ -327,6 +341,48 @@ export class ShellCommandExecutor {
         } else {
             // The shell command doesn't contain a version for any platforms, it's completely empty.
             return "The shell command is empty. :(";
+        }
+    }
+
+    /**
+     * Displays a notification balloon indicating a user that a shell command is being executed.
+     *
+     * @param child_process
+     * @param shell_command
+     * @param execution_notification_mode
+     * @private
+     */
+    private showExecutionNotification(child_process: ChildProcess, shell_command: string, execution_notification_mode: ExecutionNotificationMode) {
+        const execution_notification_message = "Executing: " + (this.t_shell_command.getAlias() || shell_command);
+        switch (execution_notification_mode) {
+            case "quick": {
+                // Retrieve the timeout from settings defined by a user.
+                this.plugin.newNotification(execution_notification_message, undefined);
+                break;
+            }
+            case "permanent": {
+                // Show the notification until the process ends.
+                const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+
+                // Hide the notification when the process finishes.
+                child_process.on("exit", () => process_notification.hide());
+                break;
+            }
+            case "if-long": {
+                // Only show the notification if the process runs for an extended period of time (defined below).
+                window.setTimeout(() => {
+                    // Check if the process is still running.
+                    if (null === child_process.exitCode) {
+                        // The process is still running.
+                        // Display notification.
+                        const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+
+                        // Hide the notification when the process finishes.
+                        child_process.on("exit", () => process_notification.hide());
+                    }
+                }, 2000); // If you change the timeout, change documentation, too!
+                break;
+            }
         }
     }
 }
