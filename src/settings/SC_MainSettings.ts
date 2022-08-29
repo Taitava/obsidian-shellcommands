@@ -24,6 +24,7 @@ import {
     CustomVariableConfiguration,
     PromptConfiguration,
 } from "../imports";
+import {OutputWrapperConfiguration} from "../models/output_wrapper/OutputWrapper";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -76,6 +77,9 @@ export interface SC_MainSettings {
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
 
+    // Output wrappers
+    output_wrappers: OutputWrapperConfiguration[];
+
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
     commands?: string[];
@@ -122,6 +126,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Custom variables
         custom_variables: [],
+
+        // Output wrappers
+        output_wrappers: [],
     }
 }
 
