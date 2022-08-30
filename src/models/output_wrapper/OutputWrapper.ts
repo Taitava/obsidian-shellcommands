@@ -22,6 +22,10 @@ import SC_Plugin from "../../main";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
 import {OutputWrapperModel} from "./OutputWrapperModel";
+import {parseVariables} from "../../variables/parseVariables";
+import {Variable_Output} from "../../variables/Variable_Output";
+import {TShellCommand} from "../../TShellCommand";
+import {debugLog} from "../../Debug";
 
 export class OutputWrapper extends Instance {
 
@@ -47,6 +51,47 @@ export class OutputWrapper extends Instance {
 
     public getConfiguration() {
         return this.configuration;
+    }
+
+    /**
+     * Wraps the given output text and parses variables in the output wrapper's content and returns the parsing result.
+     * If the parsing fails, displays error messages and returns the original output content.
+     *
+     * @param output_content
+     * @param t_shell_command
+     */
+    public wrapOutput(output_content: string, t_shell_command: TShellCommand): string {
+        const variables = this.plugin.getVariables();
+        variables.forEach((variable) => {
+            if (variable instanceof Variable_Output) {
+                // Pass output_content to {{output}} variable.
+                variable.setOutputContent(output_content);
+            }
+        });
+
+        // Parse variables
+        const parsing_result = parseVariables(
+            this.plugin,
+            this.configuration.content,
+            null,
+            t_shell_command,
+            null,
+            variables,
+        );
+
+        // Check the parsing result
+        if (parsing_result.succeeded) {
+            // Parsing succeeded
+            debugLog("Output wrapper: Variable parsing succeeded.")
+            return parsing_result.parsed_content;
+        } else {
+            // Parsing failed.
+            // Show error messages and fallback to use the original output_content without modifications.
+            debugLog("Output wrapper: Variable parsing failed: " + parsing_result.error_messages.join(" "));
+            this.plugin.newError("Output wrapper '" + this.getTitle() + "': Variable parsing failed, see error below. The output text will be used without a wrapper.");
+            this.plugin.newErrors(parsing_result.error_messages);
+            return output_content;
+        }
     }
 
 }

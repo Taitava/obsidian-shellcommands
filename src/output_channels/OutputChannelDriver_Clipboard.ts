@@ -18,11 +18,7 @@
  */
 
 import {OutputChannelDriver} from "./OutputChannelDriver";
-import {
-    copyToClipboard,
-    joinObjectProperties,
-} from "../Common";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {copyToClipboard} from "../Common";
 import {EOL} from "os";
 
 export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
@@ -30,10 +26,14 @@ export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
 
     public hotkey_letter = "L";
 
-    protected _handle(output: OutputStreams) {
-        // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
-        // will be joined together with " " as a separator.
-        const output_message = joinObjectProperties(output, " ");
+    /**
+     * There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
+     * will be joined together with " " as a separator.
+     * @protected
+     */
+    protected combine_output_streams = " ";
+
+    protected _handle(output_message: string) {
         copyToClipboard(output_message);
 
         if (this.plugin.settings.output_channel_clipboard_also_outputs_to_notification) {

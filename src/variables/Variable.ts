@@ -71,6 +71,14 @@ export abstract class Variable {
         this.arguments = {};
     }
 
+    /**
+     * Extra resetting, happens AFTER the variable has been used.
+     * @see reset
+     */
+    public resetLate() {
+        // For most variables, there's nothing to do.
+    }
+
     public getValue(
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
@@ -100,6 +108,7 @@ export abstract class Variable {
                 case "show-errors":
                     // Generate error messages by calling generateValue().
                     debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                    // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
                     this.generateValue(sc_event); // No need to use the return value, it's null anyway.
                     return {
                         value: null,

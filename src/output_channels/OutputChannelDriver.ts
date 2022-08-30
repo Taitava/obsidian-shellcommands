@@ -23,6 +23,8 @@ import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {OutputStream} from "./OutputChannel";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {joinObjectProperties} from "../Common";
+import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 
 export abstract class OutputChannelDriver {
     /**
@@ -36,6 +38,14 @@ export abstract class OutputChannelDriver {
     protected shell_command_parsing_result: ShellCommandParsingResult;
     protected t_shell_command: TShellCommand;
     protected accepts_empty_output = false;
+
+    /**
+     * Determines if the output channel wants to handle a unified output or not. If yes, this property should define a
+     * delimiter string that will be used as a glue between different output streams.
+     *
+     * @protected
+     */
+    protected combine_output_streams: false | string = false;
 
     /**
      * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
@@ -58,7 +68,12 @@ export abstract class OutputChannelDriver {
         this.shell_command_parsing_result = shell_command_parsing_result;
     }
 
-    protected abstract _handle(output: OutputStreams, error_code: number | null): void;
+    /**
+     * @param output Subclasses should define this as string, if they enable 'combine_output_streams'. Otherwise, they should define this as OutputStreams.
+     * @param error_code
+     * @protected
+     */
+    protected abstract _handle(output: OutputStreams | string, error_code: number | null): void;
 
     public handle(output: OutputStreams, error_code: number | null): void {
         // Qualify output
@@ -74,12 +89,71 @@ export abstract class OutputChannelDriver {
 
         // Output is ok.
         // Handle it.
-        this._handle(output, error_code);
+        this._handle(this.prepare_output(output), error_code);
         debugLog("Output handling is done.")
     }
 
     public acceptsOutputStream(output_stream: OutputStream) {
         return this.accepted_output_streams.contains(output_stream);
+    }
+
+    /**
+     * Does the following preparations:
+     *  - Combines output streams (if wanted by the OutputChannelDriver).
+     *  - Wraps output (if defined in shell command configuration).
+     * @param output_streams
+     * @private
+     */
+    private prepare_output(output_streams: OutputStreams): OutputStreams | string {
+        const wrap_outputs_separately = () => {
+            const wrapped_output_streams: OutputStreams = {};
+            let output_stream_name: OutputStream;
+            for (output_stream_name in output_streams) {
+                wrapped_output_streams[output_stream_name] = this.wrapOutput(
+                    output_stream_name,
+                    output_streams[output_stream_name],
+                    this.t_shell_command,
+                );
+            }
+            return wrapped_output_streams;
+        };
+
+        // Check if outputs should be combined.
+        if (this.combine_output_streams) {
+            // Combine output strings into a single string.
+
+            // Can output wrapping be combined?
+            if (this.t_shell_command.isOutputWrapperStdoutSameAsStderr()) {
+                // Output wrapping can be combined.
+                return this.wrapOutput(
+                    "stdout",
+                    joinObjectProperties(output_streams, this.combine_output_streams), // Use this.combine_output_streams as a glue string.
+                    this.t_shell_command,
+                );
+            } else {
+                // Output wrapping needs to be done separately.
+                const wrapped_output_streams = wrap_outputs_separately();
+                return joinObjectProperties(wrapped_output_streams, this.combine_output_streams); // Use this.combine_output_streams as a glue string.
+            }
+
+        } else {
+            // Do not combine, handle each stream separately
+            return wrap_outputs_separately();
+        }
+    }
+
+    /**
+     * Surrounds the given output text with an output wrapper. If no output wrapper is defined, returns the original
+     * output text without any modifications.
+     */
+    private wrapOutput(output_stream: OutputStream, output_content: string, t_shell_command: TShellCommand): string {
+        const output_wrapper: OutputWrapper = t_shell_command.getOutputWrapper(output_stream);
+        if (null === output_wrapper) {
+            // No OutputWrapper is defined for this shell command.
+            // Return the output text without modifications.
+            return output_content;
+        }
+        return output_wrapper.wrapOutput(output_content, t_shell_command);
     }
 
     /**

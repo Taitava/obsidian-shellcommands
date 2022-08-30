@@ -49,6 +49,8 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
+import {OutputStream} from "./output_channels/OutputChannel";
+import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -192,6 +194,36 @@ export class TShellCommand {
 
     public getOutputChannels() {
         return this.configuration.output_channels;
+    }
+
+    /**
+     * Finds an output wrapper that should be used for the given OutputStream. Returns null, if no OutputWrapper should
+     * be used.
+     *
+     * @param output_stream
+     */
+    public getOutputWrapper(output_stream: OutputStream): OutputWrapper | null {
+        const output_wrapper_id = this.configuration.output_wrappers[output_stream];
+        if (!output_wrapper_id) {
+            // No output wrapper is defined for this output stream in this shell command.
+            return null;
+        }
+        for (const output_wrapper of this.plugin.getOutputWrappers().values()) {
+            // Check if this is the output wrapper defined for this shell command.
+            if (output_wrapper.getID() === output_wrapper_id) {
+                // The correct output wrapper was found.
+                return output_wrapper;
+            }
+        }
+        throw new Error("OutputWrapper with ID " + output_wrapper_id + " was not found.");
+    }
+
+    /**
+     * Checks if different output streams can be wrapped together. In addition to this, combining output streams also
+     * requires the OutputChannelDrivers to be the same, but that's not checked in this method.
+     */
+    public isOutputWrapperStdoutSameAsStderr() {
+        return this.configuration.output_wrappers["stdout"] === this.configuration.output_wrappers["stderr"];
     }
 
     public getEventsConfiguration() {

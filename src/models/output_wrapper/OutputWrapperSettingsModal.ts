@@ -69,7 +69,7 @@ export class OutputWrapperSettingsModal extends SC_Modal {
         // Content
         new Setting(container_element)
             .setName("Content")
-            .setDesc("Use {{output}} as a placeholder for text that will be received from a shell command. Other variables are available, too.")
+            .setDesc("Use {{output}} as a placeholder for text that will be received from a shell command. Other variables are available, too, except {{event_*}} variables cannot be used here at the moment.")
             .addTextArea(textarea_component => textarea_component
                 .setValue(this.output_wrapper.configuration.content)
                 .onChange(async (new_content: string) => {
