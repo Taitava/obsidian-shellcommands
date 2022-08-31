@@ -40,7 +40,7 @@ import {TShellCommand} from "../TShellCommand";
  * Then again, if the parsing use-case is simpler, e.g. Prompt description or prompt field values, it's more straightforward
  * to just call parseVariables() without utilising this class. After all, this class is a wrapper for parseVariables().
  *
- * <ParsingSet> is a generalization for defining keys for an object that will be used for submitting the original parseable
+ * <ParsingMap> is a generalization for defining keys for an object that will be used for submitting the original parseable
  * content. The same keys will then be used to form another object containing the parsing results.
  */
 export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
@@ -187,6 +187,6 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     }
 }
 
-type ParsingResultContainer<ParsingSet> = {
-    [key in keyof ParsingSet]?: ParsingResult;
+type ParsingResultContainer<ParsingMap> = {
+    [key in keyof ParsingMap]?: ParsingResult;
 };
