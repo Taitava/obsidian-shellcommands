@@ -24,7 +24,9 @@ import {OutputStream} from "./OutputChannel";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {joinObjectProperties} from "../Common";
-import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
+import {Variable_Output} from "../variables/Variable_Output";
+import {parseVariables} from "../variables/parseVariables";
+import {VariableSet} from "../variables/loadVariables";
 
 export abstract class OutputChannelDriver {
     /**
@@ -112,7 +114,6 @@ export abstract class OutputChannelDriver {
                 wrapped_output_streams[output_stream_name] = this.wrapOutput(
                     output_stream_name,
                     output_streams[output_stream_name],
-                    this.t_shell_command,
                 );
             }
             return wrapped_output_streams;
@@ -128,7 +129,6 @@ export abstract class OutputChannelDriver {
                 return this.wrapOutput(
                     "stdout",
                     joinObjectProperties(output_streams, this.combine_output_streams), // Use this.combine_output_streams as a glue string.
-                    this.t_shell_command,
                 );
             } else {
                 // Output wrapping needs to be done separately.
@@ -146,14 +146,42 @@ export abstract class OutputChannelDriver {
      * Surrounds the given output text with an output wrapper. If no output wrapper is defined, returns the original
      * output text without any modifications.
      */
-    private wrapOutput(output_stream: OutputStream, output_content: string, t_shell_command: TShellCommand): string {
-        const output_wrapper: OutputWrapper = t_shell_command.getOutputWrapper(output_stream);
-        if (null === output_wrapper) {
+    private wrapOutput(output_stream: OutputStream, output_content: string): string {
+
+        // Get preparsed output wrapper content. It has all other variables parsed, except {{output}}.
+        const parsing_result_key: keyof ShellCommandParsingResult = "output_wrapper_"+output_stream as keyof ShellCommandParsingResult;
+        const output_wrapper_content = this.shell_command_parsing_result[parsing_result_key] as string | undefined;
+
+        // Check if output wrapper content exists.
+        if (undefined === output_wrapper_content) {
             // No OutputWrapper is defined for this shell command.
             // Return the output text without modifications.
+            debugLog("Output wrapping: No wrapper is defined for '" + output_stream + "'.");
             return output_content;
         }
-        return output_wrapper.wrapOutput(output_content, t_shell_command);
+
+        // Parse the {{output}} variable
+        const output_variable = new Variable_Output(this.plugin, output_content);
+        const parsing_result = parseVariables(
+            this.plugin,
+            output_wrapper_content,
+            null, // No shell anymore, so no need for escaping.
+            this.t_shell_command,
+            null, // No support for {{event_*}} variables is needed, because they are already parsed in output_wrapper_content. This phase only parses {{output}} variable, nothing else.
+            new VariableSet([output_variable]), // Only parse the {{output}} variable.
+        );
+
+        // Inspect the parsing result. It should always succeed, as the {{output}} variable should not give any errors.
+        if (parsing_result.succeeded) {
+            // Succeeded.
+            debugLog("Output wrapping: Wrapping " + output_stream + " succeeded.");
+            return parsing_result.parsed_content;
+        } else {
+            // Failed for some reason.
+            this.plugin.newError("Output wrapping failed, see error(s) below.");
+            this.plugin.newErrors(parsing_result.error_messages);
+            throw new Error("Output wrapping failed: Parsing {{output}} resulted in error(s): " + parsing_result.error_messages.join(" "));
+        }
     }
 
     /**

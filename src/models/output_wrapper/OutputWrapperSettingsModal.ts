@@ -24,6 +24,7 @@ import {
 } from "obsidian";
 import {OutputWrapper} from "./OutputWrapper";
 import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
+import {Variable_Output} from "../../variables/Variable_Output";
 
 export class OutputWrapperSettingsModal extends SC_Modal {
 
@@ -67,9 +68,10 @@ export class OutputWrapperSettingsModal extends SC_Modal {
         const title_input_element: HTMLInputElement = title_setting.controlEl.find("input") as HTMLInputElement;
 
         // Content
+        const output_variable = new Variable_Output(this.plugin, ""); // For getting an autocomplete item.
         new Setting(container_element)
             .setName("Content")
-            .setDesc("Use {{output}} as a placeholder for text that will be received from a shell command. Other variables are available, too, except {{event_*}} variables cannot be used here at the moment.")
+            .setDesc("Use {{output}} as a placeholder for text that will be received from a shell command. Other variables are available, too.")
             .addTextArea(textarea_component => textarea_component
                 .setValue(this.output_wrapper.configuration.content)
                 .onChange(async (new_content: string) => {
@@ -79,7 +81,12 @@ export class OutputWrapperSettingsModal extends SC_Modal {
                 .then((textarea_component) => {
                     // Autocomplete for Content.
                     if (this.plugin.settings.show_autocomplete_menu) {
-                        createAutocomplete(this.plugin, textarea_component.inputEl, () => textarea_component.onChanged());
+                        createAutocomplete(
+                            this.plugin,
+                            textarea_component.inputEl,
+                            () => textarea_component.onChanged(),
+                            output_variable.getAutocompleteItems(),
+                        );
                     }
                 }),
             )

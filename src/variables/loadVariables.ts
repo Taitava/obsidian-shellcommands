@@ -54,7 +54,6 @@ import {Variable_NewNoteFolderName} from "./Variable_NewNoteFolderName";
 import {Variable_NewNoteFolderPath} from "./Variable_NewNoteFolderPath";
 import {Variable_FileURI} from "./Variable_FileURI";
 import {Variable_EventFileURI} from "./event_variables/Variable_EventFileURI";
-import {Variable_Output} from "./Variable_Output";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -82,7 +81,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_FolderPath(plugin),
         new Variable_NewNoteFolderName(plugin),
         new Variable_NewNoteFolderPath(plugin),
-        new Variable_Output(plugin),
+        // Variable_Output is not loaded here, because it's only used in OutputWrappers.
         new Variable_Selection(plugin),
         new Variable_Tags(plugin),
         new Variable_Title(plugin),

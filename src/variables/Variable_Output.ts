@@ -18,40 +18,21 @@
  */
 
 import {Variable} from "./Variable";
+import SC_Plugin from "../main";
 
 export class Variable_Output extends Variable {
     public variable_name = "output";
     public help_text = "Gives text outputted by a shell command after it's executed.";
 
-    protected always_available = false;
-
-    private output_content: string;
-
-    public setOutputContent(output_content: string) {
-        this.output_content = output_content;
+    constructor(
+        plugin: SC_Plugin,
+        private output_content: string,
+    ) {
+        super(plugin);
     }
 
     protected generateValue(): string {
-        if (!this.isAvailable()) {
-            this.newErrorMessage("This variable is only available in output wrappers.");
-            return null;
-        }
-
         return this.output_content;
-    }
-
-    public resetLate(): void {
-        super.resetLate();
-
-        // Remove 'output_content' after onetime usage.
-        this.output_content = undefined;
-    }
-
-    /**
-     * This variable is only available when parsing is done from an OutputWrapper, i.e. this.output_content is set.
-     */
-    public isAvailable(): boolean {
-        return typeof this.output_content === "string";
     }
 
     public getAvailabilityText(): string {

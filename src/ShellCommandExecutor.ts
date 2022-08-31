@@ -136,6 +136,8 @@ export class ShellCommandExecutor {
                         shell_command: parsing_results["shell_command"].parsed_content,
                         alias: parsing_results["alias"].parsed_content,
                         environment_variable_path_augmentation: parsing_results.environment_variable_path_augmentation.parsed_content,
+                        output_wrapper_stdout: parsing_results.output_wrapper_stdout.parsed_content,
+                        output_wrapper_stderr: parsing_results.output_wrapper_stderr.parsed_content,
                         succeeded: true,
                         error_messages: [],
                     };

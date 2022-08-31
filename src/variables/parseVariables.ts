@@ -166,11 +166,9 @@ export function parseVariables(
                 parsing_result.succeeded = false;
                 parsing_result.parsed_content = null;
                 parsing_result.error_messages = variable_value_result.error_messages; // Returning now prevents parsing rest of the variables.
-                variable.resetLate();
                 return parsing_result;
             }
         }
-        variable.resetLate();
     }
     parsing_result.succeeded = true;
     return parsing_result;

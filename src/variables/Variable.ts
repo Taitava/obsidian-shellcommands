@@ -71,14 +71,6 @@ export abstract class Variable {
         this.arguments = {};
     }
 
-    /**
-     * Extra resetting, happens AFTER the variable has been used.
-     * @see reset
-     */
-    public resetLate() {
-        // For most variables, there's nothing to do.
-    }
-
     public getValue(
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
@@ -307,7 +299,7 @@ export abstract class Variable {
     }
 
     /**
-     * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a suer to define
+     * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a user to define
      * default values for variables that are not always available, filtering out always available variables for which default
      * values would not make sense.
      */
