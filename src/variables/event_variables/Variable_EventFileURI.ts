@@ -42,14 +42,16 @@ export class Variable_EventFileURI extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        const file: TFile = sc_event.getFile();
-        return this.plugin.getObsidianURI("open", {
-            file: normalizePath(file.path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
+            const file: TFile = sc_event.getFile();
+            return resolve(this.plugin.getObsidianURI("open", {
+                file: normalizePath(file.path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
+            }));
         });
     }
 

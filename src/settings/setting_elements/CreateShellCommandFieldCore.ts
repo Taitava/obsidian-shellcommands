@@ -39,12 +39,12 @@ export function CreateShellCommandFieldCore(
     shell_command_placeholder = "Enter your command"
     ) {
 
-    function on_change(shell_command: string) {
+    async function on_change(shell_command: string) {
         // Update preview
         setting_group.preview_setting.descEl.innerHTML = ""; // Remove previous content.
         createMultilineTextElement(
             "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
-            getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+            await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
             setting_group.preview_setting.descEl,
         );
 
@@ -93,11 +93,11 @@ export function CreateShellCommandFieldCore(
         preview_setting:
             new Setting(container_element)
                 .setClass("SC-preview-setting")
-                .then((setting: Setting) => {
+                .then(async (setting: Setting) => {
                     setting.descEl.innerHTML = ""; // Remove previous content. Not actually needed here because it's empty already, but do it just in case.
                     createMultilineTextElement(
                         "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
-                        getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
+                        await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
                         setting.descEl,
                     );
                 })
@@ -122,8 +122,8 @@ export function CreateShellCommandFieldCore(
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null) {
-    const parsing_result = parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null) {
+    const parsing_result = await parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {

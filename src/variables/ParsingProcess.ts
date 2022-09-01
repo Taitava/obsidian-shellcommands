@@ -68,7 +68,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      *
      * @return True if parsing succeeded, false otherwise. Read the results by calling .getParsingResult().
      */
-    process(): boolean {
+    public async process(): Promise<boolean> {
         const current_variables = this.variable_sets.shift();
         let success = true;
 
@@ -88,7 +88,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             }
 
             // Parse the variables
-            const parsing_result = parseVariables(
+            const parsing_result = await parseVariables(
                 this.plugin,
                 parse_content,
                 this.t_shell_command.getShell(),
@@ -114,7 +114,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      *
      * @return True if parsing all sets succeeded, false otherwise.
      */
-    public processRest(): boolean {
+    public async processRest(): Promise<boolean> {
         // 1. Check a previous parsing result (if exists).
         for (const content_key of this.getContentKeys()) {
             if (this.parsing_results[content_key]) {
@@ -129,7 +129,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
 
         // 2. Process the rest of the VariableSets.
         for (let i = 0; i < this.variable_sets.length; i++) {
-            if (!this.process()) {
+            if (!await this.process()) {
                 return false;
             }
         }

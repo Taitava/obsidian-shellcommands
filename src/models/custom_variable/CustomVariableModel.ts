@@ -178,7 +178,7 @@ export class CustomVariableModel extends Model {
         };
     }
 
-    protected _deleteInstance(custom_variable_instance: CustomVariableInstance): void {
+    protected async _deleteInstance(custom_variable_instance: CustomVariableInstance): Promise<void> {
         debugLog(`CustomVariableModel: Deleting CustomVariableInstance ${custom_variable_instance.getID()}.`);
 
         // Remove the CustomVariableInstance from all PromptFields that use it.
@@ -204,7 +204,7 @@ export class CustomVariableModel extends Model {
         this.custom_variable_instances.delete(custom_variable_instance.getID());
 
         // remove the variable from custom variable side panes.
-        this.plugin.updateCustomVariableViews();
+        await this.plugin.updateCustomVariableViews();
     }
 
     /**

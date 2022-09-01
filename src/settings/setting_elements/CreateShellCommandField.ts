@@ -103,11 +103,11 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
         .addExtraButton(button => button
             .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
             .setIcon("run-command")
-            .extraSettingsEl.addEventListener("click", (event: MouseEvent) => {
+            .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
                 const ctrl_clicked = event.ctrlKey;
                 // Execute the shell command now (for trying it out in the settings)
                 const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
-                if (parsing_process.process()) {
+                if (await parsing_process.process()) {
                     const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
                     executor.doPreactionsAndExecuteShellCommand(
                         parsing_process,

@@ -48,12 +48,14 @@ export class Variable_EventFolderName extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): string | null {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): Promise<string | null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        const folder = sc_event.getFolder();
-        return folder.name; // TODO: Consider changing to `return folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
+            const folder = sc_event.getFolder();
+            return resolve(folder.name); // TODO: Consider changing to `folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
+        });
     }
 }

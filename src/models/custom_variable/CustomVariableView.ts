@@ -51,14 +51,14 @@ export class CustomVariableView extends ItemView {
         this.container_element = this.containerEl.children[1].createDiv(); // I don't know why I cannot create elements directly under this.containerEl (they wouldn't show up). I did the same thing as was done here: https://marcus.se.net/obsidian-plugin-docs/guides/custom-views (referenced 2022-03-23).
         this.container_element.addClass("container");
 
-        this.updateContent();
+        await this.updateContent();
     }
 
-    public updateContent() {
+    public async updateContent() {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
         for (const custom_variable_instance of this.plugin.getCustomVariableInstances().values()) {
-            let custom_variable_value = custom_variable_instance.getCustomVariable().getValue().value;
+            let custom_variable_value = (await custom_variable_instance.getCustomVariable().getValue()).value;
             let emphasize = false;
             if (null === custom_variable_value) {
                 custom_variable_value = "No value yet.";

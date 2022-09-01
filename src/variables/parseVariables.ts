@@ -37,7 +37,7 @@ import {removeFromSet} from "../Common";
  * @param escaped_value_augmenter Same as raw_value_augmenter, but called after escaping the value. Can be used to for example wrap values in html elements for displaying purposes.
  * @return ParsingResult
  */
-export function parseVariables(
+export async function parseVariables(
         plugin: SC_Plugin,
         content: string,
         shell: string | null,
@@ -46,7 +46,9 @@ export function parseVariables(
         variables: VariableSet = plugin.getVariables(),
         raw_value_augmenter: ((variable: Variable, raw_value: VariableValueResult) => void) | null = null,
         escaped_value_augmenter: ((variable: Variable, escaped_value: string) => string) | null = null,
-    ): ParsingResult {
+    ): Promise<ParsingResult> {
+
+    // Initialize a parsing result object
     const parsing_result: ParsingResult = {
         original_content: content,
         parsed_content: null,
@@ -105,7 +107,7 @@ export function parseVariables(
             }
 
             // Render the variable
-            const variable_value_result = variable.getValue(
+            const variable_value_result = await variable.getValue(
                 t_shell_command,
                 sc_event,
 

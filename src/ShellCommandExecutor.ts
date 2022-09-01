@@ -123,12 +123,12 @@ export class ShellCommandExecutor {
             debugLog("No Preactions to perform. This is ok.");
         }
 
-        preaction_pipeline.then((can_execute: boolean) => {
+        preaction_pipeline.then(async (can_execute: boolean) => {
             if (can_execute) {
                 // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
                 // all variables are already parsed.
                 debugLog("Parsing all the rest of the variables (if there are any left).");
-                if (parsing_process.processRest()) {
+                if (await parsing_process.processRest()) {
                     // Parsing the rest of the variables succeeded
                     // Execute the shell command.
                     const parsing_results = parsing_process.getParsingResults();

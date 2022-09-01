@@ -37,13 +37,15 @@ export class Variable_FilePath extends FileVariable{
         mode: "absolute" | "relative";
     }
 
-    protected generateValue(): string|null {
-        const active_file = this.getFile();
-        if (active_file) {
-            return getFilePath(this.app, active_file, this.arguments.mode);
-        } else {
-            return null; // null indicates that getting a value has failed and the command should not be executed.
-        }
+    protected generateValue(): Promise<string|null> {
+        return new Promise((resolve) => {
+            const active_file = this.getFile();
+            if (active_file) {
+                return resolve(getFilePath(this.app, active_file, this.arguments.mode));
+            } else {
+                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
+            }
+        });
     }
 
     public getAutocompleteItems() {

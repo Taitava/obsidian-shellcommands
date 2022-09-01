@@ -37,23 +37,25 @@ export class Variable_YAMLValue extends FileVariable {
         property_name: string;
     }
 
-    protected generateValue(): string {
-        const active_file = this.getFile();
-        if (active_file) {
-            // We do have an active file
-            const result = this.getFileYAMLValue(active_file);
-            if (Array.isArray(result)) {
-                // The result contains error message(s).
-                this.newErrorMessages(result as string[]);
-                return null;
+    protected generateValue(): Promise<string|null> {
+        return new Promise((resolve) => {
+            const active_file = this.getFile();
+            if (active_file) {
+                // We do have an active file
+                const result = this.getFileYAMLValue(active_file);
+                if (Array.isArray(result)) {
+                    // The result contains error message(s).
+                    this.newErrorMessages(result as string[]);
+                    return resolve(null);
+                } else {
+                    // The result is ok, it's a string.
+                    return resolve(result as string);
+                }
             } else {
-                // The result is ok, it's a string.
-                return result as string;
+                // No file is active at the moment
+                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }
-        } else {
-            // No file is active at the moment
-            return null; // null indicates that getting a value has failed and the command should not be executed.
-        }
+        });
     }
 
     private yaml_value_cache: string[] | string;
