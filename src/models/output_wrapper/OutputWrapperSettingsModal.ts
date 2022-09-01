@@ -54,6 +54,7 @@ export class OutputWrapperSettingsModal extends SC_Modal {
         // Title
         const title_setting = new Setting(container_element)
             .setName("Output wrapper title")
+            .setDesc("Only used in settings, will not appear in output.")
             .addText(text => text
                 .setValue(this.output_wrapper.getTitle())
                 .onChange(async (new_title: string) => {
