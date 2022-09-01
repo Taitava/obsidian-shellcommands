@@ -1,11 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Debugging and testing
-    url: https://github.com/Taitava/obsidian-shellcommands/discussions/categories/debugging-and-testing
+    url: https://github.com/Taitava/obsidian-shellcommands/discussions/new?category=debugging-and-testing
     about: For suspected bugs or weird things.
   - name: Ideas
-    url: https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas
+    url: https://github.com/Taitava/obsidian-shellcommands/discussions/new?category=ideas
     about: For feature requests.
   - name: Q & A
-    url: https://github.com/Taitava/obsidian-shellcommands/discussions/categories/q-a
+    url: https://github.com/Taitava/obsidian-shellcommands/discussions/new?category=q-a
     about: Questions if you need help. You can also ask for help regarding what kind of shell commands you can use to do a certain thing that you have on your mind - the question doesn't have to directly relate to how to define the command in this plugin, you can ask more generally about different commands. If you are uncertain on which category you should post, post here.
