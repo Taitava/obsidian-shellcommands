@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
 ## To be Added
+- [Output wrappers (#262)](https://github.com/Taitava/obsidian-shellcommands/issues/262).
 - [Show a notification when executing shell commands (#261)](https://github.com/Taitava/obsidian-shellcommands/issues/261).
 
 ## [0.15.0] - 2022-08-20
