@@ -1,6 +1,6 @@
 ---
 name: New issues are meant to be created by the maintainer only
-about: "Click the green _Get started_ button to see instructions on how to proceed with your proposal. OR: Click one of the Discussion category links below."
+about: "DO NOT CLICK THE GREEN BUTTON!!! Click one of the _Open_ buttons below."
 title: ''
 labels: ''
 assignees: ''
