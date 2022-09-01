@@ -1,4 +1,5 @@
 import {FileVariable} from "./FileVariable";
+import {getFileContentWithoutYAML} from "../Common";
 
 export class Variable_NoteContent extends FileVariable {
     public variable_name = "note_content";
@@ -11,9 +12,8 @@ export class Variable_NoteContent extends FileVariable {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }
 
-            const content = this.app.vault.read(active_file);
-            content.then((file_content) => {
-                // TODO: process file content: 1) remove YAML frontmatter, 2) return the result
+            getFileContentWithoutYAML(active_file).then((file_content_without_yaml: string) => {
+                resolve(file_content_without_yaml);
             });
 
             this.newErrorMessage("This variable does not work yet.");

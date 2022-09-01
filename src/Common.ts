@@ -22,8 +22,10 @@ import {
     Editor,
     EditorPosition,
     FileSystemAdapter,
+    FrontMatterCache,
     MarkdownView,
     normalizePath,
+    TFile,
 } from "obsidian";
 import {PlatformId} from "./settings/SC_MainSettings";
 import {platform} from "os";
@@ -317,4 +319,18 @@ export function escapeMarkdownLinkCharacters(content: string) {
 
 export function copyToClipboard(text: string) {
     clipboard.writeText(text);
+}
+
+export async function getFileContentWithoutYAML(file: TFile): Promise<string> {
+    return new Promise((resolve) => {
+        // The logic is borrowed 2022-09-01 from https://forum.obsidian.md/t/how-to-get-current-file-content-without-yaml-frontmatter/26197/2
+        // Thank you, endorama! <3
+        const file_content = this.app.vault.read(file);
+        file_content.then((file_content: string) => {
+            const frontmatter_cache: FrontMatterCache = this.app.metadataCache.getFileCache(file).frontmatter;
+            const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+            const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatter_end_line_number).join("\n");
+            return resolve(file_content_without_frontmatter);
+        });
+    });
 }
