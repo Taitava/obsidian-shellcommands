@@ -32,6 +32,7 @@ import {
     ChangelogLink,
     DocumentationCustomVariablesLink,
     LicenseLink,
+    DocumentationOutputWrappersLink,
 } from "../Documentation";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
@@ -444,6 +445,11 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         new Setting(container_element)
             .setName("Output wrappers")
             .setHeading() // Make the "Output wrappers" text to appear as a heading.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Output wrappers")
+                .onClick(() => gotoURL(DocumentationOutputWrappersLink))
+            )
         ;
         const output_wrappers_container_element = container_element.createDiv();
         this.plugin.getOutputWrappers().forEach((output_wrapper: OutputWrapper) => {
