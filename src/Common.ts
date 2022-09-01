@@ -1,13 +1,56 @@
-import {App, Editor, FileSystemAdapter, MarkdownView, normalizePath} from "obsidian";
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
+import {
+    App,
+    Editor,
+    EditorPosition,
+    FileSystemAdapter,
+    MarkdownView,
+    normalizePath,
+} from "obsidian";
+import {PlatformId} from "./settings/SC_MainSettings";
+import {platform} from "os";
+import * as path from "path";
+import {debugLog} from "./Debug";
+import SC_Plugin from "./main";
+// @ts-ignore
+import {shell} from "electron";
+// @ts-ignore Electron is installed.
+import {clipboard} from "electron";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
     // But the code has been rewritten 2021-08-27 as per https://github.com/obsidianmd/obsidian-releases/pull/433#issuecomment-906087095
-    let adapter = app.vault.adapter;
+    const adapter = app.vault.adapter;
     if (adapter instanceof FileSystemAdapter) {
         return adapter.getBasePath();
     }
     return null;
+}
+
+export function getPluginAbsolutePath(plugin: SC_Plugin) {
+    return normalizePath2(path.join(
+        getVaultAbsolutePath(plugin.app),
+        plugin.app.vault.configDir,
+        "plugins",
+        plugin.getPluginId()));
 }
 
 /**
@@ -17,10 +60,22 @@ export function isWindows() {
     return process.platform === "win32";
 }
 
+/**
+ * This is just a wrapper around platform() in order to cast the type to PlatformId.
+ * TODO: Consider renaming this to getPlatformId().
+ */
+export function getOperatingSystem(): PlatformId  {
+    // @ts-ignore In theory, platform() can return an OS name not included in OperatingSystemName. But as Obsidian
+    // currently does not support anything else than Windows, Mac and Linux (except mobile platforms, but they are
+    // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
+    // three.
+    return platform();
+}
+
 export function getView(app: App) {
-    let view = app.workspace.getActiveViewOfType(MarkdownView);
+    const view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
-        console.log("getView(): Could not get a view. Will return null.");
+        debugLog("getView(): Could not get a view. Will return null.");
         return null;
     }
     return view;
@@ -28,7 +83,7 @@ export function getView(app: App) {
 
 export function getEditor(app: App): Editor {
 
-    let view = getView(app);
+    const view = getView(app);
     if (null === view) {
         // Could not get a view.
         return null;
@@ -42,12 +97,43 @@ export function getEditor(app: App): Editor {
     }
 
     // Did not find an editor.
-    console.log("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
+    debugLog("getEditor(): 'view' does not have a property named 'editor'. Will return null.");
     return null;
 }
 
-export function cloneObject(object: Object) {
-    return Object.assign({}, object);
+export function cloneObject<ObjectType>(object: Object): ObjectType{
+    return Object.assign({}, object) as ObjectType;
+}
+
+/**
+ * Merges two or more objects together. If they have same property names, former objects' properties get overwritten by later objects' properties.
+ *
+ * @param objects
+ */
+export function combineObjects(...objects: Object[]) {
+    return Object.assign({}, ...objects);
+}
+
+export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<SetType> {
+    return new Set<SetType>([...set1, ...set2]);
+}
+
+/**
+ * Returns a new Set cloned from 'from_set', with all items presented in 'remove' removed from it.
+ *
+ * @param from_set
+ * @param remove Can be either a Set of removable items, or a single item.
+ */
+export function removeFromSet<SetType>(from_set: Set<SetType>, remove: Set<SetType> | SetType): Set<SetType> {
+    const reduced_set = new Set(from_set);
+    if (remove instanceof Set) {
+        for (const removable of remove) {
+            reduced_set.delete(removable);
+        }
+    } else {
+        reduced_set.delete(remove);
+    }
+    return reduced_set;
 }
 
 /**
@@ -60,7 +146,7 @@ export function cloneObject(object: Object) {
 export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
-    let leading_slashes_regexp = /^[/\\]*/g; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
+    const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
     let leading_slashes = leading_slashes_regexp.exec(path)[0];
 
     // 2. Run the original normalizePath()
@@ -71,8 +157,8 @@ export function normalizePath2(path: string) {
     if (isWindows()) {
         // The platform is Windows.
         // Convert / to \
-        path = path.replace(/\//g, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
-        leading_slashes = leading_slashes.replace(/\//g, "\\"); // Same here.
+        path = path.replace(/\//gu, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
+        leading_slashes = leading_slashes.replace(/\//gu, "\\"); // Same here.
     }
     // Now ensure that path still contains leading slashes (if there were any before calling normalizePath()).
     // Check that the path should have a similar set of leading slashes at the beginning. It can be at least "/" (on linux/Mac), or "\\" (on Windows when it's a network path), in theory even "///" or "\\\\\" whatever.
@@ -86,9 +172,21 @@ export function normalizePath2(path: string) {
     return path;
 }
 
+export function extractFileName(file_path: string, with_extension = true) {
+    if (with_extension) {
+        return path.parse(file_path).base;
+    } else {
+        return path.parse(file_path).name;
+    }
+}
+
+export function extractFileParentPath(file_path: string) {
+    return path.parse(file_path).dir;
+}
+
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
-    for (let property_name in object) {
+    for (const property_name in object) {
         if (result.length) {
             result += glue;
         }
@@ -105,4 +203,118 @@ export function joinObjectProperties(object: {}, glue: string) {
  */
 export function uniqueArray(array: any[]) {
     return [...new Set(array)];
+}
+
+/**
+ * Opens a web browser in the specified URL.
+ * @param url
+ */
+export function gotoURL(url: string) {
+    shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
+}
+
+export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
+    const prefix = plugin.settings.obsidian_command_palette_prefix;
+    if (alias) {
+        // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
+        return prefix + alias;
+    }
+    return prefix + shell_command;
+}
+
+export function isInteger(value: string, allow_minus: boolean): boolean {
+    if (allow_minus) {
+        return !!value.match(/^-?\d+$/u);
+    } else {
+        return !!value.match(/^\d+$/u);
+    }
+}
+
+/**
+ * Translates 1-indexed caret line and column to a 0-indexed EditorPosition object. Also translates a possibly negative line
+ * to a positive line from the end of the file, and a possibly negative column to a positive column from the end of the line.
+ * @param editor
+ * @param caret_line
+ * @param caret_column
+ */
+export function prepareEditorPosition(editor: Editor, caret_line: number, caret_column: number): EditorPosition {
+    // Determine line
+    if (caret_line < 0) {
+        // Negative line means to calculate it from the end of the file.
+        caret_line = Math.max(0, editor.lastLine() + caret_line + 1);
+    } else {
+        // Positive line needs just a small adjustment.
+        // Editor line is zero-indexed, line numbers are 1-indexed.
+        caret_line -= 1;
+    }
+
+    // Determine column
+    if (caret_column < 0) {
+        // Negative column means to calculate it from the end of the line.
+        caret_column = Math.max(0, editor.getLine(caret_line).length + caret_column + 1);
+    } else {
+        // Positive column needs just a small adjustment.
+        // Editor column is zero-indexed, column numbers are 1-indexed.
+        caret_column -= 1;
+    }
+
+    return {
+        line: caret_line,
+        ch: caret_column,
+    }
+}
+
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: false): string;
+export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: boolean): string | null {
+    const selected_text = textarea_element.value.substring(textarea_element.selectionStart, textarea_element.selectionEnd);
+    return "" === selected_text && return_null_if_empty ? null : selected_text;
+}
+
+/**
+ * Creates an HTMLElement (with freely decidable tag) and adds the given content into it as normal text. No HTML formatting
+ * is supported, i.e. possible HTML special characters are shown as-is. Newline characters are converted to <br> elements.
+ *
+ * @param tag
+ * @param content
+ * @param parent_element
+ */
+export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, content: string, parent_element: HTMLElement) {
+    const content_element = parent_element.createEl(tag);
+
+    // Insert content line-by-line
+    const content_lines = content.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
+    content_lines.forEach((content_line: string, content_line_index: number) => {
+        // Insert the line.
+        content_element.insertAdjacentText("beforeend", content_line);
+
+        // Insert a linebreak <br> if needed.
+        if (content_line_index < content_lines.length - 1) {
+            content_element.insertAdjacentHTML("beforeend", "<br>");
+        }
+    });
+    return content_element;
+}
+
+export function randomInteger(min: number, max: number) {
+    const range = max - min + 1;
+    return min + Math.floor(Math.random() * range);
+}
+
+/**
+ * Does the following prefixings:
+ *   \ will become \\
+ *   [ will become \[
+ *   ] will become \]
+ *   ( will become \(
+ *   ) will become \)
+ *
+ * @param content
+ */
+export function escapeMarkdownLinkCharacters(content: string) {
+    return content.replace(/[\\()\[\]]/gu, "\\$&");
+}
+
+export function copyToClipboard(text: string) {
+    clipboard.writeText(text);
 }

@@ -1,30 +1,50 @@
+/*
+ * 'Shell commands' plugin for Obsidian.
+ * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
+ */
+
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {getEditor, getView, joinObjectProperties} from "../Common";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {Editor} from "obsidian";
+import {debugLog} from "../Debug";
 
 export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
 
-    public handle(output: OutputStreams) {
-        let editor = getEditor(this.app);
-        let view = getView(this.app);
+    protected _handle(output: OutputStreams) {
+        const editor = getEditor(this.app);
+        const view = getView(this.app);
 
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
         // will be joined together with " " as a separator.
-        let output_message = joinObjectProperties(output, " ");
+        const output_message = joinObjectProperties(output, " ");
 
         if (null === editor) {
             // For some reason it's not possible to get an editor.
             this.plugin.newError("Could not get an editor instance! Please raise an issue in GitHub. The command output is in the next error box:");
             this.plugin.newError(output_message); // Good to output it at least some way.
-            console.log("OutputChannelDriver_CurrentFile: Could not get an editor instance.")
+            debugLog("OutputChannelDriver_CurrentFile: Could not get an editor instance.")
             return;
         }
 
         // Check if the view is in source mode
         if (null === view) {
             // For some reason it's not possible to get an editor, but it's not a big problem.
-            console.log("OutputChannelDriver_CurrentFile: Could not get a view instance.");
+            debugLog("OutputChannelDriver_CurrentFile: Could not get a view instance.");
         } else {
             // We do have a view
             if ("source" !== view.getMode()) {
