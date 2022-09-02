@@ -12,7 +12,7 @@ export class Variable_NoteContent extends FileVariable {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }
 
-            getFileContentWithoutYAML(active_file).then((file_content_without_yaml: string) => {
+            getFileContentWithoutYAML(this.app, active_file).then((file_content_without_yaml: string) => {
                 resolve(file_content_without_yaml);
             });
 
