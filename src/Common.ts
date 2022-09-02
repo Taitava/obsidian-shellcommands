@@ -328,9 +328,16 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
         const file_content = app.vault.read(file);
         file_content.then((file_content: string) => {
             const frontmatter_cache: FrontMatterCache = app.metadataCache.getFileCache(file).frontmatter;
-            const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
-            const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatter_end_line_number).join("\n");
-            return resolve(file_content_without_frontmatter);
+            if (frontmatter_cache) {
+                // A YAML frontmatter is present in the file.
+                const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+                const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatter_end_line_number).join("\n");
+                return resolve(file_content_without_frontmatter);
+            } else {
+                // No YAML frontmatter is present in the file.
+                // Return the whole file content, because there's nothing to remove.
+                return resolve(file_content);
+            }
         });
     });
 }
