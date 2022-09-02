@@ -3,7 +3,7 @@ import {getFileContentWithoutYAML} from "../Common";
 
 export class Variable_NoteContent extends FileVariable {
     public variable_name = "note_content";
-    public help_text = "Gets the current note's content without YAML frontmatter.";
+    public help_text = "Gives the current note's content without YAML frontmatter. If you need YAML included, use {{file_content}} instead.";
 
     protected generateValue(): Promise<string|null> {
         return new Promise((resolve) => {
