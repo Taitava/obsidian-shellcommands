@@ -109,7 +109,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
                 const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
                 if (await parsing_process.process()) {
                     const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
-                    executor.doPreactionsAndExecuteShellCommand(
+                    await executor.doPreactionsAndExecuteShellCommand(
                         parsing_process,
                         ctrl_clicked ? "modal" : undefined // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
                     );

@@ -120,10 +120,10 @@ export abstract class SC_Event {
      * @param t_shell_command
      * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
-    protected trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
+    protected async trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
         // Execute the shell command.
         const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
-        executor.doPreactionsAndExecuteShellCommand(parsing_process);
+        await executor.doPreactionsAndExecuteShellCommand(parsing_process);
     }
 
     public static getCode() {

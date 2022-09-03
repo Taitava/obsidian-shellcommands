@@ -269,7 +269,7 @@ export default class SC_Plugin extends Plugin {
 					t_shell_command,
 					null // No SC_Event is available when executing via command palette or hotkey.
 				);
-				executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
+				await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages
@@ -389,7 +389,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private registerURIHandler() {
-		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, (parameters: ObsidianProtocolData) => {
+		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, async (parameters: ObsidianProtocolData) => {
 			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
 
 			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
@@ -436,7 +436,7 @@ export default class SC_Plugin extends Plugin {
 
 							// Execute it.
 							const executor = new ShellCommandExecutor(this, t_shell_command, null);
-							executor.doPreactionsAndExecuteShellCommand();
+							await executor.doPreactionsAndExecuteShellCommand();
 
 						}
 					}

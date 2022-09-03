@@ -55,7 +55,7 @@ export class ShellCommandExecutor {
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
      */
-    public doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
+    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
         const preactions = this.t_shell_command.getPreactions();
 
         // Does an already started ParsingProcess exist?
@@ -65,7 +65,7 @@ export class ShellCommandExecutor {
             debugLog("Going to prepare possible Preactions, but will first start a variable parsing process. Depending on possible Preactions, this might not yet parse all variables.");
             parsing_process = this.t_shell_command.createParsingProcess(this.sc_event);
             // Parse the first set of variables, not all sets.
-            if (!parsing_process.process()) {
+            if (!await parsing_process.process()) {
                 // Some errors happened.
                 debugLog("Will not prepare possible Preactions, because the parsing process failed. Will cancel shell command execution.");
                 parsing_process.displayErrorMessages();

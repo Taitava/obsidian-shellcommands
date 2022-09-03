@@ -54,7 +54,7 @@ export abstract class SC_VaultMoveOrRenameEvent extends SC_VaultEvent {
         // Get a trigger from the parent class (SC_VaultEvent).
         const trigger = super.getTrigger(t_shell_command);
 
-        return (abstract_file: TAbstractFile, old_relative_path: string) => {
+        return async (abstract_file: TAbstractFile, old_relative_path: string) => {
 
             // Detect if the file/folder was moved or renamed.
             // If the file/folder name has stayed the same, conclude that the file has been MOVED, not renamed. Otherwise, conclude the opposite.
@@ -78,7 +78,7 @@ export abstract class SC_VaultMoveOrRenameEvent extends SC_VaultEvent {
                 }
 
                 // Call the normal trigger function.
-                trigger(abstract_file);
+                await trigger(abstract_file);
             }
         };
     }

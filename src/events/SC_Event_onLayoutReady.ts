@@ -26,7 +26,7 @@ export class SC_Event_onLayoutReady extends SC_Event {
     protected register_after_changing_settings = false;
 
     protected _register(t_shell_command: TShellCommand) {
-        this.app.workspace.onLayoutReady(() => this.trigger(t_shell_command));
+        this.app.workspace.onLayoutReady(async () => await this.trigger(t_shell_command));
         return false; // The base class does not need to register anything.
     }
 

@@ -42,8 +42,8 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
         menu.addItem(item => item
             .setIcon(t_shell_command.getIconId()) // Icon id can be null.
             .setTitle(title)
-            .onClick(() => {
-                this.trigger(
+            .onClick(async () => {
+                await this.trigger(
                     t_shell_command,
                     parsing_process,
                 );

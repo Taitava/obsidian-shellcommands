@@ -48,6 +48,6 @@ export abstract class SC_WorkspaceEvent extends SC_Event {
     }
 
     protected getTrigger(t_shell_command: TShellCommand) {
-        return (...parameters: unknown[] /* Need to have this ugly parameter thing so that subclasses can define their own parameters. */) => this.trigger(t_shell_command);
+        return async (...parameters: unknown[] /* Need to have this ugly parameter thing so that subclasses can define their own parameters. */) => await this.trigger(t_shell_command);
     }
 }
