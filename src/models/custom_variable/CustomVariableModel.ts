@@ -100,7 +100,7 @@ export class CustomVariableModel extends Model {
                         heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
                         instance.getCustomVariable().updateProperties(); // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
-                        this.plugin.updateCustomVariableViews();
+                        await this.plugin.updateCustomVariableViews();
                     }, (reason: string | unknown) => {
                         // Not valid
                         if (typeof reason === "string") {
@@ -127,7 +127,7 @@ export class CustomVariableModel extends Model {
                     instance.configuration.description = new_description;
                     instance.getCustomVariable().updateProperties(); // Update the description also to the operational variable, not only in configuration.
                     await this.plugin.saveSettings();
-                    this.plugin.updateCustomVariableViews();
+                    await this.plugin.updateCustomVariableViews();
                 }),
             )
         ;

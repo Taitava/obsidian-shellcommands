@@ -102,7 +102,7 @@ export abstract class PromptField extends Instance {
             // Parsing succeeded.
             this.setValue(parsing_result.parsed_content);
         }
-        this.valueHasChanged(t_shell_command, sc_event);
+        await this.valueHasChanged(t_shell_command, sc_event);
     }
 
     public getParsedValue() {
