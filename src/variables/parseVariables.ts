@@ -48,6 +48,8 @@ export async function parseVariables(
         escaped_value_augmenter: ((variable: Variable, escaped_value: string) => string) | null = null,
     ): Promise<ParsingResult> {
 
+    debugLog("parseVariables(): Starting to parse " + content + " with " + variables.size + " variables.");
+
     // Initialize a parsing result object
     const parsing_result: ParsingResult = {
         original_content: content,
@@ -164,7 +166,7 @@ export async function parseVariables(
                 });
             } else {
                 // There has been problem(s) with this variable.
-                debugLog("Parsing content " + content + " failed.");
+                debugLog("parseVariables(): Parsing content " + content + " failed.");
                 parsing_result.succeeded = false;
                 parsing_result.parsed_content = null;
                 parsing_result.error_messages = variable_value_result.error_messages; // Returning now prevents parsing rest of the variables.
@@ -172,6 +174,7 @@ export async function parseVariables(
             }
         }
     }
+    debugLog("parseVariables(): Parsing content " + content + " succeeded.");
     parsing_result.succeeded = true;
     return parsing_result;
 }

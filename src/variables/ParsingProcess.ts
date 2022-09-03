@@ -29,6 +29,7 @@ import {
     uniqueArray,
 } from "../Common";
 import {TShellCommand} from "../TShellCommand";
+import {debugLog} from "../Debug";
 
 /**
  * ParsingProcess instances can be used in situations where it's uncertain can all variables be parsed at the time being,
@@ -60,7 +61,9 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
          * will shift and process the next set.
          */
         private variable_sets: VariableSet[],
-    ) {}
+    ) {
+        debugLog("Parsing process: Count variable sets: " + this.variable_sets.length);
+    }
 
     private is_first_call = true;
     /**
@@ -72,6 +75,8 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
         const current_variables = this.variable_sets.shift();
         let success = true;
 
+        debugLog("Parsing process: Count variables in current set: " + current_variables.size);
+
         // Multiple contents can be parsed in the same call. TShellCommand instances have 'shell_command' and 'alias'
         // contents which are parsed at the same time. This multi-content support can be used for even more situations if
         // needed in the future.
@@ -81,10 +86,12 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             if (this.is_first_call) {
                 // Use original content.
                 parse_content = this.original_contents[content_key];
+                debugLog("Starting to parse '" + content_key + "': " + parse_content);
             } else {
                 // Continue parsing content from previous parsing result. This time parse variables that were not parse back then.
                 // FIXME: Problem: variable values that came from an earlier phase are exposed to repetitive parsing. Find a way to limit the parsing to only original parts of the shell command.
                 parse_content = this.parsing_results[content_key].parsed_content;
+                debugLog("Continuing parsing '" + content_key + "': " + parse_content);
             }
 
             // Parse the variables
@@ -120,6 +127,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             if (this.parsing_results[content_key]) {
                 // A previous parsing result exists.
                 // Ensure it has not failed.
+                debugLog("Previous parsing succeeded? " + this.parsing_results[content_key].succeeded);
                 if (!this.parsing_results[content_key].succeeded) {
                     // The previous parsing result has failed.
                     return false;
