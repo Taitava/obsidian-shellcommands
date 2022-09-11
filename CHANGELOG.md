@@ -14,6 +14,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [Output wrappers (#262)](https://github.com/Taitava/obsidian-shellcommands/issues/262).
 - [Show a notification when executing shell commands (#261)](https://github.com/Taitava/obsidian-shellcommands/issues/261).
 - New variables:
+  - [{{file_content}} / {{event_file_content}} (#266)](https://github.com/Taitava/obsidian-shellcommands/issues/266)
   - [{{note_content}} / {{event_note_content}} (#77)](https://github.com/Taitava/obsidian-shellcommands/issues/77)
 
 ## To be Changed
