@@ -58,11 +58,11 @@ export class PromptModal extends SC_Modal {
         });
     }
 
-    public onOpen() {
+    public async onOpen() {
         super.onOpen();
 
         // Parse and display title
-        const title_parsing_result  = parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
+        const title_parsing_result = await parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
         this.setTitle(
             title_parsing_result.succeeded
             ? title_parsing_result.parsed_content
@@ -71,7 +71,7 @@ export class PromptModal extends SC_Modal {
 
         // Parse and display description
         if (this.prompt.configuration.description) {
-            const description_parsing_result: ParsingResult = parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
+            const description_parsing_result: ParsingResult = await parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
             const description =
                 description_parsing_result.succeeded
                 ? description_parsing_result.parsed_content
@@ -126,7 +126,7 @@ export class PromptModal extends SC_Modal {
             this.modalEl.createEl("hr");
 
             // A function for handling preview text updates.
-            update_shell_command_preview = () => {
+            update_shell_command_preview = async () => {
                 let shell_command_preview_text_final = shell_command_preview_text;
                 if (preview_variable_values) {
                     // The preview should show the VALUES.
@@ -141,7 +141,7 @@ export class PromptModal extends SC_Modal {
 
 
                         // Parse variables in the shell command preview text.
-                        const parsing_result = parseVariables(
+                        const parsing_result = await parseVariables(
                             this.plugin,
                             shell_command_preview_text,
                             this.getShell(),
@@ -226,7 +226,7 @@ export class PromptModal extends SC_Modal {
         }
 
         // Execute button
-        const execute_button_text_parsing_result = parseVariables(this.plugin, this.prompt.configuration.execute_button_text, null, this.t_shell_command, this.sc_event);
+        const execute_button_text_parsing_result = await parseVariables(this.plugin, this.prompt.configuration.execute_button_text, null, this.t_shell_command, this.sc_event);
         const execute_button_text =
             execute_button_text_parsing_result.succeeded
             ? execute_button_text_parsing_result.parsed_content

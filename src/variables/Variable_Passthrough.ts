@@ -34,9 +34,9 @@ export class Variable_Passthrough extends Variable {
         value: string,
     };
 
-    protected generateValue(): string {
+    protected generateValue(): Promise<string|null> {
         // Simply return the argument that was received.
-        return this.arguments.value;
+        return Promise.resolve(this.arguments.value);
     }
 
     public getAvailabilityText() {

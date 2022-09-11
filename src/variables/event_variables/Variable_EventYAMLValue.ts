@@ -52,21 +52,23 @@ export class Variable_EventYAMLValue extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string | null {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        const file = sc_event.getFile();
-        const result = this.getFileYAMLValue(file);
-        if (Array.isArray(result)) {
-            // The result contains error message(s).
-            this.newErrorMessages(result as string[]);
-            return null;
-        } else {
-            // The result is ok, it's a string.
-            return result as string;
-        }
+            const file = sc_event.getFile();
+            const result = this.getFileYAMLValue(file);
+            if (Array.isArray(result)) {
+                // The result contains error message(s).
+                this.newErrorMessages(result as string[]);
+                return resolve(null);
+            } else {
+                // The result is ok, it's a string.
+                return resolve(result as string);
+            }
+        });
     }
 
     private yaml_value_cache: string[] | string;

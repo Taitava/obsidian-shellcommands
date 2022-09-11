@@ -50,7 +50,7 @@ export abstract class SC_VaultEvent extends SC_Event {
     }
 
     protected getTrigger(t_shell_command: TShellCommand) {
-        return (file: TAbstractFile, ...extra_arguments: unknown[] /* Needed for SC_Event_FileRenamed and SC_Event_FolderRenamed to be able to define an additional parameter.*/) => {
+        return async (file: TAbstractFile, ...extra_arguments: unknown[] /* Needed for SC_Event_FileRenamed and SC_Event_FolderRenamed to be able to define an additional parameter.*/) => {
 
             // Check that it's the correct type of file: if the SC_Event requires a file, 'file' needs to be a TFile, otherwise it needs to be a TFolder.
             if ((this.file_or_folder === "folder" && file instanceof TFolder) || (this.file_or_folder === "file" && file instanceof TFile)) {
@@ -66,7 +66,7 @@ export abstract class SC_VaultEvent extends SC_Event {
                         break;
                 }
 
-                this.trigger(t_shell_command);
+                await this.trigger(t_shell_command);
             }
         };
     }

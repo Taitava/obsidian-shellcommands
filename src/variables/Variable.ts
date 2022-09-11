@@ -79,72 +79,79 @@ export abstract class Variable {
          * Will parse variables in a default value (only used if this variable is not available this time). The callback
          * is only used, if t_shell_command is given. Set to null, if no variable parsing is needed for default values.
          * */
-        default_value_parser: ((content: string) => ParsingResult) | null = null,
-    ): VariableValueResult {
-        let value: string;
-        if (this.isAvailable(sc_event)) {
-            // The variable can be used.
-            value = this.generateValue(sc_event);
-            return {
-                value: value,
-                error_messages: this.error_messages,
-                succeeded: this.error_messages.length === 0,
-            };
-        } else {
-            // The variable is not available in this situation.
-            // Check what should be done.
-            const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
-            const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
-            const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
-            switch (default_value_type) {
-                case "show-errors":
-                    // Generate error messages by calling generateValue().
-                    debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
-                    this.generateValue(sc_event); // No need to use the return value, it's null anyway.
-                    return {
-                        value: null,
+        default_value_parser: ((content: string) => Promise<ParsingResult>) | null = null,
+    ): Promise<VariableValueResult> {
+
+        return new Promise<VariableValueResult>((resolve) => {
+            if (this.isAvailable(sc_event)) {
+                // The variable can be used.
+                this.generateValue(sc_event).then((value: string | null) => {
+                    resolve({
+                        value: value,
                         error_messages: this.error_messages,
-                        succeeded: false,
-                    };
-                case "cancel-silently":
-                    // Prevent execution, but do not show any errors
-                    debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
-                    return {
-                        value: null,
-                        error_messages: [],
-                        succeeded: false,
-                    };
-                case "value":
-                    // Return a default value.
-                    debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
-                    if (default_value_parser) {
-                        // Parse possible variables in the default value.
-                        const default_value_parsing_result = default_value_parser(default_value_configuration.value);
-                        return {
-                            value:
-                                default_value_parsing_result.succeeded
-                                    ? default_value_parsing_result.parsed_content
-                                    : default_value_parsing_result.original_content
-                            ,
-                            error_messages: default_value_parsing_result.error_messages,
-                            succeeded: default_value_parsing_result.succeeded,
-                        };
-                    } else {
-                        // No variable parsing is wanted.
-                        return {
-                            value: default_value_configuration.value,
+                        succeeded: this.error_messages.length === 0,
+                    });
+                });
+            } else {
+                // The variable is not available in this situation.
+                // Check what should be done.
+                const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+                const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
+                const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
+                switch (default_value_type) {
+                    case "show-errors":
+                        // Generate error messages by calling generateValue().
+                        debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                        this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
+                            resolve({
+                                value: null,
+                                error_messages: this.error_messages,
+                                succeeded: false,
+                            });
+                        });
+                        break;
+                    case "cancel-silently":
+                        // Prevent execution, but do not show any errors
+                        debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
+                        return resolve({
+                            value: null,
                             error_messages: [],
-                            succeeded: true,
-                        };
-                    }
+                            succeeded: false,
+                        });
+                    case "value":
+                        // Return a default value.
+                        debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
+                        if (default_value_parser) {
+                            // Parse possible variables in the default value.
+                            default_value_parser(default_value_configuration.value).then((default_value_parsing_result: ParsingResult) => {
+                                return resolve({
+                                    value:
+                                        default_value_parsing_result.succeeded
+                                            ? default_value_parsing_result.parsed_content
+                                            : default_value_parsing_result.original_content
+                                    ,
+                                    error_messages: default_value_parsing_result.error_messages,
+                                    succeeded: default_value_parsing_result.succeeded,
+                                });
+                            });
+
+                        } else {
+                            // No variable parsing is wanted.
+                            return resolve({
+                                value: default_value_configuration.value,
+                                error_messages: [],
+                                succeeded: true,
+                            });
+                        }
+                }
             }
-        }
+        });
     }
 
     /**
-     * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method, but that method might be removed some day.
+     * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(sc_event: SC_Event): string|null;
+    protected abstract generateValue(sc_event: SC_Event): Promise<string|null>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;

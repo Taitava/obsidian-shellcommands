@@ -25,7 +25,7 @@ export class Variable_Clipboard extends Variable {
     public variable_name = "clipboard";
     public help_text = "Gives the content you last copied to your clipboard.";
 
-    protected generateValue(): string {
-        return clipboard.readText();
+    protected generateValue(): Promise<string|null> {
+        return Promise.resolve(clipboard.readText());
     }
 }

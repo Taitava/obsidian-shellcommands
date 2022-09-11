@@ -42,13 +42,15 @@ export class CustomVariable extends Variable {
         debugLog(`Loaded CustomVariable ${this.variable_name}.`);
     }
 
-    public generateValue() {
-        if (null === this.value) {
-            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
-            this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
-            return null;
-        }
-        return this.value;
+    public generateValue(): Promise<string|null> {
+        return new Promise((resolve) => {
+            if (null === this.value) {
+                debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
+                this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
+                return resolve(null);
+            }
+            return resolve(this.value);
+        });
     }
 
     public setValue(value: string) {

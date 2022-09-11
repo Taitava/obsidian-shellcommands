@@ -56,7 +56,7 @@ export abstract class PromptField extends Instance {
      * @param t_shell_command
      * @param sc_event Used when parsing variables for default_value and the inputted value. Needed so that also {{event_*}} variables can be used in prompts.
      */
-    public createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): void {
+    public async createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
         this._createField(container_element, t_shell_command, sc_event);
 
         // Create a preview setting element. It will not contain any actual setting elements, just text.
@@ -64,7 +64,7 @@ export abstract class PromptField extends Instance {
 
         // Parse variables in the default value and insert it to the field.
         // Note that this is a different "default value" than what TShellCommand considers as variables' default values! This is about a _field's_ default value, not a variable's default value. t_shell_command is passed in order to allow any possible variables in the field's default value to access the variables' default values (which come from TShellCommand).
-        this.applyDefaultValue(t_shell_command, sc_event);
+        await this.applyDefaultValue(t_shell_command, sc_event);
     }
 
     protected abstract _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): void;
@@ -92,9 +92,9 @@ export abstract class PromptField extends Instance {
      * @param sc_event
      * @private
      */
-    private applyDefaultValue(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
+    private async applyDefaultValue(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         const default_value = this.configuration.default_value;
-        const parsing_result = parseVariables(this.prompt.model.plugin, default_value, null, t_shell_command, sc_event);
+        const parsing_result = await parseVariables(this.prompt.model.plugin, default_value, null, t_shell_command, sc_event);
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
@@ -102,7 +102,7 @@ export abstract class PromptField extends Instance {
             // Parsing succeeded.
             this.setValue(parsing_result.parsed_content);
         }
-        this.valueHasChanged(t_shell_command, sc_event);
+        await this.valueHasChanged(t_shell_command, sc_event);
     }
 
     public getParsedValue() {
@@ -120,11 +120,11 @@ export abstract class PromptField extends Instance {
      * @param sc_event
      * @protected
      */
-    protected valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event) {
+    protected async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event) {
         let preview: string;
 
         // Parse variables in the value.
-        const parsing_result = parseVariables(this.prompt.model.plugin, this.getValue(), null, t_shell_command,sc_event);
+        const parsing_result = await parseVariables(this.prompt.model.plugin, this.getValue(), null, t_shell_command, sc_event);
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.parsed_value = null;

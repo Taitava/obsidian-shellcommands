@@ -37,13 +37,15 @@ export class Variable_FileExtension extends FileVariable {
         "dot": "with-dot" | "no-dot",
     }
 
-    protected generateValue(): string {
-        const file = this.getFile();
-        if (!file) {
-            return null; // null indicates that getting a value has failed and the command should not be executed.
-        }
+    protected generateValue(): Promise<string|null> {
+        return new Promise((resolve) => {
+            const file = this.getFile();
+            if (!file) {
+                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
+            }
 
-        return getFileExtension(file, this.arguments.dot === "with-dot");
+            return resolve(getFileExtension(file, this.arguments.dot === "with-dot"));
+        });
     }
 
     public getAutocompleteItems() {

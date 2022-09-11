@@ -40,17 +40,19 @@ export class Variable_Environment extends Variable {
         variable: string;
     }
 
-    protected generateValue(): string {
+    protected generateValue(): Promise<string|null> {
         // Check that the requested environment variable exists.
-        if (this.isAvailable()) {
-            // Yes, it exists.
-            return process.env[this.arguments.variable];
-        } else {
-            // It does not exist.
-            // Freak out.
-            this.newErrorMessage(`Environment variable named '${this.arguments.variable}' does not exist.`);
-            return null;
-        }
+        return new Promise((resolve) => {
+            if (this.isAvailable()) {
+                // Yes, it exists.
+                return resolve(process.env[this.arguments.variable]);
+            } else {
+                // It does not exist.
+                // Freak out.
+                this.newErrorMessage(`Environment variable named '${this.arguments.variable}' does not exist.`);
+                return resolve(null);
+            }
+        });
     }
 
     public getHelpName(): string {

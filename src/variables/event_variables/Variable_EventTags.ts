@@ -51,12 +51,14 @@ export class Variable_EventTags extends EventVariable {
         separator: string,
     };
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): string {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string|null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        const file = sc_event.getFile();
-        return getFileTags(this.app, file).join(this.arguments.separator);
+            const file = sc_event.getFile();
+            return resolve(getFileTags(this.app, file).join(this.arguments.separator));
+        });
     }
 }
