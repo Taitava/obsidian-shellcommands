@@ -227,59 +227,72 @@ export class ShellCommandExecutor {
 
             // Execute the shell command
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
-            const child_process = exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
+            try {
+                const child_process = exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 
-                // Did the shell command execute successfully?
-                if (null !== error) {
-                    // Some error occurred
-                    debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+                    // Did the shell command execute successfully?
+                    if (null !== error) {
+                        // Some error occurred
+                        debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
 
-                    // Check if this error should be displayed to the user or not
-                    if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
-                        // The user has ignored this error.
-                        debugLog("User has ignored this error, so won't display it.");
+                        // Check if this error should be displayed to the user or not
+                        if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
+                            // The user has ignored this error.
+                            debugLog("User has ignored this error, so won't display it.");
 
-                        // Handle only stdout output stream
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
-                    } else {
-                        // Show the error.
-                        debugLog("Will display the error to user.");
-
-                        // Check that stderr actually contains an error message
-                        if (!stderr.length) {
-                            // Stderr is empty, so the error message is probably given by Node.js's child_process.
-                            // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
-                            stderr = error.message;
-                        }
-
-                        // Handle both stdout and stderr output streams
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
-                    }
-                } else {
-                    // Probably no errors, but do one more check.
-
-                    // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
-                    if (stderr.length > 0) {
-                        // Check a special case: should error code 0 be ignored?
-                        if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
-                            // Exit code 0 is on the ignore list, so suppress stderr output.
-                            stderr = "";
-                            debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                            // Handle only stdout output stream
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
                         } else {
-                            debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                            // Show the error.
+                            debugLog("Will display the error to user.");
+
+                            // Check that stderr actually contains an error message
+                            if (!stderr.length) {
+                                // Stderr is empty, so the error message is probably given by Node.js's child_process.
+                                // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
+                                stderr = error.message;
+                            }
+
+                            // Handle both stdout and stderr output streams
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
                         }
                     } else {
-                        debugLog("Shell command executed: No errors.");
+                        // Probably no errors, but do one more check.
+
+                        // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+                        if (stderr.length > 0) {
+                            // Check a special case: should error code 0 be ignored?
+                            if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
+                                // Exit code 0 is on the ignore list, so suppress stderr output.
+                                stderr = "";
+                                debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                            } else {
+                                debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                            }
+                        } else {
+                            debugLog("Shell command executed: No errors.");
+                        }
+
+                        // Handle output
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                     }
+                });
 
-                    // Handle output
-                    handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                // Display a notification of the execution (if wanted).
+                if ("disabled" !== this.plugin.settings.execution_notification_mode) {
+                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode);
                 }
-            });
-
-            // Display a notification of the execution (if wanted).
-            if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode);
+            } catch (exception) {
+                // An exception has happened.
+                // Check if the shell command was too long.
+                if (exception.message.match(/spawn\s+ENAMETOOLONG/i)) {
+                    // It was too long. Show an error message.
+                    this.plugin.newError("Shell command execution failed because it's too long: " + shell_command.length + " characters. (Unfortunately the max limit is unknown).");
+                } else {
+                    // The shell command was not too long, this exception is about something else.
+                    // Rethrow the exception.
+                    throw  exception;
+                }
             }
         }
     }
