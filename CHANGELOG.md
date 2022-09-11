@@ -16,6 +16,7 @@ Features that are in development, but are not released yet. Does not include stu
 - New variables:
   - [{{file_content}} / {{event_file_content}} (#266)](https://github.com/Taitava/obsidian-shellcommands/issues/266)
   - [{{note_content}} / {{event_note_content}} (#77)](https://github.com/Taitava/obsidian-shellcommands/issues/77)
+- [Show an error message if a shell command is too long to execute (#269)](https://github.com/Taitava/obsidian-shellcommands/issues/269).
 
 ## To be Changed
 - [Internal: Refactor variable parsing to become asynchronous (#265)](https://github.com/Taitava/obsidian-shellcommands/issues/265).
