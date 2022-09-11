@@ -48,6 +48,7 @@ import {
     PromptModel
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
+import {ExecutionNotificationMode} from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 
@@ -467,7 +468,26 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.createNotificationDurationField(container_element, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
 
         // "Notification message duration" field
-        this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
+        this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non-fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
+
+        // "Show a notification when executing shell commands" field
+        new Setting(container_element)
+            .setName("Show a notification when executing shell commands")
+            .addDropdown(dropdown_component => dropdown_component
+                .addOptions({
+                    "disabled": "Do not show",
+                    "quick": "Show for " + this.plugin.settings.notification_message_duration + " seconds",
+                    "permanent": "Show until the process is finished",
+                    "if-long": "Show only if executing takes long",
+                })
+                .setValue(this.plugin.settings.execution_notification_mode)
+                .onChange(async (new_execution_notification_mode: string) => {
+                    // Save the change.
+                    this.plugin.settings.execution_notification_mode = new_execution_notification_mode as ExecutionNotificationMode;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
 
         // "Output channel 'Clipboard' displays a notification message, too" field
         new Setting(container_element)

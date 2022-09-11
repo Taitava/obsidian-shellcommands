@@ -611,8 +611,16 @@ export default class SC_Plugin extends Plugin {
 		});
 	}
 
-	public newNotification(message: string) {
-		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+    /**
+     *
+     * @param message
+     * @param timeout Custom timeout in milliseconds. If not set, the timeout will be fetched from user configurable settings. Use 0 if you want to disable the timeout, i.e. show the notification until it's explicitly hidden by clinking it, or via code.
+     */
+	public newNotification(
+        message: string,
+        timeout = this.settings.notification_message_duration * 1000, // * 1000 = convert seconds to milliseconds.
+    ) {
+		return new Notice(message, timeout);
 	}
 
 	public getDefaultShell(): string {
