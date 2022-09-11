@@ -61,13 +61,17 @@ import {
 	loadVariables,
 	VariableSet,
 } from "./variables/loadVariables";
+import {
+    OutputWrapperMap,
+    OutputWrapperModel,
+} from "./models/output_wrapper/OutputWrapperModel";
 
 export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.15.0";
+	public static SettingsVersion: SettingsVersionString = "0.16.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
@@ -75,6 +79,7 @@ export default class SC_Plugin extends Plugin {
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
 	private variables: VariableSet;
+    private output_wrappers: OutputWrapperMap;
 
 	/**
 	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
@@ -122,6 +127,9 @@ export default class SC_Plugin extends Plugin {
 		// Load variables (both built-in and custom ones). Do this AFTER loading configs for custom variables!
 		this.variables = loadVariables(this);
 
+        // Load output wrappers
+        const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
+        this.output_wrappers = output_wrapper_model.loadInstances(this.settings);
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
@@ -181,6 +189,10 @@ export default class SC_Plugin extends Plugin {
 
 	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
 		return this.settings.shell_commands;
+	}
+
+	public getOutputWrappers() {
+		return this.output_wrappers;
 	}
 
     /**

@@ -18,20 +18,22 @@
  */
 
 import {OutputChannelDriver} from "./OutputChannelDriver";
-import {getEditor, getView, joinObjectProperties} from "../Common";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {getEditor, getView} from "../Common";
 import {Editor} from "obsidian";
 import {debugLog} from "../Debug";
 
 export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
 
-    protected _handle(output: OutputStreams) {
+    /**
+     * There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
+     * will be joined together with " " as a separator.
+     * @protected
+     */
+    protected combine_output_streams = " ";
+
+    protected _handle(output_message: string) {
         const editor = getEditor(this.app);
         const view = getView(this.app);
-
-        // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
-        // will be joined together with " " as a separator.
-        const output_message = joinObjectProperties(output, " ");
 
         if (null === editor) {
             // For some reason it's not possible to get an editor.

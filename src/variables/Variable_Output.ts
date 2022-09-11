@@ -17,22 +17,25 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+import {Variable} from "./Variable";
 import SC_Plugin from "../main";
-import {debugLog} from "../Debug";
-import {
-    CustomVariableModel,
-    introduceModelClass,
-    PromptFieldModel,
-    PromptModel,
-} from "../imports";
-import {OutputWrapperModel} from "./output_wrapper/OutputWrapperModel";
 
-export function introduceModels(plugin: SC_Plugin) {
-    debugLog("Introducing models.")
+export class Variable_Output extends Variable {
+    public variable_name = "output";
+    public help_text = "Gives text outputted by a shell command after it's executed.";
 
-    // Keep in alphabetical order, if possible.
-    introduceModelClass(new CustomVariableModel(plugin));
-    introduceModelClass(new PromptFieldModel(plugin));
-    introduceModelClass(new PromptModel(plugin));
-    introduceModelClass(new OutputWrapperModel(plugin));
+    constructor(
+        plugin: SC_Plugin,
+        private output_content: string,
+    ) {
+        super(plugin);
+    }
+
+    protected generateValue(): string {
+        return this.output_content;
+    }
+
+    public getAvailabilityText(): string {
+        return "<strong>Only available</strong> in <em>output wrappers</em>, cannot be used as input for shell commands.";
+    }
 }

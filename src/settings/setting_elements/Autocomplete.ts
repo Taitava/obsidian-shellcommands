@@ -27,13 +27,14 @@ import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompl
  * @param plugin Used for getting a list of Variable autocomplete items.
  * @param input_element
  * @param call_on_completion A function that will be called when a user has selected a suggestion and performed the autocomplete action. onChange event will not be called, because it would trigger opening the autocomplete menu again, so that's why a separate callback is used.
+ * @param extra_autocomplete_items
  */
-export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement | HTMLTextAreaElement, call_on_completion: (field_value: string) => void) {
+export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement | HTMLTextAreaElement, call_on_completion: (field_value: string) => void, extra_autocomplete_items: IAutocompleteItem[] = []) {
 
     autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
-            const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems);
+            const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems, extra_autocomplete_items);
             const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
@@ -278,6 +279,10 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
     return true;
 }
 
+/**
+ * TODO: Can the sorting be removed from here? Now autocomplete items are sorted again every time when filtering, based on the keyword (https://github.com/Taitava/obsidian-shellcommands/issues/249).
+ * @param autocomplete_item_sets
+ */
 function merge_and_sort_autocomplete_items(...autocomplete_item_sets: IAutocompleteItem[][]) {
     const merged_autocomplete_items: IAutocompleteItem[] = [].concat(...autocomplete_item_sets);
     return merged_autocomplete_items.sort((a, b) => {

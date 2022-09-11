@@ -32,6 +32,7 @@ import {
     ChangelogLink,
     DocumentationCustomVariablesLink,
     LicenseLink,
+    DocumentationOutputWrappersLink,
 } from "../Documentation";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
@@ -47,6 +48,8 @@ import {
     PromptModel
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
+import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
+import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -436,6 +439,30 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     }
 
     private tabOutput(container_element: HTMLElement) {
+
+        // Output wrappers
+        const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
+        new Setting(container_element)
+            .setName("Output wrappers")
+            .setHeading() // Make the "Output wrappers" text to appear as a heading.
+            .addExtraButton(extra_button => extra_button
+                .setIcon("help")
+                .setTooltip("Documentation: Output wrappers")
+                .onClick(() => gotoURL(DocumentationOutputWrappersLink))
+            )
+        ;
+        const output_wrappers_container_element = container_element.createDiv();
+        this.plugin.getOutputWrappers().forEach((output_wrapper: OutputWrapper) => {
+            output_wrapper_model.createSettingFields(output_wrapper, output_wrappers_container_element);
+        });
+
+        // 'New output wrapper' button
+        const new_output_wrapper_button_promise = createNewModelInstanceButton<OutputWrapperModel, OutputWrapper>(this.plugin, OutputWrapperModel.name, container_element, output_wrappers_container_element, this.plugin.settings);
+        new_output_wrapper_button_promise.then((result: {instance: OutputWrapper, main_setting: Setting}) => {
+            output_wrapper_model.openSettingsModal(result.instance, result.main_setting); // Open the output wrapper settings modal, as the user will probably want to configure it now anyway.
+        });
+
+
         // "Error message duration" field
         this.createNotificationDurationField(container_element, "Error message duration", "Concerns messages about failed shell commands.", "error_message_duration");
 

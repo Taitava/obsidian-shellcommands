@@ -102,6 +102,7 @@ export abstract class Variable {
                     case "show-errors":
                         // Generate error messages by calling generateValue().
                         debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                        // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
                         this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
                             resolve({
                                 value: null,
@@ -305,7 +306,7 @@ export abstract class Variable {
     }
 
     /**
-     * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a suer to define
+     * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a user to define
      * default values for variables that are not always available, filtering out always available variables for which default
      * values would not make sense.
      */

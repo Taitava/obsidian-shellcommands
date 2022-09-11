@@ -87,6 +87,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_NewNoteFolderName(plugin),
         new Variable_NewNoteFolderPath(plugin),
         new Variable_NoteContent(plugin),
+        // Variable_Output is not loaded here, because it's only used in OutputWrappers.
         new Variable_Selection(plugin),
         new Variable_Tags(plugin),
         new Variable_Title(plugin),
