@@ -659,7 +659,7 @@ export class ExtraOptionsModal extends SC_Modal {
             .setName(title)
             .setDesc(description)
             .addDropdown(dropdown_component => dropdown_component
-                .addOption("no-output-wrapper", "No output wrapper")
+                .addOption("no-output-wrapper", "No "+output_stream_name+" wrapper")
                 .addOptions(output_wrapper_options)
                 .addOption("new", "Create a new output wrapper")
                 .setValue(old_selected_output_wrapper_option)
