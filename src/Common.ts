@@ -341,3 +341,31 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
         });
     });
 }
+
+export async function getFileYAMLContent(app: App, file: TFile, with_dashes: boolean): Promise<string> {
+    return new Promise((resolve) => {
+        // The logic is borrowed 2022-09-01 from https://forum.obsidian.md/t/how-to-get-current-file-content-without-yaml-frontmatter/26197/2
+        // Thank you, endorama! <3
+        const file_content = app.vault.read(file);
+        file_content.then((file_content: string) => {
+            const frontmatter_cache: FrontMatterCache = app.metadataCache.getFileCache(file).frontmatter;
+            if (frontmatter_cache) {
+                // A YAML frontmatter is present in the file.
+                const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+                const yaml_content = file_content.split("\n").slice(0,frontmatter_end_line_number).join("\n");
+                if (with_dashes) {
+                    // Return the YAML content with dashes.
+                    // No need to do anything more.
+                    return resolve(yaml_content);
+                } else {
+                    // Return the YAML content without dashes.
+                    // Remove the dashes.
+                    return resolve(yaml_content.replace(/(^\s+---|---\s+$)/u, ""));
+                }
+            } else {
+                // No YAML frontmatter is present in the file.
+                return resolve(null);
+            }
+        });
+    });
+}
