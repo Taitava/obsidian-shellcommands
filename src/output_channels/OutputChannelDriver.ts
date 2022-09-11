@@ -77,7 +77,7 @@ export abstract class OutputChannelDriver {
      */
     protected abstract _handle(output: OutputStreams | string, error_code: number | null): void;
 
-    public handle(output: OutputStreams, error_code: number | null): void {
+    public async handle(output: OutputStreams, error_code: number | null): Promise<void> {
         // Qualify output
         if (OutputChannelDriver.isOutputEmpty(output)) {
             // The output is empty
@@ -91,7 +91,7 @@ export abstract class OutputChannelDriver {
 
         // Output is ok.
         // Handle it.
-        this._handle(this.prepare_output(output), error_code);
+        this._handle(await this.prepare_output(output), error_code);
         debugLog("Output handling is done.")
     }
 
@@ -106,12 +106,12 @@ export abstract class OutputChannelDriver {
      * @param output_streams
      * @private
      */
-    private prepare_output(output_streams: OutputStreams): OutputStreams | string {
-        const wrap_outputs_separately = () => {
+    private async prepare_output(output_streams: OutputStreams): Promise<OutputStreams | string> {
+        const wrap_outputs_separately = async () => {
             const wrapped_output_streams: OutputStreams = {};
             let output_stream_name: OutputStream;
             for (output_stream_name in output_streams) {
-                wrapped_output_streams[output_stream_name] = this.wrapOutput(
+                wrapped_output_streams[output_stream_name] = await this.wrapOutput(
                     output_stream_name,
                     output_streams[output_stream_name],
                 );
@@ -126,19 +126,19 @@ export abstract class OutputChannelDriver {
             // Can output wrapping be combined?
             if (this.t_shell_command.isOutputWrapperStdoutSameAsStderr()) {
                 // Output wrapping can be combined.
-                return this.wrapOutput(
+                return await this.wrapOutput(
                     "stdout",
                     joinObjectProperties(output_streams, this.combine_output_streams), // Use this.combine_output_streams as a glue string.
                 );
             } else {
                 // Output wrapping needs to be done separately.
-                const wrapped_output_streams = wrap_outputs_separately();
+                const wrapped_output_streams = await wrap_outputs_separately();
                 return joinObjectProperties(wrapped_output_streams, this.combine_output_streams); // Use this.combine_output_streams as a glue string.
             }
 
         } else {
             // Do not combine, handle each stream separately
-            return wrap_outputs_separately();
+            return await wrap_outputs_separately();
         }
     }
 
@@ -146,7 +146,7 @@ export abstract class OutputChannelDriver {
      * Surrounds the given output text with an output wrapper. If no output wrapper is defined, returns the original
      * output text without any modifications.
      */
-    private wrapOutput(output_stream: OutputStream, output_content: string): string {
+    private async wrapOutput(output_stream: OutputStream, output_content: string): Promise<string> {
 
         // Get preparsed output wrapper content. It has all other variables parsed, except {{output}}.
         const parsing_result_key: keyof ShellCommandParsingResult = "output_wrapper_"+output_stream as keyof ShellCommandParsingResult;
@@ -162,7 +162,7 @@ export abstract class OutputChannelDriver {
 
         // Parse the {{output}} variable
         const output_variable = new Variable_Output(this.plugin, output_content);
-        const parsing_result = parseVariables(
+        const parsing_result = await parseVariables(
             this.plugin,
             output_wrapper_content,
             null, // No shell anymore, so no need for escaping.
