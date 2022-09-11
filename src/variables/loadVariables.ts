@@ -56,6 +56,8 @@ import {Variable_FileURI} from "./Variable_FileURI";
 import {Variable_EventFileURI} from "./event_variables/Variable_EventFileURI";
 import {Variable_NoteContent} from "./Variable_NoteContent";
 import {Variable_EventNoteContent} from "./event_variables/Variable_EventNoteContent";
+import {Variable_FileContent} from "./Variable_FileContent";
+import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -75,6 +77,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_Clipboard(plugin),
         new Variable_Date(plugin),
         new Variable_Environment(plugin),
+        new Variable_FileContent(plugin),
         new Variable_FileExtension(plugin),
         new Variable_FileName(plugin),
         new Variable_FilePath(plugin),
@@ -92,6 +95,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_YAMLValue(plugin),
 
         // Event variables
+        new Variable_EventFileContent(plugin),
         new Variable_EventFileExtension(plugin),
         new Variable_EventFileName(plugin),
         new Variable_EventFilePath(plugin),
