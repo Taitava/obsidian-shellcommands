@@ -61,6 +61,14 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
          * will shift and process the next set.
          */
         private variable_sets: VariableSet[],
+
+        /**
+         * This can be used to mark certain contents to always avoid escaping special characters in their variable values.
+         * This should only be used for content that is never submitted to a shell, i.e. output wrappers at the moment.
+         *
+         * This is a list of 'content keys'.
+         */
+        private avoid_escaping: (keyof ParsingMap)[] = [],
     ) {
         debugLog("Parsing process: Count variable sets: " + this.variable_sets.length);
     }
@@ -98,7 +106,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             const parsing_result = await parseVariables(
                 this.plugin,
                 parse_content,
-                this.t_shell_command.getShell(),
+                this.avoidEscaping(content_key) ? null : this.t_shell_command.getShell(), // If no escaping is needed, pass null.
                 this.t_shell_command,
                 this.sc_event,
                 current_variables,
@@ -192,6 +200,16 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             this.parsing_results[content_key].error_messages.push(...parsing_result.error_messages); // Include both old and new error messages.
             this.parsing_results[content_key].count_parsed_variables += parsing_result.count_parsed_variables; // Sum up the variable usage counts. At the time of writing, the sum is only used for determining if there were any variables parsed or not, so an accurate sum is not used atm.
         }
+    }
+
+    /**
+     * Tells whether the given content_key has a mark that special characters in the content's variable values should not be escaped.
+     *
+     * @param content_key
+     * @private
+     */
+    private avoidEscaping(content_key: keyof ParsingMap): boolean {
+        return this.avoid_escaping.contains(content_key);
     }
 }
 
