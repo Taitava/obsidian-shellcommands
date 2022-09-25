@@ -17,7 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {exec, ExecException, ExecOptions} from "child_process";
+import {
+    ChildProcess,
+    exec,
+    ExecException,
+    ExecOptions,
+} from "child_process";
 import {
     cloneObject,
     getOperatingSystem,
@@ -39,7 +44,10 @@ import {
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
-import {PlatformNames} from "./settings/SC_MainSettings";
+import {
+    ExecutionNotificationMode,
+    PlatformNames,
+} from "./settings/SC_MainSettings";
 import {OutputChannel} from "./output_channels/OutputChannel";
 
 export class ShellCommandExecutor {
@@ -55,7 +63,7 @@ export class ShellCommandExecutor {
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
      */
-    public doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
+    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
         const preactions = this.t_shell_command.getPreactions();
 
         // Does an already started ParsingProcess exist?
@@ -65,7 +73,7 @@ export class ShellCommandExecutor {
             debugLog("Going to prepare possible Preactions, but will first start a variable parsing process. Depending on possible Preactions, this might not yet parse all variables.");
             parsing_process = this.t_shell_command.createParsingProcess(this.sc_event);
             // Parse the first set of variables, not all sets.
-            if (!parsing_process.process()) {
+            if (!await parsing_process.process()) {
                 // Some errors happened.
                 debugLog("Will not prepare possible Preactions, because the parsing process failed. Will cancel shell command execution.");
                 parsing_process.displayErrorMessages();
@@ -123,12 +131,12 @@ export class ShellCommandExecutor {
             debugLog("No Preactions to perform. This is ok.");
         }
 
-        preaction_pipeline.then((can_execute: boolean) => {
+        preaction_pipeline.then(async (can_execute: boolean) => {
             if (can_execute) {
                 // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
                 // all variables are already parsed.
                 debugLog("Parsing all the rest of the variables (if there are any left).");
-                if (parsing_process.processRest()) {
+                if (await parsing_process.processRest()) {
                     // Parsing the rest of the variables succeeded
                     // Execute the shell command.
                     const parsing_results = parsing_process.getParsingResults();
@@ -136,6 +144,8 @@ export class ShellCommandExecutor {
                         shell_command: parsing_results["shell_command"].parsed_content,
                         alias: parsing_results["alias"].parsed_content,
                         environment_variable_path_augmentation: parsing_results.environment_variable_path_augmentation.parsed_content,
+                        output_wrapper_stdout: parsing_results.output_wrapper_stdout.parsed_content,
+                        output_wrapper_stderr: parsing_results.output_wrapper_stderr.parsed_content,
                         succeeded: true,
                         error_messages: [],
                     };
@@ -217,55 +227,73 @@ export class ShellCommandExecutor {
 
             // Execute the shell command
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
-            exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
+            try {
+                const child_process = exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
 
-                // Did the shell command execute successfully?
-                if (null !== error) {
-                    // Some error occurred
-                    debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+                    // Did the shell command execute successfully?
+                    if (null !== error) {
+                        // Some error occurred
+                        debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
 
-                    // Check if this error should be displayed to the user or not
-                    if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
-                        // The user has ignored this error.
-                        debugLog("User has ignored this error, so won't display it.");
+                        // Check if this error should be displayed to the user or not
+                        if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
+                            // The user has ignored this error.
+                            debugLog("User has ignored this error, so won't display it.");
 
-                        // Handle only stdout output stream
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
-                    } else {
-                        // Show the error.
-                        debugLog("Will display the error to user.");
-
-                        // Check that stderr actually contains an error message
-                        if (!stderr.length) {
-                            // Stderr is empty, so the error message is probably given by Node.js's child_process.
-                            // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
-                            stderr = error.message;
-                        }
-
-                        // Handle both stdout and stderr output streams
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
-                    }
-                } else {
-                    // Probably no errors, but do one more check.
-
-                    // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
-                    if (stderr.length > 0) {
-                        // Check a special case: should error code 0 be ignored?
-                        if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
-                            // Exit code 0 is on the ignore list, so suppress stderr output.
-                            stderr = "";
-                            debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                            // Handle only stdout output stream
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
                         } else {
-                            debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                            // Show the error.
+                            debugLog("Will display the error to user.");
+
+                            // Check that stderr actually contains an error message
+                            if (!stderr.length) {
+                                // Stderr is empty, so the error message is probably given by Node.js's child_process.
+                                // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
+                                stderr = error.message;
+                            }
+
+                            // Handle both stdout and stderr output streams
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
                         }
                     } else {
-                        debugLog("Shell command executed: No errors.");
-                    }
+                        // Probably no errors, but do one more check.
 
-                    // Handle output
-                    handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                        // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+                        if (stderr.length > 0) {
+                            // Check a special case: should error code 0 be ignored?
+                            if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
+                                // Exit code 0 is on the ignore list, so suppress stderr output.
+                                stderr = "";
+                                debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                            } else {
+                                debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                            }
+                        } else {
+                            debugLog("Shell command executed: No errors.");
+                        }
+
+                        // Handle output
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                    }
+                });
+
+                // Display a notification of the execution (if wanted).
+                if ("disabled" !== this.plugin.settings.execution_notification_mode) {
+                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode);
                 }
-            });
+            } catch (exception) {
+                // An exception has happened.
+                // Check if the shell command was too long.
+                if (exception.message.match(/spawn\s+ENAMETOOLONG/i)) {
+                    // It was too long. Show an error message.
+                    this.plugin.newError("Shell command execution failed because it's too long: " + shell_command.length + " characters. (Unfortunately the max limit is unknown).");
+                } else {
+                    // The shell command was not too long, this exception is about something else.
+                    // Rethrow the exception.
+                    throw  exception;
+                }
+            }
         }
     }
 
@@ -327,6 +355,48 @@ export class ShellCommandExecutor {
         } else {
             // The shell command doesn't contain a version for any platforms, it's completely empty.
             return "The shell command is empty. :(";
+        }
+    }
+
+    /**
+     * Displays a notification balloon indicating a user that a shell command is being executed.
+     *
+     * @param child_process
+     * @param shell_command
+     * @param execution_notification_mode
+     * @private
+     */
+    private showExecutionNotification(child_process: ChildProcess, shell_command: string, execution_notification_mode: ExecutionNotificationMode) {
+        const execution_notification_message = "Executing: " + (this.t_shell_command.getAlias() || shell_command);
+        switch (execution_notification_mode) {
+            case "quick": {
+                // Retrieve the timeout from settings defined by a user.
+                this.plugin.newNotification(execution_notification_message, undefined);
+                break;
+            }
+            case "permanent": {
+                // Show the notification until the process ends.
+                const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+
+                // Hide the notification when the process finishes.
+                child_process.on("exit", () => process_notification.hide());
+                break;
+            }
+            case "if-long": {
+                // Only show the notification if the process runs for an extended period of time (defined below).
+                window.setTimeout(() => {
+                    // Check if the process is still running.
+                    if (null === child_process.exitCode) {
+                        // The process is still running.
+                        // Display notification.
+                        const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+
+                        // Hide the notification when the process finishes.
+                        child_process.on("exit", () => process_notification.hide());
+                    }
+                }, 2000); // If you change the timeout, change documentation, too!
+                break;
+            }
         }
     }
 }

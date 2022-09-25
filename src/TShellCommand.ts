@@ -49,6 +49,8 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
+import {OutputStream} from "./output_channels/OutputChannel";
+import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -192,6 +194,36 @@ export class TShellCommand {
 
     public getOutputChannels() {
         return this.configuration.output_channels;
+    }
+
+    /**
+     * Finds an output wrapper that should be used for the given OutputStream. Returns null, if no OutputWrapper should
+     * be used.
+     *
+     * @param output_stream
+     */
+    public getOutputWrapper(output_stream: OutputStream): OutputWrapper | null {
+        const output_wrapper_id = this.configuration.output_wrappers[output_stream];
+        if (!output_wrapper_id) {
+            // No output wrapper is defined for this output stream in this shell command.
+            return null;
+        }
+        for (const output_wrapper of this.plugin.getOutputWrappers().values()) {
+            // Check if this is the output wrapper defined for this shell command.
+            if (output_wrapper.getID() === output_wrapper_id) {
+                // The correct output wrapper was found.
+                return output_wrapper;
+            }
+        }
+        throw new Error("OutputWrapper with ID " + output_wrapper_id + " was not found.");
+    }
+
+    /**
+     * Checks if different output streams can be wrapped together. In addition to this, combining output streams also
+     * requires the OutputChannelDrivers to be the same, but that's not checked in this method.
+     */
+    public isOutputWrapperStdoutSameAsStderr() {
+        return this.configuration.output_wrappers["stdout"] === this.configuration.output_wrappers["stderr"];
     }
 
     public getEventsConfiguration() {
@@ -372,19 +404,28 @@ export class TShellCommand {
      * @param sc_event Needed to get {{event_*}} variables parsed. Can be left out if working outside any SC_Event context, in which case {{event_*}} variables are inaccessible.
      */
     public createParsingProcess(sc_event: SC_Event | null): ShellCommandParsingProcess {
+        const stdout_output_wrapper = this.getOutputWrapper("stdout"); // Can be null
+        const stderr_output_wrapper = this.getOutputWrapper("stderr"); // Can be null
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
                 shell_command: this.getShellCommand(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
+                output_wrapper_stdout: stdout_output_wrapper ? stdout_output_wrapper.getContent() : undefined,
+                output_wrapper_stderr: stderr_output_wrapper ? stderr_output_wrapper.getContent() : undefined,
             },
             this,
             sc_event,
             [
                 this.getNonPreactionsDependentVariables(), // First set: All variables that are not tied to any preactions.
                 this.getPreactionsDependentVariables(), // Second set: Variables that are tied to preactions. Can be an empty set.
-            ]
+            ],
+            [
+                // Do not escape variables in output wrappers, because they are not going through a shell and escape characters would be visible in the end result.
+                'output_wrapper_stdout',
+                'output_wrapper_stderr',
+            ],
         );
     }
 
@@ -528,6 +569,8 @@ export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    output_wrapper_stdout?: string,
+    output_wrapper_stderr?: string,
     succeeded: boolean;
     error_messages: string[];
 }
@@ -538,4 +581,6 @@ type shell_command_parsing_map = {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    output_wrapper_stdout?: string,
+    output_wrapper_stderr?: string,
 };

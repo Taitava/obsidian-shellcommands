@@ -49,21 +49,23 @@ export class Variable_EventOldFolderPath extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): string | null {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): Promise<string | null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        const folder_old_relative_path = sc_event.getFolderOldRelativePath();
-        switch (this.arguments.mode.toLowerCase()) {
-            case "relative":
-                return normalizePath2(folder_old_relative_path);
-            case "absolute":
-                return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path);
-        }
+            const folder_old_relative_path = sc_event.getFolderOldRelativePath();
+            switch (this.arguments.mode.toLowerCase()) {
+                case "relative":
+                    return resolve(normalizePath2(folder_old_relative_path));
+                case "absolute":
+                    return resolve(normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path));
+            }
 
-        this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);
-        return null;
+            this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);
+            return resolve(null);
+        });
     }
 
     public getAutocompleteItems() {

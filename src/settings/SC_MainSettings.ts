@@ -24,6 +24,7 @@ import {
     CustomVariableConfiguration,
     PromptConfiguration,
 } from "../imports";
+import {OutputWrapperConfiguration} from "../models/output_wrapper/OutputWrapper";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -52,6 +53,7 @@ export interface SC_MainSettings {
     // Output:
     error_message_duration: number;
     notification_message_duration: number;
+    execution_notification_mode: ExecutionNotificationMode;
     output_channel_clipboard_also_outputs_to_notification: boolean;
 
     // Events:
@@ -75,6 +77,9 @@ export interface SC_MainSettings {
 
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
+
+    // Output wrappers
+    output_wrappers: OutputWrapperConfiguration[];
 
     // Legacy:
     /** @deprecated Use shell_commands object instead of this array. From now on, this array can be used only for migrating old configuration to shell_commands.*/
@@ -105,6 +110,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Output:
         error_message_duration: 20,
         notification_message_duration: 10,
+        execution_notification_mode: "disabled",
         output_channel_clipboard_also_outputs_to_notification: true,
 
         // Events:
@@ -122,6 +128,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Custom variables
         custom_variables: [],
+
+        // Output wrappers
+        output_wrappers: [],
     }
 }
 
@@ -172,3 +181,5 @@ export const CommandPaletteOptions: ICommandPaletteOptions = {
     unlisted: "Hotkeys only",
     disabled: "Excluded",
 }
+
+export type ExecutionNotificationMode = "disabled" | "quick" | "permanent" | "if-long";

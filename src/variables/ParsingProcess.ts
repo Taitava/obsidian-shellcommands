@@ -29,6 +29,7 @@ import {
     uniqueArray,
 } from "../Common";
 import {TShellCommand} from "../TShellCommand";
+import {debugLog} from "../Debug";
 
 /**
  * ParsingProcess instances can be used in situations where it's uncertain can all variables be parsed at the time being,
@@ -40,7 +41,7 @@ import {TShellCommand} from "../TShellCommand";
  * Then again, if the parsing use-case is simpler, e.g. Prompt description or prompt field values, it's more straightforward
  * to just call parseVariables() without utilising this class. After all, this class is a wrapper for parseVariables().
  *
- * <ParsingSet> is a generalization for defining keys for an object that will be used for submitting the original parseable
+ * <ParsingMap> is a generalization for defining keys for an object that will be used for submitting the original parseable
  * content. The same keys will then be used to form another object containing the parsing results.
  */
 export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
@@ -60,7 +61,17 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
          * will shift and process the next set.
          */
         private variable_sets: VariableSet[],
-    ) {}
+
+        /**
+         * This can be used to mark certain contents to always avoid escaping special characters in their variable values.
+         * This should only be used for content that is never submitted to a shell, i.e. output wrappers at the moment.
+         *
+         * This is a list of 'content keys'.
+         */
+        private avoid_escaping: (keyof ParsingMap)[] = [],
+    ) {
+        debugLog("Parsing process: Count variable sets: " + this.variable_sets.length);
+    }
 
     private is_first_call = true;
     /**
@@ -68,9 +79,11 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      *
      * @return True if parsing succeeded, false otherwise. Read the results by calling .getParsingResult().
      */
-    process(): boolean {
+    public async process(): Promise<boolean> {
         const current_variables = this.variable_sets.shift();
         let success = true;
+
+        debugLog("Parsing process: Count variables in current set: " + current_variables.size);
 
         // Multiple contents can be parsed in the same call. TShellCommand instances have 'shell_command' and 'alias'
         // contents which are parsed at the same time. This multi-content support can be used for even more situations if
@@ -81,17 +94,19 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             if (this.is_first_call) {
                 // Use original content.
                 parse_content = this.original_contents[content_key];
+                debugLog("Starting to parse '" + content_key + "': " + parse_content);
             } else {
                 // Continue parsing content from previous parsing result. This time parse variables that were not parse back then.
                 // FIXME: Problem: variable values that came from an earlier phase are exposed to repetitive parsing. Find a way to limit the parsing to only original parts of the shell command.
                 parse_content = this.parsing_results[content_key].parsed_content;
+                debugLog("Continuing parsing '" + content_key + "': " + parse_content);
             }
 
             // Parse the variables
-            const parsing_result = parseVariables(
+            const parsing_result = await parseVariables(
                 this.plugin,
                 parse_content,
-                this.t_shell_command.getShell(),
+                this.avoidEscaping(content_key) ? null : this.t_shell_command.getShell(), // If no escaping is needed, pass null.
                 this.t_shell_command,
                 this.sc_event,
                 current_variables,
@@ -114,12 +129,13 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      *
      * @return True if parsing all sets succeeded, false otherwise.
      */
-    public processRest(): boolean {
+    public async processRest(): Promise<boolean> {
         // 1. Check a previous parsing result (if exists).
         for (const content_key of this.getContentKeys()) {
             if (this.parsing_results[content_key]) {
                 // A previous parsing result exists.
                 // Ensure it has not failed.
+                debugLog("Previous parsing succeeded? " + this.parsing_results[content_key].succeeded);
                 if (!this.parsing_results[content_key].succeeded) {
                     // The previous parsing result has failed.
                     return false;
@@ -129,7 +145,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
 
         // 2. Process the rest of the VariableSets.
         for (let i = 0; i < this.variable_sets.length; i++) {
-            if (!this.process()) {
+            if (!await this.process()) {
                 return false;
             }
         }
@@ -185,8 +201,18 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             this.parsing_results[content_key].count_parsed_variables += parsing_result.count_parsed_variables; // Sum up the variable usage counts. At the time of writing, the sum is only used for determining if there were any variables parsed or not, so an accurate sum is not used atm.
         }
     }
+
+    /**
+     * Tells whether the given content_key has a mark that special characters in the content's variable values should not be escaped.
+     *
+     * @param content_key
+     * @private
+     */
+    private avoidEscaping(content_key: keyof ParsingMap): boolean {
+        return this.avoid_escaping.contains(content_key);
+    }
 }
 
-type ParsingResultContainer<ParsingSet> = {
-    [key in keyof ParsingSet]?: ParsingResult;
+type ParsingResultContainer<ParsingMap> = {
+    [key in keyof ParsingMap]?: ParsingResult;
 };

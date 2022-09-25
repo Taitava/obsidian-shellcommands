@@ -17,19 +17,25 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {FolderVariable} from "./FolderVariable";
+import {Variable} from "./Variable";
+import SC_Plugin from "../main";
 
-export class Variable_FolderName extends FolderVariable {
-    public variable_name = "folder_name";
-    public help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
+export class Variable_Output extends Variable {
+    public variable_name = "output";
+    public help_text = "Gives text outputted by a shell command after it's executed.";
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const folder = this.getFolder();
-            if (!folder) {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-            return resolve(folder.name); // TODO: Consider changing to `folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
-        });
+    constructor(
+        plugin: SC_Plugin,
+        private output_content: string,
+    ) {
+        super(plugin);
+    }
+
+    protected generateValue(): Promise<string> {
+        return Promise.resolve(this.output_content);
+    }
+
+    public getAvailabilityText(): string {
+        return "<strong>Only available</strong> in <em>output wrappers</em>, cannot be used as input for shell commands.";
     }
 }

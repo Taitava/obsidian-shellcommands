@@ -61,13 +61,17 @@ import {
 	loadVariables,
 	VariableSet,
 } from "./variables/loadVariables";
+import {
+    OutputWrapperMap,
+    OutputWrapperModel,
+} from "./models/output_wrapper/OutputWrapperModel";
 
 export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.15.0";
+	public static SettingsVersion: SettingsVersionString = "0.16.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
@@ -75,6 +79,7 @@ export default class SC_Plugin extends Plugin {
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
 	private variables: VariableSet;
+    private output_wrappers: OutputWrapperMap;
 
 	/**
 	 * Holder for shell commands and aliases, whose variables are parsed before the actual execution during command
@@ -122,6 +127,9 @@ export default class SC_Plugin extends Plugin {
 		// Load variables (both built-in and custom ones). Do this AFTER loading configs for custom variables!
 		this.variables = loadVariables(this);
 
+        // Load output wrappers
+        const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
+        this.output_wrappers = output_wrapper_model.loadInstances(this.settings);
 
 		// Make all defined shell commands to appear in the Obsidian command palette.
 		const shell_commands = this.getTShellCommands();
@@ -181,6 +189,10 @@ export default class SC_Plugin extends Plugin {
 
 	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
 		return this.settings.shell_commands;
+	}
+
+	public getOutputWrappers() {
+		return this.output_wrappers;
 	}
 
     /**
@@ -256,11 +268,11 @@ export default class SC_Plugin extends Plugin {
 		debugLog("Registering shell command #" + shell_command_id + "...");
 
 		// Define a function for executing the shell command.
-		const executor = (parsing_process: ShellCommandParsingProcess | undefined) => {
+		const executor = async (parsing_process: ShellCommandParsingProcess | undefined) => {
 			if (!parsing_process) {
 				parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
 				// Try to process variables that can be processed before performing preactions.
-				parsing_process.process();
+				await parsing_process.process();
 			}
 			if (parsing_process.getParsingResults().shell_command.succeeded) {
 				// The command was parsed correctly.
@@ -269,7 +281,7 @@ export default class SC_Plugin extends Plugin {
 					t_shell_command,
 					null // No SC_Event is available when executing via command palette or hotkey.
 				);
-				executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
+				await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
 			} else {
 				// The command could not be parsed correctly.
 				// Display error messages
@@ -298,22 +310,21 @@ export default class SC_Plugin extends Plugin {
 					if (this.settings.preview_variables_in_command_palette) {
 						// Preparse variables
 						const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
-						if (parsing_process.process()) {
-							// Parsing succeeded
+                        parsing_process.process().then((parsing_succeeded) => {
+                            if (parsing_succeeded) {
+                                // Parsing succeeded
 
-							// Rename Obsidian command
-							const parsing_result = parsing_process.getParsingResults();
-							t_shell_command.renameObsidianCommand(
-								parsing_result["shell_command"].parsed_content,
-								parsing_result["alias"].parsed_content,
-							);
+                                // Rename Obsidian command
+                                const parsing_result = parsing_process.getParsingResults();
+                                t_shell_command.renameObsidianCommand(
+                                    parsing_result["shell_command"].parsed_content,
+                                    parsing_result["alias"].parsed_content,
+                                );
 
-							// Store the preparsed variables so that they will be used if this shell command gets executed.
-							this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
-
-							// All done now
-							return true;
-						}
+                                // Store the preparsed variables so that they will be used if this shell command gets executed.
+                                this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
+                            }
+                        });
 					}
 
 					// If parsing failed (or was disabled), then use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
@@ -323,19 +334,20 @@ export default class SC_Plugin extends Plugin {
 
 				} else {
 					// The user has instructed to execute the command.
-					executor(
-						this.cached_parsing_processes[t_shell_command.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
-					);
+                    executor(
+                        this.cached_parsing_processes[t_shell_command.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
+                    ).then(() => {
 
-					// Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
-					// palette might generate multiple preparsed commands in the array, but as the user selects and executes only one command, all these temporary
-					// commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings, or executes commands via hotkeys. We do not want to
-					// execute obsolete commands accidentally.
-					// This deletion also needs to be done even if the executed command was not a preparsed command, because
-					// even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
-					// commands might be.
-					this.cached_parsing_processes = {}; // Removes obsolete preparsed variables from all shell commands.
-					return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
+                        // Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
+                        // palette might generate multiple preparsed commands in the array, but as the user selects and executes only one command, all these temporary
+                        // commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings, or executes commands via hotkeys. We do not want to
+                        // execute obsolete commands accidentally.
+                        // This deletion also needs to be done even if the executed command was not a preparsed command, because
+                        // even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
+                        // commands might be.
+                        this.cached_parsing_processes = {}; // Removes obsolete preparsed variables from all shell commands.
+                        return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
+                    });
 				}
 			}
 		};
@@ -389,7 +401,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private registerURIHandler() {
-		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, (parameters: ObsidianProtocolData) => {
+		this.registerObsidianProtocolHandler(SC_Plugin.SHELL_COMMANDS_URI_ACTION, async (parameters: ObsidianProtocolData) => {
 			const parameter_names: string[] = Object.getOwnPropertyNames(parameters);
 
 			// Assign values to custom variables (also delete some unneeded entries from parameter_names)
@@ -407,8 +419,8 @@ export default class SC_Plugin extends Plugin {
 							// Found the correct variable.
 							found_custom_variable = true;
 
-							// Assign the given value to the variable.
-							variable.setValue(parameters[parameter_name]);
+							// Assign the given value to the custom variable.
+							await variable.setValue(parameters[parameter_name]);
 						}
 					}
 					if (!found_custom_variable) {
@@ -436,7 +448,7 @@ export default class SC_Plugin extends Plugin {
 
 							// Execute it.
 							const executor = new ShellCommandExecutor(this, t_shell_command, null);
-							executor.doPreactionsAndExecuteShellCommand();
+							await executor.doPreactionsAndExecuteShellCommand();
 
 						}
 					}
@@ -599,8 +611,16 @@ export default class SC_Plugin extends Plugin {
 		});
 	}
 
-	public newNotification(message: string) {
-		new Notice(message, this.settings.notification_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+    /**
+     *
+     * @param message
+     * @param timeout Custom timeout in milliseconds. If not set, the timeout will be fetched from user configurable settings. Use 0 if you want to disable the timeout, i.e. show the notification until it's explicitly hidden by clinking it, or via code.
+     */
+	public newNotification(
+        message: string,
+        timeout = this.settings.notification_message_duration * 1000, // * 1000 = convert seconds to milliseconds.
+    ) {
+		return new Notice(message, timeout);
 	}
 
 	public getDefaultShell(): string {
@@ -624,9 +644,9 @@ export default class SC_Plugin extends Plugin {
 	/**
 	 * Called when CustomVariable values are changed.
 	 */
-	public updateCustomVariableViews() {
+	public async updateCustomVariableViews() {
 		for (const leaf of this.app.workspace.getLeavesOfType(CustomVariableView.ViewType)) {
-			(leaf.view as CustomVariableView).updateContent();
+			await (leaf.view as CustomVariableView).updateContent();
 		}
 	}
 }

@@ -55,7 +55,13 @@ import {
     getIconHTML,
     ICON_LIST_SORTED_UNIQUE,
 } from "../Icons";
+import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
+import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
+import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
 
+/**
+ * TODO: Rename to ShellCommandSettingsModal
+ */
 export class ExtraOptionsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
@@ -367,6 +373,12 @@ export class ExtraOptionsModal extends SC_Modal {
         // Output channeling
         const stdout_channel_setting = this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
         this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
+
+        // Output wrappers
+        this.newOutputWrapperSetting(container_element, "Output wrapper for stdout", "stdout", "Output wrappers can be used to surround output with predefined text, e.g. to put output into a code block.");
+        this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
+
+        // Order of output channels
         new Setting(container_element)
             .setName("Order of stdout/stderr output")
             .setDesc("When output contains both errors and normal output, which one should be presented first?")
@@ -631,6 +643,70 @@ export class ExtraOptionsModal extends SC_Modal {
                 .onChange(async (value: OutputChannel) => {
                     this.t_shell_command.getConfiguration().output_channels[output_stream_name] = value;
                     await this.plugin.saveSettings();
+                })
+            )
+        ;
+    }
+
+    private newOutputWrapperSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description = "") {
+        const output_wrapper_options: {[key: string]: string} = {};
+        this.plugin.getOutputWrappers().forEach((output_wrapper: OutputWrapper) => {
+            output_wrapper_options[output_wrapper.getID()] = output_wrapper.getTitle();
+        });
+        const output_wrappers = this.t_shell_command.getConfiguration().output_wrappers;
+        let old_selected_output_wrapper_option: string = (output_wrappers[output_stream_name]) ? output_wrappers[output_stream_name] : "no-output-wrapper";
+        return new Setting(container_element)
+            .setName(title)
+            .setDesc(description)
+            .addDropdown(dropdown_component => dropdown_component
+                .addOption("no-output-wrapper", "No "+output_stream_name+" wrapper")
+                .addOptions(output_wrapper_options)
+                .addOption("new", "Create a new output wrapper")
+                .setValue(old_selected_output_wrapper_option)
+                .onChange(async (output_wrapper_id: string) => {
+                    switch (output_wrapper_id) {
+                        case "new": {
+                            // Create a new OutputWrapper.
+                            const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
+                            const new_output_wrapper = output_wrapper_model.newInstance(this.plugin.settings);
+                            this.plugin.saveSettings().then(() => {
+                                const modal = new OutputWrapperSettingsModal(
+                                    this.plugin,
+                                    new_output_wrapper,
+                                    null,
+                                    "Create output wrapper",
+                                    async () => {
+                                        // Output wrapper is created.
+                                        dropdown_component.addOption(new_output_wrapper.getID(), new_output_wrapper.getTitle());
+                                        dropdown_component.setValue(new_output_wrapper.getID());
+                                        output_wrappers[output_stream_name] = new_output_wrapper.getID();
+                                        await this.plugin.saveSettings();
+                                        old_selected_output_wrapper_option = dropdown_component.getValue();
+                                    },
+                                    async () => {
+                                        // Prompt creation was cancelled.
+                                        dropdown_component.setValue(old_selected_output_wrapper_option); // Reset the dropdown selection.
+                                        output_wrapper_model.deleteInstance(new_output_wrapper);
+                                        await this.plugin.saveSettings();
+                                    },
+                                );
+                                modal.open();
+                            });
+                            break;
+                        }
+                        case "no-output-wrapper": {
+                            // Disable output wrapper.
+                            output_wrappers[output_stream_name] = null;
+                            await this.plugin.saveSettings();
+                            break;
+                        }
+                        default: {
+                            // Use an existing output wrapper.
+                            output_wrappers[output_stream_name] = output_wrapper_id;
+                            await this.plugin.saveSettings();
+                            break;
+                        }
+                    }
                 })
             )
         ;

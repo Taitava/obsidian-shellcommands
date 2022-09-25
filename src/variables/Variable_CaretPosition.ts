@@ -42,33 +42,35 @@ export class Variable_CaretPosition extends Variable {
         mode: string;
     }
 
-    protected generateValue(): string {
-        // Check that we are able to get an editor
-        const editor = getEditor(this.app);
-        if (null === editor) {
-            // Nope.
-            this.newErrorMessage("Could not get an editor instance! Please raise an issue in GitHub.");
-            return null;
-        }
-
-        const position = editor.getCursor('to');
-        const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
-        const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
-        
-        if (Object.keys(this.arguments).length > 0) {
-            switch (this.arguments.mode.toLowerCase()) {
-                case "line":
-                    return `${line}`;
-                case "column":
-                    return `${column}`;
-                default:
-                    this.newErrorMessage("Unrecognised argument: "+this.arguments.mode);
-                    return null;
+    protected generateValue(): Promise<string|null> {
+        return new Promise((resolve) => {
+            // Check that we are able to get an editor
+            const editor = getEditor(this.app);
+            if (null === editor) {
+                // Nope.
+                this.newErrorMessage("Could not get an editor instance! Please raise an issue in GitHub.");
+                return resolve(null);
             }
-        } else {
-            // default case when no args provided
-            return `${line}:${column}`;
-        }
+
+            const position = editor.getCursor('to');
+            const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
+            const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
+
+            if (Object.keys(this.arguments).length > 0) {
+                switch (this.arguments.mode.toLowerCase()) {
+                    case "line":
+                        return resolve(`${line}`);
+                    case "column":
+                        return resolve(`${column}`);
+                    default:
+                        this.newErrorMessage("Unrecognised argument: "+this.arguments.mode);
+                        return resolve(null);
+                }
+            } else {
+                // default case when no args provided
+                return resolve(`${line}:${column}`);
+            }
+        });
     }
 
     public getAutocompleteItems() {

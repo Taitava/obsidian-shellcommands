@@ -25,6 +25,7 @@ import {
     PromptFieldModel,
     PromptModel,
 } from "../imports";
+import {OutputWrapperModel} from "./output_wrapper/OutputWrapperModel";
 
 export function introduceModels(plugin: SC_Plugin) {
     debugLog("Introducing models.")
@@ -33,4 +34,5 @@ export function introduceModels(plugin: SC_Plugin) {
     introduceModelClass(new CustomVariableModel(plugin));
     introduceModelClass(new PromptFieldModel(plugin));
     introduceModelClass(new PromptModel(plugin));
+    introduceModelClass(new OutputWrapperModel(plugin));
 }

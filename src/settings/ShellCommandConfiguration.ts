@@ -46,6 +46,10 @@ export interface ShellCommandConfiguration {
         stdout: OutputChannel,
         stderr: OutputChannel,
     },
+    output_wrappers: {
+        stdout: string | null,
+        stderr: string | null,
+    };
     output_channel_order: OutputChannelOrder;
     events: SC_EventConfigurations;
     command_palette_availability: keyof ICommandPaletteOptions;
@@ -73,6 +77,10 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         output_channels: {
             stdout: "ignore",
             stderr: "notification",
+        },
+        output_wrappers: {
+            stdout: null,
+            stderr: null,
         },
         output_channel_order: "stdout-first",
         events: {},

@@ -29,11 +29,13 @@ export class Variable_EventOldFileName extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileRenamed): string | null {
-        if (!this.checkSC_EventSupport(sc_event)) {
-            return null;
-        }
+    protected generateValue(sc_event: SC_Event_FileRenamed): Promise<string | null> {
+        return new Promise((resolve) => {
+            if (!this.checkSC_EventSupport(sc_event)) {
+                return resolve(null);
+            }
 
-        return extractFileName(sc_event.getFileOldRelativePath(), true);
+            return resolve(extractFileName(sc_event.getFileOldRelativePath(), true));
+        });
     }
 }

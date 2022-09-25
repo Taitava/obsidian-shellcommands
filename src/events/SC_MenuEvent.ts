@@ -19,18 +19,34 @@
 
 import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
 import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
-import {Menu} from "obsidian";
+import {
+    Menu,
+    MenuItem,
+} from "obsidian";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
 
-    protected addTShellCommandToMenu(t_shell_command: TShellCommand, menu: Menu) {
+    protected async addTShellCommandToMenu(t_shell_command: TShellCommand, menu: Menu) {
+        // Create the menu item as soon as possible. (If it's created after 'await parsing_process.process()' below, it won't be shown in the menu for some reason, at least in Obsidian 0.16.1).
+        // No title is set here, it will be set later.
+        let menu_item: MenuItem;
+        menu.addItem(item => menu_item = item
+            .setIcon(t_shell_command.getIconId()) // Icon id can be null.
+            .onClick(async () => {
+                await this.trigger(
+                    t_shell_command,
+                    parsing_process,
+                );
+            }),
+        );
+
         // Parse shell command variables to get a title
         let title = t_shell_command.getAliasOrShellCommand(); // May contain unparsed variables.
         let parsing_process: ShellCommandParsingProcess;
         if (this.plugin.settings.preview_variables_in_command_palette) {
             // Start a parsing process
             parsing_process = t_shell_command.createParsingProcess(this);
-            if (parsing_process.process()) {
+            if (await parsing_process.process()) {
                 // Parsing succeeded.
                 const parsing_results = parsing_process.getParsingResults();
                 title = parsing_results["alias"].parsed_content || parsing_results["shell_command"].parsed_content; // Try to use a parsed alias, but if no alias is available, use a parsed shell command instead.
@@ -38,16 +54,7 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
             // If parsing process fails, the failed process can be passed to this.trigger(). The execution will eventually be cancelled and error messages displayed (if displaying is allowed).
         }
 
-        // Add a menu item.
-        menu.addItem(item => item
-            .setIcon(t_shell_command.getIconId()) // Icon id can be null.
-            .setTitle(title)
-            .onClick(() => {
-                this.trigger(
-                    t_shell_command,
-                    parsing_process,
-                );
-            }),
-        );
+        // Update menu item title.
+        menu_item.setTitle(title);
     }
 }
