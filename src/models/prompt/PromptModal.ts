@@ -250,9 +250,9 @@ export class PromptModal extends SC_Modal {
     }
 
     protected approve(): void {
-        this.validator().then(() => {
+        this.validator().then(async () => {
             // The form fields are filled ok
-            this.assignValuesToVariables();
+            await this.assignValuesToVariables();
             this.resolve_promise(true);
             this.user_confirmed_ok = true;
             this.close();
@@ -275,9 +275,9 @@ export class PromptModal extends SC_Modal {
         }
     }
 
-    private assignValuesToVariables() {
+    private async assignValuesToVariables() {
         for (const prompt_field of this.prompt_fields) {
-            prompt_field.getTargetVariable().setValue(prompt_field.getParsedValue());
+            await prompt_field.getTargetVariable().setValue(prompt_field.getParsedValue());
         }
     }
 

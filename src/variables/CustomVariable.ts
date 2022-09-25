@@ -53,13 +53,22 @@ export class CustomVariable extends Variable {
         });
     }
 
-    public setValue(value: string) {
+    /**
+     * TODO: Make it possible to prevent calling onChange callbacks:
+     *  - Make it possible to call the callbacks later outside this class.
+     *  - This makes it possible to prevent unnecessary CustomVariableView updates when multiple CustomVariables are assigned values in one go (via Shell command URI).
+     *  - Store the old value into some kind of history list.
+     *  - When calling the callbacks, the current CustomVariable should be passed as a parameter instead of the 'value' and 'old_value' parameters (which can be accessed via the CustomVariable object).
+     *
+     * @param value
+     */
+    public async setValue(value: string) {
         const old_value = this.value;
         debugLog(`CustomVariable ${this.variable_name}: Setting value to: ${value} (old was: ${old_value}).`);
         this.value = value;
 
         // Call the onChange hook.
-        this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
+        await this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
     }
 
     /**
@@ -86,10 +95,10 @@ export class CustomVariable extends Variable {
     }
     private on_change_callbacks = new Set<TCustomVariableOnChangeCallback>();
 
-    private callOnChangeCallbacks(new_value: string, old_value: string) {
+    private async callOnChangeCallbacks(new_value: string, old_value: string) {
         debugLog(`CustomVariable ${this.variable_name}: Calling onChange callbacks.`);
         for (const on_change_callback of this.on_change_callbacks) {
-            on_change_callback(this, new_value, old_value);
+            await on_change_callback(this, new_value, old_value);
         }
     }
 
@@ -101,4 +110,4 @@ export class CustomVariable extends Variable {
     }
 }
 
-type TCustomVariableOnChangeCallback = (variable: CustomVariable, new_value: string, old_value: string) => void;
+type TCustomVariableOnChangeCallback = (variable: CustomVariable, new_value: string, old_value: string) => Promise<void>;

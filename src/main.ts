@@ -419,8 +419,8 @@ export default class SC_Plugin extends Plugin {
 							// Found the correct variable.
 							found_custom_variable = true;
 
-							// Assign the given value to the variable.
-							variable.setValue(parameters[parameter_name]);
+							// Assign the given value to the custom variable.
+							await variable.setValue(parameters[parameter_name]);
 						}
 					}
 					if (!found_custom_variable) {
