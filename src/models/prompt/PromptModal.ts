@@ -191,8 +191,8 @@ export class PromptModal extends SC_Modal {
 
         // Create fields
         let is_first_field = true;
-        this.prompt_fields.forEach((prompt_field: PromptField) => {
-            prompt_field.createField(
+        for (const prompt_field of this.prompt_fields) {
+            await prompt_field.createField(
                 this.modalEl.createDiv({attr: {class: "SC-setting-group"}}),
                 this.t_shell_command,
                 this.sc_event
@@ -211,7 +211,7 @@ export class PromptModal extends SC_Modal {
                 is_first_field = false;
                 prompt_field.setFocus();
             }
-        });
+        }
         if (update_shell_command_preview) {
             // Set a preview text. Must be done after fields are created, because their values are accessed.
             update_shell_command_preview();

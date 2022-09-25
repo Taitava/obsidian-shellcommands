@@ -57,7 +57,7 @@ export abstract class PromptField extends Instance {
      * @param sc_event Used when parsing variables for default_value and the inputted value. Needed so that also {{event_*}} variables can be used in prompts.
      */
     public async createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
-        this._createField(container_element, t_shell_command, sc_event);
+        await this._createField(container_element, t_shell_command, sc_event);
 
         // Create a preview setting element. It will not contain any actual setting elements, just text.
         this.preview_setting = new Setting(container_element);
@@ -67,7 +67,7 @@ export abstract class PromptField extends Instance {
         await this.applyDefaultValue(t_shell_command, sc_event);
     }
 
-    protected abstract _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): void;
+    protected abstract _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void>;
 
     public getTitle(): string {
         return this.configuration.label === "" ? "Unlabelled field" : this.configuration.label;
