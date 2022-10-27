@@ -129,7 +129,7 @@ This project is free open source software and receives no funding. I want to tha
   - [Obsidian Publish](https://obsidian.md/publish) service for being able to host the [_Shell commands_ plugin's documentation](https://publish.obsidian.md/shellcommands) on a platform familiar to many Obsidian users.
   - A [Catalyst license](https://help.obsidian.md/Licenses+%26+Payment/Catalyst+license) so I can test the plugin with early access builds of Obsidian.
 
-### Copyright
+## Copyright
 
 Copyright (C) 2021 - 2022 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
 
