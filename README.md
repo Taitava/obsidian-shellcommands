@@ -114,6 +114,20 @@ Jarkko Linnanvirta
 Contact:
  - https://github.com/Taitava
  - https://forum.obsidian.md/u/jare/
+ 
+## Supported by
+
+This project is free open source software and receives no funding. I want to thank the following parties for kindly supporting this project by giving free licenses/service subscriptions.
+
+### <img alt="JetBrains Logo (Main) logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" style="height: 4em"></img> JetBrains
+[JetBrains](https://www.jetbrains.com/) offers me the ability to use their [WebStorm editor](https://www.jetbrains.com/webstorm/) free of charge for developing the _Shell commands_ plugin. Read more about [JetBrain's open source support](https://jb.gg/OpenSourceSupport).
+
+<img alt="WebStorm logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm.svg" style="width: 300px;">
+
+### Obsidian
+ [Obsidian](https://obsidian.md) developers offer this project:
+  - [Obsidian Publish](https://obsidian.md/publish) service for being able to host the [_Shell commands_ plugin's documentation](https://publish.obsidian.md/shellcommands) on a platform familiar to many Obsidian users.
+  - A [Catalyst license](https://help.obsidian.md/Licenses+%26+Payment/Catalyst+license) so I can test the plugin with early access builds of Obsidian.
 
 ### Copyright
 
