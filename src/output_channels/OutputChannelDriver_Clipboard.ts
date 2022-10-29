@@ -33,7 +33,7 @@ export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
      */
     protected static readonly combine_output_streams = " ";
 
-    protected _handle(output_message: string) {
+    protected _handleBuffered(output_message: string) {
         copyToClipboard(output_message);
 
         if (this.plugin.settings.output_channel_clipboard_also_outputs_to_notification) {

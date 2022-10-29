@@ -31,7 +31,7 @@ export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDrive
      */
     protected static readonly combine_output_streams = " ";
 
-    protected _handle(output_message: string) {
+    protected _handleBuffered(output_message: string) {
         const editor = getEditor(this.app);
         const view = getView(this.app);
 

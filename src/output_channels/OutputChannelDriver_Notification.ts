@@ -33,7 +33,7 @@ export class OutputChannelDriver_Notification extends OutputChannelDriver {
         }
     }
 
-    protected _handle(output: OutputStreams, error_code: number | null): void {
+    protected _handleBuffered(output: OutputStreams, error_code: number | null): void {
 
         // Iterate output streams.
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, two

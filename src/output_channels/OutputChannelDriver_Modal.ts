@@ -35,7 +35,7 @@ import {EOL} from "os";
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
     protected static readonly title = "Ask after execution";
 
-    protected _handle(outputs: OutputStreams, error_code: number | null): void {
+    protected _handleBuffered(outputs: OutputStreams, error_code: number | null): void {
         // Initialize a modal and pass outputs
         const modal = new OutputModal(this.plugin, outputs, this.t_shell_command, this.shell_command_parsing_result);
 
@@ -152,7 +152,7 @@ class OutputModal extends SC_Modal {
                             this.shell_command_parsing_result,
                             "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
                         );
-                        outputChannelDriver.handle(output_streams, this.exit_code);
+                        outputChannelDriver.handleBuffered(output_streams, this.exit_code);
                     };
 
                     // Create the button

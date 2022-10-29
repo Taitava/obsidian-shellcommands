@@ -177,7 +177,7 @@ function handle_stream(
         );
 
         // Perform handling the output
-        driver.handle(output, error_code);
+        driver.handleBuffered(output, error_code);
     }
 }
 

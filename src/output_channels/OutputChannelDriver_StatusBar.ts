@@ -32,7 +32,7 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
      */
     protected static readonly combine_output_streams = EOL + EOL;
 
-    public _handle(output_message: string) {
+    public _handleBuffered(output_message: string) {
         const status_bar_element = this.plugin.getOutputStatusBarElement();
 
         output_message = output_message.trim();

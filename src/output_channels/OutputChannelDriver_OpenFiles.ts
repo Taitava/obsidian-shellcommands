@@ -46,7 +46,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
      */
     protected static readonly accepted_output_streams: OutputStream[] = ["stdout"];
 
-    protected _handle(output: OutputStreams, error_code: number | null): void {
+    protected _handleBuffered(output: OutputStreams, error_code: number | null): void {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
 

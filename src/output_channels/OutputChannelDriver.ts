@@ -83,15 +83,9 @@ export abstract class OutputChannelDriver {
      * @param error_code
      * @protected
      */
-    protected abstract _handle(output: OutputStreams | string, error_code: number | null): void;
+    protected abstract _handleBuffered(output: OutputStreams | string, error_code: number | null): void;
 
-    /**
-     * TODO: Rename to handleBuffered().
-     *
-     * @param output
-     * @param error_code
-     */
-    public async handle(output: OutputStreams, error_code: number | null): Promise<void> {
+    public async handleBuffered(output: OutputStreams, error_code: number | null): Promise<void> {
         this.requireHandlingMode("buffered");
 
         // Qualify output
@@ -99,15 +93,15 @@ export abstract class OutputChannelDriver {
             // The output is empty
             if (!this.static().accepts_empty_output) {
                 // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
-                debugLog(this.constructor.name + ".handle(): Ignoring empty output.");
+                debugLog(this.constructor.name + ".handleBuffered(): Ignoring empty output.");
                 return;
             }
         }
-        debugLog(this.constructor.name + ".handle(): Handling output...");
+        debugLog(this.constructor.name + ".handleBuffered(): Handling output...");
 
         // Output is ok.
         // Handle it.
-        this._handle(await this.prepare_output(output), error_code);
+        this._handleBuffered(await this.prepare_output(output), error_code);
         debugLog("Output handling is done.")
     }
 
@@ -133,12 +127,12 @@ export abstract class OutputChannelDriver {
         // Determine data format. TODO: Change this so that subclasses will have a _handleRealtime() method that always takes a string.
         if (this.static().combine_output_streams) {
             // Handle as string
-            this._handle(wrappedOutput, null);
+            this._handleBuffered(wrappedOutput, null);
         } else {
             // Handle as an object
             const outputContentInObject: OutputStreams = {};
             outputContentInObject[outputStreamName] = outputContent;
-            this._handle(outputContentInObject, null);
+            this._handleBuffered(outputContentInObject, null);
         }
 
         debugLog("Output handling is done.");
