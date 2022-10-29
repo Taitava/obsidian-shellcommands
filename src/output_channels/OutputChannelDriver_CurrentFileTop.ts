@@ -21,9 +21,9 @@ import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile
 import {Editor} from "obsidian";
 
 export class OutputChannelDriver_CurrentFileTop extends OutputChannelDriver_CurrentFile {
-    protected readonly title = "Current file: top";
+    protected static readonly title = "Current file: top";
 
-    public hotkey_letter = "T";
+    public static readonly hotkey_letter = "T";
 
     /**
      * Inserts text into the given editor, at top.

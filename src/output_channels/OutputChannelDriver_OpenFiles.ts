@@ -36,15 +36,15 @@ import {EOL} from "os";
 import {debugLog} from "../Debug";
 
 export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
-    protected readonly title = "Open files";
+    protected static readonly title = "Open files";
 
-    public hotkey_letter = "O";
+    public static readonly hotkey_letter = "O";
 
     /**
      * This output channel is not suitable for stderr, as stderr can contain unexpected messages.
      * @protected
      */
-    protected readonly accepted_output_streams: OutputStream[] = ["stdout"];
+    protected static readonly accepted_output_streams: OutputStream[] = ["stdout"];
 
     protected _handle(output: OutputStreams, error_code: number | null): void {
         let output_stream_name: OutputStream;

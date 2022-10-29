@@ -36,18 +36,18 @@ export interface OutputStreams {
 }
 
 const output_channel_drivers: {
-    [key: string]: OutputChannelDriver;
+    [key: string]: typeof OutputChannelDriver;
 } = {};
 
 // Register output channel drivers
-registerOutputChannelDriver("notification", new OutputChannelDriver_Notification());
-registerOutputChannelDriver("current-file-caret", new OutputChannelDriver_CurrentFileCaret());
-registerOutputChannelDriver("current-file-top", new OutputChannelDriver_CurrentFileTop());
-registerOutputChannelDriver("current-file-bottom", new OutputChannelDriver_CurrentFileBottom());
-registerOutputChannelDriver("open-files", new OutputChannelDriver_OpenFiles());
-registerOutputChannelDriver("status-bar", new OutputChannelDriver_StatusBar());
-registerOutputChannelDriver("clipboard", new OutputChannelDriver_Clipboard());
-registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
+registerOutputChannelDriver("notification", OutputChannelDriver_Notification);
+registerOutputChannelDriver("current-file-caret", OutputChannelDriver_CurrentFileCaret);
+registerOutputChannelDriver("current-file-top", OutputChannelDriver_CurrentFileTop);
+registerOutputChannelDriver("current-file-bottom", OutputChannelDriver_CurrentFileBottom);
+registerOutputChannelDriver("open-files", OutputChannelDriver_OpenFiles);
+registerOutputChannelDriver("status-bar", OutputChannelDriver_StatusBar);
+registerOutputChannelDriver("clipboard", OutputChannelDriver_Clipboard);
+registerOutputChannelDriver("modal", OutputChannelDriver_Modal);
 
 /**
  * This function is designed to be called after a 'Wait until finished' type of shell command finishes its execution.
@@ -161,10 +161,16 @@ function handle_stream(
         if (undefined === output_channel_drivers[output_channel_name]) {
             throw new Error("No output driver found for channel '" + output_channel_name + "'.");
         }
-        const driver: OutputChannelDriver = output_channel_drivers[output_channel_name];
+
+        // Instatiate the driver
+        const driver: OutputChannelDriver = initializeOutputChannelDriver(
+            output_channel_name,
+            plugin,
+            t_shell_command,
+            shell_command_parsing_result,
+        );
 
         // Perform handling the output
-        driver.initialize(plugin, t_shell_command, shell_command_parsing_result);
         driver.handle(output, error_code);
     }
 }
@@ -174,10 +180,10 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
         [key: string]: string;
     } = {ignore: "Ignore"};
     for (const name in output_channel_drivers) {
-        const output_channel_driver: OutputChannelDriver = output_channel_drivers[name];
+        const channelClass: typeof OutputChannelDriver = output_channel_drivers[name];
         // Check that the stream is suitable for the channel
-        if (output_channel_driver.acceptsOutputStream(output_stream)) {
-            list[name] = output_channel_driver.getTitle(output_stream);
+        if (channelClass.acceptsOutputStream(output_stream)) {
+            list[name] = channelClass.getTitle(output_stream);
         }
     }
     return list;
@@ -187,9 +193,19 @@ export function getOutputChannelDrivers() {
     return output_channel_drivers;
 }
 
-function registerOutputChannelDriver(name: OutputChannel, driver: OutputChannelDriver) {
-    if (undefined !== output_channel_drivers[name]) {
-        throw new Error("OutputChannelDriver named '" + name + "' is already registered!");
+export function initializeOutputChannelDriver(
+        channelCode: OutputChannel,
+        plugin: SC_Plugin,
+        tShellCommand: TShellCommand,
+        shellCommandParsingResult: ShellCommandParsingResult
+    ): OutputChannelDriver {
+    // @ts-ignore TODO: Find out how to tell TypeScript that a subclass is being instatiated instead of the abstract base class:
+    return new output_channel_drivers[channelCode](plugin, tShellCommand, shellCommandParsingResult);
+}
+
+function registerOutputChannelDriver(channelCode: OutputChannel, channelClass: typeof OutputChannelDriver) {
+    if (undefined !== output_channel_drivers[channelCode]) {
+        throw new Error("OutputChannelDriver named '" + channelCode + "' is already registered!");
     }
-    output_channel_drivers[name] = driver;
+    output_channel_drivers[channelCode] = channelClass;
 }

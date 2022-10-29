@@ -28,18 +28,18 @@ import {Variable_Output} from "../variables/Variable_Output";
 import {parseVariables} from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
 
+/**
+ * TODO: Rename the class. Remove 'Driver' from the class name. So: OutputChannelDriver --> OutputChannel. Also rename all variables in the whole codebase that contain the word 'driver'. Before renaming the class, need to Rename OutputChannel _type_ to something else. Perhaps OutputChannelCode?
+ */
 export abstract class OutputChannelDriver {
+
+    // Class specific properties
     /**
      * Human readable name, used in settings.
      */
-    protected abstract readonly title: string;
-    protected readonly accepted_output_streams: OutputStream[] = ["stdout", "stderr"];
-
-    protected plugin: SC_Plugin;
-    protected app: App;
-    protected shell_command_parsing_result: ShellCommandParsingResult;
-    protected t_shell_command: TShellCommand;
-    protected accepts_empty_output = false;
+    protected static readonly title: string;
+    protected static readonly accepted_output_streams: OutputStream[] = ["stdout", "stderr"];
+    protected static readonly accepts_empty_output: boolean = false;
 
     /**
      * Determines if the output channel wants to handle a unified output or not. If yes, this property should define a
@@ -47,27 +47,31 @@ export abstract class OutputChannelDriver {
      *
      * @protected
      */
-    protected combine_output_streams: false | string = false;
+    protected static readonly combine_output_streams: false | string = false;
 
     /**
      * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
      * excluded from OutputModal.
      */
-    public hotkey_letter: string = undefined;
+    public static readonly hotkey_letter: string = undefined;
 
     /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
      * @param output_stream
      */
-    public getTitle(output_stream: OutputStream) {
+    public static getTitle(output_stream: OutputStream) {
         return this.title;
     }
 
-    public initialize(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
-        this.plugin = plugin;
+    // Instance specific properties
+    protected app: App;
+
+    public constructor(
+        protected plugin: SC_Plugin,
+        protected t_shell_command: TShellCommand,
+        protected shell_command_parsing_result: ShellCommandParsingResult,
+    ) {
         this.app = plugin.app;
-        this.t_shell_command = t_shell_command;
-        this.shell_command_parsing_result = shell_command_parsing_result;
     }
 
     /**
@@ -81,7 +85,7 @@ export abstract class OutputChannelDriver {
         // Qualify output
         if (OutputChannelDriver.isOutputEmpty(output)) {
             // The output is empty
-            if (!this.accepts_empty_output) {
+            if (!this.static().accepts_empty_output) {
                 // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
                 debugLog(this.constructor.name + ": Ignoring empty output.");
                 return;
@@ -95,7 +99,7 @@ export abstract class OutputChannelDriver {
         debugLog("Output handling is done.")
     }
 
-    public acceptsOutputStream(output_stream: OutputStream) {
+    public static acceptsOutputStream(output_stream: OutputStream) {
         return this.accepted_output_streams.contains(output_stream);
     }
 
@@ -120,7 +124,8 @@ export abstract class OutputChannelDriver {
         };
 
         // Check if outputs should be combined.
-        if (this.combine_output_streams) {
+        const combineOutputStreams = this.static().combine_output_streams;
+        if (combineOutputStreams) {
             // Combine output strings into a single string.
 
             // Can output wrapping be combined?
@@ -128,12 +133,12 @@ export abstract class OutputChannelDriver {
                 // Output wrapping can be combined.
                 return await this.wrapOutput(
                     "stdout",
-                    joinObjectProperties(output_streams, this.combine_output_streams), // Use this.combine_output_streams as a glue string.
+                    joinObjectProperties(output_streams, combineOutputStreams), // Use combineOutputStreams as a glue string.
                 );
             } else {
                 // Output wrapping needs to be done separately.
                 const wrapped_output_streams = await wrap_outputs_separately();
-                return joinObjectProperties(wrapped_output_streams, this.combine_output_streams); // Use this.combine_output_streams as a glue string.
+                return joinObjectProperties(wrapped_output_streams, combineOutputStreams); // Use combineOutputStreams as a glue string.
             }
 
         } else {
@@ -194,5 +199,9 @@ export abstract class OutputChannelDriver {
             return false;
         }
         return undefined === output.stdout || "" === output.stdout;
+    }
+
+    public static() {
+        return this.constructor as typeof OutputChannelDriver;
     }
 }

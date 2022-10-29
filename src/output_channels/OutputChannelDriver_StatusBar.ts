@@ -21,16 +21,16 @@ import {OutputChannelDriver} from "./OutputChannelDriver";
 import {EOL} from "os";
 
 export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
-    protected readonly title = "Status bar";
-    protected accepts_empty_output = true;
+    protected static readonly title = "Status bar";
+    protected static readonly accepts_empty_output = true;
 
-    public hotkey_letter = "S";
+    public static readonly hotkey_letter = "S";
 
     /**
      * Combine stdout and stderr (in case both of them happen to be present).
      * @protected
      */
-    protected combine_output_streams = EOL + EOL;
+    protected static readonly combine_output_streams = EOL + EOL;
 
     public _handle(output_message: string) {
         const status_bar_element = this.plugin.getOutputStatusBarElement();

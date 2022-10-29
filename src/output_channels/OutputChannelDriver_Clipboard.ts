@@ -22,16 +22,16 @@ import {copyToClipboard} from "../Common";
 import {EOL} from "os";
 
 export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
-    protected readonly title = "Clipboard";
+    protected static readonly title = "Clipboard";
 
-    public hotkey_letter = "L";
+    public static readonly hotkey_letter = "L";
 
     /**
      * There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
      * will be joined together with " " as a separator.
      * @protected
      */
-    protected combine_output_streams = " ";
+    protected static readonly combine_output_streams = " ";
 
     protected _handle(output_message: string) {
         copyToClipboard(output_message);

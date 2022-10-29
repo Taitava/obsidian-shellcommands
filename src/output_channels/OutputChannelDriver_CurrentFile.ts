@@ -29,7 +29,7 @@ export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDrive
      * will be joined together with " " as a separator.
      * @protected
      */
-    protected combine_output_streams = " ";
+    protected static readonly combine_output_streams = " ";
 
     protected _handle(output_message: string) {
         const editor = getEditor(this.app);

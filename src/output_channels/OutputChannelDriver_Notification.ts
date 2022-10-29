@@ -23,13 +23,8 @@ import {OutputStream} from "./OutputChannel";
 
 
 export class OutputChannelDriver_Notification extends OutputChannelDriver {
-    /**
-     * Not used because getTitle() exists, but must be present.
-     * @protected
-     */
-    protected readonly title: string;
 
-    public getTitle(output_stream: OutputStream): string {
+    public static getTitle(output_stream: OutputStream): string {
         switch (output_stream) {
             case "stdout":
                 return "Notification balloon";

@@ -20,6 +20,7 @@
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {
     getOutputChannelDrivers,
+    initializeOutputChannelDriver,
     OutputStreams,
 } from "./OutputChannelDriverFunctions";
 import {ButtonComponent, Setting, TextAreaComponent} from "obsidian";
@@ -32,7 +33,7 @@ import {CmdOrCtrl} from "../Hotkeys";
 import {EOL} from "os";
 
 export class OutputChannelDriver_Modal extends OutputChannelDriver {
-    protected readonly title = "Ask after execution";
+    protected static readonly title = "Ask after execution";
 
     protected _handle(outputs: OutputStreams, error_code: number | null): void {
         // Initialize a modal and pass outputs
@@ -127,12 +128,12 @@ class OutputModal extends SC_Modal {
         ;
         const output_channel_drivers = getOutputChannelDrivers();
         Object.getOwnPropertyNames(output_channel_drivers).forEach((output_channel_name: OutputChannel) => {
-            const output_channel_driver = output_channel_drivers[output_channel_name];
+            const outputChannelDriverClass = output_channel_drivers[output_channel_name];
 
             // Ensure this channel is not excluded by checking that is has a hotkey defined.
-            if (output_channel_driver.hotkey_letter) {
+            if (outputChannelDriverClass.hotkey_letter) {
                 // Ensure the output channel accepts this output stream. E.g. OutputChannelDriver_OpenFiles does not accept "stderr".
-                if (output_channel_driver.acceptsOutputStream(output_stream)) {
+                if (outputChannelDriverClass.acceptsOutputStream(output_stream)) {
 
                     const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
 
@@ -144,8 +145,13 @@ class OutputModal extends SC_Modal {
                             getSelectionFromTextarea(textarea_element, true) // Use the selection, or...
                             ?? output_textarea.getValue() // ...use the whole text, if nothing is selected.
                         ;
-                        output_channel_driver.initialize(this.plugin, this.t_shell_command, this.shell_command_parsing_result);
-                        output_channel_driver.handle(output_streams, this.exit_code);
+                        const outputChannelDriver = initializeOutputChannelDriver(
+                            output_channel_name,
+                            this.plugin,
+                            this.t_shell_command,
+                            this.shell_command_parsing_result,
+                        );
+                        outputChannelDriver.handle(output_streams, this.exit_code);
                     };
 
                     // Create the button
@@ -171,23 +177,23 @@ class OutputModal extends SC_Modal {
                     );
 
                     // Define button texts and assign hotkeys
-                    const output_channel_name: string = output_channel_driver.getTitle(output_stream);
+                    const output_channel_title: string = outputChannelDriverClass.getTitle(output_stream);
 
                     // Button text
-                    redirect_button.setButtonText(output_channel_name);
+                    redirect_button.setButtonText(output_channel_title);
 
                     // Tips about hotkeys
                     redirect_button.setTooltip(
-                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${output_channel_driver.hotkey_letter}.`
+                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelDriverClass.hotkey_letter}.`
                         + EOL + EOL +
-                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${output_channel_driver.hotkey_letter}.`
+                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelDriverClass.hotkey_letter}.`
                     );
 
                     // 1. hotkey: Ctrl/Cmd + number: handle output
-                    this.scope.register(["Ctrl"], output_channel_driver.hotkey_letter, handle_output);
+                    this.scope.register(["Ctrl"], outputChannelDriverClass.hotkey_letter, handle_output);
 
                     // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
-                    this.scope.register(["Ctrl", "Shift"], output_channel_driver.hotkey_letter, () => {
+                    this.scope.register(["Ctrl", "Shift"], outputChannelDriverClass.hotkey_letter, () => {
                         handle_output();
                         this.close();
                     });

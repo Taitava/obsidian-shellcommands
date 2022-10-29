@@ -21,9 +21,9 @@ import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile
 import {Editor, EditorPosition} from "obsidian";
 
 export class OutputChannelDriver_CurrentFileBottom extends OutputChannelDriver_CurrentFile {
-    protected readonly title = "Current file: bottom";
+    protected static readonly title = "Current file: bottom";
 
-    public hotkey_letter = "B";
+    public static readonly hotkey_letter = "B";
 
     /**
      * Inserts text into the given editor, at bottom.
