@@ -237,6 +237,21 @@ export class ShellCommandExecutor {
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
             try {
                 const child_process = spawn(shell_command, options);
+
+                // Common error handling regardless of output handling mode
+                child_process.on("error", (error: Error) => {
+                    // Probably most errors will NOT end up here, I guess this event occurs for some rare errors.
+                    //
+                    // A quote from https://nodejs.org/api/child_process.html#event-error (read 2022-10-29):
+                    // > The 'error' event is emitted whenever:
+                    // > - The process could not be spawned, or
+                    // > - The process could not be killed, or
+                    // > - Sending a message to the child process failed.
+
+                    debugLog("Shell command failed to execute: Received a non-stderr error message: " + error.message);
+                    this.plugin.newError("Shell command failed to execute. Error: " + error.message);
+                });
+
                 child_process.on("exit",(exitCode) => {
 
                     // Get outputs
