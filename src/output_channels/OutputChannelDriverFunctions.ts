@@ -56,7 +56,7 @@ registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
  * @param shell_command_parsing_result
  * @param stdout
  * @param stderr
- * @param error_code
+ * @param error_code TODO: Rename to exitCode everywhere in the codebase.
  * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from t_shell_command.
  */
 export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null, overriding_output_channel?: OutputChannel) {

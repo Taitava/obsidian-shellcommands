@@ -19,9 +19,8 @@
 
 import {
     ChildProcess,
-    exec,
-    ExecException,
-    ExecOptions,
+    spawn,
+    SpawnOptions,
 } from "child_process";
 import {
     cloneObject,
@@ -31,7 +30,6 @@ import {
 import * as path from "path";
 import * as fs from "fs";
 import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
-import {BaseEncodingOptions} from "fs";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
@@ -219,7 +217,7 @@ export class ShellCommandExecutor {
         } else {
             // Working directory is OK
             // Prepare execution options
-            const options: BaseEncodingOptions & ExecOptions = {
+            const options: SpawnOptions = {
                 "cwd": working_directory,
                 "shell": shell,
                 "env": environment_variables,
@@ -228,20 +226,27 @@ export class ShellCommandExecutor {
             // Execute the shell command
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
             try {
-                const child_process = exec(shell_command, options, (error: ExecException|null, stdout: string, stderr: string) => {
+                const child_process = spawn(shell_command, options);
+                child_process.on("exit",(exitCode) => {
+
+                    // Get outputs
+                    child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
+                    child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
+                    const stdout: string = child_process.stdout.read() ?? "";
+                    let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
 
                     // Did the shell command execute successfully?
-                    if (null !== error) {
+                    if (exitCode > 0) {
                         // Some error occurred
-                        debugLog("Command executed and failed. Error number: " + error.code + ". Message: " + error.message);
+                        debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
 
                         // Check if this error should be displayed to the user or not
-                        if (this.t_shell_command.getIgnoreErrorCodes().contains(error.code)) {
+                        if (this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
                             // The user has ignored this error.
                             debugLog("User has ignored this error, so won't display it.");
 
                             // Handle only stdout output stream
-                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel);
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel); // TODO: Replace this function call with these assignments: stderr = "" and exitCode = null. Actually, consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
                         } else {
                             // Show the error.
                             debugLog("Will display the error to user.");
@@ -250,12 +255,13 @@ export class ShellCommandExecutor {
                             if (!stderr.length) {
                                 // Stderr is empty, so the error message is probably given by Node.js's child_process.
                                 // Direct error.message to the stderr variable, so that the user can see error.message when stderr is unavailable.
-                                stderr = error.message;
+                                // stderr = error.message; // 2022-10-29: Commented out, because spawn() does not give a separate error message. TODO: Remove this if block in a separate commit.
                             }
 
                             // Handle both stdout and stderr output streams
-                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, error.code, overriding_output_channel);
+                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, overriding_output_channel); // TODO: Move this function call to below.
                         }
+                        // TODO: Move handleShellCommandOutput() call here.
                     } else {
                         // Probably no errors, but do one more check.
 
