@@ -246,15 +246,15 @@ export class ShellCommandExecutor {
                             debugLog("User has ignored this error, so won't display it.");
 
                             // Handle only stdout output stream
-                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, "", null, overriding_output_channel); // TODO: Replace this function call with these assignments: stderr = "" and exitCode = null. Actually, consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
+                            stderr = "";
+                            exitCode = null; // TODO: consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
                         } else {
-                            // Show the error.
+                            // The error can be shown.
                             debugLog("Will display the error to user.");
-
-                            // Handle both stdout and stderr output streams
-                            handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, overriding_output_channel); // TODO: Move this function call to below.
                         }
-                        // TODO: Move handleShellCommandOutput() call here.
+
+                        // Handle at least stdout (and maybe stderr) output stream
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, overriding_output_channel);
                     } else {
                         // Probably no errors, but do one more check.
 
