@@ -654,7 +654,7 @@ export default class SC_Plugin extends Plugin {
 	}
 
     /**
-     * Used by OutputChannelDriver_StatusBar.
+     * Used by OutputChannel_StatusBar.
      * TODO: Make it possible to have multiple status bar elements. It should be a shell command level setting, where a shell command opts for either to use their own status bar element, or a common one.
      */
     public getOutputStatusBarElement() {

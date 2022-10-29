@@ -17,12 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {OutputChannel} from "./OutputChannel";
 import {getEditor, getView} from "../Common";
 import {Editor} from "obsidian";
 import {debugLog} from "../Debug";
 
-export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDriver {
+export abstract class OutputChannel_CurrentFile extends OutputChannel {
 
     /**
      * There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
@@ -39,14 +39,14 @@ export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDrive
             // For some reason it's not possible to get an editor.
             this.plugin.newError("Could not get an editor instance! Please raise an issue in GitHub. The command output is in the next error box:");
             this.plugin.newError(output_message); // Good to output it at least some way.
-            debugLog("OutputChannelDriver_CurrentFile: Could not get an editor instance.")
+            debugLog("OutputChannel_CurrentFile: Could not get an editor instance.")
             return;
         }
 
         // Check if the view is in source mode
         if (null === view) {
             // For some reason it's not possible to get an editor, but it's not a big problem.
-            debugLog("OutputChannelDriver_CurrentFile: Could not get a view instance.");
+            debugLog("OutputChannel_CurrentFile: Could not get a view instance.");
         } else {
             // We do have a view
             if ("source" !== view.getMode()) {

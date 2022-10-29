@@ -17,10 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile";
+import {OutputChannel_CurrentFile} from "./OutputChannel_CurrentFile";
 import {Editor, EditorPosition} from "obsidian";
 
-export class OutputChannelDriver_CurrentFileBottom extends OutputChannelDriver_CurrentFile {
+export class OutputChannel_CurrentFileBottom extends OutputChannel_CurrentFile {
     protected static readonly title = "Current file: bottom";
 
     public static readonly hotkey_letter = "B";

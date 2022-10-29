@@ -19,7 +19,7 @@
 
 import SC_Plugin from "../main";
 import {App} from "obsidian";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {OutputStreams} from "./OutputChannelFunctions";
 import {
     OutputHandlingMode,
     OutputStream,
@@ -31,10 +31,7 @@ import {Variable_Output} from "../variables/Variable_Output";
 import {parseVariables} from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
 
-/**
- * TODO: Rename the class. Remove 'Driver' from the class name. So: OutputChannelDriver --> OutputChannel. Also rename all variables in the whole codebase that contain the word 'driver'. Before renaming the class, need to Rename OutputChannel _type_ to something else. Perhaps OutputChannelCode?
- */
-export abstract class OutputChannelDriver {
+export abstract class OutputChannel {
 
     // Class specific properties
     /**
@@ -89,10 +86,10 @@ export abstract class OutputChannelDriver {
         this.requireHandlingMode("buffered");
 
         // Qualify output
-        if (OutputChannelDriver.isOutputEmpty(output)) {
+        if (OutputChannel.isOutputEmpty(output)) {
             // The output is empty
             if (!this.static().accepts_empty_output) {
-                // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
+                // This OutputChannel does not accept empty output, i.e. empty output should be just ignored.
                 debugLog(this.constructor.name + ".handleBuffered(): Ignoring empty output.");
                 return;
             }
@@ -112,7 +109,7 @@ export abstract class OutputChannelDriver {
         if ("" === outputContent) {
             // The output is empty
             if (!this.static().accepts_empty_output) {
-                // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
+                // This OutputChannel does not accept empty output, i.e. empty output should be just ignored.
                 debugLog(this.constructor.name + ".handleRealtime(): Ignoring empty output.");
                 return;
             }
@@ -150,7 +147,7 @@ export abstract class OutputChannelDriver {
 
     /**
      * Does the following preparations:
-     *  - Combines output streams (if wanted by the OutputChannelDriver).
+     *  - Combines output streams (if wanted by the OutputChannel).
      *  - Wraps output (if defined in shell command configuration).
      * @param output_streams
      * @private
@@ -247,11 +244,11 @@ export abstract class OutputChannelDriver {
     }
 
     public static() {
-        return this.constructor as typeof OutputChannelDriver;
+        return this.constructor as typeof OutputChannel;
     }
 }
 
-export interface OutputChannelDrivers {
-    stdout?: OutputChannelDriver,
-    stderr?: OutputChannelDriver,
+export interface OutputChannels {
+    stdout?: OutputChannel,
+    stderr?: OutputChannel,
 }

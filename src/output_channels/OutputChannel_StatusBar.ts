@@ -17,10 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {OutputChannel} from "./OutputChannel";
 import {EOL} from "os";
 
-export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
+export class OutputChannel_StatusBar extends OutputChannel {
     protected static readonly title = "Status bar";
     protected static readonly accepts_empty_output = true;
 

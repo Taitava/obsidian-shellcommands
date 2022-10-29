@@ -32,7 +32,7 @@ import * as fs from "fs";
 import {
     handleBufferedOutput,
     startRealtimeOutputHandling,
-} from "./output_channels/OutputChannelDriverFunctions";
+} from "./output_channels/OutputChannelFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
@@ -342,25 +342,25 @@ export class ShellCommandExecutor {
                 }
 
                 // Handle output
-                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a channel for stderr).
             }
         });
     }
 
-    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannelCodes) {
+    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannelCodes: OutputChannelCodes) {
 
         // Prepare output channels
-        const outputChannelDrivers = startRealtimeOutputHandling(
+        const outputChannels = startRealtimeOutputHandling(
             this.plugin,
             this.t_shell_command,
             shell_command_parsing_result,
-            outputChannels,
+            outputChannelCodes,
         );
 
         // Define an output handler
         const handleNewOutputContent = (outputStreamName: OutputStream, readableStream: Readable): void => {
             const outputContent = readableStream.read() ?? "";
-            outputChannelDrivers[outputStreamName].handleRealtime(outputStreamName, outputContent);
+            outputChannels[outputStreamName].handleRealtime(outputStreamName, outputContent);
         };
 
         // Hook into stdout's and stderr's output retrieving events

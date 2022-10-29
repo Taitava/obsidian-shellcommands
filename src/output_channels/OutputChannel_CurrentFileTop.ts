@@ -17,22 +17,23 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver_CurrentFile} from "./OutputChannelDriver_CurrentFile";
+import {OutputChannel_CurrentFile} from "./OutputChannel_CurrentFile";
 import {Editor} from "obsidian";
 
-export class OutputChannelDriver_CurrentFileCaret extends OutputChannelDriver_CurrentFile {
-    protected static readonly title = "Current file: caret position";
+export class OutputChannel_CurrentFileTop extends OutputChannel_CurrentFile {
+    protected static readonly title = "Current file: top";
 
-    public static readonly hotkey_letter = "R";
+    public static readonly hotkey_letter = "T";
 
     /**
-     * Inserts text into the given editor, at caret position.
+     * Inserts text into the given editor, at top.
      *
      * @param editor
      * @param output_message
      * @protected
      */
     protected insertIntoEditor(editor: Editor, output_message: string): void {
-        editor.replaceSelection(output_message);
+        const top_position = editor.offsetToPos(0);
+        editor.replaceRange(output_message, top_position);
     }
 }

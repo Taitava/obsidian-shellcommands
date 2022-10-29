@@ -21,7 +21,7 @@
 import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
-import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
+import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
 import {
     OutputChannelCode,
     OutputChannelOrder,
@@ -655,7 +655,7 @@ export class ExtraOptionsModal extends SC_Modal {
     }
 
     private newOutputChannelSetting(container_element: HTMLElement, title: string, output_stream_name: OutputStream, description = "") {
-        const output_channel_options = getOutputChannelDriversOptionList(output_stream_name);
+        const output_channel_options = getOutputChannelsOptionList(output_stream_name);
         return new Setting(container_element)
             .setName(title)
             .setDesc(description)

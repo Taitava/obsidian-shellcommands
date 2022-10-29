@@ -224,7 +224,7 @@ export class TShellCommand {
 
     /**
      * Checks if different output streams can be wrapped together. In addition to this, combining output streams also
-     * requires the OutputChannelDrivers to be the same, but that's not checked in this method.
+     * requires the OutputChannels to be the same, but that's not checked in this method.
      */
     public isOutputWrapperStdoutSameAsStderr() {
         return this.configuration.output_wrappers["stdout"] === this.configuration.output_wrappers["stderr"];

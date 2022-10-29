@@ -17,12 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {OutputChannel} from "./OutputChannel";
 import {
-    getOutputChannelDrivers,
-    initializeOutputChannelDriver,
+    getOutputChannelClasses,
+    initializeOutputChannel,
     OutputStreams,
-} from "./OutputChannelDriverFunctions";
+} from "./OutputChannelFunctions";
 import {ButtonComponent, Setting, TextAreaComponent} from "obsidian";
 import {OutputChannelCode, OutputStream} from "./OutputChannelCode";
 import SC_Plugin from "../main";
@@ -32,7 +32,7 @@ import {getSelectionFromTextarea} from "../Common";
 import {CmdOrCtrl} from "../Hotkeys";
 import {EOL} from "os";
 
-export class OutputChannelDriver_Modal extends OutputChannelDriver {
+export class OutputChannel_Modal extends OutputChannel {
     protected static readonly title = "Ask after execution";
 
     protected _handleBuffered(outputs: OutputStreams, error_code: number | null): void {
@@ -126,33 +126,33 @@ class OutputModal extends SC_Modal {
             .setClass("SC-no-top-border")
             .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
         ;
-        const output_channel_drivers = getOutputChannelDrivers();
-        Object.getOwnPropertyNames(output_channel_drivers).forEach((output_channel_name: OutputChannelCode) => {
-            const outputChannelDriverClass = output_channel_drivers[output_channel_name];
+        const outputChannels = getOutputChannelClasses();
+        Object.getOwnPropertyNames(outputChannels).forEach((output_channel_name: OutputChannelCode) => {
+            const outputChannelClass = outputChannels[output_channel_name];
 
             // Ensure this channel is not excluded by checking that is has a hotkey defined.
-            if (outputChannelDriverClass.hotkey_letter) {
-                // Ensure the output channel accepts this output stream. E.g. OutputChannelDriver_OpenFiles does not accept "stderr".
-                if (outputChannelDriverClass.acceptsOutputStream(output_stream)) {
+            if (outputChannelClass.hotkey_letter) {
+                // Ensure the output channel accepts this output stream. E.g. OutputChannel_OpenFiles does not accept "stderr".
+                if (outputChannelClass.acceptsOutputStream(output_stream)) {
 
                     const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
 
                     // Define an output handler
                     const handle_output = () => {
-                        // Redirect output to the selected driver
+                        // Redirect output to the selected channel
                         const output_streams: OutputStreams = {};
                         output_streams[output_stream] =
                             getSelectionFromTextarea(textarea_element, true) // Use the selection, or...
                             ?? output_textarea.getValue() // ...use the whole text, if nothing is selected.
                         ;
-                        const outputChannelDriver = initializeOutputChannelDriver(
+                        const outputChannel = initializeOutputChannel(
                             output_channel_name,
                             this.plugin,
                             this.t_shell_command,
                             this.shell_command_parsing_result,
                             "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
                         );
-                        outputChannelDriver.handleBuffered(output_streams, this.exit_code);
+                        outputChannel.handleBuffered(output_streams, this.exit_code);
                     };
 
                     // Create the button
@@ -178,23 +178,23 @@ class OutputModal extends SC_Modal {
                     );
 
                     // Define button texts and assign hotkeys
-                    const output_channel_title: string = outputChannelDriverClass.getTitle(output_stream);
+                    const output_channel_title: string = outputChannelClass.getTitle(output_stream);
 
                     // Button text
                     redirect_button.setButtonText(output_channel_title);
 
                     // Tips about hotkeys
                     redirect_button.setTooltip(
-                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelDriverClass.hotkey_letter}.`
+                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
                         + EOL + EOL +
-                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelDriverClass.hotkey_letter}.`
+                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelClass.hotkey_letter}.`
                     );
 
                     // 1. hotkey: Ctrl/Cmd + number: handle output
-                    this.scope.register(["Ctrl"], outputChannelDriverClass.hotkey_letter, handle_output);
+                    this.scope.register(["Ctrl"], outputChannelClass.hotkey_letter, handle_output);
 
                     // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
-                    this.scope.register(["Ctrl", "Shift"], outputChannelDriverClass.hotkey_letter, () => {
+                    this.scope.register(["Ctrl", "Shift"], outputChannelClass.hotkey_letter, () => {
                         handle_output();
                         this.close();
                     });

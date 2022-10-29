@@ -18,41 +18,41 @@
  */
 
 import SC_Plugin from "../main";
-import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
-import {OutputChannelDriver, OutputChannelDrivers} from "./OutputChannelDriver";
-import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
-import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
+import {OutputChannel_Notification} from "./OutputChannel_Notification";
+import {OutputChannel, OutputChannels} from "./OutputChannel";
+import {OutputChannel_CurrentFileCaret} from "./OutputChannel_CurrentFileCaret";
+import {OutputChannel_CurrentFileTop} from "./OutputChannel_CurrentFileTop";
 import {
     OutputChannelCode,
     OutputChannelCodes,
     OutputHandlingMode,
     OutputStream,
 } from "./OutputChannelCode";
-import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
-import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
-import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
+import {OutputChannel_StatusBar} from "./OutputChannel_StatusBar";
+import {OutputChannel_CurrentFileBottom} from "./OutputChannel_CurrentFileBottom";
+import {OutputChannel_Clipboard} from "./OutputChannel_Clipboard";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
-import {OutputChannelDriver_Modal} from "./OutputChannelDriver_Modal";
-import {OutputChannelDriver_OpenFiles} from "./OutputChannelDriver_OpenFiles";
+import {OutputChannel_Modal} from "./OutputChannel_Modal";
+import {OutputChannel_OpenFiles} from "./OutputChannel_OpenFiles";
 
 export interface OutputStreams {
     stdout?: string;
     stderr?: string;
 }
 
-const output_channel_drivers: {
-    [key: string]: typeof OutputChannelDriver;
+const outputChannelClasses: {
+    [key: string]: typeof OutputChannel;
 } = {};
 
-// Register output channel drivers
-registerOutputChannelDriver("notification", OutputChannelDriver_Notification);
-registerOutputChannelDriver("current-file-caret", OutputChannelDriver_CurrentFileCaret);
-registerOutputChannelDriver("current-file-top", OutputChannelDriver_CurrentFileTop);
-registerOutputChannelDriver("current-file-bottom", OutputChannelDriver_CurrentFileBottom);
-registerOutputChannelDriver("open-files", OutputChannelDriver_OpenFiles);
-registerOutputChannelDriver("status-bar", OutputChannelDriver_StatusBar);
-registerOutputChannelDriver("clipboard", OutputChannelDriver_Clipboard);
-registerOutputChannelDriver("modal", OutputChannelDriver_Modal);
+// Register output channels
+registerOutputChannel("notification", OutputChannel_Notification);
+registerOutputChannel("current-file-caret", OutputChannel_CurrentFileCaret);
+registerOutputChannel("current-file-top", OutputChannel_CurrentFileTop);
+registerOutputChannel("current-file-bottom", OutputChannel_CurrentFileBottom);
+registerOutputChannel("open-files", OutputChannel_OpenFiles);
+registerOutputChannel("status-bar", OutputChannel_StatusBar);
+registerOutputChannel("clipboard", OutputChannel_Clipboard);
+registerOutputChannel("modal", OutputChannel_Modal);
 
 /**
  * This function is designed to be called after a 'Wait until finished' type of shell command finishes its execution.
@@ -76,7 +76,7 @@ export function handleBufferedOutput(
     ): void {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
-    const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
+    const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannels to use TShellCommand instead of the configuration objects directly.
 
     // Insert stdout and stderr to an object in a correct order
     let output: OutputStreams = {};
@@ -162,13 +162,13 @@ function handle_stream(
     if ("ignore" !== output_channel_name) {
         // The output should not be ignored.
 
-        // Check that an output driver exists
-        if (undefined === output_channel_drivers[output_channel_name]) {
-            throw new Error("No output driver found for channel '" + output_channel_name + "'.");
+        // Check that an output channel class exists
+        if (undefined === outputChannelClasses[output_channel_name]) {
+            throw new Error("No output channel class found for channel '" + output_channel_name + "'.");
         }
 
-        // Instatiate the driver
-        const driver: OutputChannelDriver = initializeOutputChannelDriver(
+        // Instatiate the channel
+        const outputChannel: OutputChannel = initializeOutputChannel(
             output_channel_name,
             plugin,
             t_shell_command,
@@ -177,7 +177,7 @@ function handle_stream(
         );
 
         // Perform handling the output
-        driver.handleBuffered(output, error_code);
+        outputChannel.handleBuffered(output, error_code);
     }
 }
 
@@ -185,15 +185,15 @@ export function startRealtimeOutputHandling(
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
-        outputChannels: OutputChannelCodes,
-    ): OutputChannelDrivers {
+        outputChannelCodes: OutputChannelCodes,
+    ): OutputChannels {
 
-    const drivers: OutputChannelDrivers = {};
+    const outputChannels: OutputChannels = {};
 
     // stdout
-    if ("ignore" !== outputChannels.stdout) {
-        drivers.stdout = initializeOutputChannelDriver(
-            outputChannels.stdout,
+    if ("ignore" !== outputChannelCodes.stdout) {
+        outputChannels.stdout = initializeOutputChannel(
+            outputChannelCodes.stdout,
             plugin,
             tShellCommand,
             shellCommandParsingResult,
@@ -202,9 +202,9 @@ export function startRealtimeOutputHandling(
     }
 
     // stderr
-    if ("ignore" !== outputChannels.stderr) {
-        drivers.stderr = initializeOutputChannelDriver(
-            outputChannels.stderr,
+    if ("ignore" !== outputChannelCodes.stderr) {
+        outputChannels.stderr = initializeOutputChannel(
+            outputChannelCodes.stderr,
             plugin,
             tShellCommand,
             shellCommandParsingResult,
@@ -212,15 +212,15 @@ export function startRealtimeOutputHandling(
         );
     }
 
-    return drivers;
+    return outputChannels;
 }
 
-export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
+export function getOutputChannelsOptionList(output_stream: OutputStream) {
     const list: {
         [key: string]: string;
     } = {ignore: "Ignore"};
-    for (const name in output_channel_drivers) {
-        const channelClass: typeof OutputChannelDriver = output_channel_drivers[name];
+    for (const name in outputChannelClasses) {
+        const channelClass: typeof OutputChannel = outputChannelClasses[name];
         // Check that the stream is suitable for the channel
         if (channelClass.acceptsOutputStream(output_stream)) {
             list[name] = channelClass.getTitle(output_stream);
@@ -229,19 +229,19 @@ export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
     return list;
 }
 
-export function getOutputChannelDrivers() {
-    return output_channel_drivers;
+export function getOutputChannelClasses() {
+    return outputChannelClasses;
 }
 
-export function initializeOutputChannelDriver(
+export function initializeOutputChannel(
         channelCode: OutputChannelCode,
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
         outputHandlingMode: OutputHandlingMode,
-    ): OutputChannelDriver {
+    ): OutputChannel {
     // @ts-ignore TODO: Find out how to tell TypeScript that a subclass is being instatiated instead of the abstract base class:
-    return new output_channel_drivers[channelCode](
+    return new outputChannelClasses[channelCode](
         plugin,
         tShellCommand,
         shellCommandParsingResult,
@@ -249,9 +249,9 @@ export function initializeOutputChannelDriver(
     );
 }
 
-function registerOutputChannelDriver(channelCode: OutputChannelCode, channelClass: typeof OutputChannelDriver) {
-    if (undefined !== output_channel_drivers[channelCode]) {
-        throw new Error("OutputChannelDriver named '" + channelCode + "' is already registered!");
+function registerOutputChannel(channelCode: OutputChannelCode, channelClass: typeof OutputChannel) {
+    if (undefined !== outputChannelClasses[channelCode]) {
+        throw new Error("OutputChannel named '" + channelCode + "' is already registered!");
     }
-    output_channel_drivers[channelCode] = channelClass;
+    outputChannelClasses[channelCode] = channelClass;
 }

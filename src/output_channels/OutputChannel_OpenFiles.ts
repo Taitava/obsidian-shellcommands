@@ -17,8 +17,8 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {OutputChannel} from "./OutputChannel";
+import {OutputStreams} from "./OutputChannelFunctions";
 import {OutputStream} from "./OutputChannelCode";
 import {
     EditorSelectionOrCaret,
@@ -35,7 +35,7 @@ import * as path from "path";
 import {EOL} from "os";
 import {debugLog} from "../Debug";
 
-export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
+export class OutputChannel_OpenFiles extends OutputChannel {
     protected static readonly title = "Open files";
 
     public static readonly hotkey_letter = "O";
@@ -69,7 +69,7 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
 
     private interpretFileOpeningDefinition(file_definition: string): Promise<void> {
         return new Promise((resolve, reject) => {
-            debugLog("OutputChannelDriver_OpenFiles: Interpreting file opening definition: " + file_definition);
+            debugLog("OutputChannel_OpenFiles: Interpreting file opening definition: " + file_definition);
             // Get parts that define different details about how the file should be opened
             const file_definition_parts = file_definition.split(":");
 

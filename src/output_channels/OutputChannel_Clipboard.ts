@@ -17,11 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {OutputChannel} from "./OutputChannel";
 import {copyToClipboard} from "../Common";
 import {EOL} from "os";
 
-export class OutputChannelDriver_Clipboard extends OutputChannelDriver {
+export class OutputChannel_Clipboard extends OutputChannel {
     protected static readonly title = "Clipboard";
 
     public static readonly hotkey_letter = "L";

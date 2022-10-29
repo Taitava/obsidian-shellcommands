@@ -17,12 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannelDriver} from "./OutputChannelDriver";
-import {OutputStreams} from "./OutputChannelDriverFunctions";
+import {OutputChannel} from "./OutputChannel";
+import {OutputStreams} from "./OutputChannelFunctions";
 import {OutputStream} from "./OutputChannelCode";
 
 
-export class OutputChannelDriver_Notification extends OutputChannelDriver {
+export class OutputChannel_Notification extends OutputChannel {
 
     public static getTitle(output_stream: OutputStream): string {
         switch (output_stream) {
