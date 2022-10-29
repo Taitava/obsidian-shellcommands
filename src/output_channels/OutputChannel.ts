@@ -31,3 +31,5 @@ export interface OutputChannels {
 export type OutputChannelOrder = "stdout-first" | "stderr-first";
 
 export type OutputStream = "stdout" | "stderr";
+
+export type OutputHandlingMode = "buffered" | "realtime";

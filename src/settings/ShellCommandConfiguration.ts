@@ -17,7 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannels, OutputChannelOrder} from "../output_channels/OutputChannel";
+import {
+    OutputChannels,
+    OutputChannelOrder,
+    OutputHandlingMode,
+} from "../output_channels/OutputChannel";
 import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
@@ -48,6 +52,7 @@ export interface ShellCommandConfiguration {
         stderr: string | null,
     };
     output_channel_order: OutputChannelOrder;
+    output_handling_mode: OutputHandlingMode;
     events: SC_EventConfigurations;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
@@ -80,6 +85,7 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
             stderr: null,
         },
         output_channel_order: "stdout-first",
+        output_handling_mode: "buffered",
         events: {},
         command_palette_availability: "enabled",
         preactions: [],

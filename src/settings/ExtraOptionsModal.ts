@@ -22,7 +22,12 @@ import {Setting, TextAreaComponent} from "obsidian";
 import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
-import {OutputChannel, OutputChannelOrder, OutputStream} from "../output_channels/OutputChannel";
+import {
+    OutputChannel,
+    OutputChannelOrder,
+    OutputHandlingMode,
+    OutputStream,
+} from "../output_channels/OutputChannel";
 import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
@@ -375,13 +380,30 @@ export class ExtraOptionsModal extends SC_Modal {
         this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
 
         // Output wrappers
-        this.newOutputWrapperSetting(container_element, "Output wrapper for stdout", "stdout", "Output wrappers can be used to surround output with predefined text, e.g. to put output into a code block.");
+        this.newOutputWrapperSetting(container_element, "Output wrapper for stdout", "stdout", "Output wrappers can be used to surround output with predefined text, e.g. to put output into a code block. Note: If 'Output mode' is 'Realtime', wrappers will probably appear multiple times in output!");
         this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
+
+        // Output handling mode
+        new Setting(container_element)
+            .setName("Output handling")
+            .setDesc("Set to 'Realtime' if your shell command runs for a long time AND you want output handling to start as soon as any outputted content is available. Output channels might be used multiple times during a single process. 'Wait until finished' postpones output handling until all output is received, and handles it as a single bunch. If uncertain, use the traditional 'Wait until finished'.")
+            .addDropdown(dropdown => dropdown
+                .addOptions({
+                    "buffered": "Wait until finished",
+                    "realtime": "Realtime (experimental)",
+                })
+                .setValue(this.t_shell_command.getConfiguration().output_handling_mode)
+                .onChange(async (newMode: string) => {
+                    this.t_shell_command.getConfiguration().output_handling_mode = newMode as OutputHandlingMode;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
 
         // Order of output channels
         new Setting(container_element)
             .setName("Order of stdout/stderr output")
-            .setDesc("When output contains both errors and normal output, which one should be presented first?")
+            .setDesc("When output contains both errors and normal output, which one should be presented first? (Only matters if 'Output handling' is 'Wait until finished').")
             .addDropdown(dropdown => dropdown
                 .addOptions({
                     "stdout-first": "Stdout first, then stderr.",
@@ -401,7 +423,7 @@ export class ExtraOptionsModal extends SC_Modal {
         // Ignore errors field
         new Setting(container_element)
             .setName("Ignore error codes")
-            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 0. Anything else will be removed.")
+            .setDesc("A comma separated list of numbers. If executing a shell command fails with one of these exit codes, no error message will be displayed, and the above stderr channel will be ignored. Stdout channel will still be used for stdout. Error codes must be integers and greater than or equal to 0. Anything else will be removed. Note: If 'Output handling' is 'Realtime', no exit code based ignoring can be done, as an error code is only received when a shell command process finishes.")
             .addText(text => text
                 .setValue(this.t_shell_command.getIgnoreErrorCodes().join(","))
                 .onChange(async (value) => {
