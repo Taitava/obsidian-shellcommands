@@ -58,7 +58,7 @@ registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
  * @param stdout
  * @param stderr
  * @param error_code TODO: Rename to exitCode everywhere in the codebase.
- * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from t_shell_command.
+ * @param output_channels
  */
 export function handleBufferedOutput(
         plugin: SC_Plugin,
