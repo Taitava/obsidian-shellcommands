@@ -255,6 +255,8 @@ export class ShellCommandExecutor {
                     this.plugin.newError("Shell command failed to execute. Error: " + error.message);
                 });
 
+                child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
+                child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
                 this.handleBufferedOutput(child_process, shell_command_parsing_result, outputChannels);
 
                 // Display a notification of the execution (if wanted).
@@ -280,8 +282,6 @@ export class ShellCommandExecutor {
         child_process.on("exit", (exitCode) => {
 
             // Get outputs
-            child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
-            child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
             const stdout: string = child_process.stdout.read() ?? "";
             let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
 
