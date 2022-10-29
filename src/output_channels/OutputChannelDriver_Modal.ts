@@ -150,6 +150,7 @@ class OutputModal extends SC_Modal {
                             this.plugin,
                             this.t_shell_command,
                             this.shell_command_parsing_result,
+                            "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
                         );
                         outputChannelDriver.handle(output_streams, this.exit_code);
                     };

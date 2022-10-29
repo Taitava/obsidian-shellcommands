@@ -20,7 +20,10 @@
 import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {OutputStream} from "./OutputChannel";
+import {
+    OutputHandlingMode,
+    OutputStream,
+} from "./OutputChannel";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {joinObjectProperties} from "../Common";
@@ -70,6 +73,7 @@ export abstract class OutputChannelDriver {
         protected plugin: SC_Plugin,
         protected t_shell_command: TShellCommand,
         protected shell_command_parsing_result: ShellCommandParsingResult,
+        protected outputHandlingMode: OutputHandlingMode,
     ) {
         this.app = plugin.app;
     }
@@ -81,22 +85,69 @@ export abstract class OutputChannelDriver {
      */
     protected abstract _handle(output: OutputStreams | string, error_code: number | null): void;
 
+    /**
+     * TODO: Rename to handleBuffered().
+     *
+     * @param output
+     * @param error_code
+     */
     public async handle(output: OutputStreams, error_code: number | null): Promise<void> {
+        this.requireHandlingMode("buffered");
+
         // Qualify output
         if (OutputChannelDriver.isOutputEmpty(output)) {
             // The output is empty
             if (!this.static().accepts_empty_output) {
                 // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
-                debugLog(this.constructor.name + ": Ignoring empty output.");
+                debugLog(this.constructor.name + ".handle(): Ignoring empty output.");
                 return;
             }
         }
-        debugLog(this.constructor.name + ": Handling output...");
+        debugLog(this.constructor.name + ".handle(): Handling output...");
 
         // Output is ok.
         // Handle it.
         this._handle(await this.prepare_output(output), error_code);
         debugLog("Output handling is done.")
+    }
+
+    public async handleRealtime(outputStreamName: OutputStream, outputContent: string) {
+        this.requireHandlingMode("realtime");
+
+        // Qualify output
+        if ("" === outputContent) {
+            // The output is empty
+            if (!this.static().accepts_empty_output) {
+                // This OutputChannelDriver does not accept empty output, i.e. empty output should be just ignored.
+                debugLog(this.constructor.name + ".handleRealtime(): Ignoring empty output.");
+                return;
+            }
+        }
+        debugLog(this.constructor.name + ".handleRealtime(): Handling output...");
+
+        // Output is ok.
+
+        // Wrap output (if needed)
+        const wrappedOutput = await this.wrapOutput(outputStreamName, outputContent);
+
+        // Determine data format. TODO: Change this so that subclasses will have a _handleRealtime() method that always takes a string.
+        if (this.static().combine_output_streams) {
+            // Handle as string
+            this._handle(wrappedOutput, null);
+        } else {
+            // Handle as an object
+            const outputContentInObject: OutputStreams = {};
+            outputContentInObject[outputStreamName] = outputContent;
+            this._handle(outputContentInObject, null);
+        }
+
+        debugLog("Output handling is done.");
+    }
+
+    private requireHandlingMode(requiredMode: OutputHandlingMode) {
+        if (this.outputHandlingMode !== requiredMode) {
+            throw new Error("this.outputHandlingMode must be '"+requiredMode+"'.");
+        }
     }
 
     public static acceptsOutputStream(output_stream: OutputStream) {
@@ -204,4 +255,9 @@ export abstract class OutputChannelDriver {
     public static() {
         return this.constructor as typeof OutputChannelDriver;
     }
+}
+
+export interface OutputChannelDrivers {
+    stdout?: OutputChannelDriver,
+    stderr?: OutputChannelDriver,
 }

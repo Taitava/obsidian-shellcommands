@@ -196,6 +196,10 @@ export class TShellCommand {
         return this.configuration.output_channels;
     }
 
+    public getOutputHandlingMode() {
+        return this.configuration.output_handling_mode;
+    }
+
     /**
      * Finds an output wrapper that should be used for the given OutputStream. Returns null, if no OutputWrapper should
      * be used.

@@ -29,7 +29,10 @@ import {
 } from "./Common";
 import * as path from "path";
 import * as fs from "fs";
-import {handleBufferedOutput} from "./output_channels/OutputChannelDriverFunctions";
+import {
+    handleBufferedOutput,
+    startRealtimeOutputHandling,
+} from "./output_channels/OutputChannelDriverFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
@@ -49,7 +52,9 @@ import {
 import {
     OutputChannel,
     OutputChannels,
+    OutputStream,
 } from "./output_channels/OutputChannel";
+import {Readable} from "stream";
 
 export class ShellCommandExecutor {
 
@@ -255,9 +260,23 @@ export class ShellCommandExecutor {
                     this.plugin.newError("Shell command failed to execute. Error: " + error.message);
                 });
 
+                // Define output encoding
                 child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
                 child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
-                this.handleBufferedOutput(child_process, shell_command_parsing_result, outputChannels);
+
+                // Hook into child_process for output handling
+                switch (this.t_shell_command.getOutputHandlingMode()) {
+                    case "buffered": {
+                        // Output will be buffered and handled as a single batch.
+                        this.handleBufferedOutput(child_process, shell_command_parsing_result, outputChannels);
+                        break;
+                    }
+
+                    case "realtime": {
+                        // Output will be handled on-the-go.
+                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputChannels);
+                    }
+                }
 
                 // Display a notification of the execution (if wanted).
                 if ("disabled" !== this.plugin.settings.execution_notification_mode) {
@@ -326,6 +345,27 @@ export class ShellCommandExecutor {
                 handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
             }
         });
+    }
+
+    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannels) {
+
+        // Prepare output channels
+        const outputChannelDrivers = startRealtimeOutputHandling(
+            this.plugin,
+            this.t_shell_command,
+            shell_command_parsing_result,
+            outputChannels,
+        );
+
+        // Define an output handler
+        const handleNewOutputContent = (outputStreamName: OutputStream, readableStream: Readable): void => {
+            const outputContent = readableStream.read() ?? "";
+            outputChannelDrivers[outputStreamName].handleRealtime(outputStreamName, outputContent);
+        };
+
+        // Hook into stdout's and stderr's output retrieving events
+        childProcess.stdout.on("readable", () => handleNewOutputContent("stdout", childProcess.stdout));
+        childProcess.stderr.on("readable", () => handleNewOutputContent("stderr", childProcess.stdout));
     }
 
     private getWorkingDirectory() {

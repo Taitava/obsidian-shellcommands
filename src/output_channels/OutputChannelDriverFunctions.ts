@@ -19,10 +19,15 @@
 
 import SC_Plugin from "../main";
 import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notification";
-import {OutputChannelDriver} from "./OutputChannelDriver";
+import {OutputChannelDriver, OutputChannelDrivers} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
 import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
-import {OutputChannel, OutputChannels, OutputStream} from "./OutputChannel";
+import {
+    OutputChannel,
+    OutputChannels,
+    OutputHandlingMode,
+    OutputStream,
+} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
@@ -168,11 +173,46 @@ function handle_stream(
             plugin,
             t_shell_command,
             shell_command_parsing_result,
+            "buffered",
         );
 
         // Perform handling the output
         driver.handle(output, error_code);
     }
+}
+
+export function startRealtimeOutputHandling(
+        plugin: SC_Plugin,
+        tShellCommand: TShellCommand,
+        shellCommandParsingResult: ShellCommandParsingResult,
+        outputChannels: OutputChannels,
+    ): OutputChannelDrivers {
+
+    const drivers: OutputChannelDrivers = {};
+
+    // stdout
+    if ("ignore" !== outputChannels.stdout) {
+        drivers.stdout = initializeOutputChannelDriver(
+            outputChannels.stdout,
+            plugin,
+            tShellCommand,
+            shellCommandParsingResult,
+            "realtime",
+        );
+    }
+
+    // stderr
+    if ("ignore" !== outputChannels.stderr) {
+        drivers.stderr = initializeOutputChannelDriver(
+            outputChannels.stderr,
+            plugin,
+            tShellCommand,
+            shellCommandParsingResult,
+            "realtime",
+        );
+    }
+
+    return drivers;
 }
 
 export function getOutputChannelDriversOptionList(output_stream: OutputStream) {
@@ -197,10 +237,16 @@ export function initializeOutputChannelDriver(
         channelCode: OutputChannel,
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
-        shellCommandParsingResult: ShellCommandParsingResult
+        shellCommandParsingResult: ShellCommandParsingResult,
+        outputHandlingMode: OutputHandlingMode,
     ): OutputChannelDriver {
     // @ts-ignore TODO: Find out how to tell TypeScript that a subclass is being instatiated instead of the abstract base class:
-    return new output_channel_drivers[channelCode](plugin, tShellCommand, shellCommandParsingResult);
+    return new output_channel_drivers[channelCode](
+        plugin,
+        tShellCommand,
+        shellCommandParsingResult,
+        outputHandlingMode,
+    );
 }
 
 function registerOutputChannelDriver(channelCode: OutputChannel, channelClass: typeof OutputChannelDriver) {
