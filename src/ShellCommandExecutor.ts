@@ -46,7 +46,10 @@ import {
     ExecutionNotificationMode,
     PlatformNames,
 } from "./settings/SC_MainSettings";
-import {OutputChannel} from "./output_channels/OutputChannel";
+import {
+    OutputChannel,
+    OutputChannels,
+} from "./output_channels/OutputChannel";
 
 export class ShellCommandExecutor {
 
@@ -252,55 +255,7 @@ export class ShellCommandExecutor {
                     this.plugin.newError("Shell command failed to execute. Error: " + error.message);
                 });
 
-                child_process.on("exit",(exitCode) => {
-
-                    // Get outputs
-                    child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
-                    child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
-                    const stdout: string = child_process.stdout.read() ?? "";
-                    let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
-
-                    // Did the shell command execute successfully?
-                    if (exitCode > 0) {
-                        // Some error occurred
-                        debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
-
-                        // Check if this error should be displayed to the user or not
-                        if (this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
-                            // The user has ignored this error.
-                            debugLog("User has ignored this error, so won't display it.");
-
-                            // Handle only stdout output stream
-                            stderr = "";
-                            exitCode = null; // TODO: consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
-                        } else {
-                            // The error can be shown.
-                            debugLog("Will display the error to user.");
-                        }
-
-                        // Handle at least stdout (and maybe stderr) output stream
-                        handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
-                    } else {
-                        // Probably no errors, but do one more check.
-
-                        // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
-                        if (stderr.length > 0) {
-                            // Check a special case: should error code 0 be ignored?
-                            if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
-                                // Exit code 0 is on the ignore list, so suppress stderr output.
-                                stderr = "";
-                                debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
-                            } else {
-                                debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
-                            }
-                        } else {
-                            debugLog("Shell command executed: No errors.");
-                        }
-
-                        // Handle output
-                        handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
-                    }
-                });
+                this.handleBufferedOutput(child_process, shell_command_parsing_result, outputChannels);
 
                 // Display a notification of the execution (if wanted).
                 if ("disabled" !== this.plugin.settings.execution_notification_mode) {
@@ -319,6 +274,58 @@ export class ShellCommandExecutor {
                 }
             }
         }
+    }
+
+    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannels) {
+        child_process.on("exit", (exitCode) => {
+
+            // Get outputs
+            child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
+            child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
+            const stdout: string = child_process.stdout.read() ?? "";
+            let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
+
+            // Did the shell command execute successfully?
+            if (exitCode > 0) {
+                // Some error occurred
+                debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
+
+                // Check if this error should be displayed to the user or not
+                if (this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
+                    // The user has ignored this error.
+                    debugLog("User has ignored this error, so won't display it.");
+
+                    // Handle only stdout output stream
+                    stderr = "";
+                    exitCode = null; // TODO: consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
+                } else {
+                    // The error can be shown.
+                    debugLog("Will display the error to user.");
+                }
+
+                // Handle at least stdout (and maybe stderr) output stream
+                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
+            } else {
+                // Probably no errors, but do one more check.
+
+                // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+                if (stderr.length > 0) {
+                    // Check a special case: should error code 0 be ignored?
+                    if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
+                        // Exit code 0 is on the ignore list, so suppress stderr output.
+                        stderr = "";
+                        debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                    } else {
+                        debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                    }
+                } else {
+                    debugLog("Shell command executed: No errors.");
+                }
+
+                // Handle output
+                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+            }
+        });
     }
 
     private getWorkingDirectory() {
