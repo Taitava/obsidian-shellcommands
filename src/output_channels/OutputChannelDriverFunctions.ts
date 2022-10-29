@@ -23,11 +23,11 @@ import {OutputChannelDriver, OutputChannelDrivers} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
 import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
 import {
-    OutputChannel,
-    OutputChannels,
+    OutputChannelCode,
+    OutputChannelCodes,
     OutputHandlingMode,
     OutputStream,
-} from "./OutputChannel";
+} from "./OutputChannelCode";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
@@ -72,7 +72,7 @@ export function handleBufferedOutput(
         stdout: string,
         stderr: string,
         error_code: number | null,
-        output_channels: OutputChannels
+        output_channels: OutputChannelCodes
     ): void {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
@@ -153,7 +153,7 @@ function handle_stream(
         plugin: SC_Plugin,
         t_shell_command: TShellCommand,
         shell_command_parsing_result: ShellCommandParsingResult,
-        output_channel_name: OutputChannel,
+        output_channel_name: OutputChannelCode,
         output: OutputStreams,
         error_code: number|null
     ) {
@@ -185,7 +185,7 @@ export function startRealtimeOutputHandling(
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
-        outputChannels: OutputChannels,
+        outputChannels: OutputChannelCodes,
     ): OutputChannelDrivers {
 
     const drivers: OutputChannelDrivers = {};
@@ -234,7 +234,7 @@ export function getOutputChannelDrivers() {
 }
 
 export function initializeOutputChannelDriver(
-        channelCode: OutputChannel,
+        channelCode: OutputChannelCode,
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
@@ -249,7 +249,7 @@ export function initializeOutputChannelDriver(
     );
 }
 
-function registerOutputChannelDriver(channelCode: OutputChannel, channelClass: typeof OutputChannelDriver) {
+function registerOutputChannelDriver(channelCode: OutputChannelCode, channelClass: typeof OutputChannelDriver) {
     if (undefined !== output_channel_drivers[channelCode]) {
         throw new Error("OutputChannelDriver named '" + channelCode + "' is already registered!");
     }

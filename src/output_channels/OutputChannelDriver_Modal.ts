@@ -24,7 +24,7 @@ import {
     OutputStreams,
 } from "./OutputChannelDriverFunctions";
 import {ButtonComponent, Setting, TextAreaComponent} from "obsidian";
-import {OutputChannel, OutputStream} from "./OutputChannel";
+import {OutputChannelCode, OutputStream} from "./OutputChannelCode";
 import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_Modal} from "../SC_Modal";
@@ -127,7 +127,7 @@ class OutputModal extends SC_Modal {
             .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
         ;
         const output_channel_drivers = getOutputChannelDrivers();
-        Object.getOwnPropertyNames(output_channel_drivers).forEach((output_channel_name: OutputChannel) => {
+        Object.getOwnPropertyNames(output_channel_drivers).forEach((output_channel_name: OutputChannelCode) => {
             const outputChannelDriverClass = output_channel_drivers[output_channel_name];
 
             // Ensure this channel is not excluded by checking that is has a hotkey defined.

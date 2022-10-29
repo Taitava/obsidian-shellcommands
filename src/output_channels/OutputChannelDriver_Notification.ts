@@ -19,7 +19,7 @@
 
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputStreams} from "./OutputChannelDriverFunctions";
-import {OutputStream} from "./OutputChannel";
+import {OutputStream} from "./OutputChannelCode";
 
 
 export class OutputChannelDriver_Notification extends OutputChannelDriver {

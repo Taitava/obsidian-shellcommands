@@ -28,7 +28,7 @@ import {
 } from "./OutputWrapper";
 import {debugLog} from "../../Debug";
 import {getIDGenerator} from "../../IDGenerator";
-import {OutputStream} from "../../output_channels/OutputChannel";
+import {OutputStream} from "../../output_channels/OutputChannelCode";
 import {OutputWrapperSettingsModal} from "./OutputWrapperSettingsModal";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 

@@ -50,10 +50,10 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {
-    OutputChannel,
-    OutputChannels,
+    OutputChannelCode,
+    OutputChannelCodes,
     OutputStream,
-} from "./output_channels/OutputChannel";
+} from "./output_channels/OutputChannelCode";
 import {Readable} from "stream";
 
 export class ShellCommandExecutor {
@@ -69,7 +69,7 @@ export class ShellCommandExecutor {
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
      */
-    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannel) {
+    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannelCode) {
         const preactions = this.t_shell_command.getPreactions();
 
         // Does an already started ParsingProcess exist?
@@ -178,7 +178,7 @@ export class ShellCommandExecutor {
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
-    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannel) {
+    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode) {
         const working_directory = this.getWorkingDirectory();
 
         // Define output channels
@@ -297,7 +297,7 @@ export class ShellCommandExecutor {
         }
     }
 
-    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannels) {
+    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannelCodes) {
         child_process.on("exit", (exitCode) => {
 
             // Get outputs
@@ -347,7 +347,7 @@ export class ShellCommandExecutor {
         });
     }
 
-    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannels) {
+    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannelCodes) {
 
         // Prepare output channels
         const outputChannelDrivers = startRealtimeOutputHandling(

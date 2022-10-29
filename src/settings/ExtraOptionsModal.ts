@@ -23,11 +23,11 @@ import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelDriversOptionList} from "../output_channels/OutputChannelDriverFunctions";
 import {
-    OutputChannel,
+    OutputChannelCode,
     OutputChannelOrder,
     OutputHandlingMode,
     OutputStream,
-} from "../output_channels/OutputChannel";
+} from "../output_channels/OutputChannelCode";
 import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
@@ -662,7 +662,7 @@ export class ExtraOptionsModal extends SC_Modal {
             .addDropdown(dropdown => dropdown
                 .addOptions(output_channel_options)
                 .setValue(this.t_shell_command.getOutputChannels()[output_stream_name])
-                .onChange(async (value: OutputChannel) => {
+                .onChange(async (value: OutputChannelCode) => {
                     this.t_shell_command.getConfiguration().output_channels[output_stream_name] = value;
                     await this.plugin.saveSettings();
                 })

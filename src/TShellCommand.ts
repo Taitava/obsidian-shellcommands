@@ -49,7 +49,7 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
-import {OutputStream} from "./output_channels/OutputChannel";
+import {OutputStream} from "./output_channels/OutputChannelCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 
 export interface TShellCommandContainer {

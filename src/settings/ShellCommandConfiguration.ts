@@ -18,10 +18,10 @@
  */
 
 import {
-    OutputChannels,
+    OutputChannelCodes,
     OutputChannelOrder,
     OutputHandlingMode,
-} from "../output_channels/OutputChannel";
+} from "../output_channels/OutputChannelCode";
 import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
@@ -46,7 +46,7 @@ export interface ShellCommandConfiguration {
     icon: string | null;
     confirm_execution: boolean;
     ignore_error_codes: number[];
-    output_channels: OutputChannels,
+    output_channels: OutputChannelCodes,
     output_wrappers: {
         stdout: string | null,
         stderr: string | null,

@@ -23,7 +23,7 @@ import {OutputStreams} from "./OutputChannelDriverFunctions";
 import {
     OutputHandlingMode,
     OutputStream,
-} from "./OutputChannel";
+} from "./OutputChannelCode";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {joinObjectProperties} from "../Common";
