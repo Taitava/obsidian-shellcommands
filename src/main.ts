@@ -96,6 +96,9 @@ export default class SC_Plugin extends Plugin {
 
 	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
 
+    /** @see getOutputStatusBarElement() */
+    private statusBarElement: HTMLElement;
+
 	public async onload() {
 		debugLog('loading plugin');
 
@@ -649,6 +652,17 @@ export default class SC_Plugin extends Plugin {
 			await (leaf.view as CustomVariableView).updateContent();
 		}
 	}
+
+    /**
+     * Used by OutputChannelDriver_StatusBar.
+     * TODO: Make it possible to have multiple status bar elements. It should be a shell command level setting, where a shell command opts for either to use their own status bar element, or a common one.
+     */
+    public getOutputStatusBarElement() {
+        if (!this.statusBarElement) {
+            this.statusBarElement = this.addStatusBarItem();
+        }
+        return this.statusBarElement;
+    }
 }
 
 

@@ -26,8 +26,6 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
 
     public hotkey_letter = "S";
 
-    private status_bar_element: HTMLElement;
-
     /**
      * Combine stdout and stderr (in case both of them happen to be present).
      * @protected
@@ -35,7 +33,7 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
     protected combine_output_streams = EOL + EOL;
 
     public _handle(output_message: string) {
-        const status_bar_element = this.getStatusBarElement();
+        const status_bar_element = this.plugin.getOutputStatusBarElement();
 
         output_message = output_message.trim();
 
@@ -46,12 +44,5 @@ export class OutputChannelDriver_StatusBar extends OutputChannelDriver {
         const output_message_lines = output_message.split(/(\r\n|\r|\n)/u);
         const last_output_line = output_message_lines[output_message_lines.length - 1];
         status_bar_element.setText(last_output_line);
-    }
-
-    private getStatusBarElement() {
-        if (!this.status_bar_element) {
-            this.status_bar_element = this.plugin.addStatusBarItem();
-        }
-        return this.status_bar_element;
     }
 }
