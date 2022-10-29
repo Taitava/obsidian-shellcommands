@@ -29,7 +29,7 @@ import {
 } from "./Common";
 import * as path from "path";
 import * as fs from "fs";
-import {handleShellCommandOutput} from "./output_channels/OutputChannelDriverFunctions";
+import {handleBufferedOutput} from "./output_channels/OutputChannelDriverFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
 import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
@@ -279,7 +279,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle at least stdout (and maybe stderr) output stream
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
+                        handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
                     } else {
                         // Probably no errors, but do one more check.
 
@@ -298,7 +298,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle output
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                        handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                     }
                 });
 
