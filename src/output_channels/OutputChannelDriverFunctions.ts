@@ -22,7 +22,7 @@ import {OutputChannelDriver_Notification} from "./OutputChannelDriver_Notificati
 import {OutputChannelDriver} from "./OutputChannelDriver";
 import {OutputChannelDriver_CurrentFileCaret} from "./OutputChannelDriver_CurrentFileCaret";
 import {OutputChannelDriver_CurrentFileTop} from "./OutputChannelDriver_CurrentFileTop";
-import {OutputChannel, OutputStream} from "./OutputChannel";
+import {OutputChannel, OutputChannels, OutputStream} from "./OutputChannel";
 import {OutputChannelDriver_StatusBar} from "./OutputChannelDriver_StatusBar";
 import {OutputChannelDriver_CurrentFileBottom} from "./OutputChannelDriver_CurrentFileBottom";
 import {OutputChannelDriver_Clipboard} from "./OutputChannelDriver_Clipboard";
@@ -59,7 +59,7 @@ registerOutputChannelDriver("modal", new OutputChannelDriver_Modal());
  * @param error_code TODO: Rename to exitCode everywhere in the codebase.
  * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from t_shell_command.
  */
-export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null, overriding_output_channel?: OutputChannel) {
+export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult, stdout: string, stderr: string, error_code: number | null, output_channels: OutputChannels) {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
     const shell_command_configuration = t_shell_command.getConfiguration(); // TODO: Refactor OutputChannelDrivers to use TShellCommand instead of the configuration objects directly.
@@ -99,22 +99,6 @@ export function handleShellCommandOutput(plugin: SC_Plugin, t_shell_command: TSh
         output = {
             "stdout": "",
         };
-    }
-
-    // Check if output channels should be overridden?
-    let output_channels: {
-        stdout: OutputChannel,
-        stderr: OutputChannel,
-    };
-    if (overriding_output_channel) {
-        // Override output channels
-        output_channels = {
-            "stdout": overriding_output_channel,
-            "stderr": overriding_output_channel,
-        };
-    } else {
-        // Use the normal output channels.
-        output_channels = shell_command_configuration.output_channels;
     }
 
     // Should stderr be processed same time with stdout?

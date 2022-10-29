@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannel, OutputChannelOrder} from "../output_channels/OutputChannel";
+import {OutputChannels, OutputChannelOrder} from "../output_channels/OutputChannel";
 import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
@@ -42,10 +42,7 @@ export interface ShellCommandConfiguration {
     icon: string | null;
     confirm_execution: boolean;
     ignore_error_codes: number[];
-    output_channels: {
-        stdout: OutputChannel,
-        stderr: OutputChannel,
-    },
+    output_channels: OutputChannels,
     output_wrappers: {
         stdout: string | null,
         stderr: string | null,

@@ -23,6 +23,11 @@
  */
 export type OutputChannel = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files";
 
+export interface OutputChannels {
+    stdout: OutputChannel,
+    stderr: OutputChannel,
+};
+
 export type OutputChannelOrder = "stdout-first" | "stderr-first";
 
 export type OutputStream = "stdout" | "stderr";

@@ -173,6 +173,16 @@ export class ShellCommandExecutor {
     private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannel) {
         const working_directory = this.getWorkingDirectory();
 
+        // Define output channels
+        let outputChannels = this.t_shell_command.getOutputChannels();
+        if (overriding_output_channel) {
+            // Ignore the shell command's normal channels and use temporarily something else.
+           outputChannels = {
+               'stdout': overriding_output_channel,
+               'stderr': overriding_output_channel,
+           }
+        }
+
         // Check that the shell command is not empty
         const shell_command = shell_command_parsing_result.shell_command.trim();
         if (!shell_command.length) {
@@ -254,7 +264,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle at least stdout (and maybe stderr) output stream
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, overriding_output_channel);
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
                     } else {
                         // Probably no errors, but do one more check.
 
@@ -273,7 +283,7 @@ export class ShellCommandExecutor {
                         }
 
                         // Handle output
-                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, overriding_output_channel); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
+                        handleShellCommandOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a driver for stderr).
                     }
                 });
 
