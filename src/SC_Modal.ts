@@ -22,6 +22,8 @@ import SC_Plugin from "./main";
 
 export abstract class SC_Modal extends Modal {
 
+    private _isOpen = false;
+
     protected constructor (
         protected readonly plugin: SC_Plugin
     ) {
@@ -29,6 +31,7 @@ export abstract class SC_Modal extends Modal {
     }
 
     public onOpen(): void {
+        this._isOpen = true;
 
         // Make the modal scrollable if it has more content than what fits in the screen.
         this.modalEl.addClass("SC-scrollable");
@@ -48,6 +51,10 @@ export abstract class SC_Modal extends Modal {
                 }
             });
         }
+    }
+
+    public isOpen() {
+        return this._isOpen;
     }
 
     protected setTitle(title: string) {

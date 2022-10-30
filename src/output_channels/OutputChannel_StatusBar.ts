@@ -27,21 +27,38 @@ export class OutputChannel_StatusBar extends OutputChannel {
     public static readonly hotkey_letter = "S";
 
     /**
+     * All received output cumulatively. Subsequent handlings will then use the whole output, not just new parts.
+     * Only used in "realtime" mode.
+     *
+     * @private
+     */
+    private realtimeContentBuffer = "";
+
+    /**
      * Combine stdout and stderr (in case both of them happen to be present).
      * @protected
      */
     protected static readonly combine_output_streams = EOL + EOL;
 
-    public _handleBuffered(output_message: string) {
+    public _handleBuffered(outputContent: string) {
+        this.setStatusBarContent(outputContent);
+    }
+
+    public _handleRealtime(outputContent: string): void {
+        this.realtimeContentBuffer += outputContent;
+        this.setStatusBarContent(this.realtimeContentBuffer);
+    }
+
+    private setStatusBarContent(outputContent: string) {
         const status_bar_element = this.plugin.getOutputStatusBarElement();
 
-        output_message = output_message.trim();
+        outputContent = outputContent.trim();
 
         // Full output (shown when hovering with mouse)
-        status_bar_element.setAttr("aria-label", output_message);
+        status_bar_element.setAttr("aria-label", outputContent);
 
         // Show last line permanently.
-        const output_message_lines = output_message.split(/(\r\n|\r|\n)/u);
+        const output_message_lines = outputContent.split(/(\r\n|\r|\n)/u);
         const last_output_line = output_message_lines[output_message_lines.length - 1];
         status_bar_element.setText(last_output_line);
     }

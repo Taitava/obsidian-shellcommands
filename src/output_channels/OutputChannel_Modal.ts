@@ -35,34 +35,98 @@ import {EOL} from "os";
 export class OutputChannel_Modal extends OutputChannel {
     protected static readonly title = "Ask after execution";
 
+    private modal: OutputModal;
+
+    protected initialize(): void {
+        // Initialize a modal (but don't open yet)
+        this.modal = new OutputModal(this.plugin,  this.t_shell_command, this.shell_command_parsing_result);
+    }
+
     protected _handleBuffered(outputs: OutputStreams, error_code: number | null): void {
-        // Initialize a modal and pass outputs
-        const modal = new OutputModal(this.plugin, outputs, this.t_shell_command, this.shell_command_parsing_result);
+        // Pass outputs to modal
+        this.modal.setOutputContents(outputs);
 
         // Define a possible error code to be shown on the modal.
         if (error_code !== null) {
-            modal.setExitCode(error_code);
+            this.modal.setExitCode(error_code);
         }
 
         // Done
-        modal.open();
+        this.modal.open();
+    }
+
+    protected _handleRealtime(outputContent: string, outputStreamName: OutputStream): void {
+        this.modal.addOutputContent(outputStreamName, outputContent);
+        if (!this.modal.isOpen()) {
+            this.modal.open();
+        }
+    }
+
+    protected _endRealtime(exitCode: number) {
+        // Pass exitCode to the modal
+        this.modal.setExitCode(exitCode);
     }
 
 }
 
 class OutputModal extends SC_Modal {
 
-    private readonly outputs: OutputStreams;
     private readonly t_shell_command: TShellCommand;
     private readonly shell_command_parsing_result: ShellCommandParsingResult;
     private exit_code: number = null;
 
-    constructor(plugin: SC_Plugin, outputs: OutputStreams, t_shell_command: TShellCommand, shell_command_parsing_result: ShellCommandParsingResult) {
+    // Fields and HTML elements
+    private outputFieldsContainer: HTMLElement;
+    private readonly outputFields: {[key: string]: Setting} = {};
+    private exitCodeElement: HTMLElement;
+
+    constructor(
+        plugin: SC_Plugin,
+        t_shell_command: TShellCommand,
+        shell_command_parsing_result: ShellCommandParsingResult
+    ) {
         super(plugin);
 
-        this.outputs = outputs;
         this.t_shell_command = t_shell_command;
         this.shell_command_parsing_result = shell_command_parsing_result;
+
+        this.createOutputFields();
+    }
+
+    /**
+     * Called when doing "buffered" output handling.
+     *
+     * @param outputs
+     */
+    public setOutputContents(outputs: OutputStreams) {
+        Object.getOwnPropertyNames(outputs).forEach((outputStreamName: OutputStream) => {
+            const outputField: Setting = this.outputFields[outputStreamName];
+
+            // Set field value
+            const textareaComponent = outputField.components.first() as TextAreaComponent;
+            const outputContent = outputs[outputStreamName];
+            textareaComponent.setValue(outputContent);
+
+            // Make field visible (if it's not already)
+            outputField.settingEl.matchParent(".SC-hide").removeClass("SC-hide");
+        });
+    }
+
+    /**
+     * Called when doing "realtime" output handling.
+     *
+     * @param outputStreamName
+     * @param outputContent
+     */
+    public addOutputContent(outputStreamName: OutputStream, outputContent: string) {
+        const outputField: Setting = this.outputFields[outputStreamName];
+
+        // Update field value
+        const textareaComponent = outputField.components.first() as TextAreaComponent;
+        textareaComponent.setValue(textareaComponent.getValue() + outputContent);
+
+        // Make field visible (if it's not already)
+        outputField.settingEl.matchParent(".SC-hide")?.removeClass("SC-hide");
     }
 
     public onOpen(): void {
@@ -76,21 +140,16 @@ class OutputModal extends SC_Modal {
         this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin SC-wrappable"}}); // no margin so that exit code will be close.
 
         // Exit code
+        this.exitCodeElement = this.modalEl.createEl("small", {text: "Executing...", attr: {style: "font-weight: bold;"}}); // Show "Executing..." before an actual exit code is received.
         if (this.exit_code !== null) {
-            this.modalEl.createEl("small", {text: "Exit code: " + this.exit_code});
+            this.displayExitCode();
         }
 
-        // Outputs
-        let is_first = true;
-        Object.getOwnPropertyNames(this.outputs).forEach((output_stream: OutputStream) => {
-            const output_setting = this.createOutputField(output_stream, this.outputs[output_stream]);
+        // Output fields
+        this.modalEl.insertAdjacentElement("beforeend",this.outputFieldsContainer);
 
-            // Focus on the first output field
-            if (is_first) {
-                output_setting.controlEl.find("textarea").focus();
-                is_first = false;
-            }
-        });
+        // Focus on the first output field
+        this.focusFirstField();
 
         // A tip about selecting text.
         this.modalEl.createDiv({
@@ -99,29 +158,56 @@ class OutputModal extends SC_Modal {
         });
     }
 
-    private createOutputField(output_stream: OutputStream, output: string) {
+    private createOutputFields() {
+        // Create a parent-less container. onOpen() will place it in the correct place.
+        this.outputFieldsContainer = document.createElement('div');
+
+        // Create field containers in correct order
+        let stdoutFieldContainer: HTMLDivElement;
+        let stderrFieldContainer: HTMLDivElement;
+        switch (this.t_shell_command.getOutputChannelOrder()) {
+            case "stdout-first": {
+                stdoutFieldContainer = this.outputFieldsContainer.createDiv();
+                stderrFieldContainer = this.outputFieldsContainer.createDiv();
+                break;
+            }
+            case "stderr-first": {
+                stderrFieldContainer = this.outputFieldsContainer.createDiv();
+                stdoutFieldContainer = this.outputFieldsContainer.createDiv();
+                break;
+            }
+        }
+
+        // Create fields
+        this.outputFields.stdout = this.createOutputField("stdout", stdoutFieldContainer);
+        this.outputFields.stderr = this.createOutputField("stderr", stderrFieldContainer);
+
+        // Hide the fields' containers at the beginning. They will be shown when content is added.
+        stdoutFieldContainer.addClass("SC-hide");
+        stderrFieldContainer.addClass("SC-hide");
+    }
+
+    private createOutputField(output_stream: OutputStream, containerElement: HTMLElement) {
         let output_textarea: TextAreaComponent;
 
-        this.modalEl.createEl("hr", {attr: {class: "SC-no-margin"}});
+        containerElement.createEl("hr", {attr: {class: "SC-no-margin"}});
 
         // Output stream name
-        new Setting(this.modalEl)
+        new Setting(containerElement)
             .setName(output_stream)
             .setHeading()
             .setClass("SC-no-bottom-border")
         ;
 
         // Textarea
-        const textarea_setting = new Setting(this.modalEl)
-            .addTextArea(textarea => output_textarea = textarea
-                .setValue(output)
-            )
+        const textarea_setting = new Setting(containerElement)
+            .addTextArea(textarea => output_textarea = textarea)
         ;
         textarea_setting.infoEl.addClass("SC-hide"); // Make room for the textarea by hiding the left column.
         textarea_setting.settingEl.addClass("SC-output-channel-modal-textarea-container", "SC-no-top-border");
 
         // Add controls for redirecting the output to another channel.
-        const redirect_setting = new Setting(this.modalEl)
+        const redirect_setting = new Setting(containerElement)
             .setDesc("Redirect:")
             .setClass("SC-no-top-border")
             .setClass("SC-output-channel-modal-redirection-buttons-container") // I think this calls actually HTMLDivElement.addClass(), so it should not override the previous .setClass().
@@ -212,6 +298,30 @@ class OutputModal extends SC_Modal {
      */
     public setExitCode(exit_code: number) {
         this.exit_code = exit_code;
+
+        // Try to show the exit code.
+        if (this.isOpen()) {
+            // displayExistCode() can only be called if onOpen() has been called before.
+            // If onOpen() will be called later, it will call displayExitCode() itself when it sees that this.exit_code is defined.
+            this.displayExitCode();
+        }
+    }
+
+    private displayExitCode() {
+        this.exitCodeElement.innerText = "Exit code: " + this.exit_code.toString();
+    }
+
+    private focusFirstField() {
+        switch (this.t_shell_command.getOutputChannelOrder()) {
+            case "stdout-first": {
+                this.outputFields.stdout.controlEl.find("textarea").focus();
+                break;
+            }
+            case "stderr-first": {
+                this.outputFields.stderr.controlEl.find("textarea").focus();
+                break;
+            }
+        }
     }
 
     protected approve(): void {

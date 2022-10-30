@@ -73,6 +73,19 @@ export abstract class OutputChannel {
         protected outputHandlingMode: OutputHandlingMode,
     ) {
         this.app = plugin.app;
+        this.initialize();
+    }
+
+    /**
+     * Sub classes can do here initializations that are common to both handleBuffered() and handleRealtime().
+     *
+     * Inits could be done in contructor(), too, but this is cleaner - no need to deal with parameters and no need for a super()
+     * call.
+     *
+     * @protected
+     */
+    protected initialize() {
+        // Do nothing by default.
     }
 
     /**
@@ -102,6 +115,8 @@ export abstract class OutputChannel {
         debugLog("Output handling is done.")
     }
 
+    protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): void;
+
     public async handleRealtime(outputStreamName: OutputStream, outputContent: string) {
         this.requireHandlingMode("realtime");
 
@@ -121,18 +136,26 @@ export abstract class OutputChannel {
         // Wrap output (if needed)
         const wrappedOutput = await this.wrapOutput(outputStreamName, outputContent);
 
-        // Determine data format. TODO: Change this so that subclasses will have a _handleRealtime() method that always takes a string.
-        if (this.static().combine_output_streams) {
-            // Handle as string
-            this._handleBuffered(wrappedOutput, null);
-        } else {
-            // Handle as an object
-            const outputContentInObject: OutputStreams = {};
-            outputContentInObject[outputStreamName] = outputContent;
-            this._handleBuffered(outputContentInObject, null);
-        }
+        // Handle it.
+        this._handleRealtime(wrappedOutput, outputStreamName);
 
         debugLog("Output handling is done.");
+    }
+
+    protected _endRealtime(exitCode: number): void {
+        // Do nothing by default.
+    }
+
+    /**
+     * When a shell command is executed in "realtime" mode, a separate ending call should be made in order to pass an
+     * exit code to the OutputChannel. Some OutputChannels display the code to user, but most do not.
+     *
+     * @param exitCode
+     */
+    public endRealtime(exitCode: number) {
+        this.requireHandlingMode("realtime");
+
+        this._endRealtime(exitCode);
     }
 
     private requireHandlingMode(requiredMode: OutputHandlingMode) {

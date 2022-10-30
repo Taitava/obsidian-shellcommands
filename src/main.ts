@@ -604,8 +604,11 @@ export default class SC_Plugin extends Plugin {
 		return this.manifest.name;
 	}
 
-	public newError(message: string) {
-		new Notice(message, this.settings.error_message_duration * 1000); // * 1000 = convert seconds to milliseconds.
+	public newError(
+        message: string,
+        timeout: number = this.getErrorMessageDurationMs(),
+    ) {
+		return new Notice(message, timeout);
 	}
 
 	public newErrors(messages: string[]) {
@@ -621,10 +624,18 @@ export default class SC_Plugin extends Plugin {
      */
 	public newNotification(
         message: string,
-        timeout = this.settings.notification_message_duration * 1000, // * 1000 = convert seconds to milliseconds.
+        timeout = this.getNotificationMessageDurationMs(),
     ) {
 		return new Notice(message, timeout);
 	}
+
+    public getNotificationMessageDurationMs(): number {
+        return this.settings.notification_message_duration * 1000; // * 1000 = convert seconds to milliseconds.
+    }
+
+    public getErrorMessageDurationMs(): number {
+        return this.settings.error_message_duration * 1000; // * 1000 = convert seconds to milliseconds.
+    }
 
 	public getDefaultShell(): string {
 		const operating_system = getOperatingSystem();

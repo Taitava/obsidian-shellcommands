@@ -366,6 +366,17 @@ export class ShellCommandExecutor {
         // Hook into stdout's and stderr's output retrieving events
         childProcess.stdout.on("readable", () => handleNewOutputContent("stdout", childProcess.stdout));
         childProcess.stderr.on("readable", () => handleNewOutputContent("stderr", childProcess.stderr));
+
+        // Hook into exit events
+        childProcess.on("exit", (exitCode: number, signal: string /* TODO: Pass signal to channels so it can be shown to users in the future */) => {
+            // Call stdout channel's .endRealtime()
+            outputChannels.stdout.endRealtime(exitCode);
+
+            // Call stderr channel's .endRealtime() - but prevent calling if it's the same channel as stdout, as there's no need to repeat the call.
+            if (outputChannelCodes["stderr"] !== outputChannelCodes["stdout"]) {
+                outputChannels.stderr.endRealtime(exitCode);
+            }
+        });
     }
 
     private getWorkingDirectory() {

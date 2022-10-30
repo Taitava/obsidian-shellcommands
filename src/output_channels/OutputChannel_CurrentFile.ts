@@ -31,7 +31,15 @@ export abstract class OutputChannel_CurrentFile extends OutputChannel {
      */
     protected static readonly combine_output_streams = " ";
 
-    protected _handleBuffered(output_message: string) {
+    protected _handleBuffered(outputContent: string): void {
+        this.handle(outputContent);
+    }
+
+    protected _handleRealtime(outputContent: string): void {
+        this.handle(outputContent);
+    }
+
+    private handle(output_message: string) {
         const editor = getEditor(this.app);
         const view = getView(this.app);
 

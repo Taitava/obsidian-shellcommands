@@ -49,21 +49,28 @@ export class OutputChannel_OpenFiles extends OutputChannel {
     protected _handleBuffered(output: OutputStreams, error_code: number | null): void {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
+            this.handle(output[output_stream_name]);
+        }
+    }
 
-            // Read file definitions. Usually there's just one, but there can be many. Definitions are separated by newline
-            // characters. Each file definition defines one file to be opened.
-            const file_definitions_string = output[output_stream_name].trim(); // Contains at least file name(s), and MAYBE: a caret position, new pane option, and view state
-            const file_definitions = file_definitions_string.split(/[\r\n]+/u);
+    protected _handleRealtime(outputContent: string): void {
+        this.handle(outputContent);
+    }
 
-            // Iterate all file definitions that should be opened.
-            let opening_pipeline = Promise.resolve();
-            for (const file_definition of file_definitions) {
-                // Chain each file opening to happen one after another. If one file opening fails for whatever reason, it
-                // is ok to continue to open the next file. This is why .finally() is used instead of .then().
-                opening_pipeline = opening_pipeline.finally(() => {
-                    return this.interpretFileOpeningDefinition(file_definition);
-                });
-            }
+    private handle(outputContent: string) {
+        // Read file definitions. Usually there's just one, but there can be many. Definitions are separated by newline
+        // characters. Each file definition defines one file to be opened.
+        const file_definitions_string = outputContent.trim(); // Contains at least file name(s), and MAYBE: a caret position, new pane option, and view state
+        const file_definitions = file_definitions_string.split(/[\r\n]+/u);
+
+        // Iterate all file definitions that should be opened.
+        let opening_pipeline = Promise.resolve();
+        for (const file_definition of file_definitions) {
+            // Chain each file opening to happen one after another. If one file opening fails for whatever reason, it
+            // is ok to continue to open the next file. This is why .finally() is used instead of .then().
+            opening_pipeline = opening_pipeline.finally(() => {
+                return this.interpretFileOpeningDefinition(file_definition);
+            });
         }
     }
 

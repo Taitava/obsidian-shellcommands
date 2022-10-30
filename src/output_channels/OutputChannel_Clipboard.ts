@@ -27,15 +27,32 @@ export class OutputChannel_Clipboard extends OutputChannel {
     public static readonly hotkey_letter = "L";
 
     /**
+     * All received output cumulatively. Subsequent handlings will then use the whole output, not just new parts.
+     * Only used in "realtime" mode.
+     *
+     * @private
+     */
+    private realtimeContentBuffer = "";
+
+    /**
      * There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, they
      * will be joined together with " " as a separator.
      * @protected
      */
-    protected static readonly combine_output_streams = " ";
+    protected static readonly combine_output_streams = " "; // TODO: Change to "" as there should be no extra space between stdout and stderr. Compare it to the terminal: AFAIK there is no separation between stdout and stderr outputs, just that typically each output ends with a newline.
 
-    protected _handleBuffered(output_message: string) {
-        copyToClipboard(output_message);
+    protected _handleBuffered(outputContent: string) {
+        copyToClipboard(outputContent);
+        this.notify(outputContent);
+    }
 
+    protected _handleRealtime(outputContent: string): void {
+        this.realtimeContentBuffer += outputContent;
+        copyToClipboard(this.realtimeContentBuffer);
+        this.notify(this.realtimeContentBuffer);
+    }
+
+    private notify(output_message: string) {
         if (this.plugin.settings.output_channel_clipboard_also_outputs_to_notification) {
             // Notify the user so they know a) what was copied to clipboard, and b) that their command has finished execution.
             this.plugin.newNotification("Copied to clipboard: " + EOL + output_message + EOL + EOL + "(Notification can be turned off in settings.)");
