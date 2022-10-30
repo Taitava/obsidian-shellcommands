@@ -203,13 +203,19 @@ export function startRealtimeOutputHandling(
 
     // stderr
     if ("ignore" !== outputChannelCodes.stderr) {
-        outputChannels.stderr = initializeOutputChannel(
-            outputChannelCodes.stderr,
-            plugin,
-            tShellCommand,
-            shellCommandParsingResult,
-            "realtime",
-        );
+        if (outputChannelCodes.stderr === outputChannelCodes.stdout) {
+            // stderr should use the same channel instance as stdout.
+            outputChannels.stderr = outputChannels.stdout;
+        } else {
+            // stderr uses a different channel than stdout.
+            outputChannels.stderr = initializeOutputChannel(
+                outputChannelCodes.stderr,
+                plugin,
+                tShellCommand,
+                shellCommandParsingResult,
+                "realtime",
+            );
+        }
     }
 
     return outputChannels;
