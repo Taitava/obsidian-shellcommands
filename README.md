@@ -1,4 +1,4 @@
-<div style="margin-top: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
+<div style="margin-top: -20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
 
 # Shell commands plugin for Obsidian
 
