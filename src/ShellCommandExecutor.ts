@@ -358,9 +358,11 @@ export class ShellCommandExecutor {
         );
 
         // Define an output handler
-        const handleNewOutputContent = (outputStreamName: OutputStream, readableStream: Readable): void => {
+        const handleNewOutputContent = async (outputStreamName: OutputStream, readableStream: Readable) => {
+            readableStream.pause(); // Don't emit new events while the current handling is in progress. (I think) it might cause a race condition where a simultaneous handling could overwrite another handling's data.
             const outputContent = readableStream.read() ?? "";
-            outputChannels[outputStreamName].handleRealtime(outputStreamName, outputContent);
+            await outputChannels[outputStreamName].handleRealtime(outputStreamName, outputContent);
+            readableStream.resume(); // Can emit new events again.
         };
 
         // Hook into stdout's and stderr's output retrieving events
