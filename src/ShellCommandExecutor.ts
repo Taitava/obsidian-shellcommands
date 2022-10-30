@@ -365,7 +365,7 @@ export class ShellCommandExecutor {
 
         // Hook into stdout's and stderr's output retrieving events
         childProcess.stdout.on("readable", () => handleNewOutputContent("stdout", childProcess.stdout));
-        childProcess.stderr.on("readable", () => handleNewOutputContent("stderr", childProcess.stdout));
+        childProcess.stderr.on("readable", () => handleNewOutputContent("stderr", childProcess.stderr));
     }
 
     private getWorkingDirectory() {
