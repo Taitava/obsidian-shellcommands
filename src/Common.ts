@@ -317,8 +317,8 @@ export function escapeMarkdownLinkCharacters(content: string) {
     return content.replace(/[\\()\[\]]/gu, "\\$&");
 }
 
-export function copyToClipboard(text: string) {
-    clipboard.writeText(text);
+export function copyToClipboard(text: string): Promise<void> {
+    return clipboard.writeText(text);
 }
 
 export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<string> {

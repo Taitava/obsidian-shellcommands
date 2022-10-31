@@ -41,14 +41,14 @@ export class OutputChannel_Clipboard extends OutputChannel {
      */
     protected static readonly combine_output_streams = " "; // TODO: Change to "" as there should be no extra space between stdout and stderr. Compare it to the terminal: AFAIK there is no separation between stdout and stderr outputs, just that typically each output ends with a newline.
 
-    protected _handleBuffered(outputContent: string) {
-        copyToClipboard(outputContent);
+    protected async _handleBuffered(outputContent: string): Promise<void> {
+        await copyToClipboard(outputContent);
         this.notify(outputContent);
     }
 
-    protected _handleRealtime(outputContent: string): void {
+    protected async _handleRealtime(outputContent: string): Promise<void> {
         this.realtimeContentBuffer += outputContent;
-        copyToClipboard(this.realtimeContentBuffer);
+        await copyToClipboard(this.realtimeContentBuffer);
         this.notify(this.realtimeContentBuffer);
     }
 

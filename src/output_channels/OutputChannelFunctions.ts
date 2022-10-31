@@ -149,14 +149,14 @@ export function handleBufferedOutput(
     }
 }
 
-function handle_stream(
+async function handle_stream(
         plugin: SC_Plugin,
         t_shell_command: TShellCommand,
         shell_command_parsing_result: ShellCommandParsingResult,
         output_channel_name: OutputChannelCode,
         output: OutputStreams,
         error_code: number|null
-    ) {
+    ): Promise<void> {
 
     // Check if the output should be ignored
     if ("ignore" !== output_channel_name) {
@@ -177,7 +177,7 @@ function handle_stream(
         );
 
         // Perform handling the output
-        outputChannel.handleBuffered(output, error_code);
+        await outputChannel.handleBuffered(output, error_code);
     }
 }
 

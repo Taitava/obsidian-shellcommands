@@ -31,11 +31,11 @@ export abstract class OutputChannel_CurrentFile extends OutputChannel {
      */
     protected static readonly combine_output_streams = " ";
 
-    protected _handleBuffered(outputContent: string): void {
+    protected async _handleBuffered(outputContent: string): Promise<void> {
         this.handle(outputContent);
     }
 
-    protected _handleRealtime(outputContent: string): void {
+    protected async _handleRealtime(outputContent: string): Promise<void> {
         this.handle(outputContent);
     }
 

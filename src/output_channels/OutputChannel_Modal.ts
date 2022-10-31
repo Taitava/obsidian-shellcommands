@@ -42,7 +42,7 @@ export class OutputChannel_Modal extends OutputChannel {
         this.modal = new OutputModal(this.plugin,  this.t_shell_command, this.shell_command_parsing_result);
     }
 
-    protected _handleBuffered(outputs: OutputStreams, error_code: number | null): void {
+    protected async _handleBuffered(outputs: OutputStreams, error_code: number | null): Promise<void> {
         // Pass outputs to modal
         this.modal.setOutputContents(outputs);
 
@@ -55,7 +55,7 @@ export class OutputChannel_Modal extends OutputChannel {
         this.modal.open();
     }
 
-    protected _handleRealtime(outputContent: string, outputStreamName: OutputStream): void {
+    protected async _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void> {
         this.modal.addOutputContent(outputStreamName, outputContent);
         if (!this.modal.isOpen()) {
             this.modal.open();

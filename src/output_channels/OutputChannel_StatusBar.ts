@@ -40,11 +40,11 @@ export class OutputChannel_StatusBar extends OutputChannel {
      */
     protected static readonly combine_output_streams = EOL + EOL;
 
-    public _handleBuffered(outputContent: string) {
+    public async _handleBuffered(outputContent: string): Promise<void> {
         this.setStatusBarContent(outputContent);
     }
 
-    public _handleRealtime(outputContent: string): void {
+    public async _handleRealtime(outputContent: string): Promise<void> {
         this.realtimeContentBuffer += outputContent;
         this.setStatusBarContent(this.realtimeContentBuffer);
     }

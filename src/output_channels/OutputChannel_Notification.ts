@@ -66,7 +66,7 @@ export class OutputChannel_Notification extends OutputChannel {
         }
     }
 
-    protected _handleBuffered(output: OutputStreams, error_code: number | null): void {
+    protected async _handleBuffered(output: OutputStreams, error_code: number | null): Promise<void> {
 
         // Iterate output streams.
         // There can be both "stdout" and "stderr" present at the same time, or just one of them. If both are present, two
@@ -78,7 +78,7 @@ export class OutputChannel_Notification extends OutputChannel {
         }
     }
 
-    protected _handleRealtime(outputContent: string, outputStreamName: OutputStream): void {
+    protected async _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void> {
 
         // Append new content
         this.realtimeContentBuffers[outputStreamName] += outputContent;

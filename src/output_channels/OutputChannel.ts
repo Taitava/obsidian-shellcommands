@@ -93,7 +93,7 @@ export abstract class OutputChannel {
      * @param error_code
      * @protected
      */
-    protected abstract _handleBuffered(output: OutputStreams | string, error_code: number | null): void;
+    protected abstract _handleBuffered(output: OutputStreams | string, error_code: number | null): Promise<void>;
 
     public async handleBuffered(output: OutputStreams, error_code: number | null): Promise<void> {
         this.requireHandlingMode("buffered");
@@ -111,11 +111,11 @@ export abstract class OutputChannel {
 
         // Output is ok.
         // Handle it.
-        this._handleBuffered(await this.prepare_output(output), error_code);
+        await this._handleBuffered(await this.prepare_output(output), error_code);
         debugLog("Output handling is done.")
     }
 
-    protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): void;
+    protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void>;
 
     public async handleRealtime(outputStreamName: OutputStream, outputContent: string) {
         this.requireHandlingMode("realtime");
@@ -137,7 +137,7 @@ export abstract class OutputChannel {
         const wrappedOutput = await this.wrapOutput(outputStreamName, outputContent);
 
         // Handle it.
-        this._handleRealtime(wrappedOutput, outputStreamName);
+        await this._handleRealtime(wrappedOutput, outputStreamName);
 
         debugLog("Output handling is done.");
     }
