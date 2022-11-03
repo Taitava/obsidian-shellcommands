@@ -22,10 +22,11 @@
  */
 
 import {getEditor} from "../Common";
-import {IParameters, Variable} from "./Variable";
+import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {EditorVariable} from "./EditorVariable";
 
-export class Variable_CaretPosition extends Variable {
+export class Variable_CaretPosition extends EditorVariable {
     public variable_name = "caret_position";
     public help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
 
@@ -45,14 +46,12 @@ export class Variable_CaretPosition extends Variable {
     protected generateValue(): Promise<string|null> {
         return new Promise((resolve) => {
             // Check that we are able to get an editor
-            const editor = getEditor(this.app);
-            if (null === editor) {
+            if (!this.requireEditor()) {
                 // Nope.
-                this.newErrorMessage("Could not get an editor instance! Please raise an issue in GitHub.");
                 return resolve(null);
             }
 
-            const position = editor.getCursor('to');
+            const position = this.editor.getCursor('to');
             const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
             const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
 
