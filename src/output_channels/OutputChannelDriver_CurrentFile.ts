@@ -37,7 +37,7 @@ export abstract class OutputChannelDriver_CurrentFile extends OutputChannelDrive
 
         if (null === editor) {
             // For some reason it's not possible to get an editor.
-            this.plugin.newError("Could not get an editor instance! Please raise an issue in GitHub. The command output is in the next error box:");
+            this.plugin.newError("Could not get an editor instance! Please create a discussion in GitHub. The command output is in the next error box:");
             this.plugin.newError(output_message); // Good to output it at least some way.
             debugLog("OutputChannelDriver_CurrentFile: Could not get an editor instance.")
             return;
