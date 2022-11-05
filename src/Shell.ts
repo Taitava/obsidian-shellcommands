@@ -47,8 +47,18 @@ export function getUsersDefaultShell(): string {
 
 export function isShellSupported(shell: string) {
     const shell_file_name = extractFileName(shell);
-    const supported_shells = PlatformShells[getOperatingSystem()];
-    for (const supported_shell_path in supported_shells) {
+    const supported_shells = Object.getOwnPropertyNames(PlatformShells[getOperatingSystem()]);
+
+    // Linux and macOS: Add the ambiguous 'sh' as a supported shell. It's not present in PlatformShells, because it's
+    // not desired to be an explicitly selectable shell as it's uncertain, which shell it actually points to. But have
+    // it supported when it comes from the "Use system default (sh)" option.
+    if (!isWindows()) {
+        // The platform is either Linux or macOS.
+        // Add 'sh' support.
+        supported_shells.push("sh");
+    }
+
+    for (const supported_shell_path of supported_shells) {
         // Check that the shell file names match. It doesn't matter in which directory the shell is located in.
         if (extractFileName(supported_shell_path).toLowerCase() === shell_file_name.toLowerCase()) {
             // The shell can be considered to be supported.

@@ -30,6 +30,7 @@ export function escapeValue(shell: string, raw_value: string) {
         case "bash":
         case "dash":
         case "zsh":
+        case "sh": // May sometimes appear when using the "Use system default (sh)" option as a default shell.
             escaper = new ShEscaper(raw_value);
             break;
         case "powershell.exe":  // PowerShell 5 is only available for Windows.
