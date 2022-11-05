@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
+### To be Added
+ - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
+
 ## [0.16.0] - 2022-09-25
 
 ### Added
