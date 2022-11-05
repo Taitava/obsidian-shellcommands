@@ -385,7 +385,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Output handling mode
         new Setting(container_element)
-            .setName("Output handling")
+            .setName("Output handling mode")
             .setDesc("Set to 'Realtime' if your shell command runs for a long time AND you want output handling to start as soon as any outputted content is available. Output channels might be used multiple times during a single process. 'Wait until finished' postpones output handling until all output is received, and handles it as a single bunch. If uncertain, use the traditional 'Wait until finished'.")
             .addDropdown(dropdown => dropdown
                 .addOptions({
