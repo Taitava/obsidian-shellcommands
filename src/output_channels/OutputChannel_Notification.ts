@@ -29,33 +29,26 @@ export class OutputChannel_Notification extends OutputChannel {
      * All received output cumulatively. Subsequent handlings will then use the whole output, not just new parts.
      * Only used in "realtime" mode.
      *
-     * Grouped by output stream so that stdout and stderr won't mix up.
-     *
      * @private
      */
-    private realtimeContentBuffers: {
-        stdout: string,
-        stderr: string,
-    } = {
-        stdout: "",
-        stderr: "",
-    };
+    private realtimeContentBuffer = "";
 
     /**
-     * Holds a Notice instances so that the message can be updated during subsequent handlings.
+     * Holds a Notice instance so that the message can be updated during subsequent handlings.
      * Only used in "realtime" mode.
      *
      * @private
      */
-    private realtimeNotices: {
-        stdout?: Notice,
-        stderr?: Notice,
-    } = {};
+    private realtimeNotice: Notice;
 
-    private realtimeNoticeTimeouts: {
-        stdout?: number,
-        stderr?: number,
-    } = {};
+    private realtimeNoticeTimeout: number;
+
+    /**
+     * A flag for indicating that if any stderr output has happened, all subsequent handlings should format the output
+     * Notice message with error formatting (i.e. show [...] at the beginning of the message).
+     * @private
+     */
+    private realtimeHasStderrOccurred = false;
 
     public static getTitle(output_stream: OutputStream): string {
         switch (output_stream) {
@@ -81,36 +74,38 @@ export class OutputChannel_Notification extends OutputChannel {
     protected async _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void> {
 
         // Append new content
-        this.realtimeContentBuffers[outputStreamName] += outputContent;
+        this.realtimeContentBuffer += outputContent;
+
+        // Raise a flag if seeing 'stderr' output.
+        if ("stderr" === outputStreamName) {
+            this.realtimeHasStderrOccurred = true;
+        }
 
         // Does a Notice exist already?
-        if (this.realtimeNotices[outputStreamName]) {
+        if (this.realtimeNotice) {
             // Reuse an existing Notice.
 
-            // Should output be formatted?
+            // Should output be formatted as an error message?
             let updatedMessage: string;
-            switch (outputStreamName) {
-                case "stdout":
-                    // Use output as-is
-                    updatedMessage = this.realtimeContentBuffers[outputStreamName];
-                    break;
-                case "stderr":
-                    // Apply error formatting to output
-                    updatedMessage = OutputChannel_Notification.formatErrorMessage(this.realtimeContentBuffers[outputStreamName], null);
-                    break;
+            if (this.realtimeHasStderrOccurred) {
+                // Apply error formatting to output
+                updatedMessage = OutputChannel_Notification.formatErrorMessage(this.realtimeContentBuffer, null);
+            } else {
+                // Use output as-is
+                updatedMessage = this.realtimeContentBuffer;
             }
 
             // Use the updated output
-            this.realtimeNotices[outputStreamName].setMessage(updatedMessage);
+            this.realtimeNotice.setMessage(updatedMessage);
 
             // Update notice hiding timeout
-            window.clearTimeout(this.realtimeNoticeTimeouts[outputStreamName]); // Remove old timeout
+            window.clearTimeout(this.realtimeNoticeTimeout); // Remove old timeout
             this.handleNotificationHiding(outputStreamName); // Add new timeout
         } else {
             // Create a new Notice.
-            this.realtimeNotices[outputStreamName] = this.notify(
-                outputStreamName,
-                this.realtimeContentBuffers[outputStreamName],
+            this.realtimeNotice = this.notify(
+                this.realtimeHasStderrOccurred ? "stderr" : "stdout",
+                this.realtimeContentBuffer,
                 null,
                 0, // Use 0 timeout so that the Notice won't hide automatically.
             );
@@ -121,11 +116,13 @@ export class OutputChannel_Notification extends OutputChannel {
     }
 
     protected _endRealtime(exitCode: number): void {
-        // If an stderr Notice exists, update it with the exitCode
-        this.realtimeNotices["stderr"]?.setMessage(OutputChannel_Notification.formatErrorMessage(
-            this.realtimeContentBuffers["stderr"],
-            exitCode,
-        ));
+        if (exitCode !== 0 || this.realtimeHasStderrOccurred) {
+            // If a Notice exists, update it with the exitCode
+            this.realtimeNotice?.setMessage(OutputChannel_Notification.formatErrorMessage(
+                this.realtimeContentBuffer,
+                exitCode,
+            ));
+        }
     }
 
     /**
@@ -168,12 +165,12 @@ export class OutputChannel_Notification extends OutputChannel {
                 normalTimeout = this.plugin.getErrorMessageDurationMs();
                 break;
         }
-        this.realtimeNoticeTimeouts[outputStreamName] = window.setTimeout(
+        this.realtimeNoticeTimeout = window.setTimeout(
             () => {
                 // Hide the Notice
-                this.realtimeNotices[outputStreamName].hide();
-                this.realtimeNotices[outputStreamName] = undefined;
-                this.realtimeNoticeTimeouts[outputStreamName] = undefined;
+                this.realtimeNotice.hide();
+                this.realtimeNotice = undefined;
+                this.realtimeNoticeTimeout = undefined;
             },
             normalTimeout,
         );
@@ -181,12 +178,12 @@ export class OutputChannel_Notification extends OutputChannel {
         // Subscribe to Notice's click event.
         // @ts-ignore Notice.noticeEl belongs to Obsidian's PRIVATE API, and it may change without a prior notice. Only
         // define the click listener if noticeEl exists and is an HTMLElement.
-        const noticeEl = this.realtimeNotices[outputStreamName].noticeEl;
+        const noticeEl = this.realtimeNotice.noticeEl;
         if (undefined !== noticeEl && noticeEl instanceof HTMLElement) {
             noticeEl.onClickEvent(() => {
-                window.clearTimeout(this.realtimeNoticeTimeouts[outputStreamName]); // Make sure timeout will not accidentally try to later hide an already hidden Notification.
-                this.realtimeNoticeTimeouts[outputStreamName] = undefined;
-                this.realtimeNotices[outputStreamName] = undefined; // Give a signal to _handleRealtime() that if new output comes, a new Notice should be created.
+                window.clearTimeout(this.realtimeNoticeTimeout); // Make sure timeout will not accidentally try to later hide an already hidden Notification.
+                this.realtimeNoticeTimeout = undefined;
+                this.realtimeNotice = undefined; // Give a signal to _handleRealtime() that if new output comes, a new Notice should be created.
             });
         }
     }
