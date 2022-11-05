@@ -12,7 +12,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ## [0.16.0] - 2022-09-25
 
-## Added
+### Added
 - [Output wrappers (#262)](https://github.com/Taitava/obsidian-shellcommands/issues/262).
 - [Show a notification when executing shell commands (#261)](https://github.com/Taitava/obsidian-shellcommands/issues/261).
 - New variables:
@@ -20,7 +20,7 @@ Features that are in development, but are not released yet. Does not include stu
   - [{{note_content}} / {{event_note_content}} (#77)](https://github.com/Taitava/obsidian-shellcommands/issues/77)
 - [Show an error message if a shell command is too long to execute (#269)](https://github.com/Taitava/obsidian-shellcommands/issues/269).
 
-## Changed
+### Changed
 - [Internal: Refactor variable parsing to become asynchronous (#265)](https://github.com/Taitava/obsidian-shellcommands/issues/265).
   - Should not cause any visible changes per se, but allows creating certain new variables that are dependent on asynchronous Obsidian API methods, such as the above-mentioned `{{note_content}}`.
 
