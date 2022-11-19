@@ -13,6 +13,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
  - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
+ - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
  - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
 
 ## [0.16.0] - 2022-09-25
