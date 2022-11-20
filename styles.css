@@ -185,8 +185,8 @@ p.SC-prompt-dry-run-notice {
 }
 
 /* Style the buttons that are used to open the tab content */
-.SC-tab-header-button {
-    background-color: unset !important;
+button.SC-tab-header-button {
+    background-color: unset;
     border: none;
     outline: none;
     cursor: pointer;
@@ -196,9 +196,9 @@ p.SC-prompt-dry-run-notice {
 }
 
 /* Create an active/current tablink class */
-.SC-tab-header-button.SC-tab-active,
-.SC-tab-header-button:hover {
-    background-color: var(--background-modifier-border) !important;
+button.SC-tab-header-button.SC-tab-active,
+button.SC-tab-header-button:hover {
+    background-color: var(--background-modifier-border);
 }
 
 .SC-tab-header-button svg {
