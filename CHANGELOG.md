@@ -16,6 +16,12 @@ Features that are in development, but are not released yet. Does not include stu
  - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
  - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
 
+### To be Changed
+ - [Fix layout glitches that came via Obsidian 0.16.0 (#264)](https://github.com/Taitava/obsidian-shellcommands/issues/264)
+   - Settings: Tried to revert tab system layout to how it was.
+   - Modals: Tried to revert width to make them wide again.
+   - Even thought the issue title mentions _fixing_, there's actually [just one bug fix](https://github.com/Taitava/obsidian-shellcommands/commit/6f0b290e16c82f6e3fb214c4dc8aaaedabb4fa35), others are _change_ level modifications.
+
 ## [0.16.0] - 2022-09-25
 
 ### Added
