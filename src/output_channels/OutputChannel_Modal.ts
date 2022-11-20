@@ -39,7 +39,12 @@ export class OutputChannel_Modal extends OutputChannel {
 
     protected initialize(): void {
         // Initialize a modal (but don't open yet)
-        this.modal = new OutputModal(this.plugin,  this.t_shell_command, this.shell_command_parsing_result);
+        this.modal = new OutputModal(
+            this.plugin,
+            this.t_shell_command,
+            this.shell_command_parsing_result,
+            this.processTerminator,
+        );
     }
 
     protected async _handleBuffered(outputs: OutputStreams, error_code: number | null): Promise<void> {
@@ -62,7 +67,15 @@ export class OutputChannel_Modal extends OutputChannel {
         }
     }
 
-    protected _endRealtime(exitCode: number) {
+    /**
+     * @param exitCode Can be null if user terminated the process by clicking a button. In other places exitCode can be null if process is still running, but here that cannot be the case.
+     *
+     * @protected
+     */
+    protected _endRealtime(exitCode: number | null) {
+        // Delete terminator button as the process is already ended.
+        this.modal.removeProcessTerminatorButton();
+
         // Pass exitCode to the modal
         this.modal.setExitCode(exitCode);
     }
@@ -79,11 +92,13 @@ class OutputModal extends SC_Modal {
     private outputFieldsContainer: HTMLElement;
     private readonly outputFields: {[key: string]: Setting} = {};
     private exitCodeElement: HTMLElement;
+    private processTerminatorButtonContainer: HTMLElement;
 
     constructor(
         plugin: SC_Plugin,
         t_shell_command: TShellCommand,
-        shell_command_parsing_result: ShellCommandParsingResult
+        shell_command_parsing_result: ShellCommandParsingResult,
+        private processTerminator: (() => void) | null,
     ) {
         super(plugin);
 
@@ -139,8 +154,17 @@ class OutputModal extends SC_Modal {
         // Shell command preview
         this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin SC-wrappable"}}); // no margin so that exit code will be close.
 
-        // Exit code
-        this.exitCodeElement = this.modalEl.createEl("small", {text: "Executing...", attr: {style: "font-weight: bold;"}}); // Show "Executing..." before an actual exit code is received.
+        // Container for terminating button and exit code
+        const processResultContainer = this.modalEl.createDiv();
+
+        // 'Request to terminate the process' icon button
+        if (this.processTerminator) {
+            this.processTerminatorButtonContainer = processResultContainer.createEl('span');
+            this.plugin.createRequestTerminatingButton(this.processTerminatorButtonContainer, this.processTerminator);
+        }
+
+        // Exit code (put on same line with process terminator button, if exists)
+        this.exitCodeElement = processResultContainer.createEl("small", {text: "Executing...", attr: {style: "font-weight: bold;"}}); // Show "Executing..." before an actual exit code is received.
         if (this.exit_code !== null) {
             this.displayExitCode();
         }
@@ -237,6 +261,7 @@ class OutputModal extends SC_Modal {
                             this.t_shell_command,
                             this.shell_command_parsing_result,
                             "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
+                            this.processTerminator,
                         );
                         outputChannel.handleBuffered(output_streams, this.exit_code);
                     };
@@ -291,19 +316,30 @@ class OutputModal extends SC_Modal {
         return textarea_setting;
     }
 
+    public removeProcessTerminatorButton() {
+        if (this.processTerminatorButtonContainer) {
+            this.processTerminatorButtonContainer.remove();
+        }
+    }
+
     /**
      * Should be called only if an exit code was received.
      *
-     * @param exit_code
+     * @param exit_code Can be null if user terminated the process by clicking a button.
      */
-    public setExitCode(exit_code: number) {
+    public setExitCode(exit_code: number | null) {
         this.exit_code = exit_code;
 
         // Try to show the exit code.
         if (this.isOpen()) {
-            // displayExistCode() can only be called if onOpen() has been called before.
-            // If onOpen() will be called later, it will call displayExitCode() itself when it sees that this.exit_code is defined.
-            this.displayExitCode();
+            if (null === this.exit_code) {
+                // User has terminated the process, so there's no exit code even though the process has ended.
+                this.exitCodeElement.innerText = "User terminated";
+            } else {
+                // displayExistCode() can only be called if onOpen() has been called before.
+                // If onOpen() will be called later, it will call displayExitCode() itself when it sees that this.exit_code is defined.
+                this.displayExitCode();
+            }
         }
     }
 

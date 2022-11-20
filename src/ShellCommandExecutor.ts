@@ -55,6 +55,7 @@ import {
     OutputStream,
 } from "./output_channels/OutputChannelCode";
 import {Readable} from "stream";
+import {Notice} from "obsidian";
 
 export class ShellCommandExecutor {
 
@@ -264,6 +265,11 @@ export class ShellCommandExecutor {
                 child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
                 child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
 
+                // Define a terminator
+                const processTerminator = () => {
+                    child_process.kill("SIGTERM");
+                };
+
                 // Hook into child_process for output handling
                 switch (this.t_shell_command.getOutputHandlingMode()) {
                     case "buffered": {
@@ -274,13 +280,13 @@ export class ShellCommandExecutor {
 
                     case "realtime": {
                         // Output will be handled on-the-go.
-                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputChannels);
+                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputChannels, processTerminator);
                     }
                 }
 
                 // Display a notification of the execution (if wanted).
                 if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode);
+                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode, processTerminator);
                 }
             } catch (exception) {
                 // An exception has happened.
@@ -347,7 +353,12 @@ export class ShellCommandExecutor {
         });
     }
 
-    private handleRealtimeOutput(childProcess: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannelCodes: OutputChannelCodes) {
+    private handleRealtimeOutput(
+            childProcess: ChildProcess,
+            shell_command_parsing_result: ShellCommandParsingResult,
+            outputChannelCodes: OutputChannelCodes,
+            processTerminator: (() => void) | null,
+        ) {
 
         // Prepare output channels
         const outputChannels = startRealtimeOutputHandling(
@@ -355,6 +366,7 @@ export class ShellCommandExecutor {
             this.t_shell_command,
             shell_command_parsing_result,
             outputChannelCodes,
+            processTerminator,
         );
 
         // Define an output handler
@@ -454,22 +466,39 @@ export class ShellCommandExecutor {
      * @param child_process
      * @param shell_command
      * @param execution_notification_mode
+     * @param processTerminator Will be called if user clicks 'Request to terminate the process' icon.
      * @private
      */
-    private showExecutionNotification(child_process: ChildProcess, shell_command: string, execution_notification_mode: ExecutionNotificationMode) {
+    private showExecutionNotification(
+        child_process: ChildProcess,
+        shell_command: string,
+        execution_notification_mode: ExecutionNotificationMode,
+        processTerminator: () => void,
+    ) {
+        const createRequestTerminatingButton = (notice: Notice) => {
+            // @ts-ignore Notice.noticeEl belongs to Obsidian's PRIVATE API, and it may change without a prior notice. Only
+            // create the button if noticeEl exists and is an HTMLElement.
+            const noticeEl = notice.noticeEl;
+            if (undefined !== noticeEl && noticeEl instanceof HTMLElement) {
+                this.plugin.createRequestTerminatingButton(noticeEl, processTerminator);
+            }
+        };
+
         const execution_notification_message = "Executing: " + (this.t_shell_command.getAlias() || shell_command);
         switch (execution_notification_mode) {
             case "quick": {
                 // Retrieve the timeout from settings defined by a user.
-                this.plugin.newNotification(execution_notification_message, undefined);
+                const processNotification = this.plugin.newNotification(execution_notification_message, undefined);
+                createRequestTerminatingButton(processNotification);
                 break;
             }
             case "permanent": {
                 // Show the notification until the process ends.
-                const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+                const processNotification = this.plugin.newNotification(execution_notification_message, 0);
+                createRequestTerminatingButton(processNotification);
 
                 // Hide the notification when the process finishes.
-                child_process.on("exit", () => process_notification.hide());
+                child_process.on("exit", () => processNotification.hide());
                 break;
             }
             case "if-long": {
@@ -479,10 +508,11 @@ export class ShellCommandExecutor {
                     if (null === child_process.exitCode) {
                         // The process is still running.
                         // Display notification.
-                        const process_notification = this.plugin.newNotification(execution_notification_message, 0);
+                        const processNotification = this.plugin.newNotification(execution_notification_message, 0);
+                        createRequestTerminatingButton(processNotification);
 
                         // Hide the notification when the process finishes.
-                        child_process.on("exit", () => process_notification.hide());
+                        child_process.on("exit", () => processNotification.hide());
                     }
                 }, 2000); // If you change the timeout, change documentation, too!
                 break;

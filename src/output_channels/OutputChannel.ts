@@ -66,11 +66,19 @@ export abstract class OutputChannel {
     // Instance specific properties
     protected app: App;
 
+    /**
+     * @param plugin
+     * @param t_shell_command
+     * @param shell_command_parsing_result
+     * @param outputHandlingMode
+     * @param processTerminator Will be called if user decides to end the process. Set to null if the process has already ended.
+     */
     public constructor(
         protected plugin: SC_Plugin,
         protected t_shell_command: TShellCommand,
         protected shell_command_parsing_result: ShellCommandParsingResult,
         protected outputHandlingMode: OutputHandlingMode,
+        protected processTerminator: (() => void) | null,
     ) {
         this.app = plugin.app;
         this.initialize();

@@ -113,15 +113,31 @@ export class OutputChannel_Notification extends OutputChannel {
             // Create a timeout for hiding the Notice
             this.handleNotificationHiding(outputStreamName);
         }
+
+        // Terminating button
+        // @ts-ignore Notice.noticeEl belongs to Obsidian's PRIVATE API, and it may change without a prior notice. Only
+        // create the button if noticeEl exists and is an HTMLElement.
+        const noticeEl = this.realtimeNotice.noticeEl;
+        if (undefined !== noticeEl && noticeEl instanceof HTMLElement) {
+            this.plugin.createRequestTerminatingButton(noticeEl, this.processTerminator);
+        }
     }
 
-    protected _endRealtime(exitCode: number): void {
+    protected _endRealtime(exitCode: number | null): void {
         if (exitCode !== 0 || this.realtimeHasStderrOccurred) {
             // If a Notice exists, update it with the exitCode
             this.realtimeNotice?.setMessage(OutputChannel_Notification.formatErrorMessage(
                 this.realtimeContentBuffer,
-                exitCode,
+                exitCode, // If exitCode is null, it means user terminated the process, and it will show up as "[...]". It's ok, it indicates that no exit code was received.
             ));
+        }
+
+        // Remove terminating button
+        // @ts-ignore Notice.noticeEl belongs to Obsidian's PRIVATE API, and it may change without a prior notice. Only
+        // create the button if noticeEl exists and is an HTMLElement.
+        const noticeEl = this.realtimeNotice?.noticeEl;
+        if (undefined !== noticeEl && noticeEl instanceof HTMLElement) {
+            noticeEl.find(".SC-icon-terminate-process")?.remove(); // ? = Only try to remove if the button exists. It does not exist if .setMessage() was called above as it overwrites all content in the Notice.
         }
     }
 

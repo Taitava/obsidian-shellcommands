@@ -167,13 +167,14 @@ async function handle_stream(
             throw new Error("No output channel class found for channel '" + output_channel_name + "'.");
         }
 
-        // Instatiate the channel
+        // Instantiate the channel
         const outputChannel: OutputChannel = initializeOutputChannel(
             output_channel_name,
             plugin,
             t_shell_command,
             shell_command_parsing_result,
             "buffered",
+            null, // "Buffered" output handling does not use a terminator, as the process has already ended.
         );
 
         // Perform handling the output
@@ -186,6 +187,7 @@ export function startRealtimeOutputHandling(
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
         outputChannelCodes: OutputChannelCodes,
+        processTerminator: (() => void) | null,
     ): OutputChannels {
 
     const outputChannels: OutputChannels = {};
@@ -198,6 +200,7 @@ export function startRealtimeOutputHandling(
             tShellCommand,
             shellCommandParsingResult,
             "realtime",
+            processTerminator,
         );
     }
 
@@ -214,6 +217,7 @@ export function startRealtimeOutputHandling(
                 tShellCommand,
                 shellCommandParsingResult,
                 "realtime",
+                processTerminator,
             );
         }
     }
@@ -245,6 +249,7 @@ export function initializeOutputChannel(
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
         outputHandlingMode: OutputHandlingMode,
+        processTerminator: (() => void) | null,
     ): OutputChannel {
     // @ts-ignore TODO: Find out how to tell TypeScript that a subclass is being instatiated instead of the abstract base class:
     return new outputChannelClasses[channelCode](
@@ -252,6 +257,7 @@ export function initializeOutputChannel(
         tShellCommand,
         shellCommandParsingResult,
         outputHandlingMode,
+        processTerminator,
     );
 }
 

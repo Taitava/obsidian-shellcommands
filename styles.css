@@ -278,3 +278,16 @@ div.SC-output-channel-modal-redirection-buttons-container div.setting-item-contr
     margin: 0;
     flex-grow: 1;
 }
+
+/*
+ * 'REQUEST TO TERMINATE THE PROCESS' ICON BUTTON
+ */
+a.SC-icon-terminate-process {
+    color: inherit; /* Don't use accent color. */
+    margin-right: 5px; /* Add space between the icon and next element in OutputChannel_Modal and also in Notice balloons. */
+}
+
+a.SC-icon-terminate-process svg {
+    height: 1em;
+    vertical-align: middle; /* Not middle but close enough. */
+}

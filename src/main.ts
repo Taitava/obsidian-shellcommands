@@ -29,7 +29,14 @@ import {
 	PromptModel,
 	ShellCommandExecutor,
 } from "./imports";
-import {Command, Notice, ObsidianProtocolData, Plugin, WorkspaceLeaf} from 'obsidian';
+import {
+    Command,
+    Notice,
+    ObsidianProtocolData,
+    Plugin,
+    setIcon,
+    WorkspaceLeaf,
+} from 'obsidian';
 import {
 	combineObjects,
 	generateObsidianCommandName,
@@ -673,6 +680,28 @@ export default class SC_Plugin extends Plugin {
             this.statusBarElement = this.addStatusBarItem();
         }
         return this.statusBarElement;
+    }
+
+    /**
+     * Creates an icon button that when clicked, will send a request to terminate shell command execution intermittently.
+     *
+     * @param containerElement
+     * @param processTerminator A callback that will actually terminate the shell command execution process.
+     */
+    public createRequestTerminatingButton(containerElement: HTMLElement, processTerminator: () => void) {
+        const button = containerElement.createEl('a', {
+            prepend: true,
+            attr: {
+                "aria-label": "Request to terminate the process",
+                class: "SC-icon-terminate-process",
+            },
+        });
+        setIcon(button, "power");
+        button.onclick = (event) => {
+            processTerminator();
+            event.preventDefault();
+            event.stopPropagation();
+        };
     }
 }
 
