@@ -188,6 +188,7 @@ p.SC-prompt-dry-run-notice {
 button.SC-tab-header-button {
     background-color: unset;
     border: none;
+    box-shadow: none; /* Remove a "border" that came via Obsidian 0.16.0. */
     outline: none;
     cursor: pointer;
     padding: 14px 16px;
