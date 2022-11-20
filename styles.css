@@ -157,6 +157,15 @@ div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after
 
 
 /*
+ * MODALS (generic rules to all of the plugin's modals)
+ */
+
+div.SC-modal {
+    width: max-content; /* Widen the width as much as is reasonable. Obsidian 0.16.0 made modals narrower, this aims to revert it. */
+}
+
+
+/*
  * PROMPT MODALS
  */
 
