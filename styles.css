@@ -182,7 +182,6 @@ p.SC-prompt-dry-run-notice {
 /* Style the tab */
 .SC-tab-header {
     border-bottom: 2px solid var(--background-modifier-border);
-    background-color: var(--background-secondary);
 }
 
 /* Style the buttons that are used to open the tab content */
