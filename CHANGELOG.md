@@ -21,6 +21,8 @@ Features that are in development, but are not released yet. Does not include stu
    - Settings: Tried to revert tab system layout to how it was.
    - Modals: Tried to revert width to make them wide again.
    - Even thought the issue title mentions _fixing_, there's actually [just one bug fix](https://github.com/Taitava/obsidian-shellcommands/commit/6f0b290e16c82f6e3fb214c4dc8aaaedabb4fa35), others are _change_ level modifications.
+ - [Output channel 'Open files' opens a new pane again when using `new-pane`, not a new _tab_ (#276)](https://github.com/Taitava/obsidian-shellcommands/issues/276).
+   - If you want to open a new _tab_, you can use the new `new-tab` option (listed under _Added_).
 
 ## [0.16.0] - 2022-09-25
 
