@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
+**SC VERSION `0.17.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `0.16.3` (practically the same as `1.0.0`). Older versions of Obsidian cannot upgrade SC to `0.17.0`.** The requirement raising is done due to [#276](https://github.com/Taitava/obsidian-shellcommands/issues/276) and [#291](https://github.com/Taitava/obsidian-shellcommands/issues/291).
+
 ### To be Added
  - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
