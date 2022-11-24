@@ -108,6 +108,12 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                         case "new-pane":
                             newLeaf = "split";
                             break;
+                        case "new-tab":
+                            newLeaf = "tab";
+                            break;
+                        case "new-window":
+                            newLeaf = "window";
+                            break;
                         case "can-create-file":
                             can_create_file = true;
                             break;
