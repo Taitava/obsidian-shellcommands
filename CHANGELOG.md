@@ -17,6 +17,8 @@ Features that are in development, but are not released yet. Does not include stu
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
  - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
  - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
+ - [Output channel _Open files_: Support opening new tabs and windows (#291)](https://github.com/Taitava/obsidian-shellcommands/issues/291).
+   - New options: `new-tab` and `new-window`.
 
 ### To be Changed
  - [Fix layout glitches that came via Obsidian 0.16.0 (#264)](https://github.com/Taitava/obsidian-shellcommands/issues/264)
