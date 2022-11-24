@@ -104,15 +104,34 @@ export class OutputChannelDriver_OpenFiles extends OutputChannelDriver {
                     // This is a number, so consider it as a caret position part.
                     caret_parts.push(parseInt(file_definition_part));
                 } else {
+                    const multipleNewPartsErrorMessage = "Cannot open file: Only one of the following can be defined: new-pane, new-tab, or new-window.";
                     switch (file_definition_part) {
                         case "new-pane":
-                            newLeaf = "split";
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "split";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
                             break;
                         case "new-tab":
-                            newLeaf = "tab";
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "tab";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
                             break;
                         case "new-window":
-                            newLeaf = "window";
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "window";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
                             break;
                         case "can-create-file":
                             can_create_file = true;
