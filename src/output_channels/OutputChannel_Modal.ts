@@ -263,7 +263,7 @@ class OutputModal extends SC_Modal {
                             "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
                             this.processTerminator,
                         );
-                        await outputChannel.handleBuffered(output_streams, this.exit_code);
+                        await outputChannel.handleBuffered(output_streams, this.exit_code, false); // false: Disable output wrapping as it's already wrapped before the output content was passed to this modal.
                     };
 
                     // Create the button

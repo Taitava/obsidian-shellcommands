@@ -103,7 +103,7 @@ export abstract class OutputChannel {
      */
     protected abstract _handleBuffered(output: OutputStreams | string, error_code: number | null): Promise<void>;
 
-    public async handleBuffered(output: OutputStreams, error_code: number | null): Promise<void> {
+    public async handleBuffered(output: OutputStreams, error_code: number | null, enableOutputWrapping = true): Promise<void> {
         this.requireHandlingMode("buffered");
 
         // Qualify output
@@ -119,13 +119,18 @@ export abstract class OutputChannel {
 
         // Output is ok.
         // Handle it.
-        await this._handleBuffered(await this.prepare_output(output), error_code);
+        await this._handleBuffered(await this.prepare_output(output, enableOutputWrapping), error_code);
         debugLog("Output handling is done.")
     }
 
     protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void>;
 
-    public async handleRealtime(outputStreamName: OutputStream, outputContent: string) {
+    /**
+     * @param outputStreamName
+     * @param outputContent
+     * @param enableOutputWrapping No caller actually sets this to false at the moment, unlike the handleBuffered() method's counterpart. But have this just in case.
+     */
+    public async handleRealtime(outputStreamName: OutputStream, outputContent: string, enableOutputWrapping = true) {
         this.requireHandlingMode("realtime");
 
         // Qualify output
@@ -141,11 +146,14 @@ export abstract class OutputChannel {
 
         // Output is ok.
 
-        // Wrap output (if needed)
-        const wrappedOutput = await this.wrapOutput(outputStreamName, outputContent);
+        // If allowed, wrap the output with output wrapper text.
+        if (enableOutputWrapping) {
+            // Wrap output (but only if a wrapper is defined)
+            outputContent = await this.wrapOutput(outputStreamName, outputContent);
+        }
 
         // Handle it.
-        await this._handleRealtime(wrappedOutput, outputStreamName);
+        await this._handleRealtime(outputContent, outputStreamName);
 
         debugLog("Output handling is done.");
     }
@@ -181,14 +189,25 @@ export abstract class OutputChannel {
      *  - Combines output streams (if wanted by the OutputChannel).
      *  - Wraps output (if defined in shell command configuration).
      * @param output_streams
+     * @param enableOutputWrapping
      * @private
      */
-    private async prepare_output(output_streams: OutputStreams): Promise<OutputStreams | string> {
+    private async prepare_output(output_streams: OutputStreams, enableOutputWrapping: boolean): Promise<OutputStreams | string> {
+        const wrapOutputIfEnabled = async (outputStreamName: OutputStream, outputContent: string) => {
+            if (enableOutputWrapping) {
+                // Wrap output content.
+                return await this.wrapOutput(outputStreamName, outputContent);
+            } else {
+                // Wrapping is disabled, return unmodified output content.
+                return outputContent;
+            }
+        };
+
         const wrap_outputs_separately = async () => {
             const wrapped_output_streams: OutputStreams = {};
             let output_stream_name: OutputStream;
             for (output_stream_name in output_streams) {
-                wrapped_output_streams[output_stream_name] = await this.wrapOutput(
+                wrapped_output_streams[output_stream_name] = await wrapOutputIfEnabled(
                     output_stream_name,
                     output_streams[output_stream_name],
                 );
@@ -204,7 +223,7 @@ export abstract class OutputChannel {
             // Can output wrapping be combined?
             if (this.t_shell_command.isOutputWrapperStdoutSameAsStderr()) {
                 // Output wrapping can be combined.
-                return await this.wrapOutput(
+                return await wrapOutputIfEnabled(
                     "stdout",
                     joinObjectProperties(output_streams, combineOutputStreams), // Use combineOutputStreams as a glue string.
                 );
