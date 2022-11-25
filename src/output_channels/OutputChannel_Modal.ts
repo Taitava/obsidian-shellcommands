@@ -248,7 +248,7 @@ class OutputModal extends SC_Modal {
                     const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
 
                     // Define an output handler
-                    const handle_output = () => {
+                    const handle_output = async () => {
                         // Redirect output to the selected channel
                         const output_streams: OutputStreams = {};
                         output_streams[output_stream] =
@@ -263,16 +263,16 @@ class OutputModal extends SC_Modal {
                             "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
                             this.processTerminator,
                         );
-                        outputChannel.handleBuffered(output_streams, this.exit_code);
+                        await outputChannel.handleBuffered(output_streams, this.exit_code);
                     };
 
                     // Create the button
                     let redirect_button: ButtonComponent;
                     redirect_setting.addButton((button) => {
                             redirect_button = button;
-                            button.onClick((event: MouseEvent) => {
+                            button.onClick(async (event: MouseEvent) => {
                                 // Handle output
-                                handle_output();
+                                await handle_output();
 
                                 // Finish
                                 if (event.ctrlKey) {
@@ -306,7 +306,7 @@ class OutputModal extends SC_Modal {
 
                     // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
                     this.scope.register(["Ctrl", "Shift"], outputChannelClass.hotkey_letter, () => {
-                        handle_output();
+                        handle_output().then(); // then(): No need to wait for output handling to finish before closing the modal.
                         this.close();
                     });
                 }
