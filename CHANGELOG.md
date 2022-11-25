@@ -28,6 +28,9 @@ Features that are in development, but are not released yet. Does not include stu
  - [Output channel 'Open files' opens a new pane again when using `new-pane`, not a new _tab_ (#276)](https://github.com/Taitava/obsidian-shellcommands/issues/276).
    - If you want to open a new _tab_, you can use the new `new-tab` option (listed under _Added_).
 
+### To be Fixed
+ - [Fix: Ask after execution: 'Redirect' repeated output wrapping (#278)](https://github.com/Taitava/obsidian-shellcommands/issues/278).
+
 ## [0.16.0] - 2022-09-25
 
 ### Added
