@@ -63,6 +63,7 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
+import {DocumentationOutputHandlingModeLink} from "../Documentation";
 
 /**
  * TODO: Rename to ShellCommandSettingsModal
@@ -397,6 +398,13 @@ export class ExtraOptionsModal extends SC_Modal {
                     this.t_shell_command.getConfiguration().output_handling_mode = newMode as OutputHandlingMode;
                     await this.plugin.saveSettings();
                 }),
+            )
+
+            // Documentation link
+            .addExtraButton(icon => icon
+                .setIcon("help")
+                .onClick(() => gotoURL(DocumentationOutputHandlingModeLink))
+                .setTooltip("Documentation: Output handling mode"),
             )
         ;
 
