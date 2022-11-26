@@ -23,6 +23,7 @@ import {OutputStream} from "./OutputChannelCode";
 import {
     EditorSelectionOrCaret,
     normalizePath,
+    PaneType,
 } from "obsidian";
 import {
     getEditor,
@@ -106,7 +107,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
 
             // Special features
             const caret_parts: number[] = []; // If caret position is present in file_definition_parts, the first item in this array will be the caret line, the second will be the column. If more parts are present, they will be used for making selections.
-            let new_pane = false;
+            let newLeaf: PaneType | false = false;
             let can_create_file = false;
             let file_definition_interpreting_failed = false;
 
@@ -118,9 +119,34 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                     // This is a number, so consider it as a caret position part.
                     caret_parts.push(parseInt(file_definition_part));
                 } else {
+                    const multipleNewPartsErrorMessage = "Cannot open file: Only one of the following can be defined: new-pane, new-tab, or new-window.";
                     switch (file_definition_part) {
                         case "new-pane":
-                            new_pane = true;
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "split";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
+                            break;
+                        case "new-tab":
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "tab";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
+                            break;
+                        case "new-window":
+                            // Ensure no new-* definition is used before.
+                            if (newLeaf === false) {
+                                newLeaf = "window";
+                            } else {
+                                this.plugin.newError(multipleNewPartsErrorMessage);
+                                file_definition_interpreting_failed = true;
+                            }
                             break;
                         case "can-create-file":
                             can_create_file = true;
@@ -155,7 +181,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
             // Clean up the file path
             open_file_path = normalizePath(open_file_path); // normalizePath() is used on purpose, instead of normalizePath2(), because backslashes \ should be converted to forward slashes /
 
-            this.openFileInTab(open_file_path,  new_pane, can_create_file).then(() => {
+            this.openFileInTab(open_file_path, newLeaf, can_create_file).then(() => {
                 // The file is now open
                 // Check, did we have a caret position available. If not, do nothing.
                 const count_caret_parts: number = caret_parts.length;
@@ -236,13 +262,13 @@ export class OutputChannel_OpenFiles extends OutputChannel {
         });
     }
 
-    private openFileInTab(file_path: string, new_pane: boolean, can_create_file: boolean): Promise<void> {
+    private openFileInTab(file_path: string, newLeaf: PaneType | false, can_create_file: boolean): Promise<void> {
         // Ensure that the file exists (or can be created)
         const source_path = ""; // TODO: When adding an option for creating new files, read this documentation from Obsidian API's getNewFileParent(): "sourcePath – The path to the current open/focused file, used when the user wants new files to be created “in the same folder”. Use an empty string if there is no active file."
         const file_exists_or_can_be_created = can_create_file || null !== this.app.metadataCache.getFirstLinkpathDest(file_path, source_path);
         if (file_exists_or_can_be_created) {
             // Yes, the file exists (or can be created)
-            return this.app.workspace.openLinkText(file_path, source_path, new_pane);
+            return this.app.workspace.openLinkText(file_path, source_path, newLeaf);
         } else {
             // No, the file does not exist, and it may not be created.
             return Promise.reject("Cannot open file '" + file_path + "', as it does not exist. (If you want to allow file creation, add :can-create-file to the shell command output.)");
