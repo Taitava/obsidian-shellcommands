@@ -56,6 +56,7 @@ import {
 } from "./output_channels/OutputChannelCode";
 import {Readable} from "stream";
 import {Notice} from "obsidian";
+import {OutputChannel} from "./output_channels/OutputChannel";
 
 export class ShellCommandExecutor {
 
@@ -383,18 +384,32 @@ export class ShellCommandExecutor {
             childProcess.stderr.resume();
         };
 
-        // Hook into stdout's and stderr's output retrieving events
-        childProcess.stdout.on("readable", () => handleNewOutputContent("stdout", childProcess.stdout));
-        childProcess.stderr.on("readable", () => handleNewOutputContent("stderr", childProcess.stderr));
+        // Hook into output streams' (such as stdout and stderr) output retrieving events.
+        // Note that there might be just one stream, e.g. only stderr, if stdout is ignored. In the future, there might also be more than two streams, when custom streams are implemented.
+        for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
+            const readableStream: Readable = childProcess[outputStreamName];
+            readableStream.on(
+                "readable",
+                () => handleNewOutputContent(outputStreamName, readableStream),
+            );
+        }
 
         // Hook into exit events
         childProcess.on("exit", (exitCode: number, signal: string /* TODO: Pass signal to channels so it can be shown to users in the future */) => {
-            // Call stdout channel's .endRealtime()
-            outputChannels.stdout.endRealtime(exitCode);
+            // Call all OutputChannels' endRealtime().
+            const alreadyCalledChannelCodes: OutputChannelCode[] = [];
+            for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
+                const outputChannel: OutputChannel = outputChannels[outputStreamName];
+                const outputChannelCode: OutputChannelCode = outputChannelCodes[outputStreamName];
 
-            // Call stderr channel's .endRealtime() - but prevent calling if it's the same channel as stdout, as there's no need to repeat the call.
-            if (outputChannelCodes["stderr"] !== outputChannelCodes["stdout"]) {
-                outputChannels.stderr.endRealtime(exitCode);
+                // Ensure this OutputChannel has not yet been called.
+                if (!alreadyCalledChannelCodes.includes(outputChannelCode)) {
+                    // Not yet called, so do the call.
+                    outputChannel.endRealtime(exitCode);
+
+                    // Mark that this channel's endRealtime() has already been called. Solves a situation where stderr and stdout uses the same channel, in which case endRealtime() should not be accidentally called twice.
+                    alreadyCalledChannelCodes.push(outputChannelCode);
+                }
             }
         });
     }
