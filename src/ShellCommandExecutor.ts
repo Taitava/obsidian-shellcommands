@@ -520,7 +520,7 @@ export class ShellCommandExecutor {
                 // Only show the notification if the process runs for an extended period of time (defined below).
                 window.setTimeout(() => {
                     // Check if the process is still running.
-                    if (null === child_process.exitCode) {
+                    if (null === child_process.exitCode && !child_process.killed) {
                         // The process is still running.
                         // Display notification.
                         const processNotification = this.plugin.newNotification(execution_notification_message, 0);
