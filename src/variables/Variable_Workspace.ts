@@ -31,7 +31,7 @@ export class Variable_Workspace extends Variable{
             // @ts-ignore internalPlugins exists although it's not in obsidian.d.ts.
             const workspaces_plugin = this.app.internalPlugins?.plugins?.workspaces;
             if (!workspaces_plugin) {
-                this.newErrorMessage("Workspaces core plugin is not found for some reason. Please raise an issue in GitHub.")
+                this.newErrorMessage("Workspaces core plugin is not found for some reason. Please create a discussion in GitHub.")
                 return resolve(null);
             } else if (!workspaces_plugin.enabled) {
                 this.newErrorMessage("Workspaces core plugin is not enabled.")

@@ -58,6 +58,7 @@ import {Variable_NoteContent} from "./Variable_NoteContent";
 import {Variable_EventNoteContent} from "./event_variables/Variable_EventNoteContent";
 import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
+import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -73,6 +74,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     // Load built-in variables.
     const built_in_variables: Variable[] = [
         // Normal variables
+        new Variable_CaretParagraph(plugin),
         new Variable_CaretPosition(plugin),
         new Variable_Clipboard(plugin),
         new Variable_Date(plugin),
