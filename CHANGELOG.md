@@ -8,11 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
-Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
+Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
+
+- Nothing at the moment.
+
+## [0.17.0] - 2022-11-26
 
 **SC VERSION `0.17.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `0.16.3` (practically the same as `1.0.0`). Older versions of Obsidian cannot upgrade SC to `0.17.0`.** The requirement raising is done due to [#276](https://github.com/Taitava/obsidian-shellcommands/issues/276) and [#291](https://github.com/Taitava/obsidian-shellcommands/issues/291).
 
-### To be Added
+### Added
  - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
    - This required switching to another execution method in [Node.js's `child_process` library](https://nodejs.org/api/child_process.html). This affects also the traditional way of executing shell commands, which should not have any visible changes, but bugs can always occur when doing changes.
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
@@ -21,7 +25,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [Output channel _Open files_: Support opening new tabs and windows (#291)](https://github.com/Taitava/obsidian-shellcommands/issues/291).
    - New options: `new-tab` and `new-window`.
 
-### To be Changed
+### Changed
  - [Fix layout glitches that came via Obsidian 0.16.0 (#264)](https://github.com/Taitava/obsidian-shellcommands/issues/264)
    - Settings: Tried to revert tab system layout to how it was.
    - Modals: Tried to revert width to make them wide again.
@@ -29,7 +33,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [Output channel 'Open files' opens a new pane again when using `new-pane`, not a new _tab_ (#276)](https://github.com/Taitava/obsidian-shellcommands/issues/276).
    - If you want to open a new _tab_, you can use the new `new-tab` option (listed under _Added_).
 
-### To be Fixed
+### Fixed
  - [Fix: Ask after execution: 'Redirect' repeated output wrapping (#278)](https://github.com/Taitava/obsidian-shellcommands/issues/278).
 
 ## [0.16.0] - 2022-09-25
@@ -323,7 +327,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...HEAD
+[0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.14.0...0.15.0
 [0.14.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.13.0...0.14.0
