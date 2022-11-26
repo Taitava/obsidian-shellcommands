@@ -14,6 +14,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Added
  - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
+   - This required switching to another execution method in [Node.js's `child_process` library](https://nodejs.org/api/child_process.html). This affects also the traditional way of executing shell commands, which should not have any visible changes, but bugs can always occur when doing changes.
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
  - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
  - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
@@ -27,6 +28,9 @@ Features that are in development, but are not released yet. Does not include stu
    - Even thought the issue title mentions _fixing_, there's actually [just one bug fix](https://github.com/Taitava/obsidian-shellcommands/commit/6f0b290e16c82f6e3fb214c4dc8aaaedabb4fa35), others are _change_ level modifications.
  - [Output channel 'Open files' opens a new pane again when using `new-pane`, not a new _tab_ (#276)](https://github.com/Taitava/obsidian-shellcommands/issues/276).
    - If you want to open a new _tab_, you can use the new `new-tab` option (listed under _Added_).
+
+### To be Fixed
+ - [Fix: Ask after execution: 'Redirect' repeated output wrapping (#278)](https://github.com/Taitava/obsidian-shellcommands/issues/278).
 
 ## [0.16.0] - 2022-09-25
 
