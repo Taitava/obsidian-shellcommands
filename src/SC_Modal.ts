@@ -34,7 +34,7 @@ export abstract class SC_Modal extends Modal {
         this._isOpen = true;
 
         // Make the modal scrollable if it has more content than what fits in the screen.
-        this.modalEl.addClass("SC-scrollable");
+        this.modalEl.addClass("SC-modal", "SC-scrollable");
 
         // Approve the modal by pressing the enter key (if enabled).
         if (this.plugin.settings.approve_modals_by_pressing_enter_key) {

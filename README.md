@@ -1,4 +1,4 @@
-<div style="margin-top: -40px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
+<div style="margin-top: -20px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;⏫ Remember to enable! <!-- Meant for Obsidian community plugin list view. --></div>
 
 # Shell commands plugin for Obsidian
 
@@ -102,6 +102,8 @@ Ideas, issues, feedback, pull requests etc. are all welcome! :)
 - For feature requests, please start [a new discussion](https://github.com/Taitava/obsidian-shellcommands/discussions) in Ideas category.
 - If you're about to create a pull request, please discuss your idea first so that you won't accidentally use your time for something that will be later decided to be implemented in a very different way. There might also be refactorings happening on the codebase, during which time it might be wise to wait until the refactoring is done before creating a PR, otherwise you might base your work on old codebase that will require you to update your PR when the refactoring is finished. So, ask before creating a PR, and I can tell if you should wait or not. :)
 
+[**2022-09-27: I'm slowing down the develpment for a while 🙂**, click here to read more](https://github.com/Taitava/obsidian-shellcommands/discussions/270).
+
 ## Author
 
 For all authors, see [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md).
@@ -112,8 +114,22 @@ Jarkko Linnanvirta
 Contact:
  - https://github.com/Taitava
  - https://forum.obsidian.md/u/jare/
+ 
+## Supported by
 
-### Copyright
+This project is free open source software and receives no funding. I want to thank the following parties for kindly supporting this project by giving free licenses/service subscriptions.
+
+### <img alt="JetBrains Logo (Main) logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.svg" style="height: 4em"></img> JetBrains
+[JetBrains](https://www.jetbrains.com/) offers me the ability to use their [WebStorm editor](https://www.jetbrains.com/webstorm/) free of charge for developing the _Shell commands_ plugin. Read more about [JetBrain's open source support](https://jb.gg/OpenSourceSupport).
+
+<img alt="WebStorm logo" src="https://resources.jetbrains.com/storage/products/company/brand/logos/WebStorm.svg" style="width: 300px;">
+
+### Obsidian
+ [Obsidian](https://obsidian.md) developers offer this project:
+  - [Obsidian Publish](https://obsidian.md/publish) service for being able to host the [_Shell commands_ plugin's documentation](https://publish.obsidian.md/shellcommands) on a platform familiar to many Obsidian users.
+  - A [Catalyst license](https://help.obsidian.md/Licenses+%26+Payment/Catalyst+license) so I can test the plugin with early access builds of Obsidian.
+
+## Copyright
 
 Copyright (C) 2021 - 2022 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
 

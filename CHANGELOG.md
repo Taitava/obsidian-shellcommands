@@ -10,9 +10,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap on GitHub](https://github.com/Taitava/obsidian-shellcommands/projects/1).
 
+**SC VERSION `0.17.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `0.16.3` (practically the same as `1.0.0`). Older versions of Obsidian cannot upgrade SC to `0.17.0`.** The requirement raising is done due to [#276](https://github.com/Taitava/obsidian-shellcommands/issues/276) and [#291](https://github.com/Taitava/obsidian-shellcommands/issues/291).
+
+### To be Added
+ - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
+ - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
+ - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
+ - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
+ - [Output channel _Open files_: Support opening new tabs and windows (#291)](https://github.com/Taitava/obsidian-shellcommands/issues/291).
+   - New options: `new-tab` and `new-window`.
+
+### To be Changed
+ - [Fix layout glitches that came via Obsidian 0.16.0 (#264)](https://github.com/Taitava/obsidian-shellcommands/issues/264)
+   - Settings: Tried to revert tab system layout to how it was.
+   - Modals: Tried to revert width to make them wide again.
+   - Even thought the issue title mentions _fixing_, there's actually [just one bug fix](https://github.com/Taitava/obsidian-shellcommands/commit/6f0b290e16c82f6e3fb214c4dc8aaaedabb4fa35), others are _change_ level modifications.
+ - [Output channel 'Open files' opens a new pane again when using `new-pane`, not a new _tab_ (#276)](https://github.com/Taitava/obsidian-shellcommands/issues/276).
+   - If you want to open a new _tab_, you can use the new `new-tab` option (listed under _Added_).
+
 ## [0.16.0] - 2022-09-25
 
-## Added
+### Added
 - [Output wrappers (#262)](https://github.com/Taitava/obsidian-shellcommands/issues/262).
 - [Show a notification when executing shell commands (#261)](https://github.com/Taitava/obsidian-shellcommands/issues/261).
 - New variables:
@@ -20,7 +38,7 @@ Features that are in development, but are not released yet. Does not include stu
   - [{{note_content}} / {{event_note_content}} (#77)](https://github.com/Taitava/obsidian-shellcommands/issues/77)
 - [Show an error message if a shell command is too long to execute (#269)](https://github.com/Taitava/obsidian-shellcommands/issues/269).
 
-## Changed
+### Changed
 - [Internal: Refactor variable parsing to become asynchronous (#265)](https://github.com/Taitava/obsidian-shellcommands/issues/265).
   - Should not cause any visible changes per se, but allows creating certain new variables that are dependent on asynchronous Obsidian API methods, such as the above-mentioned `{{note_content}}`.
 
