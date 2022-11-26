@@ -14,6 +14,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Added
  - [Real time output handling (#275)](https://github.com/Taitava/obsidian-shellcommands/issues/275).
+   - This required switching to another execution method in [Node.js's `child_process` library](https://nodejs.org/api/child_process.html). This affects also the traditional way of executing shell commands, which should not have any visible changes, but bugs can always occur when doing changes.
  - [New variable: {{caret_paragraph}} (#282)](https://github.com/Taitava/obsidian-shellcommands/issues/282).
  - [A button for terminating long running shell commands (#289)](https://github.com/Taitava/obsidian-shellcommands/issues/289).
  - [Add support for `sh` shell if it's system default (#281)](https://github.com/Taitava/obsidian-shellcommands/issues/281).
