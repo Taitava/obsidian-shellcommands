@@ -146,6 +146,7 @@ class OutputModal extends SC_Modal {
 
     public onOpen(): void {
         super.onOpen();
+        this.modalEl.addClass("SC-modal-output");
 
         // Heading
         const heading = this.shell_command_parsing_result.alias;
