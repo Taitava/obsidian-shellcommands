@@ -49,12 +49,14 @@ import {
     getDefaultPreaction_Prompt_Configuration,
     getModel,
     Preaction_Prompt_Configuration,
-    PreactionConfiguration,
     Prompt,
     PromptModel,
     PromptSettingsModal,
 } from "../imports";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
+import {
+    VariableDefaultValueConfiguration,
+    VariableDefaultValueType,
+} from "../variables/Variable";
 import {CmdOrCtrl} from "../Hotkeys";
 import {
     getIconHTML,
@@ -149,13 +151,15 @@ export class ExtraOptionsModal extends SC_Modal {
             new_modal.activateTab(this.tab_structure.active_tab_id);
         };
         this.scope.register(["Mod"], "ArrowUp", () => {
-            if (this.t_shell_command.previousTShellCommand()) {
-                switch_to_t_shell_command(this.t_shell_command.previousTShellCommand());
+            const previousTShellCommand = this.t_shell_command.previousTShellCommand();
+            if (previousTShellCommand) {
+                switch_to_t_shell_command(previousTShellCommand);
             }
         });
         this.scope.register(["Mod"], "ArrowDown", () => {
-            if (this.t_shell_command.nextTShellCommand()) {
-                switch_to_t_shell_command(this.t_shell_command.nextTShellCommand());
+            const nextTShellCommand = this.t_shell_command.nextTShellCommand();
+            if (nextTShellCommand) {
+                switch_to_t_shell_command(nextTShellCommand);
             }
         });
         new Setting(this.modalEl)
@@ -236,7 +240,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 }),
             )
         ;
-        icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(current_icon)
+        icon_setting.nameEl.innerHTML = "Icon " + (current_icon ? getIconHTML(current_icon) : "");
 
         // Confirm execution field
         new Setting(container_element)
@@ -293,20 +297,23 @@ export class ExtraOptionsModal extends SC_Modal {
         const preactions_configuration = this.t_shell_command.getConfiguration().preactions;
 
         // Load config values
-        let preaction_prompt_configuration: Preaction_Prompt_Configuration = null;
-        preactions_configuration.forEach((preaction_configuration: PreactionConfiguration) => {
+        let preaction_prompt_configuration: Preaction_Prompt_Configuration | null = null;
+        for (const preaction_configuration of preactions_configuration) {
             switch (preaction_configuration.type) {
                 case "prompt":
                     preaction_prompt_configuration = preaction_configuration as Preaction_Prompt_Configuration;
+                    break;
+                default:
+                    throw new Error("Unrecognised preaction type: " + preaction_configuration.type);
             }
-        });
+        }
 
         // Preaction: Prompt
         const prompt_options: {[key: string]: string} = {};
         this.plugin.getPrompts().forEach((prompt: Prompt) => {
             prompt_options[prompt.getID()] = prompt.getTitle();
         });
-        let old_selected_prompt_option: string = (preaction_prompt_configuration?.enabled) ? preaction_prompt_configuration.prompt_id : "no-prompt";
+        let old_selected_prompt_option: string = (preaction_prompt_configuration?.enabled) ? preaction_prompt_configuration.prompt_id as string : "no-prompt";
         new Setting(container_element)
             .setName("Prompt")
             .setDesc("Prompts are used to ask values from the user right before shell command execution. The values can be accessed in the shell command via custom variables. You can manage all prompts in the plugin's main settings view, under the 'Preactions' tab.")
@@ -333,14 +340,14 @@ export class ExtraOptionsModal extends SC_Modal {
                                 const modal = new PromptSettingsModal(
                                     this.plugin,
                                     new_prompt,
-                                    null,
+                                    undefined,
                                     "Create prompt",
                                     async () => {
                                         // Prompt is created.
                                         dropdown.addOption(new_prompt.getID(), new_prompt.getTitle());
                                         dropdown.setValue(new_prompt.getID());
-                                        preaction_prompt_configuration.enabled = true;
-                                        preaction_prompt_configuration.prompt_id = new_prompt.getID();
+                                        (preaction_prompt_configuration as Preaction_Prompt_Configuration).enabled = true; // 'as Preaction_Prompt_Configuration' tells TypeScript that the variable is not null.
+                                        (preaction_prompt_configuration as Preaction_Prompt_Configuration).prompt_id = new_prompt.getID();
                                         await this.plugin.saveSettings();
                                         old_selected_prompt_option = dropdown.getValue();
                                     },
@@ -610,7 +617,7 @@ export class ExtraOptionsModal extends SC_Modal {
                             "value": "Execute with value:",
                         })
                         .setValue(default_value_configuration ? default_value_configuration.type : "show-errors")
-                        .onChange(async (new_type: typeof default_value_configuration.type) => {
+                        .onChange(async (new_type: VariableDefaultValueType) => {
                             if (!default_value_configuration) {
                                 default_value_configuration = create_default_value_configuration();
                             }
@@ -684,7 +691,7 @@ export class ExtraOptionsModal extends SC_Modal {
             output_wrapper_options[output_wrapper.getID()] = output_wrapper.getTitle();
         });
         const output_wrappers = this.t_shell_command.getConfiguration().output_wrappers;
-        let old_selected_output_wrapper_option: string = (output_wrappers[output_stream_name]) ? output_wrappers[output_stream_name] : "no-output-wrapper";
+        let old_selected_output_wrapper_option: string = output_wrappers[output_stream_name] ?? "no-output-wrapper";
         return new Setting(container_element)
             .setName(title)
             .setDesc(description)
@@ -703,7 +710,7 @@ export class ExtraOptionsModal extends SC_Modal {
                                 const modal = new OutputWrapperSettingsModal(
                                     this.plugin,
                                     new_output_wrapper,
-                                    null,
+                                    undefined,
                                     "Create output wrapper",
                                     async () => {
                                         // Output wrapper is created.

@@ -23,6 +23,7 @@ import {
     Menu,
     MenuItem,
 } from "obsidian";
+import {ParsingResult} from "../variables/parseVariables";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
 
@@ -49,12 +50,15 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
             if (await parsing_process.process()) {
                 // Parsing succeeded.
                 const parsing_results = parsing_process.getParsingResults();
-                title = parsing_results["alias"].parsed_content || parsing_results["shell_command"].parsed_content; // Try to use a parsed alias, but if no alias is available, use a parsed shell command instead.
+                const aliasParsingResult: ParsingResult = parsing_results["alias"] as ParsingResult; // as ParsingResult: Tells TypeScript that the object exists.
+                const shellCommandParsingResult: ParsingResult = parsing_results["shell_command"] as ParsingResult; // as ParsingResult: Tells TypeScript that the object exists.
+                title = aliasParsingResult.parsed_content || shellCommandParsingResult.parsed_content as string; // Try to use a parsed alias, but if no alias is available, use a parsed shell command instead. as string = parsed shell command always exist when the parsing itself has succeeded.
             }
             // If parsing process fails, the failed process can be passed to this.trigger(). The execution will eventually be cancelled and error messages displayed (if displaying is allowed).
         }
 
         // Update menu item title.
+        // @ts-ignore. Suppress for now. // FIXME: Fix in a separate commit by moving the whole title generation block to a new method and call that method from the menu.addItem()'s callback function.
         menu_item.setTitle(title);
     }
 }

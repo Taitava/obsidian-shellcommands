@@ -80,7 +80,15 @@ export class Preaction_Prompt extends Preaction {
     }
 
     private getPrompt(): Prompt {
-        return this.plugin.getPrompts().get(this.configuration.prompt_id);
+        const promptId: string | undefined = this.configuration.prompt_id;
+        if (undefined === promptId) {
+            throw new Error("Prompt id is undefined in configuration.");
+        }
+        const prompt: Prompt | undefined = this.plugin.getPrompts().get(promptId);
+        if (undefined === prompt) {
+            throw new Error("Prompt with id '" + promptId + "' does not exist");
+        }
+        return prompt;
     }
 }
 
@@ -94,5 +102,5 @@ export function getDefaultPreaction_Prompt_Configuration(): Preaction_Prompt_Con
 
 export interface Preaction_Prompt_Configuration extends PreactionConfiguration {
     type: "prompt";
-    prompt_id: string;
+    prompt_id: string | undefined;
 }

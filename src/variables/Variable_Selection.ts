@@ -29,7 +29,7 @@ export class Variable_Selection extends EditorVariable {
     protected async generateValue(): Promise<string|null> {
 
         // Check that we are able to get an editor
-        if (!this.requireEditor()) {
+        if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
             // Nope.
             return null;
         }
@@ -47,7 +47,7 @@ export class Variable_Selection extends EditorVariable {
 
     public isAvailable(): boolean {
         const view = getView(this.app);
-        return view && getEditor(this.app) && view.getMode() === "source";
+        return !!view && !!getEditor(this.app) && view.getMode() === "source";
     }
 
     public getAvailabilityText(): string {

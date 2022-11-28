@@ -62,8 +62,8 @@ export function getSC_Events(plugin: SC_Plugin) {
 }
 getSC_Events.events = undefined;
 
-export function getSC_Event(plugin: SC_Plugin, sc_event_class: typeof SC_Event) {
-    let found_sc_event: SC_Event = undefined;
+export function getSC_Event(plugin: SC_Plugin, sc_event_class: typeof SC_Event): SC_Event | undefined {
+    let found_sc_event: SC_Event | undefined = undefined;
     getSC_Events(plugin).forEach((sc_event: SC_Event) => {
         if (sc_event instanceof sc_event_class) {
             found_sc_event = sc_event;

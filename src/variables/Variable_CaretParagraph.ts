@@ -24,7 +24,7 @@ export class Variable_CaretParagraph extends EditorVariable {
     public help_text = "Gives a text line at the current caret position.";
 
     protected async generateValue(): Promise<string | null> {
-        if (!this.requireEditor() || !this.isViewModeSource()) {
+        if (!this.requireEditor() || !this.isViewModeSource() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
             return null;
         }
         const caretPosition = this.editor.getCursor('to');

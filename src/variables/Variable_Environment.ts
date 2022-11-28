@@ -45,7 +45,7 @@ export class Variable_Environment extends Variable {
         return new Promise((resolve) => {
             if (this.isAvailable()) {
                 // Yes, it exists.
-                return resolve(process.env[this.arguments.variable]);
+                return resolve(process.env[this.arguments.variable] as string); // as string: tells TypeScript compiler that the item exists, is not undefined.
             } else {
                 // It does not exist.
                 // Freak out.

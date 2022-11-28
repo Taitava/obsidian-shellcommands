@@ -156,10 +156,11 @@ export class PromptSettingsModal extends SC_Modal {
 
 
         // Ok button
-        if (this.ok_button_text) {
+        const okButtonText: string | undefined = this.ok_button_text;
+        if (okButtonText) {
             new Setting(container_element)
                 .addButton(button => button
-                    .setButtonText(this.ok_button_text)
+                    .setButtonText(okButtonText)
                     .onClick(() => this.approve()),
                 )
             ;

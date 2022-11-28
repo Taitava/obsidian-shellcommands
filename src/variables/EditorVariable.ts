@@ -30,8 +30,8 @@ import {debugLog} from "../Debug";
 
 export abstract class EditorVariable extends Variable {
 
-    protected editor: Editor;
-    protected view: MarkdownView;
+    protected editor: Editor | null;
+    protected view: MarkdownView | null;
 
     protected requireEditor() {
         this.editor = getEditor(this.app);
@@ -61,7 +61,10 @@ export abstract class EditorVariable extends Variable {
         if (!this.requireView()) {
             return false;
         }
-        const view_mode = this.view.getMode(); // "preview" or "source" (can also be "live" but I don't know when that happens)
+
+        const view: MarkdownView = this.view as MarkdownView; // as MarkdownView: Make TypeScript understand that view is always defined at this point.
+        const view_mode = view.getMode(); // "preview" or "source" ("live" was removed from Obsidian API in 0.13.8 on 2021-12-10).
+
         switch (view_mode) {
             case "preview":
                 // The leaf is in preview mode, which makes things difficult.

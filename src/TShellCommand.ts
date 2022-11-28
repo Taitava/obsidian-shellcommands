@@ -89,16 +89,15 @@ export class TShellCommand {
     }
 
     public getShell(): string {
-        const operating_system = getOperatingSystem();
-
         // Check if the shell command has defined a specific shell.
-        if (undefined === this.configuration.shells[operating_system]) {
+        const shell: string | undefined = this.configuration.shells[getOperatingSystem()];
+        if (undefined === shell) {
             // The shell command does not define an explicit shell.
             // Use a default shell from the plugin's settings.
             return this.plugin.getDefaultShell();
         } else {
             // The shell command has an explicit shell defined.
-            return this.configuration.shells[operating_system];
+            return shell;
         }
     }
 
@@ -111,16 +110,15 @@ export class TShellCommand {
      * command does not have an explicit version for the current OS.
      */
     public getShellCommand(): string {
-        const operating_system = getOperatingSystem();
-
         // Check if the shell command has defined a specific command for this operating system.
-        if (undefined === this.configuration.platform_specific_commands[operating_system]) {
+        const platformSpecificShellCommand: string | undefined = this.configuration.platform_specific_commands[getOperatingSystem()];
+        if (undefined === platformSpecificShellCommand) {
             // No command is defined specifically for this operating system.
             // Return an "OS agnostic" command.
             return this.configuration.platform_specific_commands.default;
         } else {
             // The shell command has defined a specific command for this operating system.
-            return this.configuration.platform_specific_commands[operating_system];
+            return platformSpecificShellCommand;
         }
     }
 
@@ -467,19 +465,20 @@ export class TShellCommand {
         delete this.cached_preactions;
     }
 
-    private cached_preactions: Preaction[];
+    private cached_preactions: Preaction[] | undefined;
     public getPreactions(): Preaction[] {
         debugLog(`TShellCommand ${this.getId()}: Getting preactions.`);
         if (!this.cached_preactions) {
             this.cached_preactions = [];
-            this.getConfiguration().preactions.forEach((preaction_configuration: PreactionConfiguration) => {
+            let preaction_configuration: PreactionConfiguration;
+            for (preaction_configuration of this.getConfiguration().preactions) {
                 // Only create the preaction if it's enabled.
                 if (preaction_configuration.enabled) {
                     // Yes, it's enabled.
                     // Instantiate the Preaction.
                     this.cached_preactions.push(createPreaction(this.plugin, preaction_configuration, this));
                 }
-            });
+            }
         }
         return this.cached_preactions;
     }
@@ -569,6 +568,11 @@ export class TShellCommand {
     }
 }
 
+/**
+ * TODO: The name ShellCommandParsingResult sounds like this would be a sub-interface of ParsingResult, although the interfaces are very different. Rename this to something better. Candidate names:
+ *  - ParsedShellCommandProperties
+ *  - ParsedShellCommandStrings
+ */
 export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,

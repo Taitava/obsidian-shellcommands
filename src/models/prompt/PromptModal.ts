@@ -65,16 +65,16 @@ export class PromptModal extends SC_Modal {
         const title_parsing_result = await parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
         this.setTitle(
             title_parsing_result.succeeded
-            ? title_parsing_result.parsed_content
+            ? title_parsing_result.parsed_content as string
             : title_parsing_result.original_content
         );
 
         // Parse and display description
         if (this.prompt.configuration.description) {
             const description_parsing_result: ParsingResult = await parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
-            const description =
+            const description: string =
                 description_parsing_result.succeeded
-                ? description_parsing_result.parsed_content
+                ? description_parsing_result.parsed_content as string
                 : description_parsing_result.original_content
             ;
             const description_element = createMultilineTextElement("p", description, this.modalEl);
@@ -106,15 +106,19 @@ export class PromptModal extends SC_Modal {
                             ? variable_values_visible_glyph
                             : variable_names_visible_icon
                         )
+                        if (null === update_shell_command_preview) {
+                            throw new Error("Toggle showing variable names or value: update_shell_command_preview function is not defined.");
+                        }
                         update_shell_command_preview();
                     }),
                 )
             ;
 
             // Decide what text to use in the preview
-            if (this.parsing_process) {
+            const shellCommandParsingResult: ParsingResult | undefined = this.parsing_process?.getParsingResults().shell_command;
+            if (shellCommandParsingResult?.succeeded) {
                 // Show a real shell command. Use preparsed content (= content that might have some variables already parsed).
-                shell_command_preview_text = this.parsing_process.getParsingResults().shell_command.parsed_content;
+                shell_command_preview_text = shellCommandParsingResult.parsed_content as string; // as string = if shellCommandParsingResult?.succeeded is true, then .parsed_content is always string.
             } else if (this.t_shell_command) {
                 // Show a real shell command. No preparsed content is available. This content does not have any variables parsed yet.
                 shell_command_preview_text = this.t_shell_command.getShellCommand();
@@ -153,7 +157,7 @@ export class PromptModal extends SC_Modal {
                                     // Change the value to the one in the prompt field.
                                     raw_value.error_messages = []; // Remove any possible error messages.
                                     raw_value.succeeded = true; // This needs to reflect that there are no error messages.
-                                    raw_value.value = fresh_values.get(variable.variable_name);
+                                    raw_value.value = fresh_values.get(variable.variable_name) as string; // It's always a string because fresh_values.has() is used above.
                                 }
                                 // No modifications.
                             },
@@ -170,7 +174,7 @@ export class PromptModal extends SC_Modal {
                             },
                         );
                         if (parsing_result.succeeded) {
-                            shell_command_preview_text_final = parsing_result.parsed_content;
+                            shell_command_preview_text_final = parsing_result.parsed_content as string;
                         }
                     }
                 } else {
@@ -229,7 +233,7 @@ export class PromptModal extends SC_Modal {
         const execute_button_text_parsing_result = await parseVariables(this.plugin, this.prompt.configuration.execute_button_text, null, this.t_shell_command, this.sc_event);
         const execute_button_text =
             execute_button_text_parsing_result.succeeded
-            ? execute_button_text_parsing_result.parsed_content
+            ? execute_button_text_parsing_result.parsed_content as string
             : execute_button_text_parsing_result.original_content
         ;
         new Setting(this.modalEl)
@@ -276,8 +280,9 @@ export class PromptModal extends SC_Modal {
     }
 
     private async assignValuesToVariables() {
-        for (const prompt_field of this.prompt_fields) {
-            await prompt_field.getTargetVariable().setValue(prompt_field.getParsedValue());
+        let promptField: PromptField;
+        for (promptField of this.prompt_fields) {
+            await promptField.getTargetVariable().setValue(promptField.getParsedOrRawValue());
         }
     }
 
@@ -289,7 +294,7 @@ export class PromptModal extends SC_Modal {
     private getPromptFieldsValues() {
         const values = new Map<string, string>();
         for (const prompt_field of this.prompt_fields) {
-            values.set(prompt_field.getTargetVariable().variable_name, prompt_field.getParsedValue() ?? "");
+            values.set(prompt_field.getTargetVariable().variable_name, prompt_field.getParsedValue() ?? ""); // TODO: Should getParsedValue() ?? "" be changed to getParsedOrRawValue(), too?
         }
         return values;
     }

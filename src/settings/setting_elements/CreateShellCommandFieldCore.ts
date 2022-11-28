@@ -122,7 +122,7 @@ export function CreateShellCommandFieldCore(
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null) {
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
     const parsing_result = await parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
@@ -136,5 +136,5 @@ export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: s
         }
     }
     // Variable parsing succeeded
-    return parsing_result.parsed_content;
+    return parsing_result.parsed_content as string;
 }

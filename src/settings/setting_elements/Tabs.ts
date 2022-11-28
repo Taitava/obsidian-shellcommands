@@ -58,7 +58,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
         buttons: tab_buttons,
         contentContainers: tab_content_containers,
     };
-    let first_button: HTMLElement;
+    let first_button: HTMLElement | undefined;
     for (const tab_id in tabs) {
         const tab = tabs[tab_id];
 
@@ -76,7 +76,13 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
             let max_width = 0;
             let max_height = 0;
             const tab_header = tab_button.parentElement;
+            if (null === tab_header) {
+                throw new Error("Tab header is missing. Did not get a parent from tab button.");
+            }
             const container_element = tab_header.parentElement;
+            if (null === container_element) {
+                throw new Error("Container element is missing. Did not get a parent from tab header.");
+            }
             const tab_contents = container_element.findAll("div.SC-tab-content"); // Do not get all tab contents that exist, because there might be multiple tab systems open at the same time.
             const is_main_settings_modal = container_element.hasClass("vertical-tab-content");
             for (const index in tab_contents) {
@@ -107,8 +113,15 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
 
             // Activate the clicked tab
             tab_button.addClass("SC-tab-active");
-            const activate_tab_id = tab_button.attributes.getNamedItem("activateTab").value;
-            const tab_content = document.getElementById(activate_tab_id);
+            const activateTabAttribute: Attr | null = tab_button.attributes.getNamedItem("activateTab");
+            if (null === activateTabAttribute) {
+                throw new Error("Tab button has no 'activateTab' HTML attribute! Murr!");
+            }
+            const activate_tab_id = activateTabAttribute.value;
+            const tab_content: HTMLElement | null = document.getElementById(activate_tab_id);
+            if (null === tab_content) {
+                throw new Error("No tab content was found with activate_tab_id '"+activate_tab_id+"'! Hmph!");
+            }
             tab_content.addClass("SC-tab-active");
 
             // Mark the clicked tab as active in TabStructure (just to report which tab is currently active)
@@ -138,13 +151,13 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
         tab.content_generator(tab_content_containers[tab_id]);
 
         // Memorize the first tab's button
-        if (!first_button) {
+        if (undefined === first_button) {
             first_button = button;
         }
     }
 
     // Activate the first tab
-    if (first_button) {
+    if (undefined !== first_button) {
         first_button.click();
     }
 

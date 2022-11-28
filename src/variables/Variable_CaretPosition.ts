@@ -46,7 +46,7 @@ export class Variable_CaretPosition extends EditorVariable {
     protected generateValue(): Promise<string|null> {
         return new Promise((resolve) => {
             // Check that we are able to get an editor
-            if (!this.requireEditor()) {
+            if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
                 // Nope.
                 return resolve(null);
             }

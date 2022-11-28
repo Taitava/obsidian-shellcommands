@@ -36,7 +36,7 @@ import {debugLog} from "../../Debug";
 export class CustomVariableInstance extends Instance {
     public readonly parent_configuration: SC_MainSettings;
     public configuration: CustomVariableConfiguration;
-    private custom_variable: CustomVariable = null;
+    private custom_variable: CustomVariable | null = null;
 
     constructor(
         public readonly model: CustomVariableModel,

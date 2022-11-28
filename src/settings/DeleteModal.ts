@@ -61,8 +61,14 @@ export class DeleteModal extends SC_Modal {
         debugLog("Command " + this.shell_command_id + " gonna be removed.");
         this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.
         delete this.plugin.getTShellCommands()[this.shell_command_id]; // Remove the TShellCommand object.
-        const shell_command_index = this.plugin.getShellCommandConfigurationIndex(this.shell_command_id);
-        this.plugin.settings.shell_commands.splice(shell_command_index,1); // Remove from the plugin's settings.
+
+        // Remove from the plugin's settings.
+        const shellCommandIndex: number | undefined = this.plugin.getShellCommandConfigurationIndex(this.shell_command_id);
+        // Index probably always exists, but check just in case. Will make TypeScript compiler happy. :)
+        if (undefined == shellCommandIndex) {
+            throw new Error("Shell command deletion failed. Did not get shell command index in settings container.");
+        }
+        this.plugin.settings.shell_commands.splice(shellCommandIndex,1);
 
         // Remove the setting fields
         this.shell_command_element.remove();

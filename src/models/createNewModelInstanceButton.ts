@@ -47,6 +47,9 @@ export function createNewModelInstanceButton<
             .addButton(button => button
                 .setButtonText("New " + model.getSingularName().toLocaleLowerCase())
                 .onClick(async () => {
+                    if (null === parent_instance_or_configuration) {
+                        throw new Error("createNewModelInstanceButton(): Parent instance or configuration is null.");
+                    }
                     const instance = model.newInstance(parent_instance_or_configuration) as InstanceClass;
                     const main_setting = model.createSettingFields(instance, instance_container_element);
                     resolve_promise({

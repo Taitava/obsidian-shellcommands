@@ -52,7 +52,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
             handlingPipeline = handlingPipeline.finally(() => {
-                return this.handle(output[output_stream_name]);
+                return this.handle(output[output_stream_name] as string);
             });
         }
         return handlingPipeline;
@@ -87,14 +87,14 @@ export class OutputChannel_OpenFiles extends OutputChannel {
         return new Promise((resolve, reject) => {
             debugLog("OutputChannel_OpenFiles: Interpreting file opening definition: " + file_definition);
             // Get parts that define different details about how the file should be opened
-            const file_definition_parts = file_definition.split(":");
+            const file_definition_parts: string[] = file_definition.split(":"); // If file_definition is "", i.e. an empty string, the result will be [""], i.e. an array with an empty string as its only item.
 
             // The first part is always the file path
-            let open_file_path = file_definition_parts.shift();
+            let open_file_path: string = file_definition_parts.shift() as string; // If file_definition is "", this will be "", too. 'as string' is used because file_definition_parts is never empty (it always contains at least one item), so .shift() will never return undefined here.
 
             // On Windows: Check if an absolute path was split incorrectly. (E.g. a path starting with "C:\...").
             if (isWindows() && file_definition_parts.length > 0) {
-                const combined_path = open_file_path + ":" + file_definition_parts[0];
+                const combined_path: string = open_file_path + ":" + file_definition_parts[0];
                 if (path.isAbsolute(combined_path)) {
                     // Yes, the first two parts do form an absolute path together, so they should not be split.
                     open_file_path = combined_path;
@@ -220,14 +220,18 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                                 // There can be multiple selections defined
                                 const selections: EditorSelectionOrCaret[] = [];
                                 while (caret_parts.length) {
-                                    const from_line = caret_parts.shift();
-                                    const from_column = caret_parts.shift();
-                                    const to_line = caret_parts.shift();
-                                    const to_column = caret_parts.shift();
+                                    const fromLine: number | undefined = caret_parts.shift();
+                                    const fromColumn: number | undefined = caret_parts.shift();
+                                    const toLine: number | undefined = caret_parts.shift();
+                                    const toColumn: number | undefined = caret_parts.shift();
+                                    if (undefined === fromLine || undefined === fromColumn || undefined === toLine || undefined === toColumn) {
+                                        // This should never happen.
+                                        throw new Error("Encountered undefined values in fromLine, fromColumn, toLine, and/or toColumn. Strange, because the correct amount of parts in caret_parts was checked beforehand.");
+                                    }
                                     selections.push({
-                                        anchor: prepareEditorPosition(editor, from_line, from_column),
-                                        head: prepareEditorPosition(editor, to_line, to_column),
-                                    })
+                                        anchor: prepareEditorPosition(editor, fromLine, fromColumn),
+                                        head: prepareEditorPosition(editor, toLine, toColumn),
+                                    });
                                 }
                                 editor.setSelections(selections);
                             } else {

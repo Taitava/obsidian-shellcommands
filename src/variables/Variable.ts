@@ -121,6 +121,11 @@ export abstract class Variable {
                         });
                     case "value":
                         // Return a default value.
+                        if (undefined === default_value_configuration) {
+                            // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined.
+                            // This check is just for TypeScript compiler to understand that default_value_configuration is defined when it's accessed below.
+                            throw new Error("Default value configuration is undefined.");
+                        }
                         debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
                         if (default_value_parser) {
                             // Parse possible variables in the default value.
@@ -152,7 +157,7 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(sc_event: SC_Event): Promise<string|null>;
+    protected abstract generateValue(sc_event: SC_Event | null): Promise<string|null>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
@@ -356,7 +361,9 @@ export interface VariableValueResult {
     succeeded: boolean,
 }
 
+export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value";
+
 export interface VariableDefaultValueConfiguration {
-    type: "show-errors" | "cancel-silently" | "value",
+    type: VariableDefaultValueType,
     value: string,
 }

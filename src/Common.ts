@@ -44,7 +44,7 @@ export function getVaultAbsolutePath(app: App) {
     if (adapter instanceof FileSystemAdapter) {
         return adapter.getBasePath();
     }
-    return null;
+    throw new Error("Could not retrieve vault path. No DataAdapter was found from app.vault.adapter.");
 }
 
 export function getPluginAbsolutePath(plugin: SC_Plugin) {
@@ -83,7 +83,7 @@ export function getView(app: App) {
     return view;
 }
 
-export function getEditor(app: App): Editor {
+export function getEditor(app: App): Editor | null {
 
     const view = getView(app);
     if (null === view) {
@@ -149,7 +149,12 @@ export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
     const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
-    let leading_slashes = leading_slashes_regexp.exec(path)[0];
+    const leading_slashes_array = leading_slashes_regexp.exec(path); // An array with only one item.
+    if (null === leading_slashes_array) {
+        // It should always match. This exception should never happen, but have it just in case.
+        throw new Error("normalizePath2(): leading_slashes_regexp did not match.")
+    }
+    let leading_slashes = leading_slashes_array[0];
 
     // 2. Run the original normalizePath()
     path = normalizePath(path);
@@ -327,7 +332,7 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
         // Thank you, endorama! <3
         const file_content = app.vault.read(file);
         file_content.then((file_content: string) => {
-            const frontmatter_cache: FrontMatterCache = app.metadataCache.getFileCache(file).frontmatter;
+            const frontmatter_cache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
             if (frontmatter_cache) {
                 // A YAML frontmatter is present in the file.
                 const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.

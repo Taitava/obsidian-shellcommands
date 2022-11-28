@@ -39,9 +39,9 @@ export class OutputChannel_Notification extends OutputChannel {
      *
      * @private
      */
-    private realtimeNotice: Notice;
+    private realtimeNotice: Notice | undefined;
 
-    private realtimeNoticeTimeout: number;
+    private realtimeNoticeTimeout: number | undefined;
 
     /**
      * A flag for indicating that if any stderr output has happened, all subsequent handlings should format the output
@@ -66,7 +66,7 @@ export class OutputChannel_Notification extends OutputChannel {
         // notifications will be created.
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            const output_message = output[output_stream_name];
+            const output_message: string = output[output_stream_name] as string; // as string = output message is not undefined because of the for loop.
             this.notify(output_stream_name, output_message, error_code);
         }
     }
@@ -118,6 +118,9 @@ export class OutputChannel_Notification extends OutputChannel {
         // @ts-ignore Notice.noticeEl belongs to Obsidian's PRIVATE API, and it may change without a prior notice. Only
         // create the button if noticeEl exists and is an HTMLElement.
         const noticeEl = this.realtimeNotice.noticeEl;
+        if (null === this.processTerminator) {
+            throw new Error("Process terminator is not set, although it should be set when handling output in realtime mode.");
+        }
         if (undefined !== noticeEl && noticeEl instanceof HTMLElement) {
             this.plugin.createRequestTerminatingButton(noticeEl, this.processTerminator);
         }
@@ -184,7 +187,7 @@ export class OutputChannel_Notification extends OutputChannel {
         this.realtimeNoticeTimeout = window.setTimeout(
             () => {
                 // Hide the Notice
-                this.realtimeNotice.hide();
+                this.realtimeNotice?.hide(); // ? = Don't try to hide if a user has closed the notification by clicking. See the 'this.realtimeNotice = undefined;' line in the below click handler.
                 this.realtimeNotice = undefined;
                 this.realtimeNoticeTimeout = undefined;
             },

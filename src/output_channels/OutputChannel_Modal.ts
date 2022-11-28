@@ -86,7 +86,7 @@ class OutputModal extends SC_Modal {
 
     private readonly t_shell_command: TShellCommand;
     private readonly shell_command_parsing_result: ShellCommandParsingResult;
-    private exit_code: number = null;
+    private exit_code: number | null = null; // TODO: Think about changing the logic: exit code could be undefined when it's not received, and null when a user has terminated the execution. The change needs to be done in the whole plugin, although I only wrote about it in this OutputModal class.
 
     // Fields and HTML elements
     private outputFieldsContainer: HTMLElement;
@@ -120,10 +120,10 @@ class OutputModal extends SC_Modal {
             // Set field value
             const textareaComponent = outputField.components.first() as TextAreaComponent;
             const outputContent = outputs[outputStreamName];
-            textareaComponent.setValue(outputContent);
+            textareaComponent.setValue(outputContent as string); // as string = outputContent is not undefined because of the .forEach() loop.
 
             // Make field visible (if it's not already)
-            outputField.settingEl.matchParent(".SC-hide").removeClass("SC-hide");
+            outputField.settingEl.matchParent(".SC-hide")?.removeClass("SC-hide");
         });
     }
 
@@ -293,9 +293,11 @@ class OutputModal extends SC_Modal {
                     const output_channel_title: string = outputChannelClass.getTitle(output_stream);
 
                     // Button text
+                    // @ts-ignore // FIXME in a later commit. Move all this code inside the .addButtons()'s callback function.
                     redirect_button.setButtonText(output_channel_title);
 
                     // Tips about hotkeys
+                    // @ts-ignore // FIXME in a later commit. Move all this code inside the .addButtons()'s callback function.
                     redirect_button.setTooltip(
                         `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
                         + EOL + EOL +
@@ -345,6 +347,12 @@ class OutputModal extends SC_Modal {
     }
 
     private displayExitCode() {
+        if (null === this.exit_code) {
+            // Currently there are two callers for this method, and both of them does a null check on the exit code before'
+            // the call, so we'll never get here in practise.
+            // TODO: Remove this checking/throwing and make this method able to display three texts: a) an exit code, b) Executing..., or c) User terminated.
+            throw new Error("Cannot display exit code because it's null");
+        }
         this.exitCodeElement.innerText = "Exit code: " + this.exit_code.toString();
     }
 

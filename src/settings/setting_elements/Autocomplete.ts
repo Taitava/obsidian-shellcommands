@@ -38,8 +38,11 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
             const max_suggestions = 30;
 
             // Get the so far typed text - exclude everything that is on the right side of the caret.
-            const caret_position = input_element.selectionStart;
-            const typed_text = input_element.value.slice(0, caret_position);
+            const caret_position: number | null = input_element.selectionStart;
+            if (null === caret_position) {
+                throw new Error("createAutocomplete(): fetch(): caret_position is null.");
+            }
+            const typed_text: string = input_element.value.slice(0, caret_position);
             const search_query = get_search_query(typed_text);
 
             if ("" === search_query.search_text) {
@@ -58,7 +61,10 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
 
             // Get the item text and already typed text
             let supplement = item.value;
-            let caret_position = input_element.selectionStart;
+            let caret_position: number | null = input_element.selectionStart;
+            if (null === caret_position) {
+                throw new Error("createAutocomplete(): fetch(): caret_position is null.");
+            }
             const typed_text = input_element.value.slice(0, caret_position);
             const search_query = get_search_query(typed_text);
             const search_text = search_query.search_text;
@@ -284,7 +290,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
  * @param autocomplete_item_sets
  */
 function merge_and_sort_autocomplete_items(...autocomplete_item_sets: IAutocompleteItem[][]) {
-    const merged_autocomplete_items: IAutocompleteItem[] = [].concat(...autocomplete_item_sets);
+    const merged_autocomplete_items: IAutocompleteItem[] = (new Array<IAutocompleteItem>()).concat(...autocomplete_item_sets);
     return merged_autocomplete_items.sort((a, b) => {
         // First compare groups
         if (a.group < b.group) {
@@ -322,7 +328,11 @@ interface IAutocompleteSearchQuery {
  * @param typed_text
  */
 function get_search_query(typed_text: string): IAutocompleteSearchQuery {
-    let search_text = typed_text.match(/\S*?$/u)[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
+    const searchTextMatchArray: RegExpMatchArray | null = typed_text.match(/\S*?$/u); // An array, but only one match is expected.
+    if (null === searchTextMatchArray) {
+        throw new Error("get_search_query(): Regex match failed.");
+    }
+    let search_text = searchTextMatchArray[0]; // Reduce the text - limit to a single word (= exclude spaces and everything before them).
     let search_type: AutocompleteSearchQueryType = "other"; // May be overwritten.
 
     if (search_text.contains("}}")) {

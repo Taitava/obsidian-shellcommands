@@ -43,6 +43,6 @@ export abstract class FolderVariable extends FileVariable {
         }
 
         // Check that a parent folder is available. (If not, it's strange.)
-        return !!this.getFile().parent;
+        return !!this.getFile()?.parent;
     }
 }

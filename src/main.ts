@@ -72,6 +72,7 @@ import {
     OutputWrapperMap,
     OutputWrapperModel,
 } from "./models/output_wrapper/OutputWrapperModel";
+import {ParsingResult} from "./variables/parseVariables";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -98,7 +99,7 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private cached_parsing_processes: {
-		[key: string]: ShellCommandParsingProcess,
+		[key: string]: ShellCommandParsingProcess | undefined,
 	} = {};
 
 	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
@@ -284,7 +285,7 @@ export default class SC_Plugin extends Plugin {
 				// Try to process variables that can be processed before performing preactions.
 				await parsing_process.process();
 			}
-			if (parsing_process.getParsingResults().shell_command.succeeded) {
+			if (parsing_process.getParsingResults().shell_command?.succeeded) { // .shell_command should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
@@ -325,11 +326,13 @@ export default class SC_Plugin extends Plugin {
                                 // Parsing succeeded
 
                                 // Rename Obsidian command
-                                const parsing_result = parsing_process.getParsingResults();
-                                t_shell_command.renameObsidianCommand(
-                                    parsing_result["shell_command"].parsed_content,
-                                    parsing_result["alias"].parsed_content,
-                                );
+                                const parsingResults = parsing_process.getParsingResults();
+                                /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
+                                const shellCommandParsingResult: ParsingResult = parsingResults["shell_command"] as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+                                const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
+                                const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
+                                const parsedAlias: string = aliasParsingResult.parsed_content as string;
+                                t_shell_command.renameObsidianCommand(parsedShellCommand,parsedAlias);
 
                                 // Store the preparsed variables so that they will be used if this shell command gets executed.
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;

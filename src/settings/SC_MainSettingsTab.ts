@@ -191,8 +191,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                             ];
                             search_targets.push(...Object.values(t_shell_command.getPlatformSpecificShellCommands()));
                             // Only include icon in the search if it's defined.
-                            if (t_shell_command.getConfiguration().icon) {
-                                search_targets.push(t_shell_command.getConfiguration().icon);
+                            const icon: string | null = t_shell_command.getConfiguration().icon;
+                            if (icon) {
+                                search_targets.push(icon);
                             }
 
                             // Check if it's a match

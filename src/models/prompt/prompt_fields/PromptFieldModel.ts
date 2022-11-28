@@ -264,7 +264,11 @@ export class PromptFieldModel extends Model {
                         if (new_target_variable_id === other_prompt_field.configuration.target_variable_id) {
                             // They have the same target_variable_id.
                             // Return an error message.
-                            const target_variable_name = this.plugin.getCustomVariableInstances().get(new_target_variable_id).getFullName();
+                            const targetVariableInstance: CustomVariableInstance | undefined = this.plugin.getCustomVariableInstances().get(new_target_variable_id);
+                            if (undefined === targetVariableInstance) {
+                                throw new Error("Could not find target variable with id " + new_target_variable_id);
+                            }
+                            const target_variable_name = targetVariableInstance.getFullName();
                             return Promise.reject(`Target variable ${target_variable_name} is already used by another field in the same prompt. Select another variable.`);
                         }
                     }

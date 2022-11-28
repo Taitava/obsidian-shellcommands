@@ -39,8 +39,14 @@ export const PlatformShells = {
 
 export function getUsersDefaultShell(): string {
     if (isWindows()) {
+        if (undefined === process.env.ComSpec) {
+            throw new Error("process.env.ComSpec is not a string.");
+        }
         return process.env.ComSpec;
     } else {
+        if (undefined === process.env.SHELL) {
+            throw new Error("process.env.SHELL is not a string.");
+        }
         return process.env.SHELL;
     }
 }

@@ -80,7 +80,10 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
      * @return True if parsing succeeded, false otherwise. Read the results by calling .getParsingResult().
      */
     public async process(): Promise<boolean> {
-        const current_variables = this.variable_sets.shift();
+        if (this.variable_sets.length === 0) {
+            throw new Error("No variable sets are left for processing.");
+        }
+        const current_variables = this.variable_sets.shift() as VariableSet; // as VariableSet: Tell TypeScript that there is always a set of variables.
         let success = true;
 
         debugLog("Parsing process: Count variables in current set: " + current_variables.size);
@@ -98,7 +101,21 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             } else {
                 // Continue parsing content from previous parsing result. This time parse variables that were not parse back then.
                 // FIXME: Problem: variable values that came from an earlier phase are exposed to repetitive parsing. Find a way to limit the parsing to only original parts of the shell command.
-                parse_content = this.parsing_results[content_key].parsed_content;
+
+                const previousParsingResult: ParsingResult | undefined = this.parsing_results[content_key];
+                if (undefined === previousParsingResult) {
+                    // This is just a type guard. this.getContentKeys() should only return keys that exist, so the checks should never throw errors in practise.
+                    throw new Error("Parsing results do not contain key: " + content_key);
+                }
+
+                // Check that the previous parsing did not fail.
+                if (null === previousParsingResult.parsed_content) {
+                    // Previous parsing had probably failed.
+                    throw new Error("Tried to continue parsing, but previous parsing result is null. Probably previous parsing has failed.");
+                }
+
+                // Previous parsing was ok.
+                parse_content = previousParsingResult.parsed_content;
                 debugLog("Continuing parsing '" + content_key + "': " + parse_content);
             }
 
@@ -132,11 +149,12 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     public async processRest(): Promise<boolean> {
         // 1. Check a previous parsing result (if exists).
         for (const content_key of this.getContentKeys()) {
-            if (this.parsing_results[content_key]) {
+            const parsingResult: ParsingResult | undefined = this.parsing_results[content_key];
+            if (parsingResult) {
                 // A previous parsing result exists.
                 // Ensure it has not failed.
-                debugLog("Previous parsing succeeded? " + this.parsing_results[content_key].succeeded);
-                if (!this.parsing_results[content_key].succeeded) {
+                debugLog("Previous parsing succeeded? " + parsingResult.succeeded);
+                if (!parsingResult.succeeded) {
                     // The previous parsing result has failed.
                     return false;
                 }
@@ -169,8 +187,16 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     private getErrorMessages() {
         let error_messages: string[] = [];
         for (const content_key of this.getContentKeys()) {
+            const parsingResult: ParsingResult | undefined = this.parsing_results[content_key];
+
+            // Type guard
+            if (undefined === parsingResult) {
+                // This should never happen, because this.getContentKeys() should only return existing keys.
+                throw new Error("Parsing result is undefined.");
+            }
+
             error_messages.push(
-                ...this.parsing_results[content_key].error_messages,
+                ...parsingResult.error_messages,
             );
         }
 
@@ -188,17 +214,22 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     /**
      * Merges consecutive parsing results together so that information from both the old and new parsing results can be preserved.
      */
-    private mergeToParsingResults(content_key: keyof ParsingMap, parsing_result: ParsingResult) {
-        if (!this.parsing_results[content_key]) {
-            // No need to merge. But clone the object so that possible future merges will not mess up the original object in case it's used somewhere else.
-            this.parsing_results[content_key] = cloneObject(parsing_result);
+    private mergeToParsingResults(content_key: keyof ParsingMap, newParsingResult: ParsingResult) {
+        const originalParsingResult: ParsingResult | undefined = this.parsing_results[content_key];
+        if (undefined === originalParsingResult) {
+            // No need to merge. But clone the object so that possible future merges will not mess up the original object
+            // in case it's used somewhere else.
+            this.parsing_results[content_key] = cloneObject(newParsingResult);
+            // Note that originalParsingResult is still undefined. If you continue writing code here or after the if block
+            // (near the end of the function), do something like originalParsingResult = this.parsing_results[content_key]
+            // but that would require changing originalParsingResult from const to let.
         } else {
             // Merge
-            // NOTE: this.parsing_results[content_key].original_content IS KEPT UNCHANGED! The newer "original" content is not actually original, because it's partly parsed. That's why the old one is preserved.
-            this.parsing_results[content_key].parsed_content = parsing_result.parsed_content; // New parsed content overrides the old one.
-            this.parsing_results[content_key].succeeded &&= parsing_result.succeeded; // Both the old and new parsing must have succeeded in order to consider the whole process succeeded.
-            this.parsing_results[content_key].error_messages.push(...parsing_result.error_messages); // Include both old and new error messages.
-            this.parsing_results[content_key].count_parsed_variables += parsing_result.count_parsed_variables; // Sum up the variable usage counts. At the time of writing, the sum is only used for determining if there were any variables parsed or not, so an accurate sum is not used atm.
+            // NOTE: originalParsingResult.original_content IS KEPT UNCHANGED! The newer "original" content is not actually original, because it's partly parsed. That's why the old one is preserved.
+            originalParsingResult.parsed_content = newParsingResult.parsed_content; // New parsed content overrides the old one.
+            originalParsingResult.succeeded &&= newParsingResult.succeeded; // Both the old and new parsing must have succeeded in order to consider the whole process succeeded.
+            originalParsingResult.error_messages.push(...newParsingResult.error_messages); // Include both old and new error messages.
+            originalParsingResult.count_parsed_variables += newParsingResult.count_parsed_variables; // Sum up the variable usage counts. At the time of writing, the sum is only used for determining if there were any variables parsed or not, so an accurate sum is not used atm.
         }
     }
 

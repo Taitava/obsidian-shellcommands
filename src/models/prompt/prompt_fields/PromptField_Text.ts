@@ -42,8 +42,8 @@ export class PromptField_Text extends PromptField {
         const label_parsing_result = await parseVariables(this.prompt.model.plugin, this.configuration.label, null, t_shell_command, sc_event);
         const description_parsing_result = await parseVariables(this.prompt.model.plugin, this.configuration.description, null, t_shell_command, sc_event);
         const setting = new Setting(container_element)
-            .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content : label_parsing_result.original_content)
-            .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content : description_parsing_result.original_content)
+            .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content as string : label_parsing_result.original_content)
+            .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content as string : description_parsing_result.original_content)
             .addText((text_component) => {
                 this.text_component = text_component;
                 text_component.onChange(on_change);

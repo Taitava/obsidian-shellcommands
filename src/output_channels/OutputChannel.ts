@@ -53,7 +53,7 @@ export abstract class OutputChannel {
      * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
      * excluded from OutputModal.
      */
-    public static readonly hotkey_letter: string = undefined;
+    public static readonly hotkey_letter: string | undefined = undefined;
 
     /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
@@ -209,7 +209,7 @@ export abstract class OutputChannel {
             for (output_stream_name in output_streams) {
                 wrapped_output_streams[output_stream_name] = await wrapOutputIfEnabled(
                     output_stream_name,
-                    output_streams[output_stream_name],
+                    output_streams[output_stream_name] as string, // as string = output content always exists because the key came from for...in.
                 );
             }
             return wrapped_output_streams;
@@ -272,7 +272,7 @@ export abstract class OutputChannel {
         if (parsing_result.succeeded) {
             // Succeeded.
             debugLog("Output wrapping: Wrapping " + output_stream + " succeeded.");
-            return parsing_result.parsed_content;
+            return parsing_result.parsed_content as string;
         } else {
             // Failed for some reason.
             this.plugin.newError("Output wrapping failed, see error(s) below.");

@@ -58,7 +58,7 @@ export class Variable_YAMLValue extends FileVariable {
         });
     }
 
-    private yaml_value_cache: string[] | string;
+    private yaml_value_cache: string[] | string | undefined; // undefined = allow resetting back to undefined in .reset()
     private getFileYAMLValue(active_file: TFile): string[] | string {
         if (!this.yaml_value_cache) {
             this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
@@ -76,8 +76,13 @@ export class Variable_YAMLValue extends FileVariable {
             return false;
         }
 
-        const active_file = this.getFile();
-        return typeof this.getFileYAMLValue(active_file) === "string";
+        const activeFile = this.getFile();
+
+        if (null == activeFile) {
+            return false;
+        }
+
+        return typeof this.getFileYAMLValue(activeFile) === "string";
     }
 
 }

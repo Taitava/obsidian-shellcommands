@@ -48,6 +48,9 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
             .setIcon("bullet-list")
             .setTooltip(`Show the current ${path_variable_name} content (without any additions).`)
             .onClick(() => {
+                if (undefined === process.env.PATH) {
+                    throw new Error("process.env.PATH is not a string.");
+                }
                 const modal = new ConfirmationModal(
                     plugin,
                     `Current ${path_variable_name} content`,
