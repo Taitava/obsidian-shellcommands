@@ -103,6 +103,7 @@ export function getEditor(app: App): Editor | null {
     return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function cloneObject<ObjectType>(object: Object): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
@@ -112,6 +113,7 @@ export function cloneObject<ObjectType>(object: Object): ObjectType{
  *
  * @param objects
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function combineObjects(...objects: Object[]) {
     return Object.assign({}, ...objects);
 }
@@ -191,6 +193,7 @@ export function extractFileParentPath(file_path: string) {
     return path.parse(file_path).dir;
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
     for (const property_name in object) {
@@ -319,6 +322,8 @@ export function randomInteger(min: number, max: number) {
  * @param content
  */
 export function escapeMarkdownLinkCharacters(content: string) {
+    // TODO: \[ can be replaced with [ as eslint suggests and ten remove the ignore line below. I'm not doing it now because it would be outside of the scope of this commit/issue #70.
+    // eslint-disable-next-line no-useless-escape
     return content.replace(/[\\()\[\]]/gu, "\\$&");
 }
 
