@@ -59,6 +59,7 @@ import {Variable_EventNoteContent} from "./event_variables/Variable_EventNoteCon
 import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
 import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
+import {Variable_Newline} from "./Variable_Newline";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -118,6 +119,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
         built_in_variables.push(
+            new Variable_Newline(plugin),
             new Variable_Passthrough(plugin),
         );
     }
