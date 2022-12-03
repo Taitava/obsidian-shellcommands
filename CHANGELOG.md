@@ -25,6 +25,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
  - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
 
+### To be Fixed
+ - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
+
 ## [0.17.0] - 2022-11-26
 
 **SC VERSION `0.17.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `0.16.3` (practically the same as `1.0.0`). Older versions of Obsidian cannot upgrade SC to `0.17.0`.** The requirement raising is done due to [#276](https://github.com/Taitava/obsidian-shellcommands/issues/276) and [#291](https://github.com/Taitava/obsidian-shellcommands/issues/291).
