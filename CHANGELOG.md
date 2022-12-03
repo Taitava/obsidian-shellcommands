@@ -10,7 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-- Nothing at the moment.
+### To be Added
+ - [Debug: Create a {{newline}} variable (#295)](https://github.com/Taitava/obsidian-shellcommands/issues/295).
+   - Only available in debug mode and used for testing.
+
+### To be Changed
+ - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
 
 ## [0.17.0] - 2022-11-26
 
