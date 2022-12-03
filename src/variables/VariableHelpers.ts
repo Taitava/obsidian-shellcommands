@@ -179,6 +179,16 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
             // Property was not found.
             error_messages.push("YAML property '" + property_name + "' is not found.");
             return error_messages;
+        } else if (null === property_value) {
+            // Property is found, but has an empty value. Example:
+            //   ---
+            //   itemA: valueA
+            //   itemB:
+            //   itemC: valueC
+            //   ---
+            // Here `itemB` would have a null value.
+            error_messages.push("YAML property '" + property_name + "' has a null value. Make sure the property is not accidentally left empty.");
+            return error_messages;
         } else if ("object" === typeof property_value) {
             // The value is an object.
             // Check if we have still dot notation parts left in the property path.
