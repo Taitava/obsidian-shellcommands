@@ -130,6 +130,10 @@ div.SC-shell-command-setting textarea {
     resize: vertical;
 }
 
+div.SC-hotkey-info {
+    white-space: nowrap;
+}
+
 div.SC-hotkey-info svg {
     vertical-align: middle; /* Not middle but close enough. */
 }
