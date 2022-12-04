@@ -75,7 +75,7 @@ import {decorateMultilineField} from "./setting_elements/multilineField";
  * TODO: Rename to ShellCommandSettingsModal
  */
 export class ExtraOptionsModal extends SC_Modal {
-    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation";
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static ENVIRONMENTS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
@@ -269,6 +269,7 @@ export class ExtraOptionsModal extends SC_Modal {
         // Stdin field
         new Setting(container_element)
             .setName("Pass variables to stdin")
+            .setDesc("Used to pass long texts as input to the shell command. There is a limit to command line length, and e.g. {{note_content}} might provide a value too long to be used as an argument, so it works better when passed to stdin. Also, programs that ask multiple values interactively, can be fed with values using stdin. If there are multiple values that need to be inputted, put them on separate lines. Many shell programs interpret newlines as separators between different values.")
             .addExtraButton(extraButtonComponent => extraButtonComponent
                 .setIcon("help")
                 .setTooltip("Documentation: Pass variables to stdin")
@@ -287,7 +288,7 @@ export class ExtraOptionsModal extends SC_Modal {
             await this.plugin.saveSettings();
         };
         new Setting(stdinSettingContainer)
-            .setDesc("Can be used to pass long texts as input to the shell command. Very long texts cannot be passed as command arguments, so e.g. {{note_content}} works better when passed to stdin. Static text is also supported, and linebreaks.")
+            .setDesc("Can contain {{variables}} and/or static text.")
             .addTextArea(textareaComponent => {
                 textareaComponent
                     .setValue(this.t_shell_command.getInputChannels().stdin ?? "")
