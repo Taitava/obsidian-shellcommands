@@ -414,6 +414,7 @@ export class TShellCommand {
                 shell_command: this.getShellCommand(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
+                stdinContent: this.configuration.input_contents.stdin ?? undefined,
                 output_wrapper_stdout: stdout_output_wrapper ? stdout_output_wrapper.getContent() : undefined,
                 output_wrapper_stderr: stderr_output_wrapper ? stderr_output_wrapper.getContent() : undefined,
             },
@@ -424,6 +425,8 @@ export class TShellCommand {
                 this.getPreactionsDependentVariables(), // Second set: Variables that are tied to preactions. Can be an empty set.
             ],
             [
+                // Do not escape variables in stdin, because shells won't interpret stdin as executable commands.
+                "stdinContent",
                 // Do not escape variables in output wrappers, because they are not going through a shell and escape characters would be visible in the end result.
                 'output_wrapper_stdout',
                 'output_wrapper_stderr',
@@ -577,6 +580,7 @@ export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    stdinContent?: string,
     output_wrapper_stdout?: string,
     output_wrapper_stderr?: string,
     succeeded: boolean;
@@ -589,6 +593,7 @@ type shell_command_parsing_map = {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    stdinContent?: string,
     output_wrapper_stdout?: string,
     output_wrapper_stderr?: string,
 };
