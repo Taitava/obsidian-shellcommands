@@ -65,7 +65,11 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
-import {DocumentationOutputHandlingModeLink} from "../Documentation";
+import {
+    DocumentationOutputHandlingModeLink,
+    DocumentationStdinContentLink,
+} from "../Documentation";
+import {decorateMultilineField} from "./setting_elements/multilineField";
 
 /**
  * TODO: Rename to ShellCommandSettingsModal
@@ -260,6 +264,40 @@ export class ExtraOptionsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 })
             )
+        ;
+
+        // Stdin field
+        new Setting(container_element)
+            .setName("Pass variables to stdin")
+            .addExtraButton(extraButtonComponent => extraButtonComponent
+                .setIcon("help")
+                .setTooltip("Documentation: Pass variables to stdin")
+                .onClick(() => gotoURL(DocumentationStdinContentLink))
+            )
+        ;
+        const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        const onStdinChange = async (newStdinContent: string) => {
+            if ("" === newStdinContent) {
+                // Set to null
+                this.t_shell_command.getConfiguration().input_contents.stdin = null;
+            } else {
+                // Set value
+                this.t_shell_command.getConfiguration().input_contents.stdin = newStdinContent;
+            }
+            await this.plugin.saveSettings();
+        };
+        new Setting(stdinSettingContainer)
+            .setDesc("Can be used to pass long texts as input to the shell command. Very long texts cannot be passed as command arguments, so e.g. {{note_content}} works better when passed to stdin. Static text is also supported, and linebreaks.")
+            .addTextArea(textareaComponent => {
+                textareaComponent
+                    .setValue(this.t_shell_command.getInputChannels().stdin ?? "")
+                ;
+                decorateMultilineField(this.plugin, textareaComponent, onStdinChange);
+                if (this.plugin.settings.show_autocomplete_menu) {
+                    // Show autocomplete menu (= a list of available variables).
+                    createAutocomplete(this.plugin, textareaComponent.inputEl, onStdinChange);
+                }
+            })
         ;
 
         // Shell command id

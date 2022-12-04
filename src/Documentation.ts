@@ -25,6 +25,7 @@ export const DocumentationEventsFolderLink = "https://publish.obsidian.md/shellc
 export const DocumentationPATHAugmentationsLink = "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable";
 export const DocumentationOutputWrappersLink = "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers";
 export const DocumentationOutputHandlingModeLink = "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling";
+export const DocumentationStdinContentLink = "https://publish.obsidian.md/shellcommands/Variables/Pass+variables+to+stdin";
 export const GitHubLink = "https://github.com/Taitava/obsidian-shellcommands";
 export const ChangelogLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/CHANGELOG.md";
 export const LicenseLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/LICENSE";

@@ -186,6 +186,10 @@ export class TShellCommand {
         return this.configuration.ignore_error_codes;
     }
 
+    public getInputChannels() {
+        return this.configuration.input_contents;
+    }
+
     public getOutputChannelOrder() {
         return this.configuration.output_channel_order;
     }
