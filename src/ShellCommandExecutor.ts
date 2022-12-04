@@ -161,8 +161,8 @@ export class ShellCommandExecutor {
                         shell_command: (parsing_results["shell_command"] as ParsingResult).parsed_content as string,
                         alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
                         environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
-                        output_wrapper_stdout: (parsing_results.output_wrapper_stdout as ParsingResult).parsed_content as string,
-                        output_wrapper_stderr: (parsing_results.output_wrapper_stderr as ParsingResult).parsed_content as string,
+                        output_wrapper_stdout: parsing_results.output_wrapper_stdout?.parsed_content as string, // Output wrappers are not always present. If they are absent, use undefined.
+                        output_wrapper_stderr: parsing_results.output_wrapper_stderr?.parsed_content as string,
                         succeeded: true,
                         error_messages: [],
                     };
