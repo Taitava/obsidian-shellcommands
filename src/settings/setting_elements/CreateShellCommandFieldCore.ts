@@ -26,6 +26,7 @@ import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
 import {EOL} from "os";
+import {decorateMultilineField} from "./multilineField";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -50,27 +51,6 @@ export function CreateShellCommandFieldCore(
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
-
-        // Resize the shell command textarea to match the amount of lines in it.
-        update_textarea_height(shell_command, shell_command_placeholder);
-    }
-
-    function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
-        const newlines_pattern = /\r\n|\r|\n/;
-        const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
-        const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
-        let count_lines_final = Math.max(
-            count_lines_in_shell_command,
-            count_lines_in_shell_command_placeholder,
-        );
-        if (plugin.settings.max_visible_lines_in_shell_command_fields) {
-            // Limit the height so that the field will not take up too much space.
-            count_lines_final = Math.min(
-                plugin.settings.max_visible_lines_in_shell_command_fields,
-                count_lines_final,
-            );
-        }
-        (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
     const setting_group: SettingFieldGroup = {
@@ -83,10 +63,13 @@ export function CreateShellCommandFieldCore(
         ,
         shell_command_setting:
             new Setting(container_element)
-                .addTextArea(text => text
-                    .setPlaceholder(shell_command_placeholder)
-                    .setValue(shell_command)
-                    .onChange(on_change)
+                .addTextArea(textareaComponent => {
+                        textareaComponent
+                            .setPlaceholder(shell_command_placeholder)
+                            .setValue(shell_command)
+                        ;
+                        decorateMultilineField(plugin, textareaComponent, on_change);
+                    }
                 )
                 .setClass("SC-shell-command-setting")
         ,
@@ -103,7 +86,6 @@ export function CreateShellCommandFieldCore(
                 })
         ,
     };
-    update_textarea_height(shell_command, shell_command_placeholder);
 
     // Autocomplete menu
     if (show_autocomplete_menu) {

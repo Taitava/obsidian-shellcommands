@@ -126,6 +126,9 @@ div.SC-shell-command-setting div.setting-item-info {
 
 div.SC-shell-command-setting textarea {
     width: 100%;
+}
+
+textarea.SC-multiline {
     padding: 2px 5px; /* Shrink the padding all around the textarea. */
     resize: vertical;
 }
