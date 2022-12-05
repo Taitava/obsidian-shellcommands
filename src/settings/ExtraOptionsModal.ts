@@ -268,7 +268,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Stdin field
         new Setting(container_element)
-            .setName("Pass variables to stdin")
+            .setName("Pass variables to standard input (stdin)")
             .setDesc("Used to pass long texts as input to the shell command. There is a limit to command line length, and e.g. {{note_content}} might provide a value too long to be used as an argument, so it works better when passed to stdin. Also, programs that ask multiple values interactively, can be fed with values using stdin. If there are multiple values that need to be inputted, put them on separate lines. Many shell programs interpret newlines as separators between different values.")
             .addExtraButton(extraButtonComponent => extraButtonComponent
                 .setIcon("help")
