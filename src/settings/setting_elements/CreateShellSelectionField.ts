@@ -19,7 +19,7 @@
 
 import {IPlatformSpecificString, PlatformId, PlatformNames} from "../SC_MainSettings";
 import {extractFileName, getOperatingSystem} from "../../Common";
-import {getUsersDefaultShell, PlatformShells} from "../../Shell";
+import {getUsersDefaultShell, PlatformShells} from "../../shells/ShellFunctions";
 import {Setting} from "obsidian";
 import SC_Plugin from "../../main";
 

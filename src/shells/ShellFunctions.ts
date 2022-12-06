@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {extractFileName, getOperatingSystem, isWindows} from "./Common";
+import {extractFileName, getOperatingSystem, isWindows} from "../Common";
 
 export const PlatformShells = {
     darwin: {

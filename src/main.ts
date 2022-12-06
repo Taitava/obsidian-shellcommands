@@ -58,7 +58,7 @@ import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./Shell";
+import {getUsersDefaultShell} from "./shells/ShellFunctions";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";

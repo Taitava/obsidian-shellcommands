@@ -34,7 +34,7 @@ import {
     startRealtimeOutputHandling,
 } from "./output_channels/OutputChannelFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {isShellSupported} from "./Shell";
+import {isShellSupported} from "./shells/ShellFunctions";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
