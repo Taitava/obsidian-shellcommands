@@ -34,6 +34,8 @@ import {
 import {ConfirmationModal} from "../../ConfirmationModal";
 import {createAutocomplete} from "./Autocomplete";
 import {DocumentationPATHAugmentationsLink} from "../../Documentation";
+import {Shell} from "../../shells/Shell";
+import {getShellsForPlatform} from "../../shells/ShellFunctions";
 
 export function createPATHAugmentationFields(plugin: SC_Plugin, container_element: HTMLElement, path_augmentations: IPlatformSpecificString) {
 
@@ -76,7 +78,7 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
         const platform_name = PlatformNames[platform_id];
 
         new Setting(sub_container_element).setName(platform_name + " " + getPATHEnvironmentVariableName(platform_id) + " additions")
-            .setDesc("Define each directory on a separate line, or multiple directories on one line, separated by " + getPATHSeparator(platform_id, true))
+            .setDesc("Define each directory on a separate line, or multiple directories on one line, separated by " + getVerbosePATHSeparator(platform_id))
             .addTextArea(textarea => textarea
                 .setValue(path_augmentations[platform_id] ?? "")
                 .onChange(async (new_path_augmentation: string) => {
@@ -99,18 +101,37 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
         });
 }
 
-export function getPATHSeparator(platform_id: PlatformId, verbose = false) {
-    switch (platform_id) {
-        case "linux":
-        case "darwin": // This is macOS.
-            return verbose ? "a colon :" : ":";
-        case "win32":
-            return verbose ? "a semicolon ;" : ";";
+/**
+ * Determines a path separator character form the given platformId. Note that the decision is made by using whatever shell
+ * happens to come up for that particular platformId. DO NOT use this function for real usages, it can only be used for
+ * showing a preview to user of what will be used a separator. Do not export this function.
+ *
+ * Returns either:
+ *  - "a colon :"
+ *  - "a semicolon ;"
+ *  - Or just a single character.
+ *
+ * @param platformId
+ */
+function getVerbosePATHSeparator(platformId: PlatformId) {
+    const exampleShell: Shell | undefined = getShellsForPlatform(platformId).first(); // Does not matter so much which shell it is, just need to get one that can give a path separator for demonstration purposes.
+    if (!exampleShell) {
+        throw new Error("Was not able to get a shell for platform: " + platformId + ". A shell is needed for getting a path separator.");
+    }
+    const pathSeparator = exampleShell.getPathSeparator();
+    switch (pathSeparator) {
+        case ":":
+            return "a colon :";
+        case ";":
+            return "a semicolon ;";
+        default:
+            // It's other than : or ; so don't know what word to add. Return as-is.
+            return pathSeparator;
     }
 }
 
-export function convertNewlinesToPATHSeparators(path: string, platform_id: PlatformId) {
-    const separator = getPATHSeparator(platform_id);
+export function convertNewlinesToPATHSeparators(path: string, shell: Shell) {
+    const separator = shell.getPathSeparator();
     return path.replace(
         /(\r\n|\r|\n)+/gu, // + means that multiple adjacent newlines can be combined into a single separator character.
         () => separator, // The replacement is a callback in order to avoid problems with $ characters, although that problem would only occur if the separator would contain a $ character, which is does not, but fix it anyway.

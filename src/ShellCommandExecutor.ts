@@ -41,7 +41,6 @@ import {
     ConfirmationModal,
     convertNewlinesToPATHSeparators,
     getPATHEnvironmentVariableName,
-    getPATHSeparator,
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
@@ -236,7 +235,7 @@ export class ShellCommandExecutor {
         const environment_variables = cloneObject<typeof process.env>(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
 
         // Augment the PATH environment variable (if wanted)
-        const augmented_path = this.augmentPATHEnvironmentVariable(shell_command_parsing_result.environment_variable_path_augmentation);
+        const augmented_path = this.augmentPATHEnvironmentVariable(shell_command_parsing_result.environment_variable_path_augmentation, shell);
         if (augmented_path.length > 0) {
             environment_variables[getPATHEnvironmentVariableName()] = augmented_path;
         }
@@ -470,8 +469,8 @@ export class ShellCommandExecutor {
         return working_directory;
     }
 
-    private augmentPATHEnvironmentVariable(path_augmentation: string): string {
-        path_augmentation = convertNewlinesToPATHSeparators(path_augmentation, getOperatingSystem());
+    private augmentPATHEnvironmentVariable(path_augmentation: string, shell: Shell): string {
+        path_augmentation = convertNewlinesToPATHSeparators(path_augmentation, shell);
         // Check if there's anything to augment.
         if (path_augmentation.length > 0) {
             // Augment.
@@ -489,7 +488,7 @@ export class ShellCommandExecutor {
             } else {
                 // The augmentation does not contain the original PATH.
                 // Instead of simply replacing the original PATH, append the augmentation after it.
-                const separator = getPATHSeparator(getOperatingSystem());
+                const separator = shell.getPathSeparator();
                 debugLog("Augmenting environment variable PATH by adding " + separator + path_augmentation + " after it.");
                 augmented_path = original_path + separator + path_augmentation;
             }
