@@ -78,6 +78,10 @@ import {
 } from "./models/output_wrapper/OutputWrapperModel";
 import {Shell} from "./shells/Shell";
 import {ParsingResult} from "./variables/parseVariables";
+import {
+    CustomShellInstanceMap,
+    CustomShellModel,
+} from "./models/custom_shell/CustomShellModel";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -91,6 +95,7 @@ export default class SC_Plugin extends Plugin {
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
+    private customShellInstances: CustomShellInstanceMap;
 	private variables: VariableSet;
     private output_wrappers: OutputWrapperMap;
 
@@ -128,6 +133,10 @@ export default class SC_Plugin extends Plugin {
 
 		// Define models
 		introduceModels(this);
+
+        // Load CustomShells
+        const customShellModel = getModel<CustomShellModel>(CustomShellModel.name);
+        this.customShellInstances = customShellModel.loadInstances(this.settings);
 
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
@@ -201,6 +210,10 @@ export default class SC_Plugin extends Plugin {
 
 	public getCustomVariableInstances(): CustomVariableInstanceMap {
 		return this.custom_variable_instances;
+	}
+
+	public getCustomShellInstances(): CustomShellInstanceMap {
+		return this.customShellInstances;
 	}
 
 	private getShellCommandConfigurations(): ShellCommandConfiguration[] {

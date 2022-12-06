@@ -26,11 +26,13 @@ import {
     PromptModel,
 } from "../imports";
 import {OutputWrapperModel} from "./output_wrapper/OutputWrapperModel";
+import {CustomShellModel} from "./custom_shell/CustomShellModel";
 
 export function introduceModels(plugin: SC_Plugin) {
     debugLog("Introducing models.")
 
     // Keep in alphabetical order, if possible.
+    introduceModelClass(new CustomShellModel(plugin));
     introduceModelClass(new CustomVariableModel(plugin));
     introduceModelClass(new PromptFieldModel(plugin));
     introduceModelClass(new PromptModel(plugin));

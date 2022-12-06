@@ -159,6 +159,18 @@ div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after
     content: "}}"; /* Wrap custom variable name field in {{_ }} */
 }
 
+/*
+ * CUSTOM SHELL SETTINGS
+ */
+div.SC-path-translator-setting div.setting-item-control::before {
+    content: "(path, type) => {";
+    white-space: nowrap;
+}
+
+div.SC-path-translator-setting div.setting-item-control::after {
+    content: "}";
+}
+
 
 /*
  * MODALS (generic rules to all of the plugin's modals)

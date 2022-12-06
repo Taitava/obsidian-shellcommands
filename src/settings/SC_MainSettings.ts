@@ -25,6 +25,7 @@ import {
     PromptConfiguration,
 } from "../imports";
 import {OutputWrapperConfiguration} from "../models/output_wrapper/OutputWrapper";
+import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -78,6 +79,9 @@ export interface SC_MainSettings {
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
 
+    // Custom shells
+    custom_shells: CustomShellConfiguration[];
+
     // Output wrappers
     output_wrappers: OutputWrapperConfiguration[];
 
@@ -129,6 +133,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Custom variables
         custom_variables: [],
 
+        // Custom shells
+        custom_shells: [],
+
         // Output wrappers
         output_wrappers: [],
     }
@@ -139,7 +146,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
  * Values are borrowed from NodeJS.Platform.
  * "darwin" = Macintosh.
  *
- * This type must be synchronous to IOperatingSystemSpecificString interface.
+ * This type must be synchronous to IPlatformSpecificString interface.
  *
  * @see NodeJS.Platform
  */

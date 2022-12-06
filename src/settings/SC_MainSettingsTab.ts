@@ -33,6 +33,7 @@ import {
     DocumentationCustomVariablesLink,
     LicenseLink,
     DocumentationOutputWrappersLink,
+    DocumentationCustomShellsLink,
 } from "../Documentation";
 import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
@@ -51,6 +52,8 @@ import {createNewModelInstanceButton} from "../models/createNewModelInstanceButt
 import {ExecutionNotificationMode} from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
+import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
+import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -415,6 +418,28 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Platforms' default shells
         createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+
+        // CustomShells
+        new Setting(container_element)
+        .setName("Custom shells")
+        .setDesc("Here you can define shells that are not among the built-in ones that SC supports out-of-the-box.")
+        .setHeading() // Make the "Custom shells" text bold.
+        .addExtraButton(extra_button => extra_button
+            .setIcon("help")
+            .setTooltip("Documentation: Custom shells")
+            .onClick(() => {
+                gotoURL(DocumentationCustomShellsLink);
+            }),
+        )
+        ;
+
+        // Settings for each CustomShell
+        const customShellModel = getModel<CustomShellModel>(CustomShellModel.name);
+        const customShellContainer = container_element.createDiv();
+        this.plugin.getCustomShellInstances().forEach((customShellInstance: CustomShellInstance) => {
+            customShellModel.createSettingFields(customShellInstance, customShellContainer);
+        });
+        createNewModelInstanceButton<CustomShellModel, CustomShellInstance>(this.plugin, CustomShellModel.name, container_element, customShellContainer, this.plugin.settings).then();
 
         // PATH environment variable fields
         createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
