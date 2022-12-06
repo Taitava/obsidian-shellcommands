@@ -57,8 +57,9 @@ export class CustomVariableView extends ItemView {
     public async updateContent() {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
+        const shell = this.plugin.getDefaultShell(); // Custom variables don't actually use shells when getting values, but .getValue() requires one even though it won't be used.
         for (const custom_variable_instance of this.plugin.getCustomVariableInstances().values()) {
-            let custom_variable_value = (await custom_variable_instance.getCustomVariable().getValue()).value;
+            let custom_variable_value = (await custom_variable_instance.getCustomVariable().getValue(shell)).value;
             let emphasize = false;
             if (null === custom_variable_value) {
                 custom_variable_value = "No value yet.";

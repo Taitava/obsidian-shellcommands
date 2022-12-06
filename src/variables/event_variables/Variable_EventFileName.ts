@@ -24,6 +24,7 @@ import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentMod
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFileName extends EventVariable {
     public variable_name = "event_file_name";
@@ -38,7 +39,10 @@ export class Variable_EventFileName extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+    protected generateValue(
+        shell: Shell,
+        sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);

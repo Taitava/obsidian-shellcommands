@@ -123,7 +123,8 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             const parsing_result = await parseVariables(
                 this.plugin,
                 parse_content,
-                this.avoidEscaping(content_key) ? null : this.t_shell_command.getShell(), // If no escaping is needed, pass null.
+                this.t_shell_command.getShell(),
+                !this.avoidEscaping(content_key),
                 this.t_shell_command,
                 this.sc_event,
                 current_variables,

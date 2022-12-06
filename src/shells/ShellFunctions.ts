@@ -17,27 +17,30 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {extractFileName, getOperatingSystem, isWindows} from "../Common";
+import {isWindows} from "../Common";
+import {PlatformId} from "../settings/SC_MainSettings";
+import {Shell} from "./Shell";
+import {Shell_Bash} from "./Shell_Bash";
+import {Shell_Dash} from "./Shell_Dash";
+import {Shell_Zsh} from "./Shell_Zsh";
+import {Shell_PowerShellCore} from "./Shell_PowerShellCore";
+import {Shell_PowerShell5} from "./Shell_PowerShell5";
+import {Shell_CMD} from "./Shell_CMD";
 
-export const PlatformShells = {
-    darwin: {
-        "/bin/bash": "Bash",
-        "/bin/dash": "Dash",
-        "/bin/zsh": "Zsh (Z shell)",
-    },
-    linux: {
-        "/bin/bash": "Bash",
-        "/bin/dash": "Dash",
-        "/bin/zsh": "Zsh (Z shell)",
-    },
-    win32: {
-        "pwsh.exe": "PowerShell Core",
-        "PowerShell.exe": "PowerShell 5",
-        "CMD.EXE": "cmd.exe",
-    },
-}
+// Register shells
+const shells: Set<Shell> = new Set;
+registerShell(new Shell_Bash());
+registerShell(new Shell_Dash());
+registerShell(new Shell_Zsh());
+registerShell(new Shell_PowerShellCore());
+registerShell(new Shell_PowerShell5());
+registerShell(new Shell_CMD());
 
-export function getUsersDefaultShell(): string {
+/**
+ * I'm not sure if the name of this method should something else than getUsersDefaultShellIdentifier(). The 'identifier'
+ * is a bit confusing, because the function returns a file path.
+ */
+export function getUsersDefaultShellIdentifier(): string {
     if (isWindows()) {
         if (undefined === process.env.ComSpec) {
             throw new Error("process.env.ComSpec is not a string.");
@@ -51,25 +54,36 @@ export function getUsersDefaultShell(): string {
     }
 }
 
-export function isShellSupported(shell: string) {
-    const shell_file_name = extractFileName(shell);
-    const supported_shells = Object.getOwnPropertyNames(PlatformShells[getOperatingSystem()]);
-
-    // Linux and macOS: Add the ambiguous 'sh' as a supported shell. It's not present in PlatformShells, because it's
-    // not desired to be an explicitly selectable shell as it's uncertain, which shell it actually points to. But have
-    // it supported when it comes from the "Use system default (sh)" option.
-    if (!isWindows()) {
-        // The platform is either Linux or macOS.
-        // Add 'sh' support.
-        supported_shells.push("sh");
-    }
-
-    for (const supported_shell_path of supported_shells) {
-        // Check that the shell file names match. It doesn't matter in which directory the shell is located in.
-        if (extractFileName(supported_shell_path).toLowerCase() === shell_file_name.toLowerCase()) {
-            // The shell can be considered to be supported.
-            return true;
+/**
+ * @param shellIdentifier
+ * @throws NonRecognisedShellError if a shell with the given identifier was not found.
+ */
+export function getShell(shellIdentifier: string): Shell {
+    for (const shell of shells) {
+        if (shell.matchesIdentifier(shellIdentifier)) {
+            return shell;
         }
     }
-    return false;
+    throw new UnecognisedShellError("No shell was found for identifier: " + shellIdentifier);
+}
+
+export class UnecognisedShellError extends Error {}
+
+export function getShells() {
+    return shells;
+}
+
+/**
+ * Returns all Shells that support the given operating system.
+ *
+ * @param platformId
+ */
+export function getShellsForPlatform(platformId: PlatformId) {
+    return Array.from(shells).filter((shell: Shell) => {
+        return shell.getSupportedPlatforms().includes(platformId);
+    });
+}
+
+export function registerShell(shell: Shell) {
+    shells.add(shell);
 }

@@ -25,6 +25,7 @@ import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
+import {Shell} from "../shells/Shell";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -72,6 +73,7 @@ export abstract class Variable {
     }
 
     public getValue(
+        shell: Shell,
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
 
@@ -85,7 +87,7 @@ export abstract class Variable {
         return new Promise<VariableValueResult>((resolve) => {
             if (this.isAvailable(sc_event)) {
                 // The variable can be used.
-                this.generateValue(sc_event).then((value: string | null) => {
+                this.generateValue(shell, sc_event).then((value: string | null) => {
                     resolve({
                         value: value,
                         error_messages: this.error_messages,
@@ -103,7 +105,7 @@ export abstract class Variable {
                         // Generate error messages by calling generateValue().
                         debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
                         // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
-                        this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
+                        this.generateValue(shell, sc_event).then(() => {  // No need to use the return value, it's null anyway.
                             resolve({
                                 value: null,
                                 error_messages: this.error_messages,
@@ -157,7 +159,7 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(sc_event: SC_Event | null): Promise<string|null>;
+    protected abstract generateValue(shell: Shell, sc_event: SC_Event | null): Promise<string|null>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;

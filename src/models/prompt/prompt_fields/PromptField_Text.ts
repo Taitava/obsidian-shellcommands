@@ -29,6 +29,7 @@ import {TShellCommand} from "../../../TShellCommand";
 import {
     PromptField,
 } from "../../../imports";
+import {Shell} from "../../../shells/Shell";
 
 export class PromptField_Text extends PromptField {
 
@@ -39,8 +40,23 @@ export class PromptField_Text extends PromptField {
 
         // Create the field
         const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
-        const label_parsing_result = await parseVariables(this.prompt.model.plugin, this.configuration.label, null, t_shell_command, sc_event);
-        const description_parsing_result = await parseVariables(this.prompt.model.plugin, this.configuration.description, null, t_shell_command, sc_event);
+        const shell: Shell = t_shell_command ? t_shell_command.getShell() : this.prompt.model.plugin.getDefaultShell(); // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+        const label_parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            this.configuration.label,
+            shell,
+            false,
+            t_shell_command,
+            sc_event
+        );
+        const description_parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            this.configuration.description,
+            shell,
+            false,
+            t_shell_command,
+            sc_event
+        );
         const setting = new Setting(container_element)
             .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content as string : label_parsing_result.original_content)
             .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content as string : description_parsing_result.original_content)

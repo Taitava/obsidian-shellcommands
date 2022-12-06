@@ -19,7 +19,10 @@
 
 import {IPlatformSpecificString, PlatformId, PlatformNames} from "../SC_MainSettings";
 import {extractFileName, getOperatingSystem} from "../../Common";
-import {getUsersDefaultShell, PlatformShells} from "../../shells/ShellFunctions";
+import {
+    getShellsForPlatform,
+    getUsersDefaultShellIdentifier,
+} from "../../shells/ShellFunctions";
 import {Setting} from "obsidian";
 import SC_Plugin from "../../main";
 
@@ -29,16 +32,15 @@ export function createShellSelectionField(plugin: SC_Plugin, container_element: 
         const platform_name = PlatformNames[platform_id];
         let options: Record<string, string>;
         if (is_global_settings) {
-            const current_system_default = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShell()) + ")" : "";
-            options = {"default": "Use system default" + current_system_default};
+            const currentSystemDefault = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShellIdentifier()) + ")" : "";
+            options = {"default": "Use system default" + currentSystemDefault};
         } else {
             options = {"default": "Use default"};
         }
-        for (const shell_path in PlatformShells[platform_id]) {
-            // @ts-ignore // TODO: Get rid of these two ts-ignores.
-            const shell_name = PlatformShells[platform_id][shell_path];
-            // @ts-ignore
-            options[shell_path] = shell_name;
+
+        // Get human-readable shell names
+        for (const shell of getShellsForPlatform(platform_id)) {
+            options[shell.getIdentifier()] = shell.getName();
         }
         new Setting(container_element)
             .setName(platform_name + (is_global_settings ? " default shell" : " shell"))

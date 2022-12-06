@@ -32,6 +32,7 @@ import {EventVariable} from "./EventVariable";
 import {getFolderPath} from "../VariableHelpers";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFolderPath extends EventVariable {
     public variable_name = "event_folder_path";
@@ -62,14 +63,17 @@ export class Variable_EventFolderPath extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): Promise<string | null> {
+    protected generateValue(
+        shell: Shell,
+        sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const folder = sc_event.getFolder();
-            return resolve(getFolderPath(this.app, folder, this.arguments.mode));
+            return resolve(getFolderPath(this.app, shell, folder, this.arguments.mode));
         });
     }
 

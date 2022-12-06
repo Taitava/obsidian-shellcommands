@@ -23,6 +23,7 @@ import {
 } from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {getFolderPath} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_NewNoteFolderPath extends Variable {
     public variable_name = "new_note_folder_path";
@@ -39,12 +40,12 @@ export class Variable_NewNoteFolderPath extends Variable {
         mode: "absolute" | "relative";
     }
 
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(shell: Shell): Promise<string|null> {
         return new Promise((resolve) => {
             const current_file = this.app.workspace.getActiveFile(); // Needed just in case new notes should be created in the same folder as the currently open file.
             const folder = this.app.fileManager.getNewFileParent(current_file ? current_file.path : ""); // If no file is open, use an empty string as instructed in .getNewFileParent()'s documentation.
             if (folder) {
-                return resolve(getFolderPath(this.app, folder, this.arguments.mode));
+                return resolve(getFolderPath(this.app, shell, folder, this.arguments.mode));
             } else {
                 this.newErrorMessage("Cannot determine a folder path for new notes. Please create a discussion in GitHub."); // I guess this never happens.
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.

@@ -20,13 +20,13 @@
 import {EventVariable} from "./EventVariable";
 import {
     getVaultAbsolutePath,
-    normalizePath2,
 } from "../../Common";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {SC_Event_FolderMoved} from "../../events/SC_Event_FolderMoved";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventOldFolderPath extends EventVariable {
     public variable_name = "event_old_folder_path";
@@ -49,7 +49,10 @@ export class Variable_EventOldFolderPath extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): Promise<string | null> {
+    protected generateValue(
+        shell: Shell,
+        sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
@@ -58,9 +61,9 @@ export class Variable_EventOldFolderPath extends EventVariable {
             const folder_old_relative_path = sc_event.getFolderOldRelativePath();
             switch (this.arguments.mode.toLowerCase()) {
                 case "relative":
-                    return resolve(normalizePath2(folder_old_relative_path));
+                    return resolve(shell.translateRelativePath(folder_old_relative_path));
                 case "absolute":
-                    return resolve(normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path));
+                    return resolve(shell.translateAbsolutePath(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path));
             }
 
             this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);

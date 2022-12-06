@@ -51,6 +51,8 @@ import {
 import {getIconHTML} from "./Icons";
 import {OutputStream} from "./output_channels/OutputChannelCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
+import {Shell} from "./shells/Shell";
+import {getShell} from "./shells/ShellFunctions";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -88,17 +90,21 @@ export class TShellCommand {
         return this.configuration.id;
     }
 
-    public getShell(): string {
+    public getShellIdentifier(): string {
         // Check if the shell command has defined a specific shell.
-        const shell: string | undefined = this.configuration.shells[getOperatingSystem()];
-        if (undefined === shell) {
+        const shellIdentifier: string | undefined = this.configuration.shells[getOperatingSystem()];
+        if (undefined === shellIdentifier) {
             // The shell command does not define an explicit shell.
             // Use a default shell from the plugin's settings.
-            return this.plugin.getDefaultShell();
+            return this.plugin.getDefaultShellIdentifier();
         } else {
             // The shell command has an explicit shell defined.
-            return shell;
+            return shellIdentifier;
         }
+    }
+
+    public getShell(): Shell {
+        return getShell(this.getShellIdentifier());
     }
 
     public getShells() {

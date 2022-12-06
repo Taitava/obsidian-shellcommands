@@ -47,12 +47,16 @@ export function getVaultAbsolutePath(app: App) {
     throw new Error("Could not retrieve vault path. No DataAdapter was found from app.vault.adapter.");
 }
 
-export function getPluginAbsolutePath(plugin: SC_Plugin) {
-    return normalizePath2(path.join(
-        getVaultAbsolutePath(plugin.app),
-        plugin.app.vault.configDir,
-        "plugins",
-        plugin.getPluginId()));
+export function getPluginAbsolutePath(plugin: SC_Plugin, convertSlashToBackslash: boolean) {
+    return normalizePath2(
+        path.join(
+            getVaultAbsolutePath(plugin.app),
+            plugin.app.vault.configDir,
+            "plugins",
+            plugin.getPluginId()
+        ),
+        convertSlashToBackslash
+    );
 }
 
 /**
@@ -147,7 +151,7 @@ export function removeFromSet<SetType>(from_set: Set<SetType>, remove: Set<SetTy
  *
  * TODO: I've opened a discussion about this on Obsidian's forums. If anything new comes up in the discussion, make changes accordingly. https://forum.obsidian.md/t/normalizepath-removes-a-leading/24713
  */
-export function normalizePath2(path: string) {
+export function normalizePath2(path: string, convertSlashToBackslash: boolean) {
     // 1. Preparations
     path = path.trim();
     const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
@@ -163,9 +167,8 @@ export function normalizePath2(path: string) {
 
     // 3. Fixes
     // Check that correct slashes are used.
-    if (isWindows()) {
-        // The platform is Windows.
-        // Convert / to \
+    if (convertSlashToBackslash) {
+        // Convert / to \ (usually done when running on Windows, but might in theory happen on other platforms, too, if using a shell that uses Windows directory separators).
         path = path.replace(/\//gu, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
         leading_slashes = leading_slashes.replace(/\//gu, "\\"); // Same here.
     }

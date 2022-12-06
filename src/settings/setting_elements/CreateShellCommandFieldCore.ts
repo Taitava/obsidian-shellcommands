@@ -26,13 +26,14 @@ import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
 import {EOL} from "os";
+import {Shell} from "../../shells/Shell";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_icon_and_name: string,
     shell_command: string,
-    shell: string,
+    shell: Shell,
     t_shell_command: TShellCommand,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
@@ -122,8 +123,8 @@ export function CreateShellCommandFieldCore(
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
-    const parsing_result = await parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
+    const parsing_result = await parseVariables(plugin, shell_command, shell, true, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {

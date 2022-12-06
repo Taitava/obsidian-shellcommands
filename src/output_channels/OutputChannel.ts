@@ -262,7 +262,8 @@ export abstract class OutputChannel {
         const parsing_result = await parseVariables(
             this.plugin,
             output_wrapper_content,
-            null, // No shell anymore, so no need for escaping.
+            this.t_shell_command.getShell(), // Even though the shell won't get executed anymore, possible file path related variables need it for directory path formatting.
+            false, // No shell is executed anymore, so no need for escaping.
             this.t_shell_command,
             null, // No support for {{event_*}} variables is needed, because they are already parsed in output_wrapper_content. This phase only parses {{output}} variable, nothing else.
             new VariableSet([output_variable]), // Only parse the {{output}} variable.

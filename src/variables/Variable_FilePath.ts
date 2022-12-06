@@ -21,6 +21,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {FileVariable} from "./FileVariable";
 import {getFilePath} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_FilePath extends FileVariable{
     public variable_name = "file_path";
@@ -37,11 +38,11 @@ export class Variable_FilePath extends FileVariable{
         mode: "absolute" | "relative";
     }
 
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(shell: Shell): Promise<string|null> {
         return new Promise((resolve) => {
             const active_file = this.getFile();
             if (active_file) {
-                return resolve(getFilePath(this.app, active_file, this.arguments.mode));
+                return resolve(getFilePath(this.app, shell, active_file, this.arguments.mode));
             } else {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }

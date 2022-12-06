@@ -21,6 +21,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {FolderVariable} from "./FolderVariable";
 import {getFolderPath} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_FolderPath extends FolderVariable {
     public variable_name = "folder_path";
@@ -37,11 +38,11 @@ export class Variable_FolderPath extends FolderVariable {
         mode: "absolute" | "relative";
     }
 
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(shell: Shell): Promise<string|null> {
         return new Promise((resolve) => {
             const folder = this.getFolder();
             if (folder) {
-                return resolve(getFolderPath(this.app, folder, this.arguments.mode));
+                return resolve(getFolderPath(this.app, shell, folder, this.arguments.mode));
             } else {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }

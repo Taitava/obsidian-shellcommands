@@ -20,16 +20,17 @@
 import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
-import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
 import {Variable, VariableValueResult} from "./Variable";
 import {TShellCommand} from "../TShellCommand";
 import {removeFromSet} from "../Common";
+import {Shell} from "../shells/Shell";
 
 /**
  * @param plugin
  * @param content
- * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
+ * @param shell Used 1) to determine how to escape special characters in variable values (if escapeVariables is true), and 2) do correct path normalization (for variables that return file system paths).
+ * @param escapeVariables If true, special characters in variable values are quoted (but this might be prevented if a variable starts with {{! instead of {{ ). If false, dno escaping is ever done.
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
@@ -40,7 +41,8 @@ import {removeFromSet} from "../Common";
 export async function parseVariables(
         plugin: SC_Plugin,
         content: string,
-        shell: string | null,
+        shell: Shell,
+        escapeVariables: boolean,
         t_shell_command: TShellCommand | null,
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
@@ -97,19 +99,16 @@ export async function parseVariables(
             }
 
             // Should the variable's value be escaped? (Usually yes).
-            let escape = true;
+            let escapeCurrentVariable = escapeVariables;
             if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
                 // The variable usage begins with {{! instead of {{
                 // This means the variable's value should NOT be escaped.
-                escape = false;
-            }
-            if (!shell) {
-                // Escaping is forced OFF.
-                escape = false;
+                escapeCurrentVariable = false;
             }
 
             // Render the variable
             const variable_value_result = await variable.getValue(
+                shell,
                 t_shell_command,
                 sc_event,
 
@@ -122,7 +121,8 @@ export async function parseVariables(
                     return parseVariables(
                         plugin,
                         raw_default_value,
-                        null, // Disable escaping special characters at this phase to avoid double escaping, as escaping will be done later.
+                        shell,
+                        false, // Disable escaping special characters at this phase to avoid double escaping, as escaping will be done later.
                         t_shell_command,
                         sc_event,
                         reduced_variables,
@@ -145,10 +145,9 @@ export async function parseVariables(
 
                 // Escape the value if needed.
                 let use_variable_value: string;
-                if (escape) {
+                if (escapeCurrentVariable) {
                     // Use an escaped value.
-                    use_variable_value = escapeValue(
-                        shell as string, // shell is always a string when escape is true.
+                    use_variable_value = (shell as Shell).escapeValue( // shell is always a Shell object when escapeCurrentVariable is true.
                         raw_variable_value as string, // raw_variable_value is always a string when variable_value_result.succeeded is true.
                     );
                 } else {

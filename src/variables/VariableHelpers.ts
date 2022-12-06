@@ -17,20 +17,22 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getVaultAbsolutePath, normalizePath2, uniqueArray} from "../Common";
+import {getVaultAbsolutePath, uniqueArray} from "../Common";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
+import {Shell} from "../shells/Shell";
 
 /**
  * TODO: Consider creating a decorator class for TFolder and moving this function to be a method in it.
  *
  * @param app
+ * @param shell
  * @param folder
  * @param mode
  */
-export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "relative") {
+export function getFolderPath(app: App, shell: Shell, folder: TFolder, mode: "absolute" | "relative") {
     switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
-            return normalizePath2(getVaultAbsolutePath(app) + "/" + folder.path);
+            return shell.translateAbsolutePath(getVaultAbsolutePath(app) + "/" + folder.path);
         case "relative":
             if (folder.isRoot()) {
                 // Obsidian API does not give a correct folder.path value for the vault's root folder.
@@ -38,7 +40,7 @@ export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "rel
                 return ".";
             } else {
                 // This is a normal subfolder
-                return normalizePath2(folder.path); // Normalize to get a correct slash between directories depending on platform. On Windows it should be \ .
+                return shell.translateRelativePath(folder.path);
             }
     }
 }
@@ -47,15 +49,16 @@ export function getFolderPath(app: App, folder: TFolder, mode: "absolute" | "rel
  * TODO: Consider creating a decorator class for TFile and moving this function to be a method in it.
  *
  * @param app
+ * @param shell
  * @param file
  * @param mode
  */
-export function getFilePath(app: App, file: TFile, mode: "absolute" | "relative") {
+export function getFilePath(app: App, shell: Shell, file: TFile, mode: "absolute" | "relative") {
     switch (mode.toLowerCase() as "absolute" | "relative") {
         case "absolute":
-            return normalizePath2(getVaultAbsolutePath(app) + "/" + file.path);
+            return shell.translateAbsolutePath(getVaultAbsolutePath(app) + "/" + file.path);
         case "relative":
-            return normalizePath2(file.path); // Normalize to get a correct slash depending on platform. On Windows it should be \ .
+            return shell.translateRelativePath(file.path);
     }
 }
 

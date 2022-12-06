@@ -42,6 +42,7 @@ import {
 	generateObsidianCommandName,
 	getOperatingSystem,
 	getPluginAbsolutePath,
+    isWindows,
 } from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
@@ -58,7 +59,10 @@ import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./shells/ShellFunctions";
+import {
+    getShell,
+    getUsersDefaultShellIdentifier,
+} from "./shells/ShellFunctions";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
@@ -72,6 +76,7 @@ import {
     OutputWrapperMap,
     OutputWrapperModel,
 } from "./models/output_wrapper/OutputWrapperModel";
+import {Shell} from "./shells/Shell";
 import {ParsingResult} from "./variables/parseVariables";
 
 export default class SC_Plugin extends Plugin {
@@ -580,7 +585,7 @@ export default class SC_Plugin extends Plugin {
 
 	private loadCustomAutocompleteList() {
 		const custom_autocomplete_file_name = "autocomplete.yaml";
-		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this), custom_autocomplete_file_name);
+		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this, isWindows()), custom_autocomplete_file_name);
 
 		if (fs.existsSync(custom_autocomplete_file_path)) {
 			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
@@ -647,14 +652,18 @@ export default class SC_Plugin extends Plugin {
         return this.settings.error_message_duration * 1000; // * 1000 = convert seconds to milliseconds.
     }
 
-	public getDefaultShell(): string {
-		const operating_system = getOperatingSystem();
-		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
-		if (undefined === shell_name) {
-			shell_name = getUsersDefaultShell();
+	public getDefaultShellIdentifier(): string {
+		const operatingSystem = getOperatingSystem();
+		let shellIdentifier = this.settings.default_shells[operatingSystem]; // Can also be undefined.
+		if (undefined === shellIdentifier) {
+			shellIdentifier = getUsersDefaultShellIdentifier();
 		}
-		return shell_name;
+        return shellIdentifier;
 	}
+
+    public getDefaultShell(): Shell {
+        return getShell(this.getDefaultShellIdentifier());
+    }
 
 	public createCustomVariableView(): void {
 		const leaf = this.app.workspace.getRightLeaf(false);

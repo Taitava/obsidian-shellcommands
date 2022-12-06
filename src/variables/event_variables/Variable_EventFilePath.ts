@@ -28,6 +28,7 @@ import {getFilePath} from "../VariableHelpers";
 import {TFile} from "obsidian";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFilePath extends EventVariable {
     public variable_name = "event_file_path";
@@ -53,14 +54,17 @@ export class Variable_EventFilePath extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+    protected generateValue(
+        shell: Shell,
+        sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const file: TFile = sc_event.getFile();
-            return resolve(getFilePath(this.app, file, this.arguments.mode));
+            return resolve(getFilePath(this.app, shell, file, this.arguments.mode));
         });
     }
 
