@@ -32,7 +32,7 @@ import {
 
 export class CustomVariableModel extends Model {
 
-    private custom_variable_instances: CustomVariableInstanceMap;
+    private custom_variable_instances: CustomVariableInstanceMap = new CustomVariableInstanceMap;
 
     public getSingularName(): string {
         return "Custom variable";
@@ -49,7 +49,7 @@ export class CustomVariableModel extends Model {
 
     public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceMap {
         debugLog(`CustomVariableModel: Loading CustomVariableInstances.`);
-        this.custom_variable_instances = new CustomVariableInstanceMap;
+        this.custom_variable_instances.clear();
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration) => {
             this.custom_variable_instances.set(
                 custom_variable_configuration.id,
