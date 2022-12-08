@@ -118,11 +118,11 @@ export default class SC_Plugin extends Plugin {
 			return;
 		}
 
-		// Run possible configuration migrations
-		await RunMigrations(this);
-
 		// Define models
 		introduceModels(this);
+
+		// Run possible configuration migrations
+		await RunMigrations(this);
 
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();

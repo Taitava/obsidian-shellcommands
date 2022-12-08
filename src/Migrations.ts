@@ -24,6 +24,11 @@ import * as fs from "fs";
 import {combineObjects, getPluginAbsolutePath} from "./Common";
 import * as path from "path";
 import {getDefaultSettings} from "./settings/SC_MainSettings";
+import {
+    CustomVariableConfiguration,
+    CustomVariableModel,
+} from "./models/custom_variable/CustomVariableModel";
+import {getModel} from "./models/Model";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
@@ -32,6 +37,7 @@ export async function RunMigrations(plugin: SC_Plugin) {
         MigrateShellCommandsObjectToArray(plugin),
         MigrateShellCommandToPlatforms(plugin),
         EnsureShellCommandsHaveAllFields(plugin),
+        EnsureCustomVariablesHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
     ];
     if (should_save.includes(true)) {
@@ -139,6 +145,29 @@ function EnsureShellCommandsHaveAllFields(plugin: SC_Plugin) {
                 debugLog("EnsureShellCommandsHaveAllFields(): Shell command #" + shell_command_configuration.id + " does not have a property '" + property_name + "'. Will create the property and assign a default value '" + property_default_value + "'.");
                 // @ts-ignore
                 shell_command_configuration[property_name] = property_default_value;
+                save = true;
+            }
+        }
+    }
+    return save;
+}
+
+function EnsureCustomVariablesHaveAllFields(plugin: SC_Plugin) {
+    let save = false;
+    const customVariableModel = getModel<CustomVariableModel>(CustomVariableModel.name);
+    const customVariableDefaultConfiguration: CustomVariableConfiguration = customVariableModel.getDefaultConfiguration();
+    let customVariableConfiguration: CustomVariableConfiguration;
+    for (customVariableConfiguration of plugin.settings.custom_variables) {
+        for (const propertyName in customVariableDefaultConfiguration) {
+            // @ts-ignore propertyDefaultValue can have (almost) whatever datatype
+            const propertyDefaultValue = customVariableDefaultConfiguration[propertyName];
+            // @ts-ignore
+            if (undefined === customVariableConfiguration[propertyName]) {
+                // This custom variable does not have this property.
+                // Add the property to it and use a default value.
+                debugLog("EnsureCustomVariablesHaveAllFields(): Custom variable #" + customVariableConfiguration.id + " does not have a property '" + propertyName + "'. Will create the property and assign a default value '" + propertyDefaultValue + "'.");
+                // @ts-ignore
+                customVariableConfiguration[propertyName] = propertyDefaultValue;
                 save = true;
             }
         }
@@ -255,3 +284,5 @@ function backupSettingsFile(plugin: SC_Plugin) {
     }
     fs.copyFileSync(settings_file_path, backup_file_path);
 }
+
+// TODO: Add migration: shell command variable_default_values: if type is "show-errors", change it to "inherit", but only if old settings version was below 18.
