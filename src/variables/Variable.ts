@@ -149,6 +149,9 @@ export abstract class Variable {
                                 succeeded: true,
                             });
                         }
+                        break;
+                    default:
+                        throw new Error("Unrecognised default value type: " + default_value_type);
                 }
             }
         });
@@ -332,6 +335,15 @@ export abstract class Variable {
     public getAvailabilityTextPlain(): string {
         return this.getAvailabilityText().replace(/<\/?strong>/ig, ""); // Remove <strong> and </strong> markings from the help text
     }
+
+    /**
+     * Returns a default value configuration object that should be used if a shell command does not define its own
+     * default value configuration object.
+     */
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | undefined {
+        // Works for built-in variables only. CustomVariable class needs to override this method and not call the parent!
+        return this.plugin.settings.builtin_variables[this.variable_name]?.default_value; // Can return undefined
+    }
 }
 
 interface IArguments {
@@ -363,7 +375,22 @@ export interface VariableValueResult {
 
 export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value";
 
-export interface VariableDefaultValueConfiguration {
+export type VariableDefaultValueTypeWithInherit = VariableDefaultValueType | "inherit";
+
+/**
+ * Interface for a configuration object that can opt for retrieving the configuration from an upper level by defining its
+ * 'type' property have value 'inherit'.
+ */
+export interface InheritableVariableDefaultValueConfiguration {
+    type: VariableDefaultValueTypeWithInherit,
+    value: string,
+}
+
+/**
+ * Interface for a configuration object that is on a root level and so cannot inherit configuration from an upper level,
+ * because there is no upper level. Objects implementing this interface cannot set their 'type' property to 'inherit'.
+ */
+export interface GlobalVariableDefaultValueConfiguration {
     type: VariableDefaultValueType,
     value: string,
 }

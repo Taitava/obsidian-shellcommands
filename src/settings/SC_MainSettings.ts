@@ -25,6 +25,9 @@ import {
     PromptConfiguration,
 } from "../imports";
 import {OutputWrapperConfiguration} from "../models/output_wrapper/OutputWrapper";
+import {
+    GlobalVariableDefaultValueConfiguration,
+} from "../variables/Variable";
 
 export type SettingsVersionString = "prior-to-0.7.0" | string;
 
@@ -74,6 +77,13 @@ export interface SC_MainSettings {
 
     // Prompts:
     prompts: PromptConfiguration[];
+
+    // Additional configuration for built-in variables. (Currently just global default values).
+    builtin_variables: {
+        [variableName: string]: {
+            default_value: GlobalVariableDefaultValueConfiguration,
+        }
+    };
 
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
@@ -125,6 +135,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Prompts:
         prompts: [],
+
+        // Additional configuration for built-in variables:
+        builtin_variables: {},
 
         // Custom variables
         custom_variables: [],

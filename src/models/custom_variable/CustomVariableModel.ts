@@ -26,6 +26,9 @@ import {
     ParentModelOneToManyIdRelation,
 } from "../../imports";
 import {debugLog} from "../../Debug";
+import {
+    GlobalVariableDefaultValueConfiguration,
+} from "../../variables/Variable";
 
 export class CustomVariableModel extends Model {
 
@@ -175,6 +178,10 @@ export class CustomVariableModel extends Model {
             id: getIDGenerator().generateID(),
             name: String(sequential_number),
             description: "",
+            default_value: {
+                type: "show-errors",
+                value: "",
+            }
         };
     }
 
@@ -232,6 +239,7 @@ export interface CustomVariableConfiguration {
     id: string,
     name: string,
     description: string,
+    default_value: GlobalVariableDefaultValueConfiguration,
 }
 
 export class CustomVariableInstanceMap extends Map<string, CustomVariableInstance> {}

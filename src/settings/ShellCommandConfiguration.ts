@@ -28,7 +28,7 @@ import {
     IPlatformSpecificStringWithDefault,
 } from "./SC_MainSettings";
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
+import {InheritableVariableDefaultValueConfiguration} from "../variables/Variable";
 import {
     PreactionConfiguration
 } from "../imports";
@@ -57,7 +57,7 @@ export interface ShellCommandConfiguration {
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
     variable_default_values: {
-        [variable_id_or_name: string]: VariableDefaultValueConfiguration,
+        [variable_id_or_name: string]: InheritableVariableDefaultValueConfiguration,
     };
 
     // LEGACY

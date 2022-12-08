@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Variable} from "./Variable";
+import {
+    GlobalVariableDefaultValueConfiguration,
+    Variable,
+} from "./Variable";
 import SC_Plugin from "../main";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {resetVariableAutocompleteItems} from "./getVariableAutocompleteItems";
@@ -107,6 +110,10 @@ export class CustomVariable extends Variable {
      */
     public isAvailable(): boolean {
         return null !== this.value;
+    }
+
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | undefined {
+        return this.custom_variable_instance.configuration.default_value;
     }
 }
 
