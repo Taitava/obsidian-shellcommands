@@ -54,7 +54,8 @@ import {
     PromptSettingsModal,
 } from "../imports";
 import {
-    VariableDefaultValueConfiguration,
+    GlobalVariableDefaultValueConfiguration,
+    InheritableVariableDefaultValueConfiguration,
     VariableDefaultValueType,
 } from "../variables/Variable";
 import {CmdOrCtrl} from "../Hotkeys";
@@ -582,11 +583,11 @@ export class ExtraOptionsModal extends SC_Modal {
                 const variable_identifier = variable.getIdentifier();
 
                 // If a default value has defined for this variable (and this TShellCommand), retrieve the configuration.
-                let default_value_configuration: VariableDefaultValueConfiguration | undefined = this.t_shell_command.getDefaultValueConfigurationForVariable(variable); // NOTE that this can be UNDEFINED!
+                let default_value_configuration: InheritableVariableDefaultValueConfiguration | undefined = this.t_shell_command.getDefaultValueConfigurationForVariable(variable, false); // NOTE that this can be UNDEFINED!
 
                 // A function for creating configuration in onChange() callbacks if the variable does not yet have one for this TShellCommand.
                 const create_default_value_configuration = () => {
-                    const configuration: VariableDefaultValueConfiguration = {
+                    const configuration: InheritableVariableDefaultValueConfiguration = {
                         type: "show-errors",
                         value: "",
                     };
@@ -605,18 +606,28 @@ export class ExtraOptionsModal extends SC_Modal {
                     }
                 };
 
+                // TODO: Extract default value setting to a new file in "setting_elements" folder. But commit the below changes before extracting.
+
                 // Create the default value setting
+                const defaultValueTypeOptions = {
+                    "inherit": "", // Will be updated below
+                    "show-errors": "Cancel execution and show error",
+                    "cancel-silently": "Cancel execution silently",
+                    "value": "Execute with value:",
+                };
+                const globalDefaultValueConfiguration: GlobalVariableDefaultValueConfiguration | undefined = variable.getGlobalDefaultValueConfiguration();
+                const globalDefaultValueType: VariableDefaultValueType = globalDefaultValueConfiguration ? globalDefaultValueConfiguration.type : "show-errors";
+                defaultValueTypeOptions.inherit = "Inherit: " + defaultValueTypeOptions[globalDefaultValueType];
+                if ("value" === globalDefaultValueType) {
+                    defaultValueTypeOptions.inherit += " " + globalDefaultValueConfiguration?.value;
+                }
                 new Setting(container_element)
                     .setName(variable.getFullName())
                     .setDesc("If not available, then:")
                     .setTooltip(variable.getAvailabilityTextPlain())
                     .addDropdown(dropdown => dropdown
-                        .addOptions({
-                            "show-errors": "Cancel execution and show errors",
-                            "cancel-silently": "Cancel execution silently",
-                            "value": "Execute with value:",
-                        })
-                        .setValue(default_value_configuration ? default_value_configuration.type : "show-errors")
+                        .addOptions(defaultValueTypeOptions)
+                        .setValue(default_value_configuration ? default_value_configuration.type : "inherit")
                         .onChange(async (new_type: VariableDefaultValueType) => {
                             if (!default_value_configuration) {
                                 default_value_configuration = create_default_value_configuration();
