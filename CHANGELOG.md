@@ -20,6 +20,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Added
  - [Ability to pass variable values to stdin (#283)](https://github.com/Taitava/obsidian-shellcommands/issues/283).
+ - [Globally default values for variables (#298)](https://github.com/Taitava/obsidian-shellcommands/issues/298).
  - [Debug: Create a {{newline}} variable (#295)](https://github.com/Taitava/obsidian-shellcommands/issues/295).
    - Only available in debug mode and used for testing.
 
