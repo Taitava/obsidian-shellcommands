@@ -61,7 +61,7 @@ export class PromptModel extends Model {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration and generate an ID
-        const prompt_configuration = this._getDefaultConfiguration();
+        const prompt_configuration = this.getDefaultConfiguration();
 
         // Instantiate a Prompt
         const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings);
@@ -102,7 +102,7 @@ export class PromptModel extends Model {
         modal.open();
     }
 
-    private _getDefaultConfiguration(): PromptConfiguration {
+    public getDefaultConfiguration(): PromptConfiguration {
         return {
             id: getIDGenerator().generateID(),
             title: "",

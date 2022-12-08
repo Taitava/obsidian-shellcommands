@@ -79,7 +79,7 @@ export class OutputWrapperModel extends Model {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration and generate an ID
-        const output_wrapper_configuration = this._getDefaultConfiguration();
+        const output_wrapper_configuration = this.getDefaultConfiguration();
 
         // Instantiate an OutputWrapper
         const output_wrapper = new OutputWrapper(this, this.plugin, output_wrapper_configuration, this.plugin.settings);
@@ -103,7 +103,7 @@ export class OutputWrapperModel extends Model {
         modal.open();
     }
 
-    private _getDefaultConfiguration(): OutputWrapperConfiguration {
+    public getDefaultConfiguration(): OutputWrapperConfiguration {
         return {
             id: getIDGenerator().generateID(),
             title: "",

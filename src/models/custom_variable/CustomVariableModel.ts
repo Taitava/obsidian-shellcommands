@@ -63,7 +63,7 @@ export class CustomVariableModel extends Model {
         debugLog(`CustomVariableModel: Creating a new CustomVariableInstance.`);
 
         // Create a default configuration object
-        const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
+        const custom_variable_configuration: CustomVariableConfiguration = this.getDefaultConfiguration();
         parent_configuration.custom_variables.push(custom_variable_configuration);
 
         // Create a CustomVariableInstance for handling the configuration
@@ -166,7 +166,7 @@ export class CustomVariableModel extends Model {
         });
     }
 
-    protected _getDefaultConfiguration(): CustomVariableConfiguration {
+    public getDefaultConfiguration(): CustomVariableConfiguration {
         // Generate a unique name for the variable by using a sequential number.
         let sequential_number = 1;
         while (this.isCustomVariableNameDuplicate(String(sequential_number))) {

@@ -64,7 +64,7 @@ export class PromptFieldModel extends Model {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration
-        const prompt_field_configuration = this._getDefaultConfiguration();
+        const prompt_field_configuration = this.getDefaultConfiguration();
 
         // Instantiate a PromptField
         const prompt_field = this.createInstance(prompt, prompt_field_configuration, prompt.configuration.fields.length);
@@ -282,7 +282,7 @@ export class PromptFieldModel extends Model {
         }
     }
 
-    private _getDefaultConfiguration(): PromptFieldConfiguration {
+    public getDefaultConfiguration(): PromptFieldConfiguration {
         return {
             // type: "text",
             label: "",

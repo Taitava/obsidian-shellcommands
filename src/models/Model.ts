@@ -49,6 +49,8 @@ export abstract class Model {
      */
     public abstract newInstance(parent_instance_or_configuration: Instance | InstanceConfiguration): Instance;
 
+    public abstract getDefaultConfiguration(): InstanceConfiguration;
+
     public createSettingFields(instance: Instance, parent_element: HTMLElement, with_deletion = true) {
         debugLog(this.constructor.name + ": Creating setting fields.");
 
