@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import {Setting, TextAreaComponent} from "obsidian";
+import {Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
@@ -53,11 +53,6 @@ import {
     PromptModel,
     PromptSettingsModal,
 } from "../imports";
-import {
-    GlobalVariableDefaultValueConfiguration,
-    InheritableVariableDefaultValueConfiguration,
-    VariableDefaultValueType,
-} from "../variables/Variable";
 import {CmdOrCtrl} from "../Hotkeys";
 import {
     getIconHTML,
@@ -67,6 +62,7 @@ import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
 import {DocumentationOutputHandlingModeLink} from "../Documentation";
+import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
 /**
  * TODO: Rename to ShellCommandSettingsModal
@@ -565,112 +561,20 @@ export class ExtraOptionsModal extends SC_Modal {
         });
     }
 
-    private tabVariables(container_element: HTMLElement) {
+    private tabVariables(containerElement: HTMLElement) {
 
         // Default values for variables
-        new Setting(container_element)
+        new Setting(containerElement)
             .setName("Default values for variables")
             .setDesc("Certain variables can be inaccessible during certain situations, e.g. {{file_name}} is not available when no file pane is focused. You can define default values that will be used when a variable is otherwise unavailable.")
             .setHeading()
         ;
 
-        // Add default value fields for each variable that can have a default value.
-        for (const variable of this.plugin.getVariables()) {
-            // Only add fields for variables that are not always accessible.
-            if (!variable.isAlwaysAvailable()) {
-
-                // Get an identifier for a variable (an id, if it's a CustomVariable, otherwise the variable's name).
-                const variable_identifier = variable.getIdentifier();
-
-                // If a default value has defined for this variable (and this TShellCommand), retrieve the configuration.
-                let default_value_configuration: InheritableVariableDefaultValueConfiguration | undefined = this.t_shell_command.getDefaultValueConfigurationForVariable(variable, false); // NOTE that this can be UNDEFINED!
-
-                // A function for creating configuration in onChange() callbacks if the variable does not yet have one for this TShellCommand.
-                const create_default_value_configuration = () => {
-                    const configuration: InheritableVariableDefaultValueConfiguration = {
-                        type: "show-errors",
-                        value: "",
-                    };
-                    this.t_shell_command.getConfiguration().variable_default_values[variable_identifier] = configuration;
-                    return configuration;
-                }
-
-                let textarea_component: TextAreaComponent;
-
-                // A function for updating textarea_component visibility.
-                const update_textarea_component_visibility = (type: string) => {
-                    if ("value" === type) {
-                        textarea_component.inputEl.removeClass("SC-hide");
-                    } else {
-                        textarea_component.inputEl.addClass("SC-hide");
-                    }
-                };
-
-                // TODO: Extract default value setting to a new file in "setting_elements" folder. But commit the below changes before extracting.
-
-                // Create the default value setting
-                const defaultValueTypeOptions = {
-                    "inherit": "", // Will be updated below
-                    "show-errors": "Cancel execution and show error",
-                    "cancel-silently": "Cancel execution silently",
-                    "value": "Execute with value:",
-                };
-                const globalDefaultValueConfiguration: GlobalVariableDefaultValueConfiguration | undefined = variable.getGlobalDefaultValueConfiguration();
-                const globalDefaultValueType: VariableDefaultValueType = globalDefaultValueConfiguration ? globalDefaultValueConfiguration.type : "show-errors";
-                defaultValueTypeOptions.inherit = "Inherit: " + defaultValueTypeOptions[globalDefaultValueType];
-                if ("value" === globalDefaultValueType) {
-                    defaultValueTypeOptions.inherit += " " + globalDefaultValueConfiguration?.value;
-                }
-                new Setting(container_element)
-                    .setName(variable.getFullName())
-                    .setDesc("If not available, then:")
-                    .setTooltip(variable.getAvailabilityTextPlain())
-                    .addDropdown(dropdown => dropdown
-                        .addOptions(defaultValueTypeOptions)
-                        .setValue(default_value_configuration ? default_value_configuration.type : "inherit")
-                        .onChange(async (new_type: VariableDefaultValueType) => {
-                            if (!default_value_configuration) {
-                                default_value_configuration = create_default_value_configuration();
-                            }
-
-                            // Set the new type
-                            default_value_configuration.type = new_type;
-                            if ("show-errors" === new_type && default_value_configuration.value === "") {
-                                // If "show-errors" is selected and no text value is typed, the configuration file can be cleaned up by removing this configuration object completely.
-                                // Prevent deleting, if a text value is present, because the user might want to keep it if they will later change 'type' to 'value'.
-                                delete this.t_shell_command.getConfiguration().variable_default_values[variable_identifier];
-                            }
-
-                            // Show/hide the textarea
-                            update_textarea_component_visibility(new_type);
-
-                            // Save the settings
-                            await this.plugin.saveSettings();
-                        }),
-                    )
-                    .addTextArea(textarea => textarea_component = textarea
-                        .setValue(default_value_configuration ? default_value_configuration.value : "")
-                        .onChange(async (new_value: string) => {
-                            if (!default_value_configuration) {
-                                default_value_configuration = create_default_value_configuration();
-                            }
-
-                            // Set the new text value
-                            default_value_configuration.value = new_value;
-
-                            // Save the settings
-                            await this.plugin.saveSettings();
-                        }).then((textarea_component) => {
-                            // Autocomplete for the textarea.
-                            if (this.plugin.settings.show_autocomplete_menu) {
-                                createAutocomplete(this.plugin, textarea_component.inputEl, () => textarea_component.onChanged());
-                            }
-                        }),
-                    )
-                ;
-                update_textarea_component_visibility(default_value_configuration ? default_value_configuration.type : "show-errors");
-            }
-        }
+        createVariableDefaultValueFields(
+            this.plugin,
+            containerElement,
+            this.t_shell_command,
+        );
     }
 
     public activateTab(tab_id: string) {
