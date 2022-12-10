@@ -66,6 +66,13 @@ div.SC-setting-group div.setting-item div.setting-item-control {
     width: 50%; /* Make sure description does not take over 50% of the space. */
 }
 
+div.SC-setting-group div.setting-item.SC-full-description div.setting-item-info {
+    width: 100%; /* Give description 100% width. Built-in variable list in settings uses this. */
+}
+div.SC-setting-group div.setting-item.SC-full-description div.setting-item-control {
+    width: 0; /* Make room for description. */
+}
+
 div.SC-setting-group div.setting-item input[type=text],
 div.SC-setting-group div.setting-item input[type=search],
 div.SC-setting-group div.setting-item textarea,
