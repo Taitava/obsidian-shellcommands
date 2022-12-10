@@ -61,12 +61,12 @@ export function createVariableDefaultValueFields(plugin: SC_Plugin, containerEle
  * @param targetObject In which object's configuration the default value settings should be stored. Can be a TShellCommand or a Variable (either CustomVariable or a built-in one).
  */
 export function createVariableDefaultValueField(
-    plugin: SC_Plugin,
-    containerElement: HTMLElement,
-    settingName: string,
-    variable: Variable,
-    targetObject?: Variable | TShellCommand,
-): void {
+        plugin: SC_Plugin,
+        containerElement: HTMLElement,
+        settingName: string,
+        variable: Variable,
+        targetObject?: Variable | TShellCommand,
+    ): void {
 
     if (undefined === targetObject) {
         // No configuration target is defined, so use the variable as a target.
@@ -124,9 +124,9 @@ export function createVariableDefaultValueField(
             case "customVariable":
                 (targetObject as CustomVariable).getConfiguration().default_value = configuration;
                 break;
-            }
-                return configuration;
-            }
+        }
+        return configuration;
+    }
 
     let textareaComponent: TextAreaComponent;
 
