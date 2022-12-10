@@ -300,6 +300,9 @@ export abstract class Variable {
         return "{{" + this.variable_name + "}}";
     }
 
+    /**
+     * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
+     */
     public getDocumentationLink(): string {
         return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
     }

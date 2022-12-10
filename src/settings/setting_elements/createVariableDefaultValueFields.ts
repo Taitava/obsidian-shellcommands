@@ -32,6 +32,7 @@ import {
 import {createAutocomplete} from "./Autocomplete";
 import {TShellCommand} from "../../TShellCommand";
 import {CustomVariable} from "../../variables/CustomVariable";
+import {gotoURL} from "../../Common";
 
 export function createVariableDefaultValueFields(plugin: SC_Plugin, containerElement: HTMLElement, targetObject: Variable | TShellCommand) {
 
@@ -40,13 +41,22 @@ export function createVariableDefaultValueFields(plugin: SC_Plugin, containerEle
 
         // Only add fields for variables that are not always accessible.
         if (!variable.isAlwaysAvailable()) {
-            createVariableDefaultValueField(
+            const setting = createVariableDefaultValueField(
                 plugin,
                 containerElement,
                 variable.getFullName(),
                 variable,
                 targetObject
             );
+
+            // Documentation link
+            if (!(variable instanceof CustomVariable)) {
+                setting.addExtraButton(extraButton => extraButton
+                    .setIcon("help")
+                    .setTooltip("Documentation: " + variable.getFullName() + " variable")
+                    .onClick(() => gotoURL(variable.getDocumentationLink())),
+                );
+            }
         }
     }
 
@@ -66,7 +76,7 @@ export function createVariableDefaultValueField(
         settingName: string,
         variable: Variable,
         targetObject?: Variable | TShellCommand,
-    ): void {
+    ): Setting {
 
     if (undefined === targetObject) {
         // No configuration target is defined, so use the variable as a target.
@@ -166,7 +176,7 @@ export function createVariableDefaultValueField(
     }
 
     // Create the default value setting
-    new Setting(containerElement)
+    const defaultValueSetting: Setting = new Setting(containerElement)
         .setName(settingName)
         .setDesc("If not available, then:")
         .setTooltip(variable.getAvailabilityTextPlain())
@@ -243,4 +253,6 @@ export function createVariableDefaultValueField(
                 ? "show-errors" // It does not really matter if passing "show-errors" ....
                 : "inherit",    // ... or "inherit", both will have the same effect (= hide a textarea), but this is more future-proof.
     );
+
+    return defaultValueSetting;
 }
