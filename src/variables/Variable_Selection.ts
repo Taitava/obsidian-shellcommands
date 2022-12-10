@@ -55,6 +55,6 @@ export class Variable_Selection extends EditorVariable {
     }
 
     public getAvailabilityText(): string {
-        return "<strong>Only available</strong> in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
+        return "<strong>Only available</strong> when something is selected in <em>Editing</em>/<em>Live preview</em> mode, <strong>not</strong> in <em>Reading</em> mode.";
     }
 }
