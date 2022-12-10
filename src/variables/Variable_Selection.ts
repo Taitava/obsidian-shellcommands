@@ -17,8 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getEditor, getView} from "../Common";
+import {getView} from "../Common";
 import {EditorVariable} from "./EditorVariable";
+import {Editor} from "obsidian";
+import {EOL} from "os";
 
 export class Variable_Selection extends EditorVariable {
     public variable_name = "selection";
@@ -40,14 +42,16 @@ export class Variable_Selection extends EditorVariable {
             if (this.editor.somethingSelected()) {
                 return this.editor.getSelection();
             }
-            return "";
+            this.newErrorMessage("Nothing is selected. "+EOL+EOL+"(This error message was added in SC 0.18.0. Earlier the variable gave an empty text in this situation. If you want to restore the old behavior, go to SC settings, then to Variables tab, and define a default value for {{selection}}.)");
+            return null;
         }
         return null;
     }
 
     public isAvailable(): boolean {
         const view = getView(this.app);
-        return !!view && !!getEditor(this.app) && view.getMode() === "source";
+        const hasViewAndEditor: boolean = !!view && this.requireEditor() && view.getMode() === "source";
+        return hasViewAndEditor && (this.editor as Editor).somethingSelected();
     }
 
     public getAvailabilityText(): string {
