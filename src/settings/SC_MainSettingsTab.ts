@@ -402,16 +402,17 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 }
 
                 // Variable default value
+                const defaultValueSettingTitle = "Default value for "+variable.getFullName();
                 if (variable.isAlwaysAvailable()) {
                     new Setting(variableSettingGroupElement)
-                        .setName("Default value")
+                        .setName(defaultValueSettingTitle)
                         .setDesc(variable.getFullName() + " is always available, so it cannot have a default value.")
                     ;
                 } else {
                     createVariableDefaultValueField(
                         this.plugin,
                         variableSettingGroupElement,
-                        "Default value",
+                        defaultValueSettingTitle,
                         variable,
                     );
                 }
