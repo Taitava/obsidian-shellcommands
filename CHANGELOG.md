@@ -26,6 +26,8 @@ Features that are in development, but are not released yet. Does not include stu
    - Only available in debug mode and used for testing.
 
 ### To be Changed
+ - [{{selection}}: Show an error message if nothing is selected (#303)](https://github.com/Taitava/obsidian-shellcommands/issues/303).
+   - Before this, the variable gave an empty text. The old behavior can be restored by defining a [default value](https://publish.obsidian.md/shellcommands/Variables/Default+values).
  - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
 
 ### To be Fixed
