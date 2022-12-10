@@ -79,6 +79,10 @@ export function createVariableDefaultValueFields(plugin: SC_Plugin, containerEle
                         (targetObject as TShellCommand).getConfiguration().variable_default_values[variableIdentifier] = configuration;
                         break;
                     case "builtinVariable":
+                        if (undefined === plugin.settings.builtin_variables[variableIdentifier]) {
+                            // Create a config object for this variable if it does not exist yet.
+                            plugin.settings.builtin_variables[variableIdentifier] = {default_value: undefined};
+                        }
                         plugin.settings.builtin_variables[variableIdentifier].default_value = configuration;
                         break;
                     case "customVariable":
