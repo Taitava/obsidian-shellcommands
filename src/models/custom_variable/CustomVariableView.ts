@@ -57,6 +57,7 @@ export class CustomVariableView extends ItemView {
     public async updateContent() {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
+        const variableListElement: HTMLUListElement = this.container_element.createEl("ul");
         for (const customVariableInstance of this.plugin.getCustomVariableInstances().values()) {
             let customVariableValue: string | null = (await customVariableInstance.getCustomVariable().getValue()).value;
             let customVariableState: string | null = null;
@@ -77,11 +78,11 @@ export class CustomVariableView extends ItemView {
             } else if ("" === customVariableValue) {
                 customVariableState = "An empty text.";
             }
-            const variableListElement: HTMLUListElement = this.container_element.createEl("ul");
             const variableListItemElement = variableListElement.createEl("li", {
                 text: customVariableInstance.getFullName(),
                 attr: {
                     "aria-label": customVariableInstance.configuration.description,
+                    "class": "SC-custom-variable-view-list-item",
                 },
             });
             variableListItemElement.createEl("br");

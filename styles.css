@@ -159,6 +159,14 @@ div.setting-item.SC-custom-variable-name-setting div.setting-item-control::after
     content: "}}"; /* Wrap custom variable name field in {{_ }} */
 }
 
+/*
+ * CUSTOM VARIABLE VIEW
+ */
+
+li.SC-custom-variable-view-list-item {
+    margin-bottom: 1em; /* Add space between variables in list. */
+}
+
 
 /*
  * MODALS (generic rules to all of the plugin's modals)
