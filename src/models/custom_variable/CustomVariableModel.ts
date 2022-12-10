@@ -29,6 +29,7 @@ import {debugLog} from "../../Debug";
 import {
     GlobalVariableDefaultValueConfiguration,
 } from "../../variables/Variable";
+import {createVariableDefaultValueField} from "../../settings/setting_elements/createVariableDefaultValueFields";
 
 export class CustomVariableModel extends Model {
 
@@ -134,6 +135,15 @@ export class CustomVariableModel extends Model {
                 }),
             )
         ;
+
+        // Default value setting
+        createVariableDefaultValueField(
+            this.plugin,
+            container_element,
+            "Default value",
+            instance.getCustomVariable(),
+        );
+
         return heading_setting;
     }
 
