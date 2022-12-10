@@ -349,7 +349,7 @@ export abstract class Variable {
      */
     public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | undefined {
         // Works for built-in variables only. CustomVariable class needs to override this method and not call the parent!
-        return this.plugin.settings.builtin_variables[this.variable_name]?.default_value; // Can return undefined
+        return this.plugin.settings.builtin_variables[this.getIdentifier()]?.default_value; // Can return undefined
     }
 }
 
