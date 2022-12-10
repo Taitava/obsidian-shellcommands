@@ -23,6 +23,7 @@ import {
     setIcon,
 } from "obsidian";
 import SC_Plugin from "../../main";
+import {AutocompleteResult} from "autocompleter/autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
 import {gotoURL} from "../../Common";
 
@@ -35,7 +36,7 @@ import {gotoURL} from "../../Common";
  */
 export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement | HTMLTextAreaElement, call_on_completion: (field_value: string) => void, extra_autocomplete_items: IAutocompleteItem[] = []) {
 
-    autocomplete<IAutocompleteItem>({
+    const autocompleteMenu: AutocompleteResult =  autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
             const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems, extra_autocomplete_items);
@@ -142,6 +143,9 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
         keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ], // Defined just to prevent ignoring left and right keys.
         preventSubmit: true, // Prevents creating newlines in textareas when enter is pressed in the autocomplete menu.
     });
+
+    // Make the plugin able to close the menu if the plugin is disabled (or restarted).
+    plugin.registerAutocompleteMenu(autocompleteMenu);
 }
 
 export interface IAutocompleteItem {

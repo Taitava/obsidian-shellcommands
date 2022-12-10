@@ -73,6 +73,7 @@ import {
     OutputWrapperModel,
 } from "./models/output_wrapper/OutputWrapperModel";
 import {ParsingResult} from "./variables/parseVariables";
+import {AutocompleteResult} from "autocompleter/autocomplete";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -106,6 +107,8 @@ export default class SC_Plugin extends Plugin {
 
     /** @see getOutputStatusBarElement() */
     private statusBarElement: HTMLElement;
+
+    private autocompleteMenus: AutocompleteResult[] = [];
 
 	public async onload() {
 		debugLog('loading plugin');
@@ -502,6 +505,11 @@ export default class SC_Plugin extends Plugin {
 
 		// Close CustomVariableViews.
 		this.app.workspace.detachLeavesOfType(CustomVariableView.ViewType);
+
+        // Close autocomplete menus.
+        for (const autocompleteMenu of this.autocompleteMenus) {
+            autocompleteMenu?.destroy();
+        }
 	}
 
 	/**
@@ -599,6 +607,14 @@ export default class SC_Plugin extends Plugin {
 		}
 
 	}
+
+    /**
+     * Puts the given Autocomplete menu into a list of menus that will be destroyed when the plugin unloads.
+     * @param autocompleteMenu
+     */
+    public registerAutocompleteMenu(autocompleteMenu: AutocompleteResult) {
+        this.autocompleteMenus.push(autocompleteMenu);
+    }
 
 	private async disablePlugin() {
 		// This unfortunately accesses a private API.
