@@ -50,6 +50,7 @@ import {createNewModelInstanceButton} from "../models/createNewModelInstanceButt
 import {ExecutionNotificationMode} from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
+import {createVariableDefaultValueField} from "./setting_elements/createVariableDefaultValueFields";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -398,6 +399,21 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 const availability_text: string = variable.getAvailabilityText();
                 if (availability_text) {
                     variableDescriptionSetting.descEl.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+                }
+
+                // Variable default value
+                if (variable.isAlwaysAvailable()) {
+                    new Setting(variableSettingGroupElement)
+                        .setName("Default value")
+                        .setDesc(variable.getFullName() + " is always available, so it cannot have a default value.")
+                    ;
+                } else {
+                    createVariableDefaultValueField(
+                        this.plugin,
+                        variableSettingGroupElement,
+                        "Default value",
+                        variable,
+                    );
                 }
             }
         }
