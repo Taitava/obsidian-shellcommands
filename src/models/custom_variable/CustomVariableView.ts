@@ -57,32 +57,41 @@ export class CustomVariableView extends ItemView {
     public async updateContent() {
         this.container_element.empty();
         this.container_element.createEl("h3", {text: "Custom variables"});
-        for (const custom_variable_instance of this.plugin.getCustomVariableInstances().values()) {
-            let custom_variable_value = (await custom_variable_instance.getCustomVariable().getValue()).value;
-            let emphasize = false;
-            if (null === custom_variable_value) {
-                custom_variable_value = "No value yet.";
-                emphasize = true;
-            } else if ("" === custom_variable_value) {
-                custom_variable_value = "An empty text.";
-                emphasize = true;
+        for (const customVariableInstance of this.plugin.getCustomVariableInstances().values()) {
+            let customVariableValue: string | null = (await customVariableInstance.getCustomVariable().getValue()).value;
+            let customVariableState: string | null = null;
+            if (null === customVariableValue) {
+                // The variable has no value yet.
+                if ("value" === customVariableInstance.configuration.default_value?.type) {
+                    // Indicate that the variable has a default value defined, which will practically be used as long as no overriding value is set.
+                    if ("" === customVariableInstance.configuration.default_value.value.trim()) {
+                        customVariableState = "No value yet, but defaults to: An empty text.";
+                    } else {
+                        customVariableState = "No value yet, but defaults to: "; // The value will appear next to the state text later below.
+                        customVariableValue = customVariableInstance.configuration.default_value.value;
+                    }
+                } else {
+                    // No default value is defined, so no value is accessible.
+                    customVariableState = "No value yet.";
+                }
+            } else if ("" === customVariableValue) {
+                customVariableState = "An empty text.";
             }
-            const variable_list_element: HTMLUListElement = this.container_element.createEl("ul");
-            const variable_list_item_element = variable_list_element.createEl("li", {
-                text: custom_variable_instance.getFullName(),
+            const variableListElement: HTMLUListElement = this.container_element.createEl("ul");
+            const variableListItemElement = variableListElement.createEl("li", {
+                text: customVariableInstance.getFullName(),
                 attr: {
-                    "aria-label": custom_variable_instance.configuration.description,
+                    "aria-label": customVariableInstance.configuration.description,
                 },
             });
-            variable_list_item_element.createEl("br");
-            let variable_list_item_element_child: HTMLElement;
-            if (emphasize) {
-                variable_list_item_element_child = variable_list_item_element.createEl("em");
-            } else {
-                // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
-                variable_list_item_element_child = variable_list_item_element.createEl("strong");
+            variableListItemElement.createEl("br");
+            if (null !== customVariableState) {
+                variableListItemElement.createEl("em").insertAdjacentText("beforeend", customVariableState);
             }
-            variable_list_item_element_child.insertAdjacentText("beforeend", custom_variable_value);
+            if (null !== customVariableValue) {
+                // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
+                variableListItemElement.createEl("strong").insertAdjacentText("beforeend", customVariableValue);
+            }
         }
     }
 
