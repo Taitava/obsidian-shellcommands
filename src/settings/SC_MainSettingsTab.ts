@@ -27,7 +27,6 @@ import {debugLog} from "../Debug";
 import {
     DocumentationAutocompleteLink,
     DocumentationMainLink,
-    DocumentationBuiltInVariablesBaseLink,
     DocumentationBuiltInVariablesIndexLink,
     GitHubLink,
     ChangelogLink,
@@ -386,7 +385,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     .addExtraButton(extraButton => extraButton
                         .setIcon("help")
                         .setTooltip("Documentation: " + variable.getFullName() + " variable")
-                        .onClick(() => gotoURL(DocumentationBuiltInVariablesBaseLink + encodeURI(variable.getFullName())))
+                        .onClick(() => gotoURL(variable.getDocumentationLink()))
                     )
                 ;
                 variableHeadingSetting.nameEl.insertAdjacentHTML("afterbegin", variable.getHelpName());

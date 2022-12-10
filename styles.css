@@ -284,6 +284,14 @@ button.SC-tab-header-button:hover {
     font-size: 75%;
 }
 
+a.SC-autocomplete-link-icon {
+    margin-left: 3px;
+}
+
+a.SC-autocomplete-link-icon svg {
+    vertical-align: middle; /* Not middle but close enough. */
+}
+
 /*
  * OUTPUT CHANNEL: ASK AFTER EXECUTION (OutputModal TypeScript class)
  */

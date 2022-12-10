@@ -81,12 +81,14 @@ export class Variable_EventFolderPath extends EventVariable {
                 help_text: "File events: Gives path to the event related file's parent folder. Folder events: Gives path to the event related folder. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "File events: Gives path to the event related file's parent folder. Folder events: Gives path to the event related folder. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -95,12 +97,14 @@ export class Variable_EventFolderPath extends EventVariable {
                 help_text: "File events: Gives path to the event related file's parent folder. Folder events: Gives path to the event related folder. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "File events: Gives path to the event related file's parent folder. Folder events: Gives path to the event related folder. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

@@ -60,12 +60,14 @@ export class Variable_NewNoteFolderPath extends Variable {
                 help_text: "Gives path to the \"Default location for new notes\" folder (a setting in Obsidian), absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the \"Default location for new notes\" folder (a setting in Obsidian), relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -74,12 +76,14 @@ export class Variable_NewNoteFolderPath extends Variable {
                 help_text: "Gives path to the \"Default location for new notes\" folder (a setting in Obsidian), absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the \"Default location for new notes\" folder (a setting in Obsidian), relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

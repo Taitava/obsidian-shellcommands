@@ -74,12 +74,14 @@ export class Variable_EventOldFilePath extends EventVariable {
                 help_text: "Gives the renamed/moved file's old path, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "Gives the renamed/moved file's old path, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -88,12 +90,14 @@ export class Variable_EventOldFilePath extends EventVariable {
                 help_text: "Gives the renamed/moved file's old path, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "Gives the renamed/moved file's old path, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

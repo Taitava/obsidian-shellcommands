@@ -18,9 +18,13 @@
  */
 
 import autocomplete from "autocompleter";
-import {parseYaml} from "obsidian";
+import {
+    parseYaml,
+    setIcon,
+} from "obsidian";
 import SC_Plugin from "../../main";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
+import {gotoURL} from "../../Common";
 
 /**
  *
@@ -117,6 +121,20 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
                 div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
                 div_element.createSpan({attr: {class: "SC-autocomplete-help-text"}}).insertAdjacentHTML("beforeend", item.help_text);
             }
+
+            // Documentation link
+            const documentationLink: string | undefined = item.documentationLink;
+            if (undefined !== documentationLink) {
+                const documentationLinkElement = div_element.createEl("a", {attr: {"title": "Documentation: " + item.value}}); // Use "title" instead of "aria-label", because I don't know how to make "aria-label" show a tooltip box on a custom element.
+                setIcon(documentationLinkElement, "help");
+                documentationLinkElement.addClass("SC-autocomplete-link-icon");
+                documentationLinkElement.onClickEvent((event) => {
+                    gotoURL(documentationLink);
+                    // event.preventDefault(); Not needed, I guess.
+                    event.stopImmediatePropagation(); // Do not close the autocomplete menu.
+                });
+            }
+
             return div_element;
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
@@ -131,6 +149,7 @@ export interface IAutocompleteItem {
     value: string;
     group: string;
     type: AutocompleteSearchQueryType;
+    documentationLink?: string;
 }
 
 function item_match(item: IAutocompleteItem, search_query: IAutocompleteSearchQuery): boolean {

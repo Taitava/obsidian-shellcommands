@@ -25,6 +25,7 @@ import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
+import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -272,6 +273,7 @@ export abstract class Variable {
                 help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped version of the variable
@@ -280,6 +282,7 @@ export abstract class Variable {
                 help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }
@@ -295,6 +298,10 @@ export abstract class Variable {
      */
     public getFullName(): string {
         return "{{" + this.variable_name + "}}";
+    }
+
+    public getDocumentationLink(): string {
+        return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
     }
 
     /**

@@ -79,19 +79,22 @@ export class Variable_CaretPosition extends EditorVariable {
                 value: "{{" + this.variable_name + "}}",
                 help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":line}}",
                 help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":column}}",
                 help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -100,18 +103,21 @@ export class Variable_CaretPosition extends EditorVariable {
                 help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":line}}",
                 help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":column}}",
                 help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

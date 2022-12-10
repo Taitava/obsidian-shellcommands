@@ -56,12 +56,14 @@ export class Variable_FolderPath extends FolderVariable {
                 help_text: "Gives path to the current file's parent folder, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -70,12 +72,14 @@ export class Variable_FolderPath extends FolderVariable {
                 help_text: "Gives path to the current file's parent folder, absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "Gives path to the current file's parent folder, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

@@ -56,12 +56,14 @@ export class Variable_FileExtension extends FileVariable {
                 help_text: "Gives the current file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":with-dot}}",
                 help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -70,12 +72,14 @@ export class Variable_FileExtension extends FileVariable {
                 help_text: "Gives the current file name's ending without a preceding dot. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":with-dot}}",
                 help_text: "Gives the current file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }
