@@ -81,7 +81,7 @@ export interface SC_MainSettings {
     // Additional configuration for built-in variables. (Currently just global default values).
     builtin_variables: {
         [variableName: string]: {
-            default_value: GlobalVariableDefaultValueConfiguration,
+            default_value: GlobalVariableDefaultValueConfiguration | undefined,
         }
     };
 
