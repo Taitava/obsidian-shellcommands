@@ -21,7 +21,7 @@ import {FolderVariable} from "./FolderVariable";
 
 export class Variable_FolderName extends FolderVariable {
     public variable_name = "folder_name";
-    public help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
+    public help_text = "Gives the current file's parent folder name, or a dot if the folder is the vault's root. No ancestor folders are included.";
 
     protected generateValue(): Promise<string|null> {
         return new Promise((resolve) => {
