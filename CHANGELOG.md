@@ -18,6 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
+**VERSION 0.18.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES to variables `{{folder_name}}` and `{{event_folder_name}}`, see below.**
+
 ### To be Added
  - [Ability to pass variable values to stdin (#283)](https://github.com/Taitava/obsidian-shellcommands/issues/283).
  - [Globally default values for variables (#298)](https://github.com/Taitava/obsidian-shellcommands/issues/298).
@@ -26,6 +28,8 @@ Features that are in development, but are not released yet. Does not include stu
    - Only available in debug mode and used for testing.
 
 ### To be Changed
+ - [Change {{folder_name}} and {{event_folder_name}} to return a dot instead of an empty string when folder is vault root](https://github.com/Taitava/obsidian-shellcommands/issues/304).
+   - **Might be backwards incompatible!** Make sure your shell commands that use `{{folder_name}}`/`{{event_folder_name}}` work as expected when the root folder is denoted as a dot `.` instead of an empty text ` ` (like was before).
  - [{{selection}}: Show an error message if nothing is selected (#303)](https://github.com/Taitava/obsidian-shellcommands/issues/303).
    - Before this, the variable gave an empty text. The old behavior can be restored by defining a [default value](https://publish.obsidian.md/shellcommands/Variables/Default+values).
  - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
