@@ -79,6 +79,17 @@ export abstract class Shell {
     }
 
     /**
+     * Subclasses can override this to alter shell command contents. The method is called before {{variables}} are parsed,
+     * so augmentations won't accidentally alter any dynamic values from variables.
+     *
+     * @param shellCommandContent
+     */
+    public augmentShellCommandContentBeforeParsing(shellCommandContent: string): string {
+        // No augmentation by default.
+        return shellCommandContent;
+    }
+
+    /**
      * Returns an Escaper instance used for quoting special characters in {{variable}} values. Returns null iff the shell
      * does not support escaping.
      */

@@ -49,6 +49,13 @@ export class Shell_CMD extends BuiltinShell {
         return ";";
     }
 
+    public augmentShellCommandContentBeforeParsing(shellCommandContent: string): string {
+        return shellCommandContent; // Just return the content as is for now.
+
+        // TODO: Change "\r\n" with something that works as a linebreak for CMD.EXE.
+        // return shellCommandContent.replace(/(?<!\r)\n/gu, "\r\n"); // Replace LF with CRLF, but don't accidentally replace CRLF with CRCRLF.
+    }
+
     public translateAbsolutePath(originalPath: string): string {
         return normalizePath2(originalPath, true);
     }

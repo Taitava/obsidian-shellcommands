@@ -412,12 +412,18 @@ export class TShellCommand {
      * @param sc_event Needed to get {{event_*}} variables parsed. Can be left out if working outside any SC_Event context, in which case {{event_*}} variables are inaccessible.
      */
     public createParsingProcess(sc_event: SC_Event | null): ShellCommandParsingProcess {
+        // Get shell command content and do possible newline augmenting
+        const shellCommandContent: string = this.getShell().augmentShellCommandContentBeforeParsing(this.getShellCommand());
+
+        // Get OutputWrappers (if defined)
         const stdout_output_wrapper = this.getOutputWrapper("stdout"); // Can be null
         const stderr_output_wrapper = this.getOutputWrapper("stderr"); // Can be null
+
+        // Create a ParsingProcess
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                shell_command: this.getShellCommand(),
+                shell_command: shellCommandContent,
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
                 output_wrapper_stdout: stdout_output_wrapper ? stdout_output_wrapper.getContent() : undefined,
