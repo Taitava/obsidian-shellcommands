@@ -18,6 +18,7 @@
  */
 
 import {Shell} from "./Shell";
+import {extractFileName} from "../Common";
 
 export abstract class BuiltinShell extends Shell {
 
@@ -42,8 +43,9 @@ export abstract class BuiltinShell extends Shell {
         }
 
         // Do an additional check on ownedShellBinaries.
+        const shellFileName = extractFileName(shellIdentifier);
         return this.ownedShellBinaries.some((ownedShellBinary: string) => {
-            return ownedShellBinary.toLocaleLowerCase() === shellIdentifier.toLocaleLowerCase();
+            return ownedShellBinary.toLocaleLowerCase() === shellFileName.toLocaleLowerCase();
         });
     }
 }
