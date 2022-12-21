@@ -439,7 +439,17 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getCustomShellInstances().forEach((customShellInstance: CustomShellInstance) => {
             customShellModel.createSettingFields(customShellInstance, customShellContainer);
         });
-        createNewModelInstanceButton<CustomShellModel, CustomShellInstance>(this.plugin, CustomShellModel.name, container_element, customShellContainer, this.plugin.settings).then();
+        createNewModelInstanceButton<CustomShellModel, CustomShellInstance>(
+            this.plugin,
+            CustomShellModel.name,
+            container_element,
+            customShellContainer,
+            this.plugin.settings
+        ).then((result: {instance: CustomShellInstance, main_setting: Setting}) => {
+            // A new CustomShell is created.
+            // Open settings modal.
+            customShellModel.openSettingsModal(result.instance, result.main_setting);
+        });
 
         // PATH environment variable fields
         createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
