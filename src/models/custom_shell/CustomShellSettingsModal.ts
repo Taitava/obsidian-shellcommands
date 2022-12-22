@@ -104,12 +104,12 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Supported operating systems
-        const supportedPlatformsContainer = containerElement.createDiv({attr: {class: "SC-settings-group"}});
-        new Setting(supportedPlatformsContainer)
+        new Setting(containerElement)
             .setName("Supported operating systems")
             .setDesc("Select all operating systems that you have this shell installed on. Note that in case your shell belongs to a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you need to select the *host* system, as the sub-system's operating system does not matter here.")
             .setHeading()
         ;
+        const supportedPlatformsContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         let platformId: PlatformId;
         for (platformId in PlatformNames) {
             const platformName: string = PlatformNames[platformId] as string;
@@ -191,7 +191,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Path translator")
             .setDesc("Some shells introduce sub-environments where the same file is referred to using a different path than in the host operating system. A custom JavaScript function can be defined to convert file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done here - they are already changed based on the 'Directory separator' setting, if needed. Path translation is optional.")
             .setClass("SC-path-translator-setting")
-            .addTextArea(textareaComponent => textareaComponent
+            .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
                 .setValue(this.customShellInstance.configuration.path_translator ?? "")
                 .onChange(async (newPathTranslator: string) => {
                     if ("" === newPathTranslator.trim()) {
