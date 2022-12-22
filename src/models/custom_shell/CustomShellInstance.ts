@@ -60,7 +60,7 @@ export class CustomShellInstance extends Instance {
 
     private createCustomShell(): Shell {
         debugLog(`CustomShellInstance ${this.getId()}: Creating an operational CustomShell.`);
-        this.customShell = new CustomShell(this);
+        this.customShell = new CustomShell(this.model.plugin, this);
         registerShell(this.customShell);
         return this.customShell;
     }

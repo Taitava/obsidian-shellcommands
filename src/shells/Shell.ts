@@ -19,8 +19,13 @@
 
 import {Escaper} from "../variables/escapers/Escaper";
 import {PlatformId} from "../settings/SC_MainSettings";
+import SC_Plugin from "../main";
 
 export abstract class Shell {
+
+    constructor(
+       protected plugin: SC_Plugin,
+    ) {}
 
     /**
      * Returns an identifier with which this Shell is referenced to in configuration files.

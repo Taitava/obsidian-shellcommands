@@ -133,7 +133,7 @@ export default class SC_Plugin extends Plugin {
 		await RunMigrations(this);
 
         // Define builtin shells
-        registerBuiltinShells();
+        registerBuiltinShells(this);
 
 		// Define models
 		introduceModels(this);

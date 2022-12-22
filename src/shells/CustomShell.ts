@@ -27,13 +27,15 @@ import {
     isWindows,
     normalizePath2,
 } from "../Common";
+import SC_Plugin from "../main";
 
 export class CustomShell extends Shell {
 
     constructor(
+        plugin: SC_Plugin,
         private customShellInstance: CustomShellInstance,
     ) {
-        super();
+        super(plugin);
     }
 
     public getBinaryPath(): string {
@@ -118,7 +120,7 @@ export class CustomShell extends Shell {
         } catch (error) {
             // Something failed.
             // Display an error balloon.
-            // this.plugin.newError(this.getName() + ": Translating path (" + path + ", " + absoluteOrRelative + ") failed: " + error.message); // TODO: Uncomment after this.plugin is available.
+            this.plugin.newError(this.getName() + ": Translating path (" + path + ", " + absoluteOrRelative + ") failed: " + error.message);
             throw error; // Rethrow.
         }
     }

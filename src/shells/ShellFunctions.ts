@@ -26,17 +26,18 @@ import {Shell_Zsh} from "./Shell_Zsh";
 import {Shell_PowerShellCore} from "./Shell_PowerShellCore";
 import {Shell_PowerShell5} from "./Shell_PowerShell5";
 import {Shell_CMD} from "./Shell_CMD";
+import SC_Plugin from "../main";
 
 // Register shells
 const shells: Set<Shell> = new Set;
 
-export function registerBuiltinShells() {
-    registerShell(new Shell_Bash());
-    registerShell(new Shell_Dash());
-    registerShell(new Shell_Zsh());
-    registerShell(new Shell_PowerShellCore());
-    registerShell(new Shell_PowerShell5());
-    registerShell(new Shell_CMD());
+export function registerBuiltinShells(plugin: SC_Plugin) {
+    registerShell(new Shell_Bash(plugin));
+    registerShell(new Shell_Dash(plugin));
+    registerShell(new Shell_Zsh(plugin));
+    registerShell(new Shell_PowerShellCore(plugin));
+    registerShell(new Shell_PowerShell5(plugin));
+    registerShell(new Shell_CMD(plugin));
 }
 
 /**
