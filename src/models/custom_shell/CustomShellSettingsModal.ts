@@ -91,7 +91,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Binary path
-        new Setting(containerElement) // TODO: Create a div.SC-setting-group
+        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Executable binary file path")
             .setDesc("Can be absolute, or relative from the working directory defined in the main settings pane.")
             .addText(textComponent => textComponent
