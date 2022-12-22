@@ -19,6 +19,8 @@
 
 import {Escaper} from "../variables/escapers/Escaper";
 import {PlatformId} from "../settings/SC_MainSettings";
+import {getVaultAbsolutePath} from "../Common";
+import * as path from "path";
 import SC_Plugin from "../main";
 
 export abstract class Shell {
@@ -111,5 +113,23 @@ export abstract class Shell {
      * @param originalPath
      */
     public abstract translateRelativePath(originalPath: string): string;
+
+    /**
+     * Returns a working directory received from plugin settings, translated to the format expected by this Shell.
+     */
+    public getWorkingDirectory() {
+        // Returns either a user defined working directory, or an automatically detected one.
+        const workingDirectory: string = this.plugin.settings.working_directory;
+        const vaultAbsolutePath: string = getVaultAbsolutePath(this.plugin.app);
+        if (workingDirectory.length == 0) {
+            // No working directory specified, so use the vault directory.
+            return this.translateAbsolutePath(vaultAbsolutePath);
+        } else if (!path.isAbsolute(workingDirectory)) {
+            // The working directory is relative.
+            // Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
+            return this.translateAbsolutePath(path.join(vaultAbsolutePath, workingDirectory));
+        }
+        return workingDirectory;
+    }
 }
 

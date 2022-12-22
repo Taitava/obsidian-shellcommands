@@ -25,9 +25,7 @@ import {
 import {
     cloneObject,
     getOperatingSystem,
-    getVaultAbsolutePath,
 } from "./Common";
-import * as path from "path";
 import * as fs from "fs";
 import {
     handleBufferedOutput,
@@ -190,7 +188,7 @@ export class ShellCommandExecutor {
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
     private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): void {
-        const working_directory = this.getWorkingDirectory();
+        const working_directory = this.t_shell_command.getShell().getWorkingDirectory();
 
         // Define output channels
         let outputChannels = this.t_shell_command.getOutputChannels();
@@ -453,20 +451,6 @@ export class ShellCommandExecutor {
                 }
             }
         });
-    }
-
-    private getWorkingDirectory() {
-        // Returns either a user defined working directory, or an automatically detected one.
-        const working_directory = this.plugin.settings.working_directory;
-        if (working_directory.length == 0) {
-            // No working directory specified, so use the vault directory.
-            return getVaultAbsolutePath(this.plugin.app);
-        } else if (!path.isAbsolute(working_directory)) {
-            // The working directory is relative.
-            // Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
-            return path.join(getVaultAbsolutePath(this.plugin.app), working_directory);
-        }
-        return working_directory;
     }
 
     private augmentPATHEnvironmentVariable(path_augmentation: string, shell: Shell): string {
