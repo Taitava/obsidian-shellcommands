@@ -44,6 +44,9 @@ export class CustomShellInstance extends Instance {
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new CustomShellInstances.
         getIDGenerator().addReservedID(configuration.id);
 
+        // Create an operative shell.
+        this.createCustomShell();
+
         debugLog(`Loaded CustomShellInstance ${this.getId()}.`);
     }
 
@@ -55,7 +58,7 @@ export class CustomShellInstance extends Instance {
         return this.configuration.name;
     }
 
-    public createCustomShell(): Shell {
+    private createCustomShell(): Shell {
         debugLog(`CustomShellInstance ${this.getId()}: Creating an operational CustomShell.`);
         this.customShell = new CustomShell(this);
         registerShell(this.customShell);

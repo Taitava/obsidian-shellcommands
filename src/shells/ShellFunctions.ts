@@ -29,12 +29,15 @@ import {Shell_CMD} from "./Shell_CMD";
 
 // Register shells
 const shells: Set<Shell> = new Set;
-registerShell(new Shell_Bash());
-registerShell(new Shell_Dash());
-registerShell(new Shell_Zsh());
-registerShell(new Shell_PowerShellCore());
-registerShell(new Shell_PowerShell5());
-registerShell(new Shell_CMD());
+
+export function registerBuiltinShells() {
+    registerShell(new Shell_Bash());
+    registerShell(new Shell_Dash());
+    registerShell(new Shell_Zsh());
+    registerShell(new Shell_PowerShellCore());
+    registerShell(new Shell_PowerShell5());
+    registerShell(new Shell_CMD());
+}
 
 /**
  * I'm not sure if the name of this method should something else than getUsersDefaultShellIdentifier(). The 'identifier'

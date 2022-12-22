@@ -108,9 +108,6 @@ export class CustomShellModel extends Model {
         const customShellInstance: CustomShellInstance = new CustomShellInstance(this, customShellConfiguration, parentConfiguration);
         this.customShellInstances.set(customShellConfiguration.id, customShellInstance);
 
-        // Create an operational variable.
-        customShellInstance.createCustomShell();
-
         return customShellInstance;
         // TODO: Move this logic to the base Model class.
     }

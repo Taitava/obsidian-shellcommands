@@ -62,6 +62,7 @@ import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from 
 import {
     getShell,
     getUsersDefaultShellIdentifier,
+    registerBuiltinShells,
 } from "./shells/ShellFunctions";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
@@ -130,6 +131,9 @@ export default class SC_Plugin extends Plugin {
 
 		// Run possible configuration migrations
 		await RunMigrations(this);
+
+        // Define builtin shells
+        registerBuiltinShells();
 
 		// Define models
 		introduceModels(this);
