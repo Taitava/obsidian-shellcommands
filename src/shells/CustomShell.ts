@@ -107,8 +107,20 @@ export class CustomShell extends Shell {
             // Return the path without modifications.
             return path;
         }
-        const pathTranslator = window.eval("function (path, type) {" + pathTranslatorCode + "}");
-        return pathTranslator(path, absoluteOrRelative);
+
+        try {
+            // Create a JS function for doing the translation.
+            const translatorFunction = new Function(
+                "path", "type", // Parameter names
+                pathTranslatorCode // Function content
+            );
+            return translatorFunction(path, absoluteOrRelative);
+        } catch (error) {
+            // Something failed.
+            // Display an error balloon.
+            // this.plugin.newError(this.getName() + ": Translating path (" + path + ", " + absoluteOrRelative + ") failed: " + error.message); // TODO: Uncomment after this.plugin is available.
+            throw error; // Rethrow.
+        }
     }
 
 }
