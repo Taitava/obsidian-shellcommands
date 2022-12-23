@@ -46,6 +46,9 @@ export interface ShellCommandConfiguration {
     icon: string | null;
     confirm_execution: boolean;
     ignore_error_codes: number[];
+    input_contents: {
+        stdin: string | null,
+    },
     output_channels: OutputChannelCodes,
     output_wrappers: {
         stdout: string | null,
@@ -76,6 +79,9 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         icon: null,
         confirm_execution: false,
         ignore_error_codes: [],
+        input_contents: {
+            stdin: null,
+        },
         output_channels: {
             stdout: "ignore",
             stderr: "notification",

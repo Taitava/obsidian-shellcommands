@@ -61,14 +61,18 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
-import {DocumentationOutputHandlingModeLink} from "../Documentation";
+import {
+    DocumentationOutputHandlingModeLink,
+    DocumentationStdinContentLink,
+} from "../Documentation";
+import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
 /**
  * TODO: Rename to ShellCommandSettingsModal
  */
 export class ExtraOptionsModal extends SC_Modal {
-    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation";
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static ENVIRONMENTS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
@@ -257,6 +261,41 @@ export class ExtraOptionsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 })
             )
+        ;
+
+        // Stdin field
+        new Setting(container_element)
+            .setName("Pass variables to standard input (stdin)")
+            .setDesc("Used to pass long texts as input to the shell command. There is a limit to command line length, and e.g. {{note_content}} might provide a value too long to be used as an argument, so it works better when passed to stdin. Also, programs that ask multiple values interactively, can be fed with values using stdin. If there are multiple values that need to be inputted, put them on separate lines. Many shell programs interpret newlines as separators between different values.")
+            .addExtraButton(extraButtonComponent => extraButtonComponent
+                .setIcon("help")
+                .setTooltip("Documentation: Pass variables to stdin")
+                .onClick(() => gotoURL(DocumentationStdinContentLink))
+            )
+        ;
+        const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        const onStdinChange = async (newStdinContent: string) => {
+            if ("" === newStdinContent) {
+                // Set to null
+                this.t_shell_command.getConfiguration().input_contents.stdin = null;
+            } else {
+                // Set value
+                this.t_shell_command.getConfiguration().input_contents.stdin = newStdinContent;
+            }
+            await this.plugin.saveSettings();
+        };
+        new Setting(stdinSettingContainer)
+            .setDesc("Can contain {{variables}} and/or static text.")
+            .addTextArea(textareaComponent => {
+                textareaComponent
+                    .setValue(this.t_shell_command.getInputChannels().stdin ?? "")
+                ;
+                decorateMultilineField(this.plugin, textareaComponent, onStdinChange);
+                if (this.plugin.settings.show_autocomplete_menu) {
+                    // Show autocomplete menu (= a list of available variables).
+                    createAutocomplete(this.plugin, textareaComponent.inputEl, onStdinChange);
+                }
+            })
         ;
 
         // Shell command id

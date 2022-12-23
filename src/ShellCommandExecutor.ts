@@ -161,6 +161,7 @@ export class ShellCommandExecutor {
                         shell_command: (parsing_results["shell_command"] as ParsingResult).parsed_content as string,
                         alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
                         environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
+                        stdinContent: parsing_results.stdinContent?.parsed_content as string,
                         output_wrapper_stdout: parsing_results.output_wrapper_stdout?.parsed_content as string, // Output wrappers are not always present. If they are absent, use undefined.
                         output_wrapper_stderr: parsing_results.output_wrapper_stderr?.parsed_content as string,
                         succeeded: true,
@@ -256,6 +257,20 @@ export class ShellCommandExecutor {
             debugLog("Executing command " + shell_command + " in " + working_directory + "...");
             try {
                 const child_process = spawn(shell_command, options);
+
+                // Pass stdin content (if defined)
+                if (undefined !== shell_command_parsing_result.stdinContent) {
+                    // Stdin content is defined
+                    debugLog("Stdin content is present in parsing result. Will write it to the process.");
+                    if (null === child_process.stdin) {
+                        // noinspection ExceptionCaughtLocallyJS: The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
+                        throw new Error("Shell command execution process does not have a standard input stream (stdin).");
+                    }
+                    child_process.stdin.write(shell_command_parsing_result.stdinContent);
+                    child_process.stdin.end();
+                } else {
+                    debugLog("No stdin content is present in parsing result.");
+                }
 
                 // Common error handling regardless of output handling mode
                 child_process.on("error", (error: Error) => {

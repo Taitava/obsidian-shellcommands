@@ -186,6 +186,10 @@ export class TShellCommand {
         return this.configuration.ignore_error_codes;
     }
 
+    public getInputChannels() {
+        return this.configuration.input_contents;
+    }
+
     public getOutputChannelOrder() {
         return this.configuration.output_channel_order;
     }
@@ -414,6 +418,7 @@ export class TShellCommand {
                 shell_command: this.getShellCommand(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
+                stdinContent: this.configuration.input_contents.stdin ?? undefined,
                 output_wrapper_stdout: stdout_output_wrapper ? stdout_output_wrapper.getContent() : undefined,
                 output_wrapper_stderr: stderr_output_wrapper ? stderr_output_wrapper.getContent() : undefined,
             },
@@ -588,6 +593,7 @@ export interface ShellCommandParsingResult {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    stdinContent?: string,
     output_wrapper_stdout?: string,
     output_wrapper_stderr?: string,
     succeeded: boolean;
@@ -600,6 +606,7 @@ type shell_command_parsing_map = {
     shell_command: string,
     alias: string,
     environment_variable_path_augmentation: string,
+    stdinContent?: string,
     output_wrapper_stdout?: string,
     output_wrapper_stderr?: string,
 };
