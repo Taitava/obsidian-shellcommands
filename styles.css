@@ -61,8 +61,8 @@ div.SC-setting-group div.setting-item {
     padding: 5px; /* Shrink the padding. */
 }
 
-div.SC-setting-group div.setting-item div.setting-item-info,
-div.SC-setting-group div.setting-item div.setting-item-control {
+div.SC-setting-group div.setting-item:not(.setting-item-heading) div.setting-item-info, /* :not() = Don't shrink headings, they usually don't have large control elements. Heading texts themselves can be long, so don't limit them to 50% width. */
+div.SC-setting-group div.setting-item:not(.setting-item-heading) div.setting-item-control {
     width: 50%; /* Make sure description does not take over 50% of the space. */
 }
 
