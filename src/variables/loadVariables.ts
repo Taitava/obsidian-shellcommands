@@ -60,6 +60,7 @@ import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
 import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
 import {Variable_Newline} from "./Variable_Newline";
+import {Variable_YAMLContent} from "./Variable_YAMLContent";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -96,6 +97,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_Title(plugin),
         new Variable_VaultPath(plugin),
         new Variable_Workspace(plugin),
+        new Variable_YAMLContent(plugin),
         new Variable_YAMLValue(plugin),
 
         // Event variables
