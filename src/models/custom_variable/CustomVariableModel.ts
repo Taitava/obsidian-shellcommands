@@ -188,7 +188,7 @@ export class CustomVariableModel extends Model {
             id: getIDGenerator().generateID(),
             name: String(sequential_number),
             description: "",
-            default_value: undefined,
+            default_value: null,
         };
     }
 
@@ -246,7 +246,7 @@ export interface CustomVariableConfiguration {
     id: string,
     name: string,
     description: string,
-    default_value: GlobalVariableDefaultValueConfiguration | undefined,
+    default_value: GlobalVariableDefaultValueConfiguration | null,
 }
 
 export class CustomVariableInstanceMap extends Map<string, CustomVariableInstance> {}

@@ -116,7 +116,7 @@ export class CustomVariable extends Variable {
         return this.custom_variable_instance.configuration;
     }
 
-    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | undefined {
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
         return this.custom_variable_instance.configuration.default_value;
     }
 }

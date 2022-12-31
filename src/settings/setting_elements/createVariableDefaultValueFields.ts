@@ -101,7 +101,7 @@ export function createVariableDefaultValueField(
     const variableIdentifier = variable.getIdentifier();
 
     // If a default value has been defined for this variable (and this targetObject), retrieve the configuration.
-    let defaultValueConfiguration: GlobalVariableDefaultValueConfiguration | InheritableVariableDefaultValueConfiguration | undefined;
+    let defaultValueConfiguration: GlobalVariableDefaultValueConfiguration | InheritableVariableDefaultValueConfiguration | null;
     switch (targetType) {
         case "tShellCommand":
             defaultValueConfiguration = (targetObject as TShellCommand).getDefaultValueConfigurationForVariable(variable, false);
@@ -127,7 +127,7 @@ export function createVariableDefaultValueField(
             case "builtinVariable":
                 if (undefined === plugin.settings.builtin_variables[variableIdentifier]) {
                     // Create a config object for this variable if it does not exist yet.
-                    plugin.settings.builtin_variables[variableIdentifier] = {default_value: undefined};
+                    plugin.settings.builtin_variables[variableIdentifier] = {default_value: null};
                 }
                 plugin.settings.builtin_variables[variableIdentifier].default_value = configuration;
                 break;
@@ -159,7 +159,7 @@ export function createVariableDefaultValueField(
     switch (targetType) {
         case "tShellCommand": {
             // Shell commands can have the "inherit" type.
-            const globalDefaultValueConfiguration: GlobalVariableDefaultValueConfiguration | undefined = variable.getGlobalDefaultValueConfiguration();
+            const globalDefaultValueConfiguration: GlobalVariableDefaultValueConfiguration | null = variable.getGlobalDefaultValueConfiguration();
             const globalDefaultValueType: VariableDefaultValueType = globalDefaultValueConfiguration ? globalDefaultValueConfiguration.type : "show-errors";
             defaultValueTypeOptions.inherit = "Inherit: " + defaultValueTypeOptions[globalDefaultValueType];
             if ("value" === globalDefaultValueType) {
@@ -210,10 +210,10 @@ export function createVariableDefaultValueField(
                         // Prevent deleting, if a text value is present, because the user might want to keep it if they will later change 'type' to 'value'.
                         switch (targetType) {
                             case "builtinVariable":
-                                plugin.settings.builtin_variables[variableIdentifier].default_value = undefined;
+                                plugin.settings.builtin_variables[variableIdentifier].default_value = null;
                                 break;
                             case "customVariable":
-                                (targetObject as CustomVariable).getConfiguration().default_value = undefined;
+                                (targetObject as CustomVariable).getConfiguration().default_value = null;
                                 break;
                         }
                     }

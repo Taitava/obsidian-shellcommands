@@ -124,8 +124,8 @@ export abstract class Variable {
                             });
                         case "value":
                             // Return a default value.
-                            if (undefined === default_value_configuration) {
-                                // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined.
+                            if (!default_value_configuration) {
+                                // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined or null.
                                 // This check is just for TypeScript compiler to understand that default_value_configuration is defined when it's accessed below.
                                 throw new Error("Default value configuration is undefined.");
                             }
@@ -353,9 +353,9 @@ export abstract class Variable {
      * Returns a default value configuration object that should be used if a shell command does not define its own
      * default value configuration object.
      */
-    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | undefined {
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
         // Works for built-in variables only. CustomVariable class needs to override this method and not call the parent!
-        return this.plugin.settings.builtin_variables[this.getIdentifier()]?.default_value; // Can return undefined
+        return this.plugin.settings.builtin_variables[this.getIdentifier()]?.default_value; // Can return null
     }
 }
 
