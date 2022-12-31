@@ -66,7 +66,7 @@ export abstract class EventVariable extends Variable {
         return sc_event_titles.join(", ");
     }
 
-    public isAvailable(sc_event: SC_Event | null): boolean {
+    public async isAvailable(sc_event: SC_Event | null): Promise<boolean> {
         if (!sc_event) {
             return false;
         }

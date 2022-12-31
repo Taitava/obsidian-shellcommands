@@ -71,8 +71,8 @@ export class Variable_YAMLValue extends FileVariable {
         this.yaml_value_cache = undefined;
     }
 
-    public isAvailable(): boolean {
-        if (!super.isAvailable()) {
+    public async isAvailable(): Promise<boolean> {
+        if (!await super.isAvailable()) {
             return false;
         }
 

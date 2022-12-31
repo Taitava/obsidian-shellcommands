@@ -84,77 +84,80 @@ export abstract class Variable {
     ): Promise<VariableValueResult> {
 
         return new Promise<VariableValueResult>((resolve) => {
-            if (this.isAvailable(sc_event)) {
-                // The variable can be used.
-                this.generateValue(sc_event).then((value: string | null) => {
-                    resolve({
-                        value: value,
-                        error_messages: this.error_messages,
-                        succeeded: this.error_messages.length === 0,
+            // Check variable availability
+            this.isAvailable(sc_event).then((isAvailable: boolean) => {
+                if (isAvailable) {
+                    // The variable can be used.
+                    this.generateValue(sc_event).then((value: string | null) => {
+                        resolve({
+                            value: value,
+                            error_messages: this.error_messages,
+                            succeeded: this.error_messages.length === 0,
+                        });
                     });
-                });
-            } else {
-                // The variable is not available in this situation.
-                // Check what should be done.
-                const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
-                const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
-                const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
-                switch (default_value_type) {
-                    case "show-errors":
-                        // Generate error messages by calling generateValue().
-                        debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
-                        // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
-                        this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
-                            resolve({
-                                value: null,
-                                error_messages: this.error_messages,
-                                succeeded: false,
-                            });
-                        });
-                        break;
-                    case "cancel-silently":
-                        // Prevent execution, but do not show any errors
-                        debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
-                        return resolve({
-                            value: null,
-                            error_messages: [],
-                            succeeded: false,
-                        });
-                    case "value":
-                        // Return a default value.
-                        if (undefined === default_value_configuration) {
-                            // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined.
-                            // This check is just for TypeScript compiler to understand that default_value_configuration is defined when it's accessed below.
-                            throw new Error("Default value configuration is undefined.");
-                        }
-                        debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
-                        if (default_value_parser) {
-                            // Parse possible variables in the default value.
-                            default_value_parser(default_value_configuration.value).then((default_value_parsing_result: ParsingResult) => {
-                                return resolve({
-                                    value:
-                                        default_value_parsing_result.succeeded
-                                            ? default_value_parsing_result.parsed_content
-                                            : default_value_parsing_result.original_content
-                                    ,
-                                    error_messages: default_value_parsing_result.error_messages,
-                                    succeeded: default_value_parsing_result.succeeded,
+                } else {
+                    // The variable is not available in this situation.
+                    // Check what should be done.
+                    const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+                    const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
+                    const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
+                    switch (default_value_type) {
+                        case "show-errors":
+                            // Generate error messages by calling generateValue().
+                            debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                            // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
+                            this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
+                                resolve({
+                                    value: null,
+                                    error_messages: this.error_messages,
+                                    succeeded: false,
                                 });
                             });
-
-                        } else {
-                            // No variable parsing is wanted.
+                            break;
+                        case "cancel-silently":
+                            // Prevent execution, but do not show any errors
+                            debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
                             return resolve({
-                                value: default_value_configuration.value,
+                                value: null,
                                 error_messages: [],
-                                succeeded: true,
+                                succeeded: false,
                             });
-                        }
-                        break;
-                    default:
-                        throw new Error("Unrecognised default value type: " + default_value_type);
+                        case "value":
+                            // Return a default value.
+                            if (undefined === default_value_configuration) {
+                                // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined.
+                                // This check is just for TypeScript compiler to understand that default_value_configuration is defined when it's accessed below.
+                                throw new Error("Default value configuration is undefined.");
+                            }
+                            debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
+                            if (default_value_parser) {
+                                // Parse possible variables in the default value.
+                                default_value_parser(default_value_configuration.value).then((default_value_parsing_result: ParsingResult) => {
+                                    return resolve({
+                                        value:
+                                            default_value_parsing_result.succeeded
+                                                ? default_value_parsing_result.parsed_content
+                                                : default_value_parsing_result.original_content
+                                        ,
+                                        error_messages: default_value_parsing_result.error_messages,
+                                        succeeded: default_value_parsing_result.succeeded,
+                                    });
+                                });
+
+                            } else {
+                                // No variable parsing is wanted.
+                                return resolve({
+                                    value: default_value_configuration.value,
+                                    error_messages: [],
+                                    succeeded: true,
+                                });
+                            }
+                            break;
+                        default:
+                            throw new Error("Unrecognised default value type: " + default_value_type);
+                    }
                 }
-            }
+            });
         });
     }
 
@@ -319,7 +322,7 @@ export abstract class Variable {
      * Tells whether the variable can be currently accessed. If you want to know if the variable can sometimes be inaccessible,
      * use isAlwaysAvailable() instead.
      */
-    public isAvailable(sc_event: SC_Event | null) {
+    public async isAvailable(sc_event: SC_Event | null): Promise<boolean> {
         return true; // If the variable is always available, return true. If not, the variable should override this method.
     }
 

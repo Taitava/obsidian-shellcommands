@@ -84,8 +84,8 @@ export class Variable_EventYAMLValue extends EventVariable {
         this.yaml_value_cache = undefined;
     }
 
-    public isAvailable(sc_event: SC_Event_FileMenu /* TODO: This type should actually be SC_Event, as the method might be called with whatever SC_Event. */ | null): boolean {
-        if (!super.isAvailable(sc_event) || null == sc_event) { // The null check is redundant, but needed for TS compiler to understand that sc_event.getFile() won't happen on null.
+    public async isAvailable(sc_event: SC_Event_FileMenu /* TODO: This type should actually be SC_Event, as the method might be called with whatever SC_Event. */ | null): Promise<boolean> {
+        if (!await super.isAvailable(sc_event) || null == sc_event) { // The null check is redundant, but needed for TS compiler to understand that sc_event.getFile() won't happen on null.
             return false;
         }
 

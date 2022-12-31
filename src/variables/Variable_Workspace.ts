@@ -49,7 +49,7 @@ export class Variable_Workspace extends Variable{
         });
     }
 
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         // @ts-ignore internalPlugins exists, although it's not in obsidian.d.ts.
         const workspaces_plugin = this.app.internalPlugins?.plugins?.workspaces;
         return workspaces_plugin && workspaces_plugin.enabled && workspaces_plugin.instance?.activeWorkspace;

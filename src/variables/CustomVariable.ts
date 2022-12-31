@@ -108,7 +108,7 @@ export class CustomVariable extends Variable {
     /**
      * Returns true if the CustomVariable has an assigned value.
      */
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         return null !== this.value;
     }
 

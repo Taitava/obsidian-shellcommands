@@ -48,7 +48,7 @@ export class Variable_Selection extends EditorVariable {
         return null;
     }
 
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         const view = getView(this.app);
         const hasViewAndEditor: boolean = !!view && this.requireEditor() && view.getMode() === "source";
         return hasViewAndEditor && (this.editor as Editor).somethingSelected();

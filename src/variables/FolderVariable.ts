@@ -36,9 +36,9 @@ export abstract class FolderVariable extends FileVariable {
         return current_folder;
     }
 
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         // Normal check: ensure a file pane is open and focused.
-        if (!super.isAvailable()) {
+        if (!await super.isAvailable()) {
             return false;
         }
 

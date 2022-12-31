@@ -32,7 +32,7 @@ export abstract class FileVariable extends Variable {
         return current_file;
     }
 
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         const current_file = this.getActiveFile();
         return !!current_file;
     }

@@ -126,7 +126,7 @@ export class Variable_CaretPosition extends EditorVariable {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
     }
 
-    public isAvailable(): boolean {
+    public async isAvailable(): Promise<boolean> {
         return !!getEditor(this.app);
     }
 
