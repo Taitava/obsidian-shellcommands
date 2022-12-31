@@ -25,13 +25,15 @@ import {
 import {
     Editor,
     MarkdownView,
+    MarkdownViewModeType,
+    TextFileView,
 } from "obsidian";
 import {debugLog} from "../Debug";
 
 export abstract class EditorVariable extends Variable {
 
     protected editor: Editor | null;
-    protected view: MarkdownView | null;
+    protected view: TextFileView | null;
 
     protected requireEditor() {
         this.editor = getEditor(this.app);
@@ -62,10 +64,17 @@ export abstract class EditorVariable extends Variable {
             return false;
         }
 
-        const view: MarkdownView = this.view as MarkdownView; // as MarkdownView: Make TypeScript understand that view is always defined at this point.
-        const view_mode = view.getMode(); // "preview" or "source" ("live" was removed from Obsidian API in 0.13.8 on 2021-12-10).
+        let viewMode: MarkdownViewModeType;
+        if (this.view instanceof MarkdownView) {
+            // When the view is a MarkdownView, getMode() can be used.
+            viewMode = this.view.getMode(); // "preview" or "source" ("live" was removed from Obsidian API in 0.13.8 on 2021-12-10).
+        } else {
+            // The view is some other TextFileView - probably presented by another community plugin, such as Org Mode. In
+            // this case, it's unknown how to check if the view is in an editing mode or not. Just assume it can be edited.
+            viewMode = "source";
+        }
 
-        switch (view_mode) {
+        switch (viewMode) {
             case "preview":
                 // The leaf is in preview mode, which makes things difficult.
                 // FIXME: Make it possible to use this feature also in preview mode.
@@ -76,7 +85,7 @@ export abstract class EditorVariable extends Variable {
                 // Good, the editor is in "source" mode, so it's possible to get a selection.
                 return true;
             default:
-                throw new Error("EditorVariable: Unrecognised view mode: " + view_mode);
+                throw new Error("EditorVariable: Unrecognised view mode: " + viewMode);
         }
     }
 }

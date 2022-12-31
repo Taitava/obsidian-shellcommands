@@ -19,7 +19,10 @@
 
 import {OutputChannel} from "./OutputChannel";
 import {getEditor, getView} from "../Common";
-import {Editor} from "obsidian";
+import {
+    Editor,
+    MarkdownView,
+} from "obsidian";
 import {debugLog} from "../Debug";
 
 export abstract class OutputChannel_CurrentFile extends OutputChannel {
@@ -57,7 +60,8 @@ export abstract class OutputChannel_CurrentFile extends OutputChannel {
             debugLog("OutputChannel_CurrentFile: Could not get a view instance.");
         } else {
             // We do have a view
-            if ("source" !== view.getMode()) {
+            // The View is at least a TextFileView. If it's MarkdownView (a subclass of TextFileView), check the view mode.
+            if (view instanceof MarkdownView && "source" !== view.getMode()) {
                 // Warn that the output might go to an unexpected place in the note file.
                 this.plugin.newNotification("Note that your active note is not in 'Edit' mode! The output comes visible when you switch to 'Edit' mode again!");
             }

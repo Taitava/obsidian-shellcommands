@@ -49,9 +49,19 @@ export class Variable_Selection extends EditorVariable {
     }
 
     public isAvailable(): boolean {
+        // Check that a TextFileView and an Editor is available/focused.
         const view = getView(this.app);
-        const hasViewAndEditor: boolean = !!view && this.requireEditor() && view.getMode() === "source";
-        return hasViewAndEditor && (this.editor as Editor).somethingSelected();
+        if (!view || !this.requireEditor()) {
+            return false;
+        }
+
+        // Inspect view mode.
+        if (!this.isViewModeSource()) {
+            return false;
+        }
+
+        // Check that something is selected in editor.
+        return (this.editor as Editor).somethingSelected();
     }
 
     public getAvailabilityText(): string {

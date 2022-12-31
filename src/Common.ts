@@ -23,8 +23,8 @@ import {
     EditorPosition,
     FileSystemAdapter,
     FrontMatterCache,
-    MarkdownView,
     normalizePath,
+    TextFileView,
     TFile,
 } from "obsidian";
 import {PlatformId} from "./settings/SC_MainSettings";
@@ -74,8 +74,8 @@ export function getOperatingSystem(): PlatformId  {
     return platform();
 }
 
-export function getView(app: App) {
-    const view = app.workspace.getActiveViewOfType(MarkdownView);
+export function getView(app: App): TextFileView | null {
+    const view = app.workspace.getActiveViewOfType(TextFileView);
     if (!view) {
         debugLog("getView(): Could not get a view. Will return null.");
         return null;
@@ -85,7 +85,7 @@ export function getView(app: App) {
 
 export function getEditor(app: App): Editor | null {
 
-    const view = getView(app);
+    const view: TextFileView | null = getView(app);
     if (null === view) {
         // Could not get a view.
         return null;
