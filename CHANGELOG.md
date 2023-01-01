@@ -34,6 +34,8 @@ Features that are in development, but are not released yet. Does not include stu
  - [{{selection}}: Show an error message if nothing is selected (#303)](https://github.com/Taitava/obsidian-shellcommands/issues/303).
    - Before this, the variable gave an empty text. The old behavior can be restored by defining a [default value](https://publish.obsidian.md/shellcommands/Variables/Default+values).
  - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
+ - [Internal: TypeScript compiler: Use strict null checks (#70)](https://github.com/Taitava/obsidian-shellcommands/issues/70).
+     - This should not be visible to users, but as it touches most parts of the plugin, new bugs are always possible, even though the aim is to reduce the risk of new bugs being born.
 
 ### To be Fixed
  - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
