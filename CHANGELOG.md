@@ -23,6 +23,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Added
  - [Ability to pass variable values to stdin (#283)](https://github.com/Taitava/obsidian-shellcommands/issues/283).
  - [Globally default values for variables (#298)](https://github.com/Taitava/obsidian-shellcommands/issues/298).
+ - [New variables: {{yaml_content}} and {{event_yaml_content}} (#267)](https://github.com/Taitava/obsidian-shellcommands/issues/267).
  - [Settings: Add documentation links to the list of {{variables}} (#302)](https://github.com/Taitava/obsidian-shellcommands/issues/302).
  - [Debug: Create a {{newline}} variable (#295)](https://github.com/Taitava/obsidian-shellcommands/issues/295).
    - Only available in debug mode and used for testing.
