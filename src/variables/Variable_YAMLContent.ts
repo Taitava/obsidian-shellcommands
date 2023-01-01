@@ -46,6 +46,10 @@ export class Variable_YAMLContent extends FileVariable {
         return null !== await getFileYAML(this.app, activeFile, this.shouldUseDashes());
     }
 
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, a YAML frontmatter section needs to be present.";
+    }
+
     private shouldUseDashes(): boolean {
         return "with-dashes" === this.arguments.withDashes;
     }
