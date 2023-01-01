@@ -85,4 +85,12 @@ export class Variable_YAMLValue extends FileVariable {
         return typeof this.getFileYAMLValue(activeFile) === "string";
     }
 
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, the given YAML property must exist in the file's frontmatter.";
+    }
+
+    public getHelpName(): string {
+        return "<strong>{{yaml_value:property}}</strong>";
+    }
+
 }

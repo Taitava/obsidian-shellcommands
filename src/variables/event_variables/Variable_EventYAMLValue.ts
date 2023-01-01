@@ -92,4 +92,12 @@ export class Variable_EventYAMLValue extends EventVariable {
         const active_file = sc_event.getFile();
         return typeof this.getFileYAMLValue(active_file) === "string";
     }
+
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, the given YAML property must exist in the file's frontmatter.";
+    }
+
+    public getHelpName(): string {
+        return "<strong>{{event_yaml_value:property}}</strong>";
+    }
 }
