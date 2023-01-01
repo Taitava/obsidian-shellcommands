@@ -429,6 +429,8 @@ export class TShellCommand {
                 this.getPreactionsDependentVariables(), // Second set: Variables that are tied to preactions. Can be an empty set.
             ],
             [
+                // Do not escape variables in stdin, because shells won't interpret special characters in stdin. All characters are considered literal.
+                "stdinContent",
                 // Do not escape variables in output wrappers, because they are not going through a shell and escape characters would be visible in the end result.
                 'output_wrapper_stdout',
                 'output_wrapper_stderr',
