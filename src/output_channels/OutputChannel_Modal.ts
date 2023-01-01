@@ -23,7 +23,7 @@ import {
     initializeOutputChannel,
     OutputStreams,
 } from "./OutputChannelFunctions";
-import {ButtonComponent, Setting, TextAreaComponent} from "obsidian";
+import {Setting, TextAreaComponent} from "obsidian";
 import {OutputChannelCode, OutputStream} from "./OutputChannelCode";
 import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
@@ -268,9 +268,7 @@ class OutputModal extends SC_Modal {
                     };
 
                     // Create the button
-                    let redirect_button: ButtonComponent;
                     redirect_setting.addButton((button) => {
-                            redirect_button = button;
                             button.onClick(async (event: MouseEvent) => {
                                 // Handle output
                                 await handle_output();
@@ -286,22 +284,20 @@ class OutputModal extends SC_Modal {
                                     textarea_element.focus(); // Bring the focus back to the textarea in order to show a possible highlight (=selection) again.
                                 }
                             });
+
+                            // Define button texts and assign hotkeys
+                            const output_channel_title: string = outputChannelClass.getTitle(output_stream);
+
+                            // Button text
+                            button.setButtonText(output_channel_title);
+
+                            // Tips about hotkeys
+                            button.setTooltip(
+                                `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
+                                + EOL + EOL +
+                                `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelClass.hotkey_letter}.`
+                            );
                         },
-                    );
-
-                    // Define button texts and assign hotkeys
-                    const output_channel_title: string = outputChannelClass.getTitle(output_stream);
-
-                    // Button text
-                    // @ts-ignore // FIXME in a later commit. Move all this code inside the .addButtons()'s callback function.
-                    redirect_button.setButtonText(output_channel_title);
-
-                    // Tips about hotkeys
-                    // @ts-ignore // FIXME in a later commit. Move all this code inside the .addButtons()'s callback function.
-                    redirect_button.setTooltip(
-                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
-                        + EOL + EOL +
-                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelClass.hotkey_letter}.`
                     );
 
                     // 1. hotkey: Ctrl/Cmd + number: handle output
