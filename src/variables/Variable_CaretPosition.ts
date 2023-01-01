@@ -129,6 +129,6 @@ export class Variable_CaretPosition extends EditorVariable {
     }
 
     public getAvailabilityText(): string {
-        return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
+        return super.getAvailabilityText() + " Not available in preview mode.";
     }
 }
