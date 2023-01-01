@@ -37,6 +37,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Fixed
  - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
+ - [`{{caret_paragraph}}` should be able to have a default value defined (#311)](https://github.com/Taitava/obsidian-shellcommands/issues/311).
 
 ## [0.17.0] - 2022-11-26
 
