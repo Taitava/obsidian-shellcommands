@@ -39,6 +39,7 @@ export abstract class Variable {
 
     /**
      * If this is false, the variable can be assigned a default value that can be used in situations where the variable is unavailable.
+     * TODO: Set to false, as most Variables are not always available. Then remove all 'always_available = false' lines from subclasses, and add 'always_available = true' to those subclasses that need it.
      * @protected
      */
     protected always_available = true;

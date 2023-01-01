@@ -31,4 +31,7 @@ export class Variable_CaretParagraph extends EditorVariable {
         return this.editor.getLine(caretPosition.line);
     }
 
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Not available in preview mode.";
+    }
 }

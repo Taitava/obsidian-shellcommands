@@ -33,6 +33,8 @@ export abstract class EditorVariable extends Variable {
     protected editor: Editor | null;
     protected view: MarkdownView | null;
 
+    protected always_available = false;
+
     protected requireEditor() {
         this.editor = getEditor(this.app);
         if (null === this.editor) {
@@ -78,5 +80,9 @@ export abstract class EditorVariable extends Variable {
             default:
                 throw new Error("EditorVariable: Unrecognised view mode: " + view_mode);
         }
+    }
+
+    public getAvailabilityText(): string {
+        return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
     }
 }

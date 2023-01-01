@@ -26,8 +26,6 @@ export class Variable_Selection extends EditorVariable {
     public variable_name = "selection";
     public help_text = "Gives the currently selected text.";
 
-    protected always_available = false;
-
     protected async generateValue(): Promise<string|null> {
 
         // Check that we are able to get an editor
