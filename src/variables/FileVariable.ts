@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Variable} from "./Variable";
+import {
+    ICastedArguments,
+    Variable,
+} from "./Variable";
 
 export abstract class FileVariable extends Variable {
 
@@ -32,7 +35,7 @@ export abstract class FileVariable extends Variable {
         return current_file;
     }
 
-    public async isAvailable(): Promise<boolean> {
+    public async isAvailable(castedArguments: ICastedArguments): Promise<boolean> {
         const current_file = this.getActiveFile();
         return !!current_file;
     }

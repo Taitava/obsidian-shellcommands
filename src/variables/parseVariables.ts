@@ -22,7 +22,11 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
-import {Variable, VariableValueResult} from "./Variable";
+import {
+    IRawArguments,
+    Variable,
+    VariableValueResult,
+} from "./Variable";
 import {TShellCommand} from "../TShellCommand";
 import {removeFromSet} from "../Common";
 
@@ -86,13 +90,14 @@ export async function parseVariables(
             const substitute: string = _arguments.shift() as string; // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'. 'as string' is used to tell TypeScript that _arguments[0] is always defined.
 
             // Iterate all arguments
+            const presentArguments: IRawArguments = {};
             for (const i in _arguments) {
                 // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
                 if (undefined !== _arguments[i]) {
                     // The argument is present.
                     const argument = _arguments[i].slice(1); // .slice(1): Remove a preceding :
                     const parameter_name = parameter_names[i];
-                    variable.setArgument(parameter_name, argument);
+                    presentArguments[parameter_name] = argument;
                 }
             }
 
@@ -112,6 +117,7 @@ export async function parseVariables(
             const variable_value_result = await variable.getValue(
                 t_shell_command,
                 sc_event,
+                presentArguments,
 
                 // Define a recursive callback that can be used to parse possible variables in a default value of the current variable.
                 (raw_default_value) => {

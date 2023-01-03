@@ -39,10 +39,6 @@ export class Variable_EventFileExtension extends EventVariable {
         },
     };
 
-    protected arguments: {
-        "dot": "with-dot" | "no-dot",
-    }
-
     protected supported_sc_events = [
         SC_Event_FileMenu,
         SC_Event_FileCreated,
@@ -52,14 +48,17 @@ export class Variable_EventFileExtension extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+    protected generateValue(
+        castedArguments: {"dot": "with-dot" | "no-dot"},
+        sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const file = sc_event.getFile();
-            return resolve(getFileExtension(file, this.arguments.dot === "with-dot"));
+            return resolve(getFileExtension(file, castedArguments.dot === "with-dot"));
         });
     }
 

@@ -39,10 +39,6 @@ export class Variable_EventYAMLValue extends EventVariable {
         },
     };
 
-    protected arguments: {
-        property_name: string;
-    }
-
     protected supported_sc_events = [
         SC_Event_FileMenu,
         SC_Event_FileCreated,
@@ -52,14 +48,17 @@ export class Variable_EventYAMLValue extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed): Promise<string | null> {
+    protected generateValue(
+        castedArguments: {propertyName: string},
+        sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const file = sc_event.getFile();
-            const result = this.getFileYAMLValue(file);
+            const result = this.getFileYAMLValue(file, castedArguments.propertyName);
             if (Array.isArray(result)) {
                 // The result contains error message(s).
                 this.newErrorMessages(result as string[]);
@@ -71,26 +70,20 @@ export class Variable_EventYAMLValue extends EventVariable {
         });
     }
 
-    private yaml_value_cache: string[] | string | undefined; // undefined = allow resetting back to undefined in .reset()
-    private getFileYAMLValue(active_file: TFile): string[] | string {
-        if (!this.yaml_value_cache) {
-            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
-        }
-        return this.yaml_value_cache;
+    private getFileYAMLValue(active_file: TFile, propertyName: string): string[] | string {
+        return getFileYAMLValue(this.app, active_file, propertyName);
     }
 
-    public reset(): void {
-        super.reset();
-        this.yaml_value_cache = undefined;
-    }
-
-    public async isAvailable(sc_event: SC_Event_FileMenu /* TODO: This type should actually be SC_Event, as the method might be called with whatever SC_Event. */ | null): Promise<boolean> {
-        if (!await super.isAvailable(sc_event) || null == sc_event) { // The null check is redundant, but needed for TS compiler to understand that sc_event.getFile() won't happen on null.
+    public async isAvailable(
+        castedArguments: {propertyName: string},
+        sc_event: SC_Event_FileMenu /* TODO: This type should actually be SC_Event, as the method might be called with whatever SC_Event. */ | null,
+    ): Promise<boolean> {
+        if (!await super.isAvailable(castedArguments, sc_event) || null == sc_event) { // The null check is redundant, but needed for TS compiler to understand that sc_event.getFile() won't happen on null.
             return false;
         }
 
         const active_file = sc_event.getFile();
-        return typeof this.getFileYAMLValue(active_file) === "string";
+        return typeof this.getFileYAMLValue(active_file, castedArguments.propertyName) === "string";
     }
 
     public getAvailabilityText(): string {

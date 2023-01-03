@@ -35,18 +35,14 @@ export class Variable_YAMLContent extends FileVariable {
         },
     };
 
-    protected arguments: {
-        withDashes: "with-dashes" | "no-dashes";
-    }
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<string|null> {
         return new Promise((resolve) => {
             const activeFile = this.getFile();
             if (!activeFile) {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }
 
-            getFileYAML(this.app, activeFile, this.shouldUseDashes()).then((yamlContent: string) => {
+            getFileYAML(this.app, activeFile, "with-dashes" === castedArguments.withDashes).then((yamlContent: string) => {
                 if (null === yamlContent) {
                     this.newErrorMessage("The current file does not contain a YAML frontmatter.");
                 }
@@ -55,22 +51,18 @@ export class Variable_YAMLContent extends FileVariable {
         });
     }
 
-    public async isAvailable(): Promise<boolean> {
+    public async isAvailable(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<boolean> {
         const activeFile = this.getFile();
 
-        if (!await super.isAvailable() || !activeFile) {
+        if (!await super.isAvailable(castedArguments) || !activeFile) {
             return false;
         }
 
-        return null !== await getFileYAML(this.app, activeFile, this.shouldUseDashes());
+        return null !== await getFileYAML(this.app, activeFile, "with-dashes" === castedArguments.withDashes);
     }
 
     public getAvailabilityText(): string {
         return super.getAvailabilityText() + " Also, a YAML frontmatter section needs to be present.";
-    }
-
-    private shouldUseDashes(): boolean {
-        return "with-dashes" === this.arguments.withDashes;
     }
 
     public getAutocompleteItems() {

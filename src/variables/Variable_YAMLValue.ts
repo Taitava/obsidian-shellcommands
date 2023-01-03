@@ -33,16 +33,12 @@ export class Variable_YAMLValue extends FileVariable {
         },
     };
 
-    protected arguments: {
-        property_name: string;
-    }
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {property_name: string}): Promise<string|null> {
         return new Promise((resolve) => {
             const active_file = this.getFile();
             if (active_file) {
                 // We do have an active file
-                const result = this.getFileYAMLValue(active_file);
+                const result = this.getFileYAMLValue(active_file, castedArguments.property_name);
                 if (Array.isArray(result)) {
                     // The result contains error message(s).
                     this.newErrorMessages(result as string[]);
@@ -58,21 +54,12 @@ export class Variable_YAMLValue extends FileVariable {
         });
     }
 
-    private yaml_value_cache: string[] | string | undefined; // undefined = allow resetting back to undefined in .reset()
-    private getFileYAMLValue(active_file: TFile): string[] | string {
-        if (!this.yaml_value_cache) {
-            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
-        }
-        return this.yaml_value_cache;
+    private getFileYAMLValue(active_file: TFile, propertyName: string ): string[] | string {
+        return getFileYAMLValue(this.app, active_file, propertyName);
     }
 
-    public reset(): void {
-        super.reset();
-        this.yaml_value_cache = undefined;
-    }
-
-    public async isAvailable(): Promise<boolean> {
-        if (!await super.isAvailable()) {
+    public async isAvailable(castedArguments: {property_name: string}): Promise<boolean> {
+        if (!await super.isAvailable(castedArguments)) {
             return false;
         }
 
@@ -82,7 +69,7 @@ export class Variable_YAMLValue extends FileVariable {
             return false;
         }
 
-        return typeof this.getFileYAMLValue(activeFile) === "string";
+        return typeof this.getFileYAMLValue(activeFile, castedArguments.property_name) === "string";
     }
 
     public getAvailabilityText(): string {

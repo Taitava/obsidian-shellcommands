@@ -31,11 +31,7 @@ export class Variable_Date extends Variable {
         },
     }
 
-    protected arguments: {
-        format: string,
-    }
-
-    protected generateValue(): Promise<string|null> {
-        return Promise.resolve(moment().format(this.arguments.format));
+    protected generateValue(castedArguments: {format: string}): Promise<string|null> {
+        return Promise.resolve(moment().format(castedArguments.format));
     }
 }

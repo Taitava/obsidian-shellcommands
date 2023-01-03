@@ -33,15 +33,11 @@ export class Variable_FilePath extends FileVariable{
         },
     };
 
-    protected arguments: {
-        mode: "absolute" | "relative";
-    }
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string|null> {
         return new Promise((resolve) => {
             const active_file = this.getFile();
             if (active_file) {
-                return resolve(getFilePath(this.app, active_file, this.arguments.mode));
+                return resolve(getFilePath(this.app, active_file, castedArguments.mode));
             } else {
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
             }

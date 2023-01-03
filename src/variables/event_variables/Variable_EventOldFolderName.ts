@@ -31,7 +31,10 @@ export class Variable_EventOldFolderName extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed): Promise<string | null> {
+    protected generateValue(
+        argumentsAreNotUsed: never,
+        sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);

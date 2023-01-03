@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Variable} from "../Variable";
+import {
+    ICastedArguments,
+    Variable,
+} from "../Variable";
 import {SC_Event} from "../../events/SC_Event";
 
 export abstract class EventVariable extends Variable {
@@ -66,7 +69,7 @@ export abstract class EventVariable extends Variable {
         return sc_event_titles.join(", ");
     }
 
-    public async isAvailable(sc_event: SC_Event | null): Promise<boolean> {
+    public async isAvailable(castedArguments: ICastedArguments, sc_event: SC_Event | null): Promise<boolean> {
         if (!sc_event) {
             return false;
         }

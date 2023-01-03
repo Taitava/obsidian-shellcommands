@@ -32,16 +32,12 @@ export class Variable_Tags extends FileVariable {
         }
     };
 
-    protected arguments: {
-        separator: string,
-    };
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {separator: string}): Promise<string|null> {
         return new Promise((resolve) => {
             const active_file = this.getFile();
             if (active_file) {
                 // We do have an active file
-                return resolve(getFileTags(this.app, active_file).join(this.arguments.separator));
+                return resolve(getFileTags(this.app, active_file).join(castedArguments.separator));
             } else {
                 // No file is active at the moment
                 return resolve(null); // null indicates that getting a value has failed and the command should not be executed.

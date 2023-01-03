@@ -18,6 +18,7 @@
  */
 
 import {FileVariable} from "./FileVariable";
+import {ICastedArguments} from "./Variable";
 
 export abstract class FolderVariable extends FileVariable {
 
@@ -36,9 +37,9 @@ export abstract class FolderVariable extends FileVariable {
         return current_folder;
     }
 
-    public async isAvailable(): Promise<boolean> {
+    public async isAvailable(castedArguments: ICastedArguments): Promise<boolean> {
         // Normal check: ensure a file pane is open and focused.
-        if (!await super.isAvailable()) {
+        if (!await super.isAvailable(castedArguments)) {
             return false;
         }
 

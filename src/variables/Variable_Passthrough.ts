@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {IParameters, Variable} from "./Variable";
+import {
+    IParameters,
+    Variable,
+} from "./Variable";
 
 export class Variable_Passthrough extends Variable {
     public variable_name = "passthrough";
@@ -30,13 +33,9 @@ export class Variable_Passthrough extends Variable {
         }
     };
 
-    protected arguments: {
-        value: string,
-    };
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {value: string}): Promise<string|null> {
         // Simply return the argument that was received.
-        return Promise.resolve(this.arguments.value);
+        return Promise.resolve(castedArguments.value);
     }
 
     public getAvailabilityText() {

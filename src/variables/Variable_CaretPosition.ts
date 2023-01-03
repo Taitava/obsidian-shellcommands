@@ -35,11 +35,7 @@ export class Variable_CaretPosition extends EditorVariable {
         },
     };
 
-    protected arguments: {
-        mode: string;
-    }
-
-    protected generateValue(): Promise<string|null> {
+    protected generateValue(castedArguments: {mode?: string}): Promise<string|null> {
         return new Promise((resolve) => {
             // Check that we are able to get an editor
             if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
@@ -51,14 +47,14 @@ export class Variable_CaretPosition extends EditorVariable {
             const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
             const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
 
-            if (Object.keys(this.arguments).length > 0) {
-                switch (this.arguments.mode.toLowerCase()) {
+            if (undefined !== castedArguments.mode) {
+                switch (castedArguments.mode.toLowerCase()) {
                     case "line":
                         return resolve(`${line}`);
                     case "column":
                         return resolve(`${column}`);
                     default:
-                        this.newErrorMessage("Unrecognised argument: "+this.arguments.mode);
+                        this.newErrorMessage("Unrecognised argument: "+castedArguments.mode);
                         return resolve(null);
                 }
             } else {

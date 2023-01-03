@@ -44,10 +44,6 @@ export class Variable_EventFolderPath extends EventVariable {
         },
     };
 
-    protected arguments: {
-        mode: "absolute" | "relative";
-    }
-
     protected supported_sc_events = [
         SC_Event_FileMenu,
         SC_Event_FolderMenu,
@@ -62,14 +58,17 @@ export class Variable_EventFolderPath extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed): Promise<string | null> {
+    protected generateValue(
+        castedArguments: {mode: "absolute" | "relative"},
+        sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const folder = sc_event.getFolder();
-            return resolve(getFolderPath(this.app, folder, this.arguments.mode));
+            return resolve(getFolderPath(this.app, folder, castedArguments.mode));
         });
     }
 

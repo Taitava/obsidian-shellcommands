@@ -29,7 +29,10 @@ export class Variable_EventOldTitle extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileRenamed): Promise<string | null> {
+    protected generateValue(
+        argumentsAreNotUsed: never,
+        sc_event: SC_Event_FileRenamed,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);

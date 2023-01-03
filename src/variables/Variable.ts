@@ -50,12 +50,6 @@ export abstract class Variable {
      */
     protected static readonly parameters: IParameters = {};
 
-    /**
-     * This contains actual values for parameters.
-     * @protected
-     */
-    protected arguments: IArguments; // Default value is set in .reset()
-
     constructor(
         protected readonly plugin: SC_Plugin,
     ) {
@@ -66,16 +60,15 @@ export abstract class Variable {
     /**
      * Variable instances are reused multiple times. This method resets all properties that are modified during usage:
      *  - error_messages
-     *  - arguments
      */
     public reset() {
         this.error_messages = [];
-        this.arguments = {};
     }
 
     public getValue(
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
+        variableArguments: IRawArguments = {},
 
         /**
          * Will parse variables in a default value (only used if this variable is not available this time). The callback
@@ -85,11 +78,14 @@ export abstract class Variable {
     ): Promise<VariableValueResult> {
 
         return new Promise<VariableValueResult>((resolve) => {
+            // Cast arguments (if any) to their correct data types
+            const castedArguments = this.castArguments(variableArguments);
+
             // Check variable availability
-            this.isAvailable(sc_event).then((isAvailable: boolean) => {
+            this.isAvailable(castedArguments, sc_event).then((isAvailable: boolean) => {
                 if (isAvailable) {
                     // The variable can be used.
-                    this.generateValue(sc_event).then((value: string | null) => {
+                    this.generateValue(castedArguments, sc_event).then((value: string | null) => {
                         resolve({
                             value: value,
                             error_messages: this.error_messages,
@@ -107,7 +103,7 @@ export abstract class Variable {
                             // Generate error messages by calling generateValue().
                             debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
                             // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
-                            this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
+                            this.generateValue(castedArguments, sc_event).then(() => {  // No need to use the return value, it's null anyway.
                                 resolve({
                                     value: null,
                                     error_messages: this.error_messages,
@@ -165,7 +161,7 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(sc_event: SC_Event | null): Promise<string|null>;
+    protected abstract generateValue(variableArguments: ICastedArguments, sc_event: SC_Event | null): Promise<string|null>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
@@ -231,19 +227,23 @@ export abstract class Variable {
     }
 
     /**
-     * @param parameter_name
-     * @param argument At this point 'argument' is always a string, but this method may convert it to another data type, depending on the parameter's data type.
+     * @param variableArguments String typed arguments. Arguments that should be typed otherly, will be cast to other types. Then all arguments are returned.
      */
-    public setArgument(parameter_name: string, argument: string) {
-        const parameter_type = this.getParameters()[parameter_name].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
-        switch (parameter_type) {
-            case "string":
-                this.arguments[parameter_name] = argument;
-                break;
-            case "integer":
-                this.arguments[parameter_name] = parseInt(argument);
-                break;
+    public castArguments(variableArguments: IRawArguments): ICastedArguments {
+        const castedArguments: ICastedArguments = {};
+        for (const parameterName of Object.getOwnPropertyNames(variableArguments)) {
+            const parameter_type = this.getParameters()[parameterName].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
+            const argument = variableArguments[parameterName];
+            switch (parameter_type) {
+                case "string":
+                    castedArguments[parameterName] = argument;
+                    break;
+                case "integer":
+                    castedArguments[parameterName] = parseInt(argument);
+                    break;
+            }
         }
+        return castedArguments;
     }
 
     protected newErrorMessage(message: string) {
@@ -323,7 +323,7 @@ export abstract class Variable {
      * Tells whether the variable can be currently accessed. If you want to know if the variable can sometimes be inaccessible,
      * use isAlwaysAvailable() instead.
      */
-    public async isAvailable(sc_event: SC_Event | null): Promise<boolean> {
+    public async isAvailable(castedArguments: ICastedArguments, sc_event: SC_Event | null): Promise<boolean> {
         return true; // If the variable is always available, return true. If not, the variable should override this method.
     }
 
@@ -360,8 +360,18 @@ export abstract class Variable {
     }
 }
 
-interface IArguments {
+/**
+ * Arguments that are cast to their designed data types, i.e. strings or integers at the moment.
+ */
+export interface ICastedArguments {
     [key: string]: unknown;
+}
+
+/**
+ * Same as ICastedArguments, but not yet cast to the target data types.
+ */
+export interface IRawArguments {
+    [key: string]: string;
 }
 
 /**

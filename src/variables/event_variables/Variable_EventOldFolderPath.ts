@@ -39,31 +39,30 @@ export class Variable_EventOldFolderPath extends EventVariable {
         },
     };
 
-    protected arguments: {
-        mode: "absolute" | "relative";
-    }
-
     protected supported_sc_events = [
         SC_Event_FileMoved,
         SC_Event_FolderMoved,
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): Promise<string | null> {
+    protected generateValue(
+        castedArguments: {mode: "absolute" | "relative"},
+        sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved,
+    ): Promise<string | null> {
         return new Promise((resolve) => {
             if (!this.checkSC_EventSupport(sc_event)) {
                 return resolve(null);
             }
 
             const folder_old_relative_path = sc_event.getFolderOldRelativePath();
-            switch (this.arguments.mode.toLowerCase()) {
+            switch (castedArguments.mode.toLowerCase()) {
                 case "relative":
                     return resolve(normalizePath2(folder_old_relative_path));
                 case "absolute":
                     return resolve(normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path));
             }
 
-            this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);
+            this.newErrorMessage("Unrecognized mode parameter: " + castedArguments.mode);
             return resolve(null);
         });
     }

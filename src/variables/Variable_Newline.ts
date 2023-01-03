@@ -23,11 +23,6 @@ export class Variable_Newline extends Variable {
     public variable_name = "newline";
     public help_text = "Gives a \\n character. Used for testing line break escaping. An optional argument can be used to tell how many newlines are needed.";
 
-    public reset() {
-        super.reset();
-        this.arguments.count = 1;
-    }
-
     protected static readonly parameters: IParameters = {
         count: {
             type: "integer",
@@ -35,13 +30,9 @@ export class Variable_Newline extends Variable {
         }
     };
 
-    protected arguments: {
-        count: number,
-    };
-
-    protected async generateValue(): Promise<string|null> {
+    protected async generateValue(castedArguments: {count?: number}): Promise<string|null> {
         // Return \n, possible repeating it
-        return "\n".repeat(this.arguments.count);
+        return "\n".repeat(castedArguments.count ?? 1);
     }
 
     public getAvailabilityText() {
