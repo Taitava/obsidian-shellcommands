@@ -339,14 +339,19 @@ export default class SC_Plugin extends Plugin {
 
                                 // Store the preparsed variables so that they will be used if this shell command gets executed.
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
+                            } else {
+                                // Parsing failed, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
+                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                                this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                             }
                         });
-					}
+                    } else {
+                        // Parsing is disabled, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
+                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                        this.cached_parsing_processes[t_shell_command.getId()] = undefined;
+                    }
 
-					// If parsing failed (or was disabled), then use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-					t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
-					this.cached_parsing_processes[t_shell_command.getId()] = undefined;
-					return true;
+                    return true; // Tell Obsidian this command can be shown in command palette.
 
 				} else {
 					// The user has instructed to execute the command.
