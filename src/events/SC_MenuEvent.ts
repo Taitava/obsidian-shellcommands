@@ -41,8 +41,10 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
                     title = aliasParsingResult.parsed_content || shellCommandParsingResult.parsed_content as string; // Try to use a parsed alias, but if no alias is available, use a parsed shell command instead. as string = parsed shell command always exist when the parsing itself has succeeded.
                 }
                 // If parsing process fails, the failed process can be passed to this.trigger(). The execution will eventually be cancelled and error messages displayed (if displaying is allowed).
-                menuItem.setTitle(title);
             }
+
+            // Set menu item title - be it parsed or not.
+            menuItem.setTitle(title);
 
             // Icon and onClick handler.
             menuItem
