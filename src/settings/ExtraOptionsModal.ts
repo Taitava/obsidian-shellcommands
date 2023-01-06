@@ -564,10 +564,8 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
             const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.static().getCode());
-            const summary_of_extra_variables = sc_event.getSummaryOfEventVariables();
-            new Setting(container_element)
+            const setting = new Setting(container_element)
                 .setName(sc_event.static().getTitle())
-                .setDesc(summary_of_extra_variables ? "Additional variables: " + summary_of_extra_variables : "")
                 .addToggle(toggle => toggle
                     .setValue(is_event_enabled)
                     .onChange(async (enable: boolean) => {
@@ -592,6 +590,11 @@ export class ExtraOptionsModal extends SC_Modal {
                     .setTooltip("Documentation: " + sc_event.static().getTitle() + " event"),
                 )
             ;
+
+            // Mention additional variables (if any)
+            if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
+                setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
+            }
 
             // Extra settings
             const extra_settings_container = container_element.createDiv();

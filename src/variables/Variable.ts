@@ -26,6 +26,7 @@ import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
 import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
+import {EOL} from "os";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -309,6 +310,23 @@ export abstract class Variable {
      */
     public getDocumentationLink(): string {
         return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
+    }
+
+    /**
+     * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
+     */
+    public createDocumentationLinkElement(container: HTMLElement
+    ): void {
+        const description =
+            this.getFullName() + ": " + this.help_text
+            + EOL + EOL +
+            "Click for external documentation."
+        ;
+        container.createEl("a", {
+            text: this.getFullName(),
+            href: this.getDocumentationLink(),
+            attr: {"aria-label": description},
+        });
     }
 
     /**

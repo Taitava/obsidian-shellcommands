@@ -134,12 +134,22 @@ export abstract class SC_Event {
         return this.event_title;
     }
 
-    public getSummaryOfEventVariables(): string {
-        const variable_names: string[] = [];
+    /**
+     * Creates a list of variables to the given container element. Each variable is a link to its documentation.
+     *
+     * @param container
+     * @return A boolean indicating whether anything was created or not. Not all SC_Events utilise event variables.
+     */
+    public createSummaryOfEventVariables(container: HTMLElement): boolean {
+        let hasCreatedElements = false;
         this.getEventVariables().forEach((variable: Variable) => {
-            variable_names.push("{{" + variable.variable_name + "}}");
+            if (hasCreatedElements) {
+                container.insertAdjacentText("beforeend", ", ");
+            }
+            hasCreatedElements = true;
+            variable.createDocumentationLinkElement(container);
         });
-        return variable_names.join(", ");
+        return hasCreatedElements;
     }
 
     private getEventVariables() {
