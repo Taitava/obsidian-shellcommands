@@ -31,7 +31,7 @@ export abstract class FolderVariable extends FileVariable {
         const currentFolder: TFolder = file.parent;
         if (!currentFolder) {
             // No parent folder.
-            this.throw("The current file does not have a parent for some strange reason.")
+            this.throw("The current file does not have a parent for some strange reason.");
         }
         return currentFolder;
     }

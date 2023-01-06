@@ -71,7 +71,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     // Load CustomVariables
     // Do this before loading built-in variables so that these user-defined variables will appear first in all lists containing variables.
     plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
-        variables.add(custom_variable_instance.createCustomVariable())
+        variables.add(custom_variable_instance.createCustomVariable());
     });
 
     // Load built-in variables.

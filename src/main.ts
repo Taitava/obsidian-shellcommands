@@ -103,7 +103,7 @@ export default class SC_Plugin extends Plugin {
 		[key: string]: ShellCommandParsingProcess | undefined,
 	} = {};
 
-	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
+	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands";
 
     /** @see getOutputStatusBarElement() */
     private statusBarElement: HTMLElement;
@@ -242,7 +242,7 @@ export default class SC_Plugin extends Plugin {
         if ("open" === action && uri_arguments.file !== undefined) {
             // Use shorthand uri type for opening a file.
             const encoded_file = encodeURIComponent(uri_arguments.file);
-            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`
+            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`;
             delete uri_arguments.file; // Prevent adding an extra '&file=' argument to the end of the URI.
         } else {
             // Use normal uri type for everything else.
@@ -301,7 +301,7 @@ export default class SC_Plugin extends Plugin {
 				// Display error messages
 				parsing_process.displayErrorMessages();
 			}
-		}
+		};
 
 		// Register an Obsidian command
 		const obsidian_command: Command = {
@@ -372,10 +372,10 @@ export default class SC_Plugin extends Plugin {
 				}
 			}
 		};
-		this.addCommand(obsidian_command)
+		this.addCommand(obsidian_command);
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.
 		t_shell_command.setObsidianCommand(obsidian_command);
-		debugLog("Registered.")
+		debugLog("Registered.");
 	}
 
 
@@ -598,7 +598,7 @@ export default class SC_Plugin extends Plugin {
 		if (fs.existsSync(custom_autocomplete_file_path)) {
 			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
 			const custom_autocomplete_content = fs.readFileSync(custom_autocomplete_file_path).toLocaleString();
-			const result = addCustomAutocompleteItems(custom_autocomplete_content)
+			const result = addCustomAutocompleteItems(custom_autocomplete_content);
 			if (true === result) {
 				// OK
 				debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " loaded.");

@@ -170,7 +170,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
     private tabGeneral(container_element: HTMLElement) {
         // Alias field
-        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(alias_container)
             .setName("Alias")
         ;
@@ -273,7 +273,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 .onClick(() => gotoURL(DocumentationStdinContentLink))
             )
         ;
-        const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}});
         const onStdinChange = async (newStdinContent: string) => {
             if ("" === newStdinContent) {
                 // Set to null
@@ -306,7 +306,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 .setTooltip(`Copy ${this.shell_command_id} to the clipboard.`)
                 .onClick(() => {
                     copyToClipboard(this.shell_command_id);
-                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`)
+                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`);
                 }),
             )
         ;
@@ -320,7 +320,7 @@ export class ExtraOptionsModal extends SC_Modal {
                     .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
                     .onClick(() => {
                         copyToClipboard(obsidian_command_id);
-                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`);
                     }),
                 )
                 .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
@@ -370,7 +370,7 @@ export class ExtraOptionsModal extends SC_Modal {
                     switch (new_prompt_id) {
                         case "new": {
                             // Create a new Prompt.
-                            const model = getModel<PromptModel>(PromptModel.name)
+                            const model = getModel<PromptModel>(PromptModel.name);
                             const new_prompt = model.newInstance(this.plugin.settings);
                             this.plugin.saveSettings().then(() => {
                                 const modal = new PromptSettingsModal(

@@ -154,7 +154,7 @@ export function normalizePath2(path: string) {
     const leading_slashes_array = leading_slashes_regexp.exec(path); // An array with only one item.
     if (null === leading_slashes_array) {
         // It should always match. This exception should never happen, but have it just in case.
-        throw new Error("normalizePath2(): leading_slashes_regexp did not match.")
+        throw new Error("normalizePath2(): leading_slashes_regexp did not match.");
     }
     let leading_slashes = leading_slashes_array[0];
 
@@ -271,7 +271,7 @@ export function prepareEditorPosition(editor: Editor, caret_line: number, caret_
     return {
         line: caret_line,
         ch: caret_column,
-    }
+    };
 }
 
 export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;

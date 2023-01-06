@@ -28,7 +28,7 @@ import {
 import {OutputWrapperModel} from "./output_wrapper/OutputWrapperModel";
 
 export function introduceModels(plugin: SC_Plugin) {
-    debugLog("Introducing models.")
+    debugLog("Introducing models.");
 
     // Keep in alphabetical order, if possible.
     introduceModelClass(new CustomVariableModel(plugin));

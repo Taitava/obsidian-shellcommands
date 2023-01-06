@@ -77,7 +77,7 @@ export class Prompt extends Instance {
         return [
             Prompt.getCSSBaseClass(),
             this.getCSSClass(),
-        ]
+        ];
     }
 
     /**
@@ -136,7 +136,7 @@ export class Prompt extends Instance {
     private createFields() {
         debugLog("Creating fields for Prompt " + this.getID());
         const prompt_field_model = getModel<PromptFieldModel>(PromptFieldModel.name);
-        this.prompt_fields = prompt_field_model.loadInstances(this)
+        this.prompt_fields = prompt_field_model.loadInstances(this);
     }
 
     /**

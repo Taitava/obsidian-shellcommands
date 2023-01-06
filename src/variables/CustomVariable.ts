@@ -47,8 +47,8 @@ export class CustomVariable extends Variable {
 
     public async generateValue(): Promise<string> {
         if (null === this.value) {
-            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
-            this.throw("This custom variable does not have a value yet, and no default value is defined.")
+            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`);
+            this.throw("This custom variable does not have a value yet, and no default value is defined.");
         }
         return this.value;
     }

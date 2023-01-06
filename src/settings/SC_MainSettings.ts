@@ -144,7 +144,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Output wrappers
         output_wrappers: [],
-    }
+    };
 }
 
 /**
@@ -193,6 +193,6 @@ export const CommandPaletteOptions: ICommandPaletteOptions = {
     enabled: "Command palette & hotkeys",
     unlisted: "Hotkeys only",
     disabled: "Excluded",
-}
+};
 
 export type ExecutionNotificationMode = "disabled" | "quick" | "permanent" | "if-long";

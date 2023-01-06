@@ -50,7 +50,7 @@ export class Preaction_Prompt extends Preaction {
                     // User wants to cancel.
                     resolve(false);
                 }
-            })
+            });
         });
     }
 

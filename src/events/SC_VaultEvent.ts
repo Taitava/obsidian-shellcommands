@@ -62,7 +62,7 @@ export abstract class SC_VaultEvent extends SC_Event {
                         this.file = file as TFile;
                         break;
                     case "folder":
-                        this.folder = file as TFolder
+                        this.folder = file as TFolder;
                         break;
                 }
 

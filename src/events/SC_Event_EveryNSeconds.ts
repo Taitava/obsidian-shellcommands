@@ -75,11 +75,11 @@ export class SC_Event_EveryNSeconds extends SC_Event {
                 .setButtonText("Apply")
                 .onClick(async () => {
                     if (undefined == apply_seconds || apply_seconds === this.getConfiguration(t_shell_command).seconds) {
-                        new Notice("You didn't change the seconds!")
+                        new Notice("You didn't change the seconds!");
                     } else if (isNaN(apply_seconds)) {
-                        new Notice("The seconds need to be an integer!")
+                        new Notice("The seconds need to be an integer!");
                     } else if (apply_seconds <= 0) {
-                        new Notice("The seconds need to be at least 1!")
+                        new Notice("The seconds need to be at least 1!");
                     } else {
                         // All ok, save.
                         this.getConfiguration(t_shell_command).seconds = apply_seconds;

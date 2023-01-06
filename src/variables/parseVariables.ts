@@ -198,7 +198,7 @@ export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables()
+    const search_for_variables: VariableSet = plugin.getVariables();
     const found_variables = new VariableSet();
     
     for (const variable of search_for_variables)

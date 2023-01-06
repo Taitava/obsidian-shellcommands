@@ -120,7 +120,7 @@ export abstract class OutputChannel {
         // Output is ok.
         // Handle it.
         await this._handleBuffered(await this.prepare_output(output, enableOutputWrapping), error_code);
-        debugLog("Output handling is done.")
+        debugLog("Output handling is done.");
     }
 
     protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void>;

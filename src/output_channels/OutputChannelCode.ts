@@ -27,7 +27,7 @@ export type OutputChannelCode = "ignore" | "notification" | "current-file-caret"
 export interface OutputChannelCodes {
     stdout: OutputChannelCode,
     stderr: OutputChannelCode,
-};
+}
 
 export type OutputChannelOrder = "stdout-first" | "stderr-first";
 

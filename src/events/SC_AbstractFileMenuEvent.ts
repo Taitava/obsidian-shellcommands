@@ -39,7 +39,7 @@ export abstract class SC_AbstractFileMenuEvent extends SC_MenuEvent {
                         this.file = file as TFile;
                         break;
                     case "folder":
-                        this.folder = file as TFolder
+                        this.folder = file as TFolder;
                         break;
                 }
 

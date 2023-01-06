@@ -172,7 +172,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                     open_file_path = open_file_path.substr(vault_absolute_path.length); // Get everything after the point where the vault path ends.
                 } else {
                     // Cannot convert to relative, because the file does not reside in the vault
-                    this.plugin.newError("Cannot open file '" + open_file_path + "' as the path is outside this vault.")
+                    this.plugin.newError("Cannot open file '" + open_file_path + "' as the path is outside this vault.");
                     reject();
                     return;
                 }
@@ -213,7 +213,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                     // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
                     // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
                     window.setTimeout(() => {
-                        const editor = getEditor(this.app)
+                        const editor = getEditor(this.app);
                         if (editor) {
                             if (count_caret_parts >= 4) {
                                 // Selection mode

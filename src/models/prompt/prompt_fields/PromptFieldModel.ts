@@ -81,7 +81,7 @@ export class PromptFieldModel extends Model {
 
     private createInstance(prompt: Prompt, prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number): PromptField {
         // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index)
+        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index);
     }
 
     protected _createSettingFields(prompt_field: PromptField, container_element: HTMLElement): Setting {
@@ -135,7 +135,7 @@ export class PromptFieldModel extends Model {
                     .setPlaceholder(label_placeholders[label_placeholder_index])
                     .onChange(async (new_label: string) => {
                         prompt_field.configuration.label = new_label;
-                        _update_heading()
+                        _update_heading();
                         await this.plugin.saveSettings();
                     })
                 )
@@ -172,7 +172,7 @@ export class PromptFieldModel extends Model {
                     .onChange((new_target_variable_id: string) => {
                         if ("new" === new_target_variable_id) {
                             // Create a new custom variable.
-                            const model = getModel<CustomVariableModel>(CustomVariableModel.name)
+                            const model = getModel<CustomVariableModel>(CustomVariableModel.name);
                             const custom_variable_instance = model.newInstance(this.plugin.settings);
                             this.plugin.saveSettings().then(() => {
                                 const modal = new CustomVariableSettingsModal(
@@ -291,7 +291,7 @@ export class PromptFieldModel extends Model {
             //  TODO: Add 'placeholder'.
             target_variable_id: "",
             required: true,
-        }
+        };
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {

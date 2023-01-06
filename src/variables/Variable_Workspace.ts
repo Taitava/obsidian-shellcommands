@@ -37,7 +37,7 @@ export class Variable_Workspace extends Variable{
 
         const workspace_name = workspaces_plugin.instance?.activeWorkspace;
         if (!workspace_name) {
-            this.throw("Could not figure out the current workspace's name. Probably you have not loaded a workspace. You can do it e.g. via \"Manage workspaces\" from the left side panel.")
+            this.throw("Could not figure out the current workspace's name. Probably you have not loaded a workspace. You can do it e.g. via \"Manage workspaces\" from the left side panel.");
         }
 
         // All ok

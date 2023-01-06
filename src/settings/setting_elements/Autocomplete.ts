@@ -255,7 +255,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
         return error.message;
     }
     if (null === yaml || typeof yaml !== "object") {
-        return "Unable to parse the content due to unknown reason."
+        return "Unable to parse the content due to unknown reason.";
     }
 
     // Iterate autocomplete item groups

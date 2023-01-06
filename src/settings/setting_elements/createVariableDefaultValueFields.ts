@@ -136,7 +136,7 @@ export function createVariableDefaultValueField(
                 break;
         }
         return configuration;
-    }
+    };
 
     let textareaComponent: TextAreaComponent;
 

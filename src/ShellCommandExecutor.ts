@@ -171,12 +171,12 @@ export class ShellCommandExecutor {
                     this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
                 } else {
                     // Parsing has failed.
-                    debugLog("Parsing the rest of the variables failed.")
+                    debugLog("Parsing the rest of the variables failed.");
                     parsing_process.displayErrorMessages();
                 }
             } else {
                 // Cancel execution
-                debugLog("Shell command execution cancelled.")
+                debugLog("Shell command execution cancelled.");
             }
         });
 
@@ -200,7 +200,7 @@ export class ShellCommandExecutor {
            outputChannels = {
                'stdout': overriding_output_channel,
                'stderr': overriding_output_channel,
-           }
+           };
         }
 
         // Check that the shell command is not empty

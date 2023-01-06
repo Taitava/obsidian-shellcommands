@@ -105,7 +105,7 @@ export class PromptModal extends SC_Modal {
                             preview_variable_values
                             ? variable_values_visible_glyph
                             : variable_names_visible_icon
-                        )
+                        );
                         if (null === update_shell_command_preview) {
                             throw new Error("Toggle showing variable names or value: update_shell_command_preview function is not defined.");
                         }

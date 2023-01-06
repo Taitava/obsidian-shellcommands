@@ -81,7 +81,7 @@ export abstract class SC_Event {
      */
     private subclass_instance: this;
     public getClass() {
-        return this.subclass_instance.constructor as typeof SC_Event
+        return this.subclass_instance.constructor as typeof SC_Event;
     }
 
     public canRegisterAfterChangingSettings(): boolean {
@@ -176,7 +176,7 @@ export abstract class SC_Event {
     public getDefaultConfiguration(enabled: boolean): SC_EventConfiguration {
         const configuration = cloneObject<SC_EventConfiguration>(this.default_configuration);
         configuration.enabled = enabled;
-        return configuration
+        return configuration;
     }
 
     protected getConfiguration(t_shell_command: TShellCommand) {

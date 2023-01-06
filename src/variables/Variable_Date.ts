@@ -29,7 +29,7 @@ export class Variable_Date extends Variable {
             type: "string",
             required: true,
         },
-    }
+    };
 
     protected async generateValue(castedArguments: {format: string}): Promise<string> {
         return moment().format(castedArguments.format);

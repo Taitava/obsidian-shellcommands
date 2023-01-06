@@ -46,16 +46,18 @@ export function createShellSelectionField(plugin: SC_Plugin, container_element: 
             .addDropdown(dropdown => dropdown
                 .addOptions(options)
                 .setValue(shells[platform_id] ?? "default")
-                .onChange(((_platform_id: PlatformId) => { return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
-                    if ("default" === value) {
-                        // When using default shell, the value should be unset.
-                        delete shells[_platform_id];
-                    } else {
-                        // Normal case: assign the shell value.
-                        shells[_platform_id] = value;
-                    }
-                    await plugin.saveSettings();
-                }})(platform_id))
+                .onChange(((_platform_id: PlatformId) => {
+                    return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
+                        if ("default" === value) {
+                            // When using default shell, the value should be unset.
+                            delete shells[_platform_id];
+                        } else {
+                            // Normal case: assign the shell value.
+                            shells[_platform_id] = value;
+                        }
+                        await plugin.saveSettings();
+                    };
+                })(platform_id))
             )
         ;
     }

@@ -35,7 +35,7 @@ export const PlatformShells = {
         "PowerShell.exe": "PowerShell 5",
         "CMD.EXE": "cmd.exe",
     },
-}
+};
 
 export function getUsersDefaultShell(): string {
     if (isWindows()) {

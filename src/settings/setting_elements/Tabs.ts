@@ -128,7 +128,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
             tab_structure.active_tab_id = activate_tab_id.replace(/^SC-tab-/, ""); // Remove "SC-tab" prefix.
 
             // Focus an element (if a focusable element is present)
-            tab_content.find(".SC-focus-element-on-tab-opening")?.focus() // ? = If not found, do nothing.
+            tab_content.find(".SC-focus-element-on-tab-opening")?.focus(); // ? = If not found, do nothing.
 
             // Apply the max dimensions to this tab
             // But don't do it if this is the main settings modal

@@ -96,5 +96,5 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         command_palette_availability: "enabled",
         preactions: [],
         variable_default_values: {},
-    }
+    };
 }

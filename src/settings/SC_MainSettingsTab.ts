@@ -241,7 +241,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     }
                 }).then((search_component: SearchComponent) => {
                     // Focus on the search field.
-                    search_component.inputEl.addClass("SC-focus-element-on-tab-opening")
+                    search_component.inputEl.addClass("SC-focus-element-on-tab-opening");
                 }),
             )
         ;
@@ -285,7 +285,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 const paragraph_element = container_element.createEl("p", {text: sc_event.static().getTitle()});
                 const list_element = paragraph_element.createEl("ul");
                 event_enabled_t_shell_commands.forEach((t_shell_command: TShellCommand) => {
-                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()})
+                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()});
                 });
                 found_enabled_event = true;
             }
@@ -328,7 +328,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Autocomplete")
                 .onClick(() => {
-                    gotoURL(DocumentationAutocompleteLink)
+                    gotoURL(DocumentationAutocompleteLink);
                 }),
             )
         ;
@@ -370,7 +370,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Built-in variables")
                 .onClick(() => {
-                    gotoURL(DocumentationBuiltInVariablesIndexLink)
+                    gotoURL(DocumentationBuiltInVariablesIndexLink);
                 }),
             )
         ;

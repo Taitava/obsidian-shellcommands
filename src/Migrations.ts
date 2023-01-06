@@ -42,10 +42,10 @@ export async function RunMigrations(plugin: SC_Plugin) {
     ];
     if (should_save.includes(true)) {
         // Only save if there were changes to configuration.
-        debugLog("Saving migrations...")
+        debugLog("Saving migrations...");
         backupSettingsFile(plugin); // Make a backup copy of the old file BEFORE writing the new, migrated settings file.
         await plugin.saveSettings();
-        debugLog("Migrations saved...")
+        debugLog("Migrations saved...");
     }
 }
 

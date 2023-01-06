@@ -260,7 +260,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             let hotkeys_joined = "";
             hotkeys.forEach((hotkey: Hotkey) => {
                 if (hotkeys_joined) {
-                    hotkeys_joined += "<br>"
+                    hotkeys_joined += "<br>";
                 }
                 hotkeys_joined += HotkeyToString(hotkey);
             });

@@ -47,7 +47,7 @@ export abstract class OutputChannel_CurrentFile extends OutputChannel {
             // For some reason it's not possible to get an editor.
             this.plugin.newError("Could not get an editor instance! Please create a discussion in GitHub. The command output is in the next error box:");
             this.plugin.newError(output_message); // Good to output it at least some way.
-            debugLog("OutputChannel_CurrentFile: Could not get an editor instance.")
+            debugLog("OutputChannel_CurrentFile: Could not get an editor instance.");
             return;
         }
 
