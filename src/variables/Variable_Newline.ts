@@ -17,11 +17,25 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_VaultMoveOrRenameEvent} from "./SC_VaultMoveOrRenameEvent";
+import {IParameters, Variable} from "./Variable";
 
-export class SC_Event_FileMoved extends SC_VaultMoveOrRenameEvent {
-    protected static readonly event_code = "file-moved";
-    protected static readonly event_title = "File moved";
-    protected move_or_rename: "move" = "move";
-    protected file_or_folder: "file" = "file";
+export class Variable_Newline extends Variable {
+    public variable_name = "newline";
+    public help_text = "Gives a \\n character. Used for testing line break escaping. An optional argument can be used to tell how many newlines are needed.";
+
+    protected static readonly parameters: IParameters = {
+        count: {
+            type: "integer",
+            required: false,
+        }
+    };
+
+    protected async generateValue(castedArguments: {count?: number}): Promise<string> {
+        // Return \n, possibly repeating it
+        return "\n".repeat(castedArguments.count ?? 1);
+    }
+
+    public getAvailabilityText() {
+        return "<strong>Only available</strong> in debug mode.";
+    }
 }

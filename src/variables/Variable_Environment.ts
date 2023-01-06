@@ -1,12 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022:
- *  - Vinay Rajur (created most of the content of the Variable_CaretPosition class)
- *  - Jarkko Linnanvirta (some minor/structural changes)
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
- * Contact:
- *  - Vinay Rajur: https://github.com/vrajur
- *  - Jarkko Linnanvirta: https://github.com/Taitava/
+ * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
 import {IParameters, Variable} from "./Variable";
@@ -36,31 +32,20 @@ export class Variable_Environment extends Variable {
         },
     };
 
-    protected arguments: {
-        variable: string;
-    }
-
-    protected generateValue(): Promise<string|null> {
+    protected async generateValue(castedArguments: {variable: string}): Promise<string> {
         // Check that the requested environment variable exists.
-        return new Promise((resolve) => {
-            if (this.isAvailable()) {
-                // Yes, it exists.
-                return resolve(process.env[this.arguments.variable]);
-            } else {
-                // It does not exist.
-                // Freak out.
-                this.newErrorMessage(`Environment variable named '${this.arguments.variable}' does not exist.`);
-                return resolve(null);
-            }
-        });
+        if (undefined !== process.env[castedArguments.variable]) {
+            // Yes, it exists.
+            return process.env[castedArguments.variable] as string; // as string: tells TypeScript compiler that the item exists, is not undefined.
+        } else {
+            // It does not exist.
+            // Freak out.
+            this.throw(`Environment variable named '${castedArguments.variable}' does not exist.`);
+        }
     }
 
     public getHelpName(): string {
         return "<strong>{{environment:variable}}</strong>";
-    }
-
-    public isAvailable(): boolean {
-        return undefined !== process.env[this.arguments.variable];
     }
 
     public getAvailabilityText(): string {

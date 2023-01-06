@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -50,7 +50,7 @@ export class Preaction_Prompt extends Preaction {
                     // User wants to cancel.
                     resolve(false);
                 }
-            })
+            });
         });
     }
 
@@ -80,7 +80,15 @@ export class Preaction_Prompt extends Preaction {
     }
 
     private getPrompt(): Prompt {
-        return this.plugin.getPrompts().get(this.configuration.prompt_id);
+        const promptId: string | undefined = this.configuration.prompt_id;
+        if (undefined === promptId) {
+            throw new Error("Prompt id is undefined in configuration.");
+        }
+        const prompt: Prompt | undefined = this.plugin.getPrompts().get(promptId);
+        if (undefined === prompt) {
+            throw new Error("Prompt with id '" + promptId + "' does not exist");
+        }
+        return prompt;
     }
 }
 
@@ -94,5 +102,5 @@ export function getDefaultPreaction_Prompt_Configuration(): Preaction_Prompt_Con
 
 export interface Preaction_Prompt_Configuration extends PreactionConfiguration {
     type: "prompt";
-    prompt_id: string;
+    prompt_id: string | undefined;
 }

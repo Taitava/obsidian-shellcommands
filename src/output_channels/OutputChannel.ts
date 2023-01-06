@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -53,7 +53,7 @@ export abstract class OutputChannel {
      * Used in OutputModal to redirect output based on hotkeys. If this is undefined, then the output channel is completely
      * excluded from OutputModal.
      */
-    public static readonly hotkey_letter: string = undefined;
+    public static readonly hotkey_letter: string | undefined = undefined;
 
     /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
@@ -120,7 +120,7 @@ export abstract class OutputChannel {
         // Output is ok.
         // Handle it.
         await this._handleBuffered(await this.prepare_output(output, enableOutputWrapping), error_code);
-        debugLog("Output handling is done.")
+        debugLog("Output handling is done.");
     }
 
     protected abstract _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void>;
@@ -209,7 +209,7 @@ export abstract class OutputChannel {
             for (output_stream_name in output_streams) {
                 wrapped_output_streams[output_stream_name] = await wrapOutputIfEnabled(
                     output_stream_name,
-                    output_streams[output_stream_name],
+                    output_streams[output_stream_name] as string, // as string = output content always exists because the key came from for...in.
                 );
             }
             return wrapped_output_streams;
@@ -272,7 +272,7 @@ export abstract class OutputChannel {
         if (parsing_result.succeeded) {
             // Succeeded.
             debugLog("Output wrapping: Wrapping " + output_stream + " succeeded.");
-            return parsing_result.parsed_content;
+            return parsing_result.parsed_content as string;
         } else {
             // Failed for some reason.
             this.plugin.newError("Output wrapping failed, see error(s) below.");

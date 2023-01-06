@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -28,7 +28,7 @@ import {
     IPlatformSpecificStringWithDefault,
 } from "./SC_MainSettings";
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
+import {InheritableVariableDefaultValueConfiguration} from "../variables/Variable";
 import {
     PreactionConfiguration
 } from "../imports";
@@ -46,6 +46,9 @@ export interface ShellCommandConfiguration {
     icon: string | null;
     confirm_execution: boolean;
     ignore_error_codes: number[];
+    input_contents: {
+        stdin: string | null,
+    },
     output_channels: OutputChannelCodes,
     output_wrappers: {
         stdout: string | null,
@@ -57,7 +60,7 @@ export interface ShellCommandConfiguration {
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
     variable_default_values: {
-        [variable_id_or_name: string]: VariableDefaultValueConfiguration,
+        [variable_id_or_name: string]: InheritableVariableDefaultValueConfiguration,
     };
 
     // LEGACY
@@ -76,6 +79,9 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         icon: null,
         confirm_execution: false,
         ignore_error_codes: [],
+        input_contents: {
+            stdin: null,
+        },
         output_channels: {
             stdout: "ignore",
             stderr: "notification",
@@ -90,5 +96,5 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         command_palette_availability: "enabled",
         preactions: [],
         variable_default_values: {},
-    }
+    };
 }

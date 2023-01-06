@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -44,7 +44,7 @@ export function getVaultAbsolutePath(app: App) {
     if (adapter instanceof FileSystemAdapter) {
         return adapter.getBasePath();
     }
-    return null;
+    throw new Error("Could not retrieve vault path. No DataAdapter was found from app.vault.adapter.");
 }
 
 export function getPluginAbsolutePath(plugin: SC_Plugin) {
@@ -83,7 +83,7 @@ export function getView(app: App) {
     return view;
 }
 
-export function getEditor(app: App): Editor {
+export function getEditor(app: App): Editor | null {
 
     const view = getView(app);
     if (null === view) {
@@ -103,6 +103,7 @@ export function getEditor(app: App): Editor {
     return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function cloneObject<ObjectType>(object: Object): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
@@ -112,6 +113,7 @@ export function cloneObject<ObjectType>(object: Object): ObjectType{
  *
  * @param objects
  */
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function combineObjects(...objects: Object[]) {
     return Object.assign({}, ...objects);
 }
@@ -149,7 +151,12 @@ export function normalizePath2(path: string) {
     // 1. Preparations
     path = path.trim();
     const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
-    let leading_slashes = leading_slashes_regexp.exec(path)[0];
+    const leading_slashes_array = leading_slashes_regexp.exec(path); // An array with only one item.
+    if (null === leading_slashes_array) {
+        // It should always match. This exception should never happen, but have it just in case.
+        throw new Error("normalizePath2(): leading_slashes_regexp did not match.");
+    }
+    let leading_slashes = leading_slashes_array[0];
 
     // 2. Run the original normalizePath()
     path = normalizePath(path);
@@ -186,6 +193,7 @@ export function extractFileParentPath(file_path: string) {
     return path.parse(file_path).dir;
 }
 
+// eslint-disable-next-line @typescript-eslint/ban-types
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
     for (const property_name in object) {
@@ -263,7 +271,7 @@ export function prepareEditorPosition(editor: Editor, caret_line: number, caret_
     return {
         line: caret_line,
         ch: caret_column,
-    }
+    };
 }
 
 export function getSelectionFromTextarea(textarea_element: HTMLTextAreaElement, return_null_if_empty: true): string | null;
@@ -314,6 +322,8 @@ export function randomInteger(min: number, max: number) {
  * @param content
  */
 export function escapeMarkdownLinkCharacters(content: string) {
+    // TODO: \[ can be replaced with [ as eslint suggests and ten remove the ignore line below. I'm not doing it now because it would be outside of the scope of this commit/issue #70.
+    // eslint-disable-next-line no-useless-escape
     return content.replace(/[\\()\[\]]/gu, "\\$&");
 }
 
@@ -327,7 +337,7 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
         // Thank you, endorama! <3
         const file_content = app.vault.read(file);
         file_content.then((file_content: string) => {
-            const frontmatter_cache: FrontMatterCache = app.metadataCache.getFileCache(file).frontmatter;
+            const frontmatter_cache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
             if (frontmatter_cache) {
                 // A YAML frontmatter is present in the file.
                 const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
@@ -337,6 +347,37 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
                 // No YAML frontmatter is present in the file.
                 // Return the whole file content, because there's nothing to remove.
                 return resolve(file_content);
+            }
+        });
+    });
+}
+
+export async function getFileYAML(app: App, file: TFile, withDashes: boolean): Promise<string | null> {
+    return new Promise((resolve) => {
+        // The logic is borrowed 2022-09-01 from https://forum.obsidian.md/t/how-to-get-current-file-content-without-yaml-frontmatter/26197/2
+        // Thank you, endorama! <3
+        const fileContent = app.vault.read(file);
+        fileContent.then((file_content: string) => {
+            const frontmatterCache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
+            if (frontmatterCache) {
+                // A YAML frontmatter is present in the file.
+                const frontmatterEndLineNumber = frontmatterCache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+                let firstLine: number;
+                let lastLine: number;
+                if (withDashes) {
+                    // Take full YAML content, including --- lines at the top and bottom.
+                    firstLine = 0;
+                    lastLine = frontmatterEndLineNumber;
+                } else {
+                    // Exclude --- lines.
+                    firstLine = 1;
+                    lastLine = frontmatterEndLineNumber-1;
+                }
+                const frontmatterContent: string = file_content.split("\n").slice(firstLine,lastLine).join("\n");
+                return resolve(frontmatterContent);
+            } else {
+                // No YAML frontmatter is present in the file.
+                return resolve(null);
             }
         });
     });

@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,6 +26,7 @@ import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
 import {EOL} from "os";
+import {decorateMultilineField} from "./multilineField";
 
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
@@ -50,27 +51,6 @@ export function CreateShellCommandFieldCore(
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
-
-        // Resize the shell command textarea to match the amount of lines in it.
-        update_textarea_height(shell_command, shell_command_placeholder);
-    }
-
-    function update_textarea_height(shell_command: string, shell_command_placeholder: string) {
-        const newlines_pattern = /\r\n|\r|\n/;
-        const count_lines_in_shell_command = shell_command.split(newlines_pattern).length;
-        const count_lines_in_shell_command_placeholder = shell_command_placeholder.split(newlines_pattern).length;
-        let count_lines_final = Math.max(
-            count_lines_in_shell_command,
-            count_lines_in_shell_command_placeholder,
-        );
-        if (plugin.settings.max_visible_lines_in_shell_command_fields) {
-            // Limit the height so that the field will not take up too much space.
-            count_lines_final = Math.min(
-                plugin.settings.max_visible_lines_in_shell_command_fields,
-                count_lines_final,
-            );
-        }
-        (setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement).rows = count_lines_final;
     }
 
     const setting_group: SettingFieldGroup = {
@@ -83,10 +63,13 @@ export function CreateShellCommandFieldCore(
         ,
         shell_command_setting:
             new Setting(container_element)
-                .addTextArea(text => text
-                    .setPlaceholder(shell_command_placeholder)
-                    .setValue(shell_command)
-                    .onChange(on_change)
+                .addTextArea(textareaComponent => {
+                        textareaComponent
+                            .setPlaceholder(shell_command_placeholder)
+                            .setValue(shell_command)
+                        ;
+                        decorateMultilineField(plugin, textareaComponent, on_change);
+                    }
                 )
                 .setClass("SC-shell-command-setting")
         ,
@@ -103,7 +86,6 @@ export function CreateShellCommandFieldCore(
                 })
         ,
     };
-    update_textarea_height(shell_command, shell_command_placeholder);
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
@@ -122,7 +104,7 @@ export function CreateShellCommandFieldCore(
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null) {
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
     const parsing_result = await parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
@@ -136,5 +118,5 @@ export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: s
         }
     }
     // Variable parsing succeeded
-    return parsing_result.parsed_content;
+    return parsing_result.parsed_content as string;
 }

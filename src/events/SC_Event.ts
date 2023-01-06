@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -81,7 +81,7 @@ export abstract class SC_Event {
      */
     private subclass_instance: this;
     public getClass() {
-        return this.subclass_instance.constructor as typeof SC_Event
+        return this.subclass_instance.constructor as typeof SC_Event;
     }
 
     public canRegisterAfterChangingSettings(): boolean {
@@ -134,12 +134,22 @@ export abstract class SC_Event {
         return this.event_title;
     }
 
-    public getSummaryOfEventVariables(): string {
-        const variable_names: string[] = [];
+    /**
+     * Creates a list of variables to the given container element. Each variable is a link to its documentation.
+     *
+     * @param container
+     * @return A boolean indicating whether anything was created or not. Not all SC_Events utilise event variables.
+     */
+    public createSummaryOfEventVariables(container: HTMLElement): boolean {
+        let hasCreatedElements = false;
         this.getEventVariables().forEach((variable: Variable) => {
-            variable_names.push("{{" + variable.variable_name + "}}");
+            if (hasCreatedElements) {
+                container.insertAdjacentText("beforeend", ", ");
+            }
+            hasCreatedElements = true;
+            variable.createDocumentationLinkElement(container);
         });
-        return variable_names.join(", ");
+        return hasCreatedElements;
     }
 
     private getEventVariables() {
@@ -166,7 +176,7 @@ export abstract class SC_Event {
     public getDefaultConfiguration(enabled: boolean): SC_EventConfiguration {
         const configuration = cloneObject<SC_EventConfiguration>(this.default_configuration);
         configuration.enabled = enabled;
-        return configuration
+        return configuration;
     }
 
     protected getConfiguration(t_shell_command: TShellCommand) {

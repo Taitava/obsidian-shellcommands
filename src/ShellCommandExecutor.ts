@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -57,6 +57,7 @@ import {
 import {Readable} from "stream";
 import {Notice} from "obsidian";
 import {OutputChannel} from "./output_channels/OutputChannel";
+import {ParsingResult} from "./variables/parseVariables";
 
 export class ShellCommandExecutor {
 
@@ -132,6 +133,10 @@ export class ShellCommandExecutor {
             debugLog(`Adding Preaction of type '${preaction.configuration.type}' to pipeline.`);
             preaction_pipeline = preaction_pipeline.then(() => {
                 debugLog(`Calling Preaction of type '${preaction.configuration.type}'.`);
+                if (!parsing_process) {
+                    // Should have a ParsingProcess at this point.
+                    throw new Error("No parsing process. Cannot do preaction.");
+                }
                 return preaction.perform(parsing_process, this.sc_event);
             });
         });
@@ -144,16 +149,21 @@ export class ShellCommandExecutor {
                 // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
                 // all variables are already parsed.
                 debugLog("Parsing all the rest of the variables (if there are any left).");
+                if (!parsing_process) {
+                    // Should have a ParsingProcess at this point.
+                    throw new Error("No parsing process. Cannot execute shell command.");
+                }
                 if (await parsing_process.processRest()) {
                     // Parsing the rest of the variables succeeded
                     // Execute the shell command.
                     const parsing_results = parsing_process.getParsingResults();
                     const shell_command_parsing_result: ShellCommandParsingResult = {
-                        shell_command: parsing_results["shell_command"].parsed_content,
-                        alias: parsing_results["alias"].parsed_content,
-                        environment_variable_path_augmentation: parsing_results.environment_variable_path_augmentation.parsed_content,
-                        output_wrapper_stdout: parsing_results.output_wrapper_stdout.parsed_content,
-                        output_wrapper_stderr: parsing_results.output_wrapper_stderr.parsed_content,
+                        shell_command: (parsing_results["shell_command"] as ParsingResult).parsed_content as string,
+                        alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
+                        environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
+                        stdinContent: parsing_results.stdinContent?.parsed_content as string,
+                        output_wrapper_stdout: parsing_results.output_wrapper_stdout?.parsed_content as string, // Output wrappers are not always present. If they are absent, use undefined.
+                        output_wrapper_stderr: parsing_results.output_wrapper_stderr?.parsed_content as string,
                         succeeded: true,
                         error_messages: [],
                     };
@@ -161,12 +171,12 @@ export class ShellCommandExecutor {
                     this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
                 } else {
                     // Parsing has failed.
-                    debugLog("Parsing the rest of the variables failed.")
+                    debugLog("Parsing the rest of the variables failed.");
                     parsing_process.displayErrorMessages();
                 }
             } else {
                 // Cancel execution
-                debugLog("Shell command execution cancelled.")
+                debugLog("Shell command execution cancelled.");
             }
         });
 
@@ -190,7 +200,7 @@ export class ShellCommandExecutor {
            outputChannels = {
                'stdout': overriding_output_channel,
                'stderr': overriding_output_channel,
-           }
+           };
         }
 
         // Check that the shell command is not empty
@@ -248,6 +258,20 @@ export class ShellCommandExecutor {
             try {
                 const child_process = spawn(shell_command, options);
 
+                // Pass stdin content (if defined)
+                if (undefined !== shell_command_parsing_result.stdinContent) {
+                    // Stdin content is defined
+                    debugLog("Stdin content is present in parsing result. Will write it to the process.");
+                    if (null === child_process.stdin) {
+                        // noinspection ExceptionCaughtLocallyJS: The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
+                        throw new Error("Shell command execution process does not have a standard input stream (stdin).");
+                    }
+                    child_process.stdin.write(shell_command_parsing_result.stdinContent);
+                    child_process.stdin.end();
+                } else {
+                    debugLog("No stdin content is present in parsing result.");
+                }
+
                 // Common error handling regardless of output handling mode
                 child_process.on("error", (error: Error) => {
                     // Probably most errors will NOT end up here, I guess this event occurs for some rare errors.
@@ -263,6 +287,10 @@ export class ShellCommandExecutor {
                 });
 
                 // Define output encoding
+                if (null === child_process.stdout || null == child_process.stderr) {
+                    // The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
+                    throw new Error("Child process's stdout and/or stderr stream is null.");
+                }
                 child_process.stdout.setEncoding("utf8"); // Receive stdout and ...
                 child_process.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
 
@@ -305,19 +333,24 @@ export class ShellCommandExecutor {
     }
 
     private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannelCodes) {
-        child_process.on("exit", (exitCode) => {
+        child_process.on("exit", (exitCode: number | null) => {
+            // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
 
             // Get outputs
+            if (null === child_process.stdout || null == child_process.stderr) {
+                // The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
+                throw new Error("Child process's stdout and/or stderr stream is null.");
+            }
             const stdout: string = child_process.stdout.read() ?? "";
             let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
 
             // Did the shell command execute successfully?
-            if (exitCode > 0) {
+            if (exitCode === null || exitCode > 0) {
                 // Some error occurred
                 debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
 
                 // Check if this error should be displayed to the user or not
-                if (this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
+                if (null !== exitCode && this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
                     // The user has ignored this error.
                     debugLog("User has ignored this error, so won't display it.");
 
@@ -372,12 +405,20 @@ export class ShellCommandExecutor {
 
         // Define an output handler
         const handleNewOutputContent = async (outputStreamName: OutputStream, readableStream: Readable) => {
+            if (null === childProcess.stdout || null == childProcess.stderr) {
+                throw new Error("Child process's stdout and/or stderr stream is null.");
+            }
+
             // Don't emit new events while the current handling is in progress. (I think) it might cause a race condition where a simultaneous handling could overwrite another handling's data. Pause both streams, not just the current one, to maintain correct handling order also between the two streams.
             childProcess.stdout.pause();
             childProcess.stderr.pause();
 
             const outputContent = readableStream.read() ?? "";
-            await outputChannels[outputStreamName].handleRealtime(outputStreamName, outputContent);
+            const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
+            if (undefined === outputChannel) {
+                throw new Error("Output channel is undefined.");
+            }
+            await outputChannel.handleRealtime(outputStreamName, outputContent);
 
             // Can emit new events again.
             childProcess.stdout.resume();
@@ -387,7 +428,10 @@ export class ShellCommandExecutor {
         // Hook into output streams' (such as stdout and stderr) output retrieving events.
         // Note that there might be just one stream, e.g. only stderr, if stdout is ignored. In the future, there might also be more than two streams, when custom streams are implemented.
         for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
-            const readableStream: Readable = childProcess[outputStreamName];
+            const readableStream: Readable | null = childProcess[outputStreamName];
+            if (null === readableStream) {
+                throw new Error("Child process's readable stream '"+outputStreamName+"' is null.");
+            }
             readableStream.on(
                 "readable",
                 () => handleNewOutputContent(outputStreamName, readableStream),
@@ -399,7 +443,10 @@ export class ShellCommandExecutor {
             // Call all OutputChannels' endRealtime().
             const alreadyCalledChannelCodes: OutputChannelCode[] = [];
             for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
-                const outputChannel: OutputChannel = outputChannels[outputStreamName];
+                const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
+                if (undefined === outputChannel) {
+                    throw new Error("Output channel is undefined.");
+                }
                 const outputChannelCode: OutputChannelCode = outputChannelCodes[outputStreamName];
 
                 // Ensure this OutputChannel has not yet been called.
@@ -433,7 +480,10 @@ export class ShellCommandExecutor {
         // Check if there's anything to augment.
         if (path_augmentation.length > 0) {
             // Augment.
-            const original_path = process.env[getPATHEnvironmentVariableName()];
+            const original_path: string | undefined = process.env[getPATHEnvironmentVariableName()];
+            if (undefined === original_path) {
+                throw new Error("process.env does not contain '" + getPATHEnvironmentVariableName() + "'.");
+            }
             let augmented_path: string;
             if (path_augmentation.contains(original_path)) {
                 // The augmentation contains the original PATH.

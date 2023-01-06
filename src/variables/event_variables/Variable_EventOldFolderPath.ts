@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,33 +39,27 @@ export class Variable_EventOldFolderPath extends EventVariable {
         },
     };
 
-    protected arguments: {
-        mode: "absolute" | "relative";
-    }
-
     protected supported_sc_events = [
         SC_Event_FileMoved,
         SC_Event_FolderMoved,
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+    protected async generateValue(
+        castedArguments: {mode: "absolute" | "relative"},
+        sc_event: SC_Event_FileMoved | SC_Event_FolderRenamed | SC_Event_FolderMoved,
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            const folder_old_relative_path = sc_event.getFolderOldRelativePath();
-            switch (this.arguments.mode.toLowerCase()) {
-                case "relative":
-                    return resolve(normalizePath2(folder_old_relative_path));
-                case "absolute":
-                    return resolve(normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path));
-            }
+        const folder_old_relative_path = sc_event.getFolderOldRelativePath();
+        switch (castedArguments.mode.toLowerCase()) {
+            case "relative":
+                return normalizePath2(folder_old_relative_path);
+            case "absolute":
+                return normalizePath2(getVaultAbsolutePath(this.app) + "/" + folder_old_relative_path);
+        }
 
-            this.newErrorMessage("Unrecognized mode parameter: " + this.arguments.mode);
-            return resolve(null);
-        });
+        this.throw("Unrecognized mode parameter: " + castedArguments.mode);
     }
 
     public getAutocompleteItems() {
@@ -76,12 +70,14 @@ export class Variable_EventOldFolderPath extends EventVariable {
                 help_text: "File events: Gives the moved file's old parent folder's path. Folder events: Gives the renamed/moved folder's old path. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":relative}}",
                 help_text: "File events: Gives the moved file's old parent folder's path. Folder events: Gives the renamed/moved folder's old path. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -90,12 +86,14 @@ export class Variable_EventOldFolderPath extends EventVariable {
                 help_text: "File events: Gives the moved file's old parent folder's path. Folder events: Gives the renamed/moved folder's old path. The path is absolute from the root of the file system. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":relative}}",
                 help_text: "File events: Gives the moved file's old parent folder's path. Folder events: Gives the renamed/moved folder's old path. The path is relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }

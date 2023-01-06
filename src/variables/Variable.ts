@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,6 +25,8 @@ import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
+import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
+import {EOL} from "os";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -32,12 +34,12 @@ import {ParsingResult} from "./parseVariables";
 export abstract class Variable {
     private static readonly parameter_separator = ":";
     protected readonly app: App;
-    private error_messages: string[]; // Default value is set in .reset()
     public variable_name: string;
     public help_text: string;
 
     /**
      * If this is false, the variable can be assigned a default value that can be used in situations where the variable is unavailable.
+     * TODO: Set to false, as most Variables are not always available. Then remove all 'always_available = false' lines from subclasses, and add 'always_available = true' to those subclasses that need it.
      * @protected
      */
     protected always_available = true;
@@ -48,32 +50,16 @@ export abstract class Variable {
      */
     protected static readonly parameters: IParameters = {};
 
-    /**
-     * This contains actual values for parameters.
-     * @protected
-     */
-    protected arguments: IArguments; // Default value is set in .reset()
-
     constructor(
         protected readonly plugin: SC_Plugin,
     ) {
         this.app = plugin.app;
-        this.reset(); // This is also called in parseShellCommandVariables(), but call it here just in case.
-    }
-
-    /**
-     * Variable instances are reused multiple times. This method resets all properties that are modified during usage:
-     *  - error_messages
-     *  - arguments
-     */
-    public reset() {
-        this.error_messages = [];
-        this.arguments = {};
     }
 
     public getValue(
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
+        variableArguments: IRawArguments = {},
 
         /**
          * Will parse variables in a default value (only used if this variable is not available this time). The callback
@@ -83,76 +69,91 @@ export abstract class Variable {
     ): Promise<VariableValueResult> {
 
         return new Promise<VariableValueResult>((resolve) => {
-            if (this.isAvailable(sc_event)) {
-                // The variable can be used.
-                this.generateValue(sc_event).then((value: string | null) => {
-                    resolve({
-                        value: value,
-                        error_messages: this.error_messages,
-                        succeeded: this.error_messages.length === 0,
-                    });
+            // Cast arguments (if any) to their correct data types
+            const castedArguments = this.castArguments(variableArguments);
+
+            // Generate a value, or catch an exception if one occurs.
+            this.generateValue(castedArguments, sc_event).then((value: string | null) => {
+                // Value generation succeeded.
+                return resolve({
+                    value: value,
+                    error_messages: [],
+                    succeeded: true,
                 });
-            } else {
-                // The variable is not available in this situation.
-                // Check what should be done.
-                const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
-                const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
-                const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
-                switch (default_value_type) {
-                    case "show-errors":
-                        // Generate error messages by calling generateValue().
-                        debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
-                        // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
-                        this.generateValue(sc_event).then(() => {  // No need to use the return value, it's null anyway.
-                            resolve({
+            }).catch((error) => {
+                // Caught a VariableError or an Error.
+                if (error instanceof VariableError) {
+                    // The variable is not available in this situation.
+                    debugLog(this.constructor.name + ".getValue(): Caught a VariableError and will determine how to handle it: " + error.message);
+
+                    // Check what should be done.
+                    const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+                    const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
+                    const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
+                    switch (default_value_type) {
+                        case "show-errors":
+                            // Generate error messages by calling generateValue().
+                            debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
+                            return resolve({
                                 value: null,
-                                error_messages: this.error_messages,
+                                error_messages: [error.message], // Currently, error_messages will never contain multiple messages. TODO: Consider renaming error_messages to singular form.
                                 succeeded: false,
                             });
-                        });
-                        break;
-                    case "cancel-silently":
-                        // Prevent execution, but do not show any errors
-                        debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
-                        return resolve({
-                            value: null,
-                            error_messages: [],
-                            succeeded: false,
-                        });
-                    case "value":
-                        // Return a default value.
-                        debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
-                        if (default_value_parser) {
-                            // Parse possible variables in the default value.
-                            default_value_parser(default_value_configuration.value).then((default_value_parsing_result: ParsingResult) => {
-                                return resolve({
-                                    value:
-                                        default_value_parsing_result.succeeded
-                                            ? default_value_parsing_result.parsed_content
-                                            : default_value_parsing_result.original_content
-                                    ,
-                                    error_messages: default_value_parsing_result.error_messages,
-                                    succeeded: default_value_parsing_result.succeeded,
-                                });
-                            });
-
-                        } else {
-                            // No variable parsing is wanted.
+                        case "cancel-silently":
+                            // Prevent execution, but do not show any errors
+                            debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
                             return resolve({
-                                value: default_value_configuration.value,
+                                value: null,
                                 error_messages: [],
-                                succeeded: true,
+                                succeeded: false,
                             });
-                        }
+                        case "value":
+                            // Return a default value.
+                            if (!default_value_configuration) {
+                                // This should not happen, because default_value_type is never "value" when default_value_configuration is undefined or null.
+                                // This check is just for TypeScript compiler to understand that default_value_configuration is defined when it's accessed below.
+                                throw new Error("Default value configuration is undefined.");
+                            }
+                            debugLog(debug_message_base + "Will use a default value: " + default_value_configuration.value);
+                            if (default_value_parser) {
+                                // Parse possible variables in the default value.
+                                default_value_parser(default_value_configuration.value).then((default_value_parsing_result: ParsingResult) => {
+                                    return resolve({
+                                        value:
+                                            default_value_parsing_result.succeeded
+                                                ? default_value_parsing_result.parsed_content
+                                                : default_value_parsing_result.original_content
+                                        ,
+                                        error_messages: default_value_parsing_result.error_messages,
+                                        succeeded: default_value_parsing_result.succeeded,
+                                    });
+                                });
+
+                            } else {
+                                // No variable parsing is wanted.
+                                return resolve({
+                                    value: default_value_configuration.value,
+                                    error_messages: [],
+                                    succeeded: true,
+                                });
+                            }
+                            break;
+                        default:
+                            throw new Error("Unrecognised default value type: " + default_value_type);
+                    }
+                } else {
+                    // A program logic error has happened.
+                    debugLog(this.constructor.name + ".getValue(): Caught an unrecognised error of class: " + error.constructor.name + ". Will rethrow it.");
+                    throw error;
                 }
-            }
+            });
         });
     }
 
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(sc_event: SC_Event): Promise<string|null>;
+    protected abstract generateValue(variableArguments: ICastedArguments, sc_event: SC_Event | null): Promise<string>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
@@ -218,31 +219,52 @@ export abstract class Variable {
     }
 
     /**
-     * @param parameter_name
-     * @param argument At this point 'argument' is always a string, but this method may convert it to another data type, depending on the parameter's data type.
+     * @param variableArguments String typed arguments. Arguments that should be typed otherly, will be cast to other types. Then all arguments are returned.
      */
-    public setArgument(parameter_name: string, argument: string) {
-        const parameter_type = this.getParameters()[parameter_name].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
-        switch (parameter_type) {
-            case "string":
-                this.arguments[parameter_name] = argument;
-                break;
-            case "integer":
-                this.arguments[parameter_name] = parseInt(argument);
-                break;
+    public castArguments(variableArguments: IRawArguments): ICastedArguments {
+        const castedArguments: ICastedArguments = {};
+        for (const parameterName of Object.getOwnPropertyNames(variableArguments)) {
+            const parameter_type = this.getParameters()[parameterName].type ?? "string"; // If the variable uses "options" instead of "type", then the type is always "string".
+            const argument = variableArguments[parameterName];
+            switch (parameter_type) {
+                case "string":
+                    castedArguments[parameterName] = argument;
+                    break;
+                case "integer":
+                    castedArguments[parameterName] = parseInt(argument);
+                    break;
+            }
         }
+        return castedArguments;
     }
 
-    protected newErrorMessage(message: string) {
-        const prefix = "{{" + this.variable_name + "}}: ";
-        this.error_messages.push(prefix + message);
-        debugLog(prefix + message);
+    /**
+     * Creates a VariableError and passes it to a rejector function, which will pass the VariableError to Variable.getValue().
+     * Then it will be handled there according to user preferences.
+     *
+     * @param message
+     * @param rejector
+     * @protected
+     */
+    protected reject(message: string, rejector: (error: VariableError) => void): void {
+        rejector(this.newVariableError(message));
     }
 
-    protected newErrorMessages(messages: string[]) {
-        messages.forEach((message: string) => {
-            this.newErrorMessage(message);
-        });
+    /**
+     * Similar to Variable.reject(), but uses a traditional throw. Can be used in async methods. For methods that create
+     * Promises manually, Variable.reject() should be used, because errors thrown in manually created Promises are not caught
+     * by Variable.getValue()'s Promise.catch() callback.
+     *
+     * @param message
+     * @protected
+     */
+    protected throw(message: string): never {
+        throw this.newVariableError(message);
+    }
+
+    private newVariableError(message: string) {
+        const prefix = this.getFullName() + ": ";
+        return new VariableError(prefix + message);
     }
 
     public getAutocompleteItems(): IAutocompleteItem[] {
@@ -264,6 +286,7 @@ export abstract class Variable {
                 help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped version of the variable
@@ -272,6 +295,7 @@ export abstract class Variable {
                 help_text: (this.help_text + " " + this.getAvailabilityText()).trim(), // .trim() removes " " if help_text or getAvailabilityText() is empty.
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }
@@ -290,19 +314,35 @@ export abstract class Variable {
     }
 
     /**
+     * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
+     */
+    public getDocumentationLink(): string {
+        return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
+    }
+
+    /**
+     * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
+     */
+    public createDocumentationLinkElement(container: HTMLElement
+    ): void {
+        const description =
+            this.getFullName() + ": " + this.help_text
+            + EOL + EOL +
+            "Click for external documentation."
+        ;
+        container.createEl("a", {
+            text: this.getFullName(),
+            href: this.getDocumentationLink(),
+            attr: {"aria-label": description},
+        });
+    }
+
+    /**
      * Returns a unique string that can be used in default value configurations.
      * @return Normal variable name, if this is a built-in variable; or an ID string if this is a CustomVariable.
      */
     public getIdentifier(): string {
         return this.getFullName();
-    }
-
-    /**
-     * Tells whether the variable can be currently accessed. If you want to know if the variable can sometimes be inaccessible,
-     * use isAlwaysAvailable() instead.
-     */
-    public isAvailable(sc_event: SC_Event | null) {
-        return true; // If the variable is always available, return true. If not, the variable should override this method.
     }
 
     /**
@@ -327,10 +367,29 @@ export abstract class Variable {
     public getAvailabilityTextPlain(): string {
         return this.getAvailabilityText().replace(/<\/?strong>/ig, ""); // Remove <strong> and </strong> markings from the help text
     }
+
+    /**
+     * Returns a default value configuration object that should be used if a shell command does not define its own
+     * default value configuration object.
+     */
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
+        // Works for built-in variables only. CustomVariable class needs to override this method and not call the parent!
+        return this.plugin.settings.builtin_variables[this.getIdentifier()]?.default_value; // Can return null
+    }
 }
 
-interface IArguments {
+/**
+ * Arguments that are cast to their designed data types, i.e. strings or integers at the moment.
+ */
+export interface ICastedArguments {
     [key: string]: unknown;
+}
+
+/**
+ * Same as ICastedArguments, but not yet cast to the target data types.
+ */
+export interface IRawArguments {
+    [key: string]: string;
 }
 
 /**
@@ -356,7 +415,30 @@ export interface VariableValueResult {
     succeeded: boolean,
 }
 
-export interface VariableDefaultValueConfiguration {
-    type: "show-errors" | "cancel-silently" | "value",
+/**
+ * Thrown when Variables encounter errors that users should solve. Variable.getValue() will catch these and show to user
+ * (unless errors are ignored).
+ */
+export class VariableError extends Error {}
+
+export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value";
+
+export type VariableDefaultValueTypeWithInherit = VariableDefaultValueType | "inherit";
+
+/**
+ * Interface for a configuration object that can opt for retrieving the configuration from an upper level by defining its
+ * 'type' property have value 'inherit'.
+ */
+export interface InheritableVariableDefaultValueConfiguration {
+    type: VariableDefaultValueTypeWithInherit,
+    value: string,
+}
+
+/**
+ * Interface for a configuration object that is on a root level and so cannot inherit configuration from an upper level,
+ * because there is no upper level. Objects implementing this interface cannot set their 'type' property to 'inherit'.
+ */
+export interface GlobalVariableDefaultValueConfiguration {
+    type: VariableDefaultValueType,
     value: string,
 }

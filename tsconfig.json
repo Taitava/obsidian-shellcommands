@@ -10,6 +10,7 @@
     "moduleResolution": "node",
     "importHelpers": true,
     "noImplicitReturns": true,
+    "strictNullChecks": true,
     "lib": [
       "dom",
       "es2021",

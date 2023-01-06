@@ -1,6 +1,6 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
  */
 
 import {setIcon} from "obsidian";
-import {debugLog} from "./Debug";
 import {uniqueArray} from "./Common";
 
 /**
@@ -29,7 +28,6 @@ export function getIconHTML(icon_id: string) {
         return "";
     }
     const icon_container = document.body.createEl("div"); // A temporary element, will be deleted soon. Not nice to create a temporary element in the body, but I don't know any better way.
-    debugLog(icon_id); // TODO: Do not commit.
     setIcon(icon_container, icon_id);
     const icon_html = icon_container.innerHTML;
     icon_container.remove();

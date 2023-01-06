@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,7 +18,7 @@
  */
 
 // @ts-ignore
-import {Setting, TextAreaComponent} from "obsidian";
+import {Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
@@ -49,12 +49,10 @@ import {
     getDefaultPreaction_Prompt_Configuration,
     getModel,
     Preaction_Prompt_Configuration,
-    PreactionConfiguration,
     Prompt,
     PromptModel,
     PromptSettingsModal,
 } from "../imports";
-import {VariableDefaultValueConfiguration} from "../variables/Variable";
 import {CmdOrCtrl} from "../Hotkeys";
 import {
     getIconHTML,
@@ -63,13 +61,18 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
-import {DocumentationOutputHandlingModeLink} from "../Documentation";
+import {
+    DocumentationOutputHandlingModeLink,
+    DocumentationStdinContentLink,
+} from "../Documentation";
+import {decorateMultilineField} from "./setting_elements/multilineField";
+import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
 /**
  * TODO: Rename to ShellCommandSettingsModal
  */
 export class ExtraOptionsModal extends SC_Modal {
-    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation";
+    public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
     public static ENVIRONMENTS_OPTIONS_SUMMARY = "Shell selection, Operating system specific shell commands";
@@ -149,13 +152,15 @@ export class ExtraOptionsModal extends SC_Modal {
             new_modal.activateTab(this.tab_structure.active_tab_id);
         };
         this.scope.register(["Mod"], "ArrowUp", () => {
-            if (this.t_shell_command.previousTShellCommand()) {
-                switch_to_t_shell_command(this.t_shell_command.previousTShellCommand());
+            const previousTShellCommand = this.t_shell_command.previousTShellCommand();
+            if (previousTShellCommand) {
+                switch_to_t_shell_command(previousTShellCommand);
             }
         });
         this.scope.register(["Mod"], "ArrowDown", () => {
-            if (this.t_shell_command.nextTShellCommand()) {
-                switch_to_t_shell_command(this.t_shell_command.nextTShellCommand());
+            const nextTShellCommand = this.t_shell_command.nextTShellCommand();
+            if (nextTShellCommand) {
+                switch_to_t_shell_command(nextTShellCommand);
             }
         });
         new Setting(this.modalEl)
@@ -165,7 +170,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
     private tabGeneral(container_element: HTMLElement) {
         // Alias field
-        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}})
+        const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(alias_container)
             .setName("Alias")
         ;
@@ -236,7 +241,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 }),
             )
         ;
-        icon_setting.nameEl.innerHTML = "Icon " + getIconHTML(current_icon)
+        icon_setting.nameEl.innerHTML = "Icon " + (current_icon ? getIconHTML(current_icon) : "");
 
         // Confirm execution field
         new Setting(container_element)
@@ -258,6 +263,41 @@ export class ExtraOptionsModal extends SC_Modal {
             )
         ;
 
+        // Stdin field
+        new Setting(container_element)
+            .setName("Pass variables to standard input (stdin) (experimental)")
+            .setDesc("Used to pass long texts as input to the shell command. There is a limit to command line length, and e.g. {{note_content}} might provide a value too long to be used as an argument, so it works better when passed to stdin. Also, programs that ask multiple values interactively, can be fed with values using stdin. If there are multiple values that need to be inputted, put them on separate lines. Many shell programs interpret newlines as separators between different values.")
+            .addExtraButton(extraButtonComponent => extraButtonComponent
+                .setIcon("help")
+                .setTooltip("Documentation: Pass variables to stdin")
+                .onClick(() => gotoURL(DocumentationStdinContentLink))
+            )
+        ;
+        const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}});
+        const onStdinChange = async (newStdinContent: string) => {
+            if ("" === newStdinContent) {
+                // Set to null
+                this.t_shell_command.getConfiguration().input_contents.stdin = null;
+            } else {
+                // Set value
+                this.t_shell_command.getConfiguration().input_contents.stdin = newStdinContent;
+            }
+            await this.plugin.saveSettings();
+        };
+        new Setting(stdinSettingContainer)
+            .setDesc("Can contain {{variables}} and/or static text.")
+            .addTextArea(textareaComponent => {
+                textareaComponent
+                    .setValue(this.t_shell_command.getInputChannels().stdin ?? "")
+                ;
+                decorateMultilineField(this.plugin, textareaComponent, onStdinChange);
+                if (this.plugin.settings.show_autocomplete_menu) {
+                    // Show autocomplete menu (= a list of available variables).
+                    createAutocomplete(this.plugin, textareaComponent.inputEl, onStdinChange);
+                }
+            })
+        ;
+
         // Shell command id
         new Setting(container_element)
             .setDesc(`Shell command id: ${this.shell_command_id}`)
@@ -266,7 +306,7 @@ export class ExtraOptionsModal extends SC_Modal {
                 .setTooltip(`Copy ${this.shell_command_id} to the clipboard.`)
                 .onClick(() => {
                     copyToClipboard(this.shell_command_id);
-                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`)
+                    this.plugin.newNotification(`${this.shell_command_id} was copied to the clipboard.`);
                 }),
             )
         ;
@@ -280,7 +320,7 @@ export class ExtraOptionsModal extends SC_Modal {
                     .setTooltip(`Copy ${obsidian_command_id} to the clipboard.`)
                     .onClick(() => {
                         copyToClipboard(obsidian_command_id);
-                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`)
+                        this.plugin.newNotification(`${obsidian_command_id} was copied to the clipboard.`);
                     }),
                 )
                 .settingEl.addClass("SC-no-top-border") // No horizontal ruler between the two id elements.
@@ -293,20 +333,23 @@ export class ExtraOptionsModal extends SC_Modal {
         const preactions_configuration = this.t_shell_command.getConfiguration().preactions;
 
         // Load config values
-        let preaction_prompt_configuration: Preaction_Prompt_Configuration = null;
-        preactions_configuration.forEach((preaction_configuration: PreactionConfiguration) => {
+        let preaction_prompt_configuration: Preaction_Prompt_Configuration | null = null;
+        for (const preaction_configuration of preactions_configuration) {
             switch (preaction_configuration.type) {
                 case "prompt":
                     preaction_prompt_configuration = preaction_configuration as Preaction_Prompt_Configuration;
+                    break;
+                default:
+                    throw new Error("Unrecognised preaction type: " + preaction_configuration.type);
             }
-        });
+        }
 
         // Preaction: Prompt
         const prompt_options: {[key: string]: string} = {};
         this.plugin.getPrompts().forEach((prompt: Prompt) => {
             prompt_options[prompt.getID()] = prompt.getTitle();
         });
-        let old_selected_prompt_option: string = (preaction_prompt_configuration?.enabled) ? preaction_prompt_configuration.prompt_id : "no-prompt";
+        let old_selected_prompt_option: string = (preaction_prompt_configuration?.enabled) ? preaction_prompt_configuration.prompt_id as string : "no-prompt";
         new Setting(container_element)
             .setName("Prompt")
             .setDesc("Prompts are used to ask values from the user right before shell command execution. The values can be accessed in the shell command via custom variables. You can manage all prompts in the plugin's main settings view, under the 'Preactions' tab.")
@@ -327,20 +370,20 @@ export class ExtraOptionsModal extends SC_Modal {
                     switch (new_prompt_id) {
                         case "new": {
                             // Create a new Prompt.
-                            const model = getModel<PromptModel>(PromptModel.name)
+                            const model = getModel<PromptModel>(PromptModel.name);
                             const new_prompt = model.newInstance(this.plugin.settings);
                             this.plugin.saveSettings().then(() => {
                                 const modal = new PromptSettingsModal(
                                     this.plugin,
                                     new_prompt,
-                                    null,
+                                    undefined,
                                     "Create prompt",
                                     async () => {
                                         // Prompt is created.
                                         dropdown.addOption(new_prompt.getID(), new_prompt.getTitle());
                                         dropdown.setValue(new_prompt.getID());
-                                        preaction_prompt_configuration.enabled = true;
-                                        preaction_prompt_configuration.prompt_id = new_prompt.getID();
+                                        (preaction_prompt_configuration as Preaction_Prompt_Configuration).enabled = true; // 'as Preaction_Prompt_Configuration' tells TypeScript that the variable is not null.
+                                        (preaction_prompt_configuration as Preaction_Prompt_Configuration).prompt_id = new_prompt.getID();
                                         await this.plugin.saveSettings();
                                         old_selected_prompt_option = dropdown.getValue();
                                     },
@@ -521,10 +564,8 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
         getSC_Events(this.plugin).forEach((sc_event: SC_Event) => {
             const is_event_enabled: boolean = this.t_shell_command.isSC_EventEnabled(sc_event.static().getCode());
-            const summary_of_extra_variables = sc_event.getSummaryOfEventVariables();
-            new Setting(container_element)
+            const setting = new Setting(container_element)
                 .setName(sc_event.static().getTitle())
-                .setDesc(summary_of_extra_variables ? "Additional variables: " + summary_of_extra_variables : "")
                 .addToggle(toggle => toggle
                     .setValue(is_event_enabled)
                     .onChange(async (enable: boolean) => {
@@ -550,6 +591,11 @@ export class ExtraOptionsModal extends SC_Modal {
                 )
             ;
 
+            // Mention additional variables (if any)
+            if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
+                setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
+            }
+
             // Extra settings
             const extra_settings_container = container_element.createDiv();
             extra_settings_container.style.display = is_event_enabled ? "block" : "none";
@@ -557,102 +603,20 @@ export class ExtraOptionsModal extends SC_Modal {
         });
     }
 
-    private tabVariables(container_element: HTMLElement) {
+    private tabVariables(containerElement: HTMLElement) {
 
         // Default values for variables
-        new Setting(container_element)
+        new Setting(containerElement)
             .setName("Default values for variables")
             .setDesc("Certain variables can be inaccessible during certain situations, e.g. {{file_name}} is not available when no file pane is focused. You can define default values that will be used when a variable is otherwise unavailable.")
             .setHeading()
         ;
 
-        // Add default value fields for each variable that can have a default value.
-        for (const variable of this.plugin.getVariables()) {
-            // Only add fields for variables that are not always accessible.
-            if (!variable.isAlwaysAvailable()) {
-
-                // Get an identifier for a variable (an id, if it's a CustomVariable, otherwise the variable's name).
-                const variable_identifier = variable.getIdentifier();
-
-                // If a default value has defined for this variable (and this TShellCommand), retrieve the configuration.
-                let default_value_configuration: VariableDefaultValueConfiguration | undefined = this.t_shell_command.getDefaultValueConfigurationForVariable(variable); // NOTE that this can be UNDEFINED!
-
-                // A function for creating configuration in onChange() callbacks if the variable does not yet have one for this TShellCommand.
-                const create_default_value_configuration = () => {
-                    const configuration: VariableDefaultValueConfiguration = {
-                        type: "show-errors",
-                        value: "",
-                    };
-                    this.t_shell_command.getConfiguration().variable_default_values[variable_identifier] = configuration;
-                    return configuration;
-                }
-
-                let textarea_component: TextAreaComponent;
-
-                // A function for updating textarea_component visibility.
-                const update_textarea_component_visibility = (type: string) => {
-                    if ("value" === type) {
-                        textarea_component.inputEl.removeClass("SC-hide");
-                    } else {
-                        textarea_component.inputEl.addClass("SC-hide");
-                    }
-                };
-
-                // Create the default value setting
-                new Setting(container_element)
-                    .setName(variable.getFullName())
-                    .setDesc("If not available, then:")
-                    .setTooltip(variable.getAvailabilityTextPlain())
-                    .addDropdown(dropdown => dropdown
-                        .addOptions({
-                            "show-errors": "Cancel execution and show errors",
-                            "cancel-silently": "Cancel execution silently",
-                            "value": "Execute with value:",
-                        })
-                        .setValue(default_value_configuration ? default_value_configuration.type : "show-errors")
-                        .onChange(async (new_type: typeof default_value_configuration.type) => {
-                            if (!default_value_configuration) {
-                                default_value_configuration = create_default_value_configuration();
-                            }
-
-                            // Set the new type
-                            default_value_configuration.type = new_type;
-                            if ("show-errors" === new_type && default_value_configuration.value === "") {
-                                // If "show-errors" is selected and no text value is typed, the configuration file can be cleaned up by removing this configuration object completely.
-                                // Prevent deleting, if a text value is present, because the user might want to keep it if they will later change 'type' to 'value'.
-                                delete this.t_shell_command.getConfiguration().variable_default_values[variable_identifier];
-                            }
-
-                            // Show/hide the textarea
-                            update_textarea_component_visibility(new_type);
-
-                            // Save the settings
-                            await this.plugin.saveSettings();
-                        }),
-                    )
-                    .addTextArea(textarea => textarea_component = textarea
-                        .setValue(default_value_configuration ? default_value_configuration.value : "")
-                        .onChange(async (new_value: string) => {
-                            if (!default_value_configuration) {
-                                default_value_configuration = create_default_value_configuration();
-                            }
-
-                            // Set the new text value
-                            default_value_configuration.value = new_value;
-
-                            // Save the settings
-                            await this.plugin.saveSettings();
-                        }).then((textarea_component) => {
-                            // Autocomplete for the textarea.
-                            if (this.plugin.settings.show_autocomplete_menu) {
-                                createAutocomplete(this.plugin, textarea_component.inputEl, () => textarea_component.onChanged());
-                            }
-                        }),
-                    )
-                ;
-                update_textarea_component_visibility(default_value_configuration ? default_value_configuration.type : "show-errors");
-            }
-        }
+        createVariableDefaultValueFields(
+            this.plugin,
+            containerElement,
+            this.t_shell_command,
+        );
     }
 
     public activateTab(tab_id: string) {
@@ -684,7 +648,7 @@ export class ExtraOptionsModal extends SC_Modal {
             output_wrapper_options[output_wrapper.getID()] = output_wrapper.getTitle();
         });
         const output_wrappers = this.t_shell_command.getConfiguration().output_wrappers;
-        let old_selected_output_wrapper_option: string = (output_wrappers[output_stream_name]) ? output_wrappers[output_stream_name] : "no-output-wrapper";
+        let old_selected_output_wrapper_option: string = output_wrappers[output_stream_name] ?? "no-output-wrapper";
         return new Setting(container_element)
             .setName(title)
             .setDesc(description)
@@ -703,7 +667,7 @@ export class ExtraOptionsModal extends SC_Modal {
                                 const modal = new OutputWrapperSettingsModal(
                                     this.plugin,
                                     new_output_wrapper,
-                                    null,
+                                    undefined,
                                     "Create output wrapper",
                                     async () => {
                                         // Output wrapper is created.

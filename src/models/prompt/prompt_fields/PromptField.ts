@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -38,7 +38,7 @@ export abstract class PromptField extends Instance {
      */
     protected preview_setting: Setting;
 
-    private parsed_value: string;
+    private parsed_value: string | null;
     private parsing_errors: string[] = [];
 
     constructor(
@@ -100,13 +100,21 @@ export abstract class PromptField extends Instance {
             this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
         } else {
             // Parsing succeeded.
-            this.setValue(parsing_result.parsed_content);
+            this.setValue(parsing_result.parsed_content as string);
         }
         await this.valueHasChanged(t_shell_command, sc_event);
     }
 
-    public getParsedValue() {
+    public getParsedValue(): string | null {
         return this.parsed_value;
+    }
+
+    /**
+     * Tries to get a parsed value, but if it's not available (probably due to incorrect usage of variables), returns an
+     * unparsed value instead().
+     */
+    public getParsedOrRawValue(): string {
+        return this.parsed_value ?? this.getValue();
     }
 
     public getParsingErrors() {
@@ -120,7 +128,7 @@ export abstract class PromptField extends Instance {
      * @param sc_event
      * @protected
      */
-    protected async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event) {
+    protected async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         let preview: string;
 
         // Parse variables in the value.
@@ -139,7 +147,7 @@ export abstract class PromptField extends Instance {
         } else {
             // Parsing succeeded
             this.parsed_value = parsing_result.parsed_content;
-            preview = parsing_result.parsed_content;
+            preview = parsing_result.parsed_content as string;
             this.parsing_errors = []; // No errors.
         }
 
@@ -205,7 +213,7 @@ export abstract class PromptField extends Instance {
 
     public getTargetVariableInstance(): CustomVariableInstance {
         const target_variable_id = this.configuration.target_variable_id;
-        const custom_variable_instance: CustomVariableInstance = this.prompt.model.plugin.getCustomVariableInstances().get(target_variable_id);
+        const custom_variable_instance: CustomVariableInstance | undefined = this.prompt.model.plugin.getCustomVariableInstances().get(target_variable_id);
         if (!custom_variable_instance) {
             throw new Error(this.constructor.name + ".getTargetVariableInstance(): CustomVariableInstance with ID '" + target_variable_id + "' was not found");
         }

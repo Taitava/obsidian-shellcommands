@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -22,7 +22,11 @@ import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
-import {Variable, VariableValueResult} from "./Variable";
+import {
+    IRawArguments,
+    Variable,
+    VariableValueResult,
+} from "./Variable";
 import {TShellCommand} from "../TShellCommand";
 import {removeFromSet} from "../Common";
 
@@ -53,26 +57,23 @@ export async function parseVariables(
     // Initialize a parsing result object
     const parsing_result: ParsingResult = {
         original_content: content,
-        parsed_content: null,
+        parsed_content: content, // Create a copy of the variable because we don't want to alter the original value of 'content' during iterating its regex matches. Originally this copy was just another local variable, but now it's changed to be a property in an object.
         succeeded: false,
         error_messages: [],
         count_parsed_variables: 0,
     };
 
-    parsing_result.parsed_content = content; // Create a copy of the variable because we don't want to alter the original value of 'content' during iterating its regex matches. Originally this copy was just another local variable, but now it's changed to be a property in an object.
     for (const variable of variables)
     {
         const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
         const parameter_names = variable.getParameterNames();
-        let argument_matches: RegExpExecArray; // Need to prefix with _ because JavaScript reserves the variable name 'arguments'.
+        let argument_matches: RegExpExecArray | null;
         while ((argument_matches = pattern.exec(content)) !== null) {
-            // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
-            variable.reset();
-
             // Count how many times any variables have appeared.
             parsing_result.count_parsed_variables++;
 
             // Remove stuff that should not be iterated in a later loop.
+            /** Need to prefix with _ because JavaScript reserves the variable name 'arguments'. */
             const _arguments = argument_matches.filter((value: unknown /* Won't be used */, key: unknown) => {
                 return "number" === typeof key;
                 // This leaves out for example the following non-numeric keys (and their values):
@@ -83,16 +84,17 @@ export async function parseVariables(
             });
 
             // Get the {{variable}} string that will be substituted (= replaced with the actual value of the variable).
-            const substitute = _arguments.shift(); // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'.
+            const substitute: string = _arguments.shift() as string; // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'. 'as string' is used to tell TypeScript that _arguments[0] is always defined.
 
             // Iterate all arguments
+            const presentArguments: IRawArguments = {};
             for (const i in _arguments) {
                 // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
                 if (undefined !== _arguments[i]) {
                     // The argument is present.
                     const argument = _arguments[i].slice(1); // .slice(1): Remove a preceding :
                     const parameter_name = parameter_names[i];
-                    variable.setArgument(parameter_name, argument);
+                    presentArguments[parameter_name] = argument;
                 }
             }
 
@@ -112,6 +114,7 @@ export async function parseVariables(
             const variable_value_result = await variable.getValue(
                 t_shell_command,
                 sc_event,
+                presentArguments,
 
                 // Define a recursive callback that can be used to parse possible variables in a default value of the current variable.
                 (raw_default_value) => {
@@ -147,10 +150,13 @@ export async function parseVariables(
                 let use_variable_value: string;
                 if (escape) {
                     // Use an escaped value.
-                    use_variable_value = escapeValue(shell, raw_variable_value);
+                    use_variable_value = escapeValue(
+                        shell as string, // shell is always a string when escape is true.
+                        raw_variable_value as string, // raw_variable_value is always a string when variable_value_result.succeeded is true.
+                    );
                 } else {
                     // No escaping is wanted, so use the raw value.
-                    use_variable_value = raw_variable_value;
+                    use_variable_value = raw_variable_value as string; // raw_variable_value is always a string when variable_value_result.succeeded is true.
                 }
 
                 // Augment the escaped value, if wanted.
@@ -159,7 +165,7 @@ export async function parseVariables(
                 }
 
                 // Replace the variable name with the variable value.
-                parsing_result.parsed_content = parsing_result.parsed_content.replace(substitute, () => {
+                parsing_result.parsed_content = (parsing_result.parsed_content as string /* not null */).replace(substitute, () => {
                     // Do the replacing in a function in order to avoid a possible $ character to be interpreted by JavaScript to interact with the regex.
                     // More information: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/replace#specifying_a_string_as_a_parameter (referenced 2021-11-02.)
                     return use_variable_value;
@@ -192,7 +198,7 @@ export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables()
+    const search_for_variables: VariableSet = plugin.getVariables();
     const found_variables = new VariableSet();
     
     for (const variable of search_for_variables)
@@ -209,7 +215,12 @@ export function getUsedVariables(
 
 export interface ParsingResult {
     original_content: string;
-    parsed_content: string;
+
+    /**
+     * This is null if succeeded is false.
+     * */
+    parsed_content: string | null;
+
     succeeded: boolean;
     error_messages: string[];
     count_parsed_variables: number;

@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -83,13 +83,21 @@ export function getFileExtension(file: TFile, with_dot: boolean) {
 
 export function getFileTags(app: App, file: TFile) {
     const cache = app.metadataCache.getFileCache(file);
-    const tags: string[] = uniqueArray(getAllTags(cache)); // If a tag is defined multiple times in the same file, getTags() returns it multiple times, so use uniqueArray() to iron out duplicates.
+    if (!cache) {
+        throw new Error("Could not get metadata cache.");
+    }
+
+    // Get tags. May include duplicates, if a tag is defined multiple times in the same file.
+    const tagsIncludingDuplicates: string[] = getAllTags(cache) ?? []; // ?? [] = in case null is returned, convert it to an empty array. I have no clue in which situation this might happen. Maybe if the file does not contain any tags?
+
+    // Iron out possible duplicates.
+    const tagsWithoutDuplicates: string[] = uniqueArray(tagsIncludingDuplicates);
 
     // Remove preceding hash characters. E.g. #tag becomes tag
-    tags.forEach((tag: string, index) => {
-        tags[index] = tag.replace("#", "");
+    tagsWithoutDuplicates.forEach((tag: string, index) => {
+        tagsWithoutDuplicates[index] = tag.replace("#", "");
     });
-    return tags;
+    return tagsWithoutDuplicates;
 }
 
 /**
@@ -126,13 +134,17 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
     }
 
     /**
-     * @param property_parts Property path split into parts (= property names). The deeper the nesting goes, the fewer values will be left in this array.
+     * @param property_parts Property path split into parts (= property names). The deeper the nesting goes, the fewer values will be left in this array. This should always contain at least one part! If not, an Error is thrown.
      * @param property_path The original, whole property path string.
      * @param yaml_object
      * @return string|string[] Either a result string, or an array of error messages.
      */
     function nested_read(property_parts: string[], property_path: string, yaml_object: { [key: string]: string | number | object }): string | string[] {
-        let property_name: string = property_parts.shift();
+        // Check that property_parts contains at least one part.
+        if (property_parts.length === 0) {
+            throw new Error("No more property parts to read!");
+        }
+        let property_name: string = property_parts.shift() as string; // as string: Tell TypeScript that the result is not undefined, because the array is not empty.
 
         // Check if the property name is a negative numeric index.
         if (property_name.match(/^-\d+$/u)) {
@@ -166,6 +178,16 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
         if (undefined === property_value) {
             // Property was not found.
             error_messages.push("YAML property '" + property_name + "' is not found.");
+            return error_messages;
+        } else if (null === property_value) {
+            // Property is found, but has an empty value. Example:
+            //   ---
+            //   itemA: valueA
+            //   itemB:
+            //   itemC: valueC
+            //   ---
+            // Here `itemB` would have a null value.
+            error_messages.push("YAML property '" + property_name + "' has a null value. Make sure the property is not accidentally left empty.");
             return error_messages;
         } else if ("object" === typeof property_value) {
             // The value is an object.

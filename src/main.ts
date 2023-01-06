@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -72,13 +72,15 @@ import {
     OutputWrapperMap,
     OutputWrapperModel,
 } from "./models/output_wrapper/OutputWrapperModel";
+import {ParsingResult} from "./variables/parseVariables";
+import {AutocompleteResult} from "autocompleter/autocomplete";
 
 export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.17.0";
+	public static SettingsVersion: SettingsVersionString = "0.18.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
@@ -98,13 +100,15 @@ export default class SC_Plugin extends Plugin {
 	 * @private
 	 */
 	private cached_parsing_processes: {
-		[key: string]: ShellCommandParsingProcess,
+		[key: string]: ShellCommandParsingProcess | undefined,
 	} = {};
 
-	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands"
+	public static readonly SHELL_COMMANDS_URI_ACTION = "shell-commands";
 
     /** @see getOutputStatusBarElement() */
     private statusBarElement: HTMLElement;
+
+    private autocompleteMenus: AutocompleteResult[] = [];
 
 	public async onload() {
 		debugLog('loading plugin');
@@ -117,11 +121,11 @@ export default class SC_Plugin extends Plugin {
 			return;
 		}
 
-		// Run possible configuration migrations
-		await RunMigrations(this);
-
 		// Define models
 		introduceModels(this);
+
+		// Run possible configuration migrations
+		await RunMigrations(this);
 
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
@@ -238,7 +242,7 @@ export default class SC_Plugin extends Plugin {
         if ("open" === action && uri_arguments.file !== undefined) {
             // Use shorthand uri type for opening a file.
             const encoded_file = encodeURIComponent(uri_arguments.file);
-            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`
+            base_uri = `obsidian://vault/${encoded_vault_name}/${encoded_file}`;
             delete uri_arguments.file; // Prevent adding an extra '&file=' argument to the end of the URI.
         } else {
             // Use normal uri type for everything else.
@@ -284,7 +288,7 @@ export default class SC_Plugin extends Plugin {
 				// Try to process variables that can be processed before performing preactions.
 				await parsing_process.process();
 			}
-			if (parsing_process.getParsingResults().shell_command.succeeded) {
+			if (parsing_process.getParsingResults().shell_command?.succeeded) { // .shell_command should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
@@ -297,7 +301,7 @@ export default class SC_Plugin extends Plugin {
 				// Display error messages
 				parsing_process.displayErrorMessages();
 			}
-		}
+		};
 
 		// Register an Obsidian command
 		const obsidian_command: Command = {
@@ -325,22 +329,29 @@ export default class SC_Plugin extends Plugin {
                                 // Parsing succeeded
 
                                 // Rename Obsidian command
-                                const parsing_result = parsing_process.getParsingResults();
-                                t_shell_command.renameObsidianCommand(
-                                    parsing_result["shell_command"].parsed_content,
-                                    parsing_result["alias"].parsed_content,
-                                );
+                                const parsingResults = parsing_process.getParsingResults();
+                                /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
+                                const shellCommandParsingResult: ParsingResult = parsingResults["shell_command"] as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+                                const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
+                                const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
+                                const parsedAlias: string = aliasParsingResult.parsed_content as string;
+                                t_shell_command.renameObsidianCommand(parsedShellCommand,parsedAlias);
 
                                 // Store the preparsed variables so that they will be used if this shell command gets executed.
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
+                            } else {
+                                // Parsing failed, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
+                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                                this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                             }
                         });
-					}
+                    } else {
+                        // Parsing is disabled, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
+                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                        this.cached_parsing_processes[t_shell_command.getId()] = undefined;
+                    }
 
-					// If parsing failed (or was disabled), then use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-					t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
-					this.cached_parsing_processes[t_shell_command.getId()] = undefined;
-					return true;
+                    return true; // Tell Obsidian this command can be shown in command palette.
 
 				} else {
 					// The user has instructed to execute the command.
@@ -361,10 +372,10 @@ export default class SC_Plugin extends Plugin {
 				}
 			}
 		};
-		this.addCommand(obsidian_command)
+		this.addCommand(obsidian_command);
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.
 		t_shell_command.setObsidianCommand(obsidian_command);
-		debugLog("Registered.")
+		debugLog("Registered.");
 	}
 
 
@@ -499,6 +510,11 @@ export default class SC_Plugin extends Plugin {
 
 		// Close CustomVariableViews.
 		this.app.workspace.detachLeavesOfType(CustomVariableView.ViewType);
+
+        // Close autocomplete menus.
+        for (const autocompleteMenu of this.autocompleteMenus) {
+            autocompleteMenu?.destroy();
+        }
 	}
 
 	/**
@@ -582,7 +598,7 @@ export default class SC_Plugin extends Plugin {
 		if (fs.existsSync(custom_autocomplete_file_path)) {
 			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
 			const custom_autocomplete_content = fs.readFileSync(custom_autocomplete_file_path).toLocaleString();
-			const result = addCustomAutocompleteItems(custom_autocomplete_content)
+			const result = addCustomAutocompleteItems(custom_autocomplete_content);
 			if (true === result) {
 				// OK
 				debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " loaded.");
@@ -596,6 +612,14 @@ export default class SC_Plugin extends Plugin {
 		}
 
 	}
+
+    /**
+     * Puts the given Autocomplete menu into a list of menus that will be destroyed when the plugin unloads.
+     * @param autocompleteMenu
+     */
+    public registerAutocompleteMenu(autocompleteMenu: AutocompleteResult) {
+        this.autocompleteMenus.push(autocompleteMenu);
+    }
 
 	private async disablePlugin() {
 		// This unfortunately accesses a private API.

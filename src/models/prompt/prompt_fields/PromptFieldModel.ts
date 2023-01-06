@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -64,7 +64,7 @@ export class PromptFieldModel extends Model {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration
-        const prompt_field_configuration = this._getDefaultConfiguration();
+        const prompt_field_configuration = this.getDefaultConfiguration();
 
         // Instantiate a PromptField
         const prompt_field = this.createInstance(prompt, prompt_field_configuration, prompt.configuration.fields.length);
@@ -81,7 +81,7 @@ export class PromptFieldModel extends Model {
 
     private createInstance(prompt: Prompt, prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number): PromptField {
         // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index)
+        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index);
     }
 
     protected _createSettingFields(prompt_field: PromptField, container_element: HTMLElement): Setting {
@@ -135,7 +135,7 @@ export class PromptFieldModel extends Model {
                     .setPlaceholder(label_placeholders[label_placeholder_index])
                     .onChange(async (new_label: string) => {
                         prompt_field.configuration.label = new_label;
-                        _update_heading()
+                        _update_heading();
                         await this.plugin.saveSettings();
                     })
                 )
@@ -172,7 +172,7 @@ export class PromptFieldModel extends Model {
                     .onChange((new_target_variable_id: string) => {
                         if ("new" === new_target_variable_id) {
                             // Create a new custom variable.
-                            const model = getModel<CustomVariableModel>(CustomVariableModel.name)
+                            const model = getModel<CustomVariableModel>(CustomVariableModel.name);
                             const custom_variable_instance = model.newInstance(this.plugin.settings);
                             this.plugin.saveSettings().then(() => {
                                 const modal = new CustomVariableSettingsModal(
@@ -264,7 +264,11 @@ export class PromptFieldModel extends Model {
                         if (new_target_variable_id === other_prompt_field.configuration.target_variable_id) {
                             // They have the same target_variable_id.
                             // Return an error message.
-                            const target_variable_name = this.plugin.getCustomVariableInstances().get(new_target_variable_id).getFullName();
+                            const targetVariableInstance: CustomVariableInstance | undefined = this.plugin.getCustomVariableInstances().get(new_target_variable_id);
+                            if (undefined === targetVariableInstance) {
+                                throw new Error("Could not find target variable with id " + new_target_variable_id);
+                            }
+                            const target_variable_name = targetVariableInstance.getFullName();
                             return Promise.reject(`Target variable ${target_variable_name} is already used by another field in the same prompt. Select another variable.`);
                         }
                     }
@@ -278,7 +282,7 @@ export class PromptFieldModel extends Model {
         }
     }
 
-    private _getDefaultConfiguration(): PromptFieldConfiguration {
+    public getDefaultConfiguration(): PromptFieldConfiguration {
         return {
             // type: "text",
             label: "",
@@ -287,7 +291,7 @@ export class PromptFieldModel extends Model {
             //  TODO: Add 'placeholder'.
             target_variable_id: "",
             required: true,
-        }
+        };
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {

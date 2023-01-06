@@ -24,17 +24,17 @@ import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentMod
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
-import {getFilePath} from "../VariableHelpers";
-import {IParameters} from "../Variable";
+import {getFileYAML} from "../../Common";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {IParameters} from "../Variable";
 
-export class Variable_EventFilePath extends EventVariable {
-    public variable_name = "event_file_path";
-    public help_text = "Gives path to the event related file, either as absolute from the root of the file system, or as relative from the root of the Obsidian vault.";
+export class Variable_EventYAMLContent extends EventVariable {
+    public variable_name = "event_yaml_content";
+    public help_text = "Gives the event related note's YAML frontmatter. Dashes --- can be included or excluded.";
 
     protected static readonly parameters: IParameters = {
-        mode: {
-            options: ["absolute", "relative"],
+        withDashes: {
+            options: ["with-dashes", "no-dashes"],
             required: true,
         },
     };
@@ -48,28 +48,49 @@ export class Variable_EventFilePath extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected async generateValue(
-        castedArguments: {mode: "absolute" | "relative"},
+    protected generateValue(
+        castedArguments: {withDashes: "with-dashes" | "no-dashes"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {
-        this.requireCorrectEvent(sc_event);
+        return new Promise((resolve, reject) => {
+            try {
+                this.requireCorrectEvent(sc_event);
+            } catch (error) {
+                // Need to catch here, because Variable.getValue()'s .catch() block won't be able to catch thrown errors,
+                // it can only catch errors that were passed to reject().
+                reject(error);
+                return;
+            }
 
-        return getFilePath(this.app, sc_event.getFile(), castedArguments.mode);
+            getFileYAML(this.app, sc_event.getFile(), castedArguments.withDashes === "with-dashes").then((yamlContent: string) => {
+                if (null === yamlContent) {
+                    // No YAML frontmatter.
+                    this.reject("The event related file does not contain a YAML frontmatter.", reject);
+                } else {
+                    // Got a YAML frontmatter.
+                    resolve(yamlContent);
+                }
+            });
+        });
+    }
+
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, a YAML frontmatter section needs to be present.";
     }
 
     public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{
-                value: "{{" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the event related file, absolute from the root of the file system. " + this.getAvailabilityText(),
+                value: "{{" + this.variable_name + ":with-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, wrapped between --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
                 documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
-                value: "{{" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the event related file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                value: "{{" + this.variable_name + ":no-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, excluding top and bottom --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
                 documentationLink: this.getDocumentationLink(),
@@ -77,15 +98,15 @@ export class Variable_EventFilePath extends EventVariable {
 
             // Unescaped variables
             <IAutocompleteItem>{
-                value: "{{!" + this.variable_name + ":absolute}}",
-                help_text: "Gives path to the event related file, absolute from the root of the file system. " + this.getAvailabilityText(),
+                value: "{{!" + this.variable_name + ":with-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, wrapped between --- lines." + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
                 documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
-                value: "{{!" + this.variable_name + ":relative}}",
-                help_text: "Gives path to the event related file, relative from the root of the Obsidian vault. " + this.getAvailabilityText(),
+                value: "{{!" + this.variable_name + ":no-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, excluding top and bottom --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
                 documentationLink: this.getDocumentationLink(),
@@ -94,6 +115,7 @@ export class Variable_EventFilePath extends EventVariable {
     }
 
     public getHelpName(): string {
-        return "<strong>{{event_file_path:relative}}</strong> or <strong>{{event_file_path:absolute}}</strong>";
+        return "<strong>{{event_yaml_content:with-dashes}}</strong> or <strong>{{event_yaml_content:no-dashes}}</strong>";
     }
+
 }

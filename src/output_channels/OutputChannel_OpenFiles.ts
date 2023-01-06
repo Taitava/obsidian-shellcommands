@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -52,7 +52,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
             handlingPipeline = handlingPipeline.finally(() => {
-                return this.handle(output[output_stream_name]);
+                return this.handle(output[output_stream_name] as string);
             });
         }
         return handlingPipeline;
@@ -87,14 +87,14 @@ export class OutputChannel_OpenFiles extends OutputChannel {
         return new Promise((resolve, reject) => {
             debugLog("OutputChannel_OpenFiles: Interpreting file opening definition: " + file_definition);
             // Get parts that define different details about how the file should be opened
-            const file_definition_parts = file_definition.split(":");
+            const file_definition_parts: string[] = file_definition.split(":"); // If file_definition is "", i.e. an empty string, the result will be [""], i.e. an array with an empty string as its only item.
 
             // The first part is always the file path
-            let open_file_path = file_definition_parts.shift();
+            let open_file_path: string = file_definition_parts.shift() as string; // If file_definition is "", this will be "", too. 'as string' is used because file_definition_parts is never empty (it always contains at least one item), so .shift() will never return undefined here.
 
             // On Windows: Check if an absolute path was split incorrectly. (E.g. a path starting with "C:\...").
             if (isWindows() && file_definition_parts.length > 0) {
-                const combined_path = open_file_path + ":" + file_definition_parts[0];
+                const combined_path: string = open_file_path + ":" + file_definition_parts[0];
                 if (path.isAbsolute(combined_path)) {
                     // Yes, the first two parts do form an absolute path together, so they should not be split.
                     open_file_path = combined_path;
@@ -172,7 +172,7 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                     open_file_path = open_file_path.substr(vault_absolute_path.length); // Get everything after the point where the vault path ends.
                 } else {
                     // Cannot convert to relative, because the file does not reside in the vault
-                    this.plugin.newError("Cannot open file '" + open_file_path + "' as the path is outside this vault.")
+                    this.plugin.newError("Cannot open file '" + open_file_path + "' as the path is outside this vault.");
                     reject();
                     return;
                 }
@@ -213,21 +213,25 @@ export class OutputChannel_OpenFiles extends OutputChannel {
                     // the caret will be placed in a correct position, but it might be that the editor does not scroll into correct position, so the
                     // caret might be out of the view, even when it's in a correct place. (Obsidian version 0.13.23).
                     window.setTimeout(() => {
-                        const editor = getEditor(this.app)
+                        const editor = getEditor(this.app);
                         if (editor) {
                             if (count_caret_parts >= 4) {
                                 // Selection mode
                                 // There can be multiple selections defined
                                 const selections: EditorSelectionOrCaret[] = [];
                                 while (caret_parts.length) {
-                                    const from_line = caret_parts.shift();
-                                    const from_column = caret_parts.shift();
-                                    const to_line = caret_parts.shift();
-                                    const to_column = caret_parts.shift();
+                                    const fromLine: number | undefined = caret_parts.shift();
+                                    const fromColumn: number | undefined = caret_parts.shift();
+                                    const toLine: number | undefined = caret_parts.shift();
+                                    const toColumn: number | undefined = caret_parts.shift();
+                                    if (undefined === fromLine || undefined === fromColumn || undefined === toLine || undefined === toColumn) {
+                                        // This should never happen.
+                                        throw new Error("Encountered undefined values in fromLine, fromColumn, toLine, and/or toColumn. Strange, because the correct amount of parts in caret_parts was checked beforehand.");
+                                    }
                                     selections.push({
-                                        anchor: prepareEditorPosition(editor, from_line, from_column),
-                                        head: prepareEditorPosition(editor, to_line, to_column),
-                                    })
+                                        anchor: prepareEditorPosition(editor, fromLine, fromColumn),
+                                        head: prepareEditorPosition(editor, toLine, toColumn),
+                                    });
                                 }
                                 editor.setSelections(selections);
                             } else {

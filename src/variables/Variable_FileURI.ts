@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -24,16 +24,9 @@ export class Variable_FileURI extends FileVariable{
     public variable_name = "file_uri";
     public help_text = "Gives an Obsidian URI that opens the current file.";
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const active_file = this.getFile();
-            if (active_file) {
-                return resolve(this.plugin.getObsidianURI("open", {
-                    file: normalizePath(active_file.path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
-                }));
-            } else {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
+    protected async generateValue(): Promise<string> {
+        return this.plugin.getObsidianURI("open", {
+            file: normalizePath(this.getFileOrThrow().path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
         });
     }
 }

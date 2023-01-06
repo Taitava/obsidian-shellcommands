@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -23,7 +23,7 @@ import {
     initializeOutputChannel,
     OutputStreams,
 } from "./OutputChannelFunctions";
-import {ButtonComponent, Setting, TextAreaComponent} from "obsidian";
+import {Setting, TextAreaComponent} from "obsidian";
 import {OutputChannelCode, OutputStream} from "./OutputChannelCode";
 import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
@@ -86,7 +86,7 @@ class OutputModal extends SC_Modal {
 
     private readonly t_shell_command: TShellCommand;
     private readonly shell_command_parsing_result: ShellCommandParsingResult;
-    private exit_code: number = null;
+    private exit_code: number | null = null; // TODO: Think about changing the logic: exit code could be undefined when it's not received, and null when a user has terminated the execution. The change needs to be done in the whole plugin, although I only wrote about it in this OutputModal class.
 
     // Fields and HTML elements
     private outputFieldsContainer: HTMLElement;
@@ -120,10 +120,10 @@ class OutputModal extends SC_Modal {
             // Set field value
             const textareaComponent = outputField.components.first() as TextAreaComponent;
             const outputContent = outputs[outputStreamName];
-            textareaComponent.setValue(outputContent);
+            textareaComponent.setValue(outputContent as string); // as string = outputContent is not undefined because of the .forEach() loop.
 
             // Make field visible (if it's not already)
-            outputField.settingEl.matchParent(".SC-hide").removeClass("SC-hide");
+            outputField.settingEl.matchParent(".SC-hide")?.removeClass("SC-hide");
         });
     }
 
@@ -268,9 +268,7 @@ class OutputModal extends SC_Modal {
                     };
 
                     // Create the button
-                    let redirect_button: ButtonComponent;
                     redirect_setting.addButton((button) => {
-                            redirect_button = button;
                             button.onClick(async (event: MouseEvent) => {
                                 // Handle output
                                 await handle_output();
@@ -286,20 +284,20 @@ class OutputModal extends SC_Modal {
                                     textarea_element.focus(); // Bring the focus back to the textarea in order to show a possible highlight (=selection) again.
                                 }
                             });
+
+                            // Define button texts and assign hotkeys
+                            const output_channel_title: string = outputChannelClass.getTitle(output_stream);
+
+                            // Button text
+                            button.setButtonText(output_channel_title);
+
+                            // Tips about hotkeys
+                            button.setTooltip(
+                                `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
+                                + EOL + EOL +
+                                `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelClass.hotkey_letter}.`
+                            );
                         },
-                    );
-
-                    // Define button texts and assign hotkeys
-                    const output_channel_title: string = outputChannelClass.getTitle(output_stream);
-
-                    // Button text
-                    redirect_button.setButtonText(output_channel_title);
-
-                    // Tips about hotkeys
-                    redirect_button.setTooltip(
-                        `Redirect: Normal click OR ${CmdOrCtrl()} + ${outputChannelClass.hotkey_letter}.`
-                        + EOL + EOL +
-                        `Redirect and close the modal: ${CmdOrCtrl()} + click OR ${CmdOrCtrl()} + Shift + ${outputChannelClass.hotkey_letter}.`
                     );
 
                     // 1. hotkey: Ctrl/Cmd + number: handle output
@@ -345,6 +343,12 @@ class OutputModal extends SC_Modal {
     }
 
     private displayExitCode() {
+        if (null === this.exit_code) {
+            // Currently there are two callers for this method, and both of them does a null check on the exit code before'
+            // the call, so we'll never get here in practise.
+            // TODO: Remove this checking/throwing and make this method able to display three texts: a) an exit code, b) Executing..., or c) User terminated.
+            throw new Error("Cannot display exit code because it's null");
+        }
         this.exitCodeElement.innerText = "Exit code: " + this.exit_code.toString();
     }
 

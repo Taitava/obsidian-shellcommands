@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,6 +48,8 @@ export abstract class Model {
      * Creates a new instance and adds its configuration to the parent configuration.
      */
     public abstract newInstance(parent_instance_or_configuration: Instance | InstanceConfiguration): Instance;
+
+    public abstract getDefaultConfiguration(): InstanceConfiguration;
 
     public createSettingFields(instance: Instance, parent_element: HTMLElement, with_deletion = true) {
         debugLog(this.constructor.name + ": Creating setting fields.");
