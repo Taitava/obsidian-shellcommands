@@ -25,7 +25,6 @@ import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {getFilePath} from "../VariableHelpers";
-import {TFile} from "obsidian";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 
@@ -49,18 +48,13 @@ export class Variable_EventFilePath extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(
+    protected async generateValue(
         castedArguments: {mode: "absolute" | "relative"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            const file: TFile = sc_event.getFile();
-            return resolve(getFilePath(this.app, file, castedArguments.mode));
-        });
+        return getFilePath(this.app, sc_event.getFile(), castedArguments.mode);
     }
 
     public getAutocompleteItems() {

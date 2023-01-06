@@ -35,17 +35,14 @@ export class Variable_NewNoteFolderPath extends Variable {
         }
     };
 
-    protected generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string|null> {
-        return new Promise((resolve) => {
-            const current_file = this.app.workspace.getActiveFile(); // Needed just in case new notes should be created in the same folder as the currently open file.
-            const folder = this.app.fileManager.getNewFileParent(current_file ? current_file.path : ""); // If no file is open, use an empty string as instructed in .getNewFileParent()'s documentation.
-            if (folder) {
-                return resolve(getFolderPath(this.app, folder, castedArguments.mode));
-            } else {
-                this.newErrorMessage("Cannot determine a folder path for new notes. Please create a discussion in GitHub."); // I guess this never happens.
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-        });
+    protected async generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string> {
+        const current_file = this.app.workspace.getActiveFile(); // Needed just in case new notes should be created in the same folder as the currently open file.
+        const folder = this.app.fileManager.getNewFileParent(current_file ? current_file.path : ""); // If no file is open, use an empty string as instructed in .getNewFileParent()'s documentation.
+        if (folder) {
+            return getFolderPath(this.app, folder, castedArguments.mode);
+        } else {
+            this.throw("Cannot determine a folder path for new notes. Please create a discussion in GitHub."); // I guess this never happens.
+        }
     }
 
     public getAutocompleteItems() {

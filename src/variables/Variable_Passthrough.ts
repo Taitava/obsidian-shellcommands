@@ -33,9 +33,9 @@ export class Variable_Passthrough extends Variable {
         }
     };
 
-    protected generateValue(castedArguments: {value: string}): Promise<string|null> {
+    protected async generateValue(castedArguments: {value: string}): Promise<string> {
         // Simply return the argument that was received.
-        return Promise.resolve(castedArguments.value);
+        return castedArguments.value;
     }
 
     public getAvailabilityText() {

@@ -19,10 +19,10 @@
  *  - Jarkko Linnanvirta: https://github.com/Taitava/
  */
 
-import {getEditor} from "../Common";
 import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {EditorVariable} from "./EditorVariable";
+import {Editor} from "obsidian";
 
 export class Variable_CaretPosition extends EditorVariable {
     public variable_name = "caret_position";
@@ -35,33 +35,27 @@ export class Variable_CaretPosition extends EditorVariable {
         },
     };
 
-    protected generateValue(castedArguments: {mode?: string}): Promise<string|null> {
-        return new Promise((resolve) => {
-            // Check that we are able to get an editor
-            if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
-                // Nope.
-                return resolve(null);
-            }
+    protected async generateValue(castedArguments: {mode?: string}): Promise<string> {
+        // Check that we are able to get an editor
+        const editor: Editor = this.getEditorOrThrow();
 
-            const position = this.editor.getCursor('to');
-            const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
-            const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
+        const position = editor.getCursor('to');
+        const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
+        const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
 
-            if (undefined !== castedArguments.mode) {
-                switch (castedArguments.mode.toLowerCase()) {
-                    case "line":
-                        return resolve(`${line}`);
-                    case "column":
-                        return resolve(`${column}`);
-                    default:
-                        this.newErrorMessage("Unrecognised argument: "+castedArguments.mode);
-                        return resolve(null);
-                }
-            } else {
-                // default case when no args provided
-                return resolve(`${line}:${column}`);
+        if (undefined !== castedArguments.mode) {
+            switch (castedArguments.mode.toLowerCase()) {
+                case "line":
+                    return `${line}`;
+                case "column":
+                    return `${column}`;
+                default:
+                    this.throw("Unrecognised argument: "+castedArguments.mode);
             }
-        });
+        } else {
+            // default case when no args provided
+            return `${line}:${column}`;
+        }
     }
 
     public getAutocompleteItems() {
@@ -116,10 +110,6 @@ export class Variable_CaretPosition extends EditorVariable {
 
     public getHelpName(): string {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
-    }
-
-    public async isAvailable(): Promise<boolean> {
-        return !!getEditor(this.app);
     }
 
     public getAvailabilityText(): string {

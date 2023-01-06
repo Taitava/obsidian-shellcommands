@@ -32,25 +32,20 @@ export class Variable_Environment extends Variable {
         },
     };
 
-    protected async generateValue(castedArguments: {variable: string}): Promise<string|null> {
+    protected async generateValue(castedArguments: {variable: string}): Promise<string> {
         // Check that the requested environment variable exists.
-        if (await this.isAvailable(castedArguments)) {
+        if (undefined !== process.env[castedArguments.variable]) {
             // Yes, it exists.
             return process.env[castedArguments.variable] as string; // as string: tells TypeScript compiler that the item exists, is not undefined.
         } else {
             // It does not exist.
             // Freak out.
-            this.newErrorMessage(`Environment variable named '${castedArguments.variable}' does not exist.`);
-            return null;
+            this.throw(`Environment variable named '${castedArguments.variable}' does not exist.`);
         }
     }
 
     public getHelpName(): string {
         return "<strong>{{environment:variable}}</strong>";
-    }
-
-    public async isAvailable(castedArguments: {variable: string}): Promise<boolean> {
-        return undefined !== process.env[castedArguments.variable];
     }
 
     public getAvailabilityText(): string {

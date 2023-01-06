@@ -24,16 +24,9 @@ export class Variable_FileURI extends FileVariable{
     public variable_name = "file_uri";
     public help_text = "Gives an Obsidian URI that opens the current file.";
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const active_file = this.getFile();
-            if (active_file) {
-                return resolve(this.plugin.getObsidianURI("open", {
-                    file: normalizePath(active_file.path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
-                }));
-            } else {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
+    protected async generateValue(): Promise<string> {
+        return this.plugin.getObsidianURI("open", {
+            file: normalizePath(this.getFileOrThrow().path), // Use normalizePath() instead of normalizePath2() because / should not be converted to \ on Windows because this is used as a URI, not as a file system path.
         });
     }
 }

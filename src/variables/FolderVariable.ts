@@ -18,32 +18,22 @@
  */
 
 import {FileVariable} from "./FileVariable";
-import {ICastedArguments} from "./Variable";
+import {
+    TFile,
+    TFolder,
+} from "obsidian";
 
 export abstract class FolderVariable extends FileVariable {
 
-    protected getFolder() {
+    protected getFolderOrThrow(): TFolder | never {
         // Get current file's parent folder.
-        const file = this.getFile();
-        if (!file) {
-            return null;
-        }
-        const current_folder = file.parent;
-        if (!current_folder) {
+        const file: TFile = this.getFileOrThrow();
+        const currentFolder: TFolder = file.parent;
+        if (!currentFolder) {
             // No parent folder.
-            this.newErrorMessage("The current file does not have a parent for some strange reason.")
-            return null;
+            this.throw("The current file does not have a parent for some strange reason.")
         }
-        return current_folder;
+        return currentFolder;
     }
 
-    public async isAvailable(castedArguments: ICastedArguments): Promise<boolean> {
-        // Normal check: ensure a file pane is open and focused.
-        if (!await super.isAvailable(castedArguments)) {
-            return false;
-        }
-
-        // Check that a parent folder is available. (If not, it's strange.)
-        return !!this.getFile()?.parent;
-    }
 }

@@ -29,16 +29,12 @@ export class Variable_EventOldFileName extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(
+    protected async generateValue(
         argumentsAreNotUsed: never,
         sc_event: SC_Event_FileRenamed,
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            return resolve(extractFileName(sc_event.getFileOldRelativePath(), true));
-        });
+        return extractFileName(sc_event.getFileOldRelativePath(), true);
     }
 }

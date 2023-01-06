@@ -31,8 +31,8 @@ export class Variable_Output extends Variable {
         super(plugin);
     }
 
-    protected generateValue(): Promise<string> {
-        return Promise.resolve(this.output_content);
+    protected async generateValue(): Promise<string> {
+        return this.output_content;
     }
 
     public getAvailabilityText(): string {

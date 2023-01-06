@@ -33,15 +33,8 @@ export class Variable_FileExtension extends FileVariable {
         },
     };
 
-    protected generateValue(castedArguments: {"dot": "with-dot" | "no-dot"}): Promise<string|null> {
-        return new Promise((resolve) => {
-            const file = this.getFile();
-            if (!file) {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-
-            return resolve(getFileExtension(file, castedArguments.dot === "with-dot"));
-        });
+    protected async generateValue(castedArguments: {"dot": "with-dot" | "no-dot"}): Promise<string> {
+        return getFileExtension(this.getFileOrThrow(), castedArguments.dot === "with-dot");
     }
 
     public getAutocompleteItems() {

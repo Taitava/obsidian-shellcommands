@@ -33,15 +33,8 @@ export class Variable_FolderPath extends FolderVariable {
         }
     };
 
-    protected generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string|null> {
-        return new Promise((resolve) => {
-            const folder = this.getFolder();
-            if (folder) {
-                return resolve(getFolderPath(this.app, folder, castedArguments.mode));
-            } else {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-        });
+    protected async generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string> {
+        return getFolderPath(this.app, this.getFolderOrThrow(), castedArguments.mode);
     }
 
     public getAutocompleteItems() {

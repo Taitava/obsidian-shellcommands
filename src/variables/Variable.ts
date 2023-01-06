@@ -34,7 +34,6 @@ import {EOL} from "os";
 export abstract class Variable {
     private static readonly parameter_separator = ":";
     protected readonly app: App;
-    private error_messages: string[]; // Default value is set in .reset()
     public variable_name: string;
     public help_text: string;
 
@@ -55,15 +54,6 @@ export abstract class Variable {
         protected readonly plugin: SC_Plugin,
     ) {
         this.app = plugin.app;
-        this.reset(); // This is also called in parseShellCommandVariables(), but call it here just in case.
-    }
-
-    /**
-     * Variable instances are reused multiple times. This method resets all properties that are modified during usage:
-     *  - error_messages
-     */
-    public reset() {
-        this.error_messages = [];
     }
 
     public getValue(
@@ -82,19 +72,20 @@ export abstract class Variable {
             // Cast arguments (if any) to their correct data types
             const castedArguments = this.castArguments(variableArguments);
 
-            // Check variable availability
-            this.isAvailable(castedArguments, sc_event).then((isAvailable: boolean) => {
-                if (isAvailable) {
-                    // The variable can be used.
-                    this.generateValue(castedArguments, sc_event).then((value: string | null) => {
-                        resolve({
-                            value: value,
-                            error_messages: this.error_messages,
-                            succeeded: this.error_messages.length === 0,
-                        });
-                    });
-                } else {
+            // Generate a value, or catch an exception if one occurs.
+            this.generateValue(castedArguments, sc_event).then((value: string | null) => {
+                // Value generation succeeded.
+                return resolve({
+                    value: value,
+                    error_messages: [],
+                    succeeded: true,
+                });
+            }).catch((error) => {
+                // Caught a VariableError or an Error.
+                if (error instanceof VariableError) {
                     // The variable is not available in this situation.
+                    debugLog(this.constructor.name + ".getValue(): Caught a VariableError and will determine how to handle it: " + error.message);
+
                     // Check what should be done.
                     const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
                     const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
@@ -103,15 +94,11 @@ export abstract class Variable {
                         case "show-errors":
                             // Generate error messages by calling generateValue().
                             debugLog(debug_message_base + "Will prevent shell command execution and show visible error messages.");
-                            // TODO: Availability errors generation should be moved to happen in a different method than .generateValue(), which should only be called when the variable is available.
-                            this.generateValue(castedArguments, sc_event).then(() => {  // No need to use the return value, it's null anyway.
-                                resolve({
-                                    value: null,
-                                    error_messages: this.error_messages,
-                                    succeeded: false,
-                                });
+                            return resolve({
+                                value: null,
+                                error_messages: [error.message], // Currently, error_messages will never contain multiple messages. TODO: Consider renaming error_messages to singular form.
+                                succeeded: false,
                             });
-                            break;
                         case "cancel-silently":
                             // Prevent execution, but do not show any errors
                             debugLog(debug_message_base + "Will prevent shell command execution silently without visible error messages.");
@@ -154,6 +141,10 @@ export abstract class Variable {
                         default:
                             throw new Error("Unrecognised default value type: " + default_value_type);
                     }
+                } else {
+                    // A program logic error has happened.
+                    debugLog(this.constructor.name + ".getValue(): Caught an unrecognised error of class: " + error.constructor.name + ". Will rethrow it.");
+                    throw error;
                 }
             });
         });
@@ -162,7 +153,7 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(variableArguments: ICastedArguments, sc_event: SC_Event | null): Promise<string|null>;
+    protected abstract generateValue(variableArguments: ICastedArguments, sc_event: SC_Event | null): Promise<string>;
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
@@ -247,16 +238,33 @@ export abstract class Variable {
         return castedArguments;
     }
 
-    protected newErrorMessage(message: string) {
-        const prefix = "{{" + this.variable_name + "}}: ";
-        this.error_messages.push(prefix + message);
-        debugLog(prefix + message);
+    /**
+     * Creates a VariableError and passes it to a rejector function, which will pass the VariableError to Variable.getValue().
+     * Then it will be handled there according to user preferences.
+     *
+     * @param message
+     * @param rejector
+     * @protected
+     */
+    protected reject(message: string, rejector: (error: VariableError) => void): void {
+        rejector(this.newVariableError(message));
     }
 
-    protected newErrorMessages(messages: string[]) {
-        messages.forEach((message: string) => {
-            this.newErrorMessage(message);
-        });
+    /**
+     * Similar to Variable.reject(), but uses a traditional throw. Can be used in async methods. For methods that create
+     * Promises manually, Variable.reject() should be used, because errors thrown in manually created Promises are not caught
+     * by Variable.getValue()'s Promise.catch() callback.
+     *
+     * @param message
+     * @protected
+     */
+    protected throw(message: string): never {
+        throw this.newVariableError(message);
+    }
+
+    private newVariableError(message: string) {
+        const prefix = this.getFullName() + ": ";
+        return new VariableError(prefix + message);
     }
 
     public getAutocompleteItems(): IAutocompleteItem[] {
@@ -338,14 +346,6 @@ export abstract class Variable {
     }
 
     /**
-     * Tells whether the variable can be currently accessed. If you want to know if the variable can sometimes be inaccessible,
-     * use isAlwaysAvailable() instead.
-     */
-    public async isAvailable(castedArguments: ICastedArguments, sc_event: SC_Event | null): Promise<boolean> {
-        return true; // If the variable is always available, return true. If not, the variable should override this method.
-    }
-
-    /**
      * This can be used to determine if the variable can sometimes be unavailable. Used in settings to allow a user to define
      * default values for variables that are not always available, filtering out always available variables for which default
      * values would not make sense.
@@ -414,6 +414,12 @@ export interface VariableValueResult {
     /** In practise, this is true every time error_messages is empty, so this is just a shorthand so that error_messages.length does not need to be checked by the consumer. */
     succeeded: boolean,
 }
+
+/**
+ * Thrown when Variables encounter errors that users should solve. Variable.getValue() will catch these and show to user
+ * (unless errors are ignored).
+ */
+export class VariableError extends Error {}
 
 export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value";
 

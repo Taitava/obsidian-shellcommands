@@ -48,18 +48,13 @@ export class Variable_EventFileExtension extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(
+    protected async generateValue(
         castedArguments: {"dot": "with-dot" | "no-dot"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            const file = sc_event.getFile();
-            return resolve(getFileExtension(file, castedArguments.dot === "with-dot"));
-        });
+        return getFileExtension(sc_event.getFile(), castedArguments.dot === "with-dot");
     }
 
     public getAutocompleteItems() {

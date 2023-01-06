@@ -69,9 +69,6 @@ export async function parseVariables(
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray | null;
         while ((argument_matches = pattern.exec(content)) !== null) {
-            // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
-            variable.reset();
-
             // Count how many times any variables have appeared.
             parsing_result.count_parsed_variables++;
 

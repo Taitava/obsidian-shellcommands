@@ -45,15 +45,12 @@ export class CustomVariable extends Variable {
         debugLog(`Loaded CustomVariable ${this.variable_name}.`);
     }
 
-    public generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            if (null === this.value) {
-                debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
-                this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
-                return resolve(null);
-            }
-            return resolve(this.value);
-        });
+    public async generateValue(): Promise<string> {
+        if (null === this.value) {
+            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
+            this.throw("This custom variable does not have a value yet, and no default value is defined.")
+        }
+        return this.value;
     }
 
     /**
@@ -103,13 +100,6 @@ export class CustomVariable extends Variable {
         for (const on_change_callback of this.on_change_callbacks) {
             await on_change_callback(this, new_value, old_value);
         }
-    }
-
-    /**
-     * Returns true if the CustomVariable has an assigned value.
-     */
-    public async isAvailable(): Promise<boolean> {
-        return null !== this.value;
     }
 
     public getConfiguration() {

@@ -30,8 +30,8 @@ export class Variable_Newline extends Variable {
         }
     };
 
-    protected async generateValue(castedArguments: {count?: number}): Promise<string|null> {
-        // Return \n, possible repeating it
+    protected async generateValue(castedArguments: {count?: number}): Promise<string> {
+        // Return \n, possibly repeating it
         return "\n".repeat(castedArguments.count ?? 1);
     }
 

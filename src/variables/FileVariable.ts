@@ -17,34 +17,22 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {
-    ICastedArguments,
-    Variable,
-} from "./Variable";
+import {Variable} from "./Variable";
+import {TFile} from "obsidian";
 
 export abstract class FileVariable extends Variable {
 
     protected always_available = false;
 
-    protected getFile() {
-        const current_file = this.getActiveFile();
-        if (!current_file) {
-            this.newErrorMessage("No file is active at the moment. Open a file or click a pane that has a file open.");
-            return null;
+    protected getFileOrThrow(): TFile | never {
+        const currentFile = this.app.workspace.getActiveFile();
+        if (!currentFile) {
+            this.throw("No file is active at the moment. Open a file or click a pane that has a file open.");
         }
-        return current_file;
-    }
-
-    public async isAvailable(castedArguments: ICastedArguments): Promise<boolean> {
-        const current_file = this.getActiveFile();
-        return !!current_file;
+        return currentFile;
     }
 
     public getAvailabilityText(): string {
         return "<strong>Only available</strong> when the active pane contains a file, not in graph view or other non-file view.";
-    }
-
-    private getActiveFile() {
-        return this.app.workspace.getActiveFile();
     }
 }

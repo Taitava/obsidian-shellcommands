@@ -30,41 +30,32 @@ import {debugLog} from "../Debug";
 
 export abstract class EditorVariable extends Variable {
 
-    protected editor: Editor | null;
-    protected view: MarkdownView | null;
-
     protected always_available = false;
 
-    protected requireEditor() {
-        this.editor = getEditor(this.app);
-        if (null === this.editor) {
+    protected getEditorOrThrow(): Editor | never {
+        const editor = getEditor(this.app);
+        if (null === editor) {
             // No editor.
-            this.newErrorMessage("Could not get an editor instance! Please create a discussion in GitHub.");
-            return false;
+            this.throw("Could not get an editor instance! Please create a discussion in GitHub.");
         }
-        return true;
+        return editor;
     }
 
     /**
      * Can be made protected if needed to be accessed by subclasses.
      * @private
      */
-    private requireView() {
-        this.view = getView(this.app);
-        if (null === this.view) {
+    private getViewOrThrow(): MarkdownView {
+        const view = getView(this.app);
+        if (null === view) {
             // No view.
-            this.newErrorMessage("Could not get a view instance! Please create a discussion in GitHub.");
-            return false
+            this.throw("Could not get a view instance! Please create a discussion in GitHub.");
         }
-        return true;
+        return view;
     }
 
-    protected isViewModeSource() {
-        if (!this.requireView()) {
-            return false;
-        }
-
-        const view: MarkdownView = this.view as MarkdownView; // as MarkdownView: Make TypeScript understand that view is always defined at this point.
+    protected requireViewModeSource(): void {
+        const view: MarkdownView = this.getViewOrThrow();
         const view_mode = view.getMode(); // "preview" or "source" ("live" was removed from Obsidian API in 0.13.8 on 2021-12-10).
 
         switch (view_mode) {
@@ -72,13 +63,14 @@ export abstract class EditorVariable extends Variable {
                 // The leaf is in preview mode, which makes things difficult.
                 // FIXME: Make it possible to use this feature also in preview mode.
                 debugLog("EditorVariable: 'view' is in preview mode, and the poor guy who wrote this code, does not know how to return an editor instance that could be used for getting text selection.");
-                this.newErrorMessage("You need to turn editing mode on, unfortunately this variable does not work in preview mode.");
-                return false;
+                this.throw("You need to turn editing mode on, unfortunately this variable does not work in preview mode.");
+                break;
             case "source":
-                // Good, the editor is in "source" mode, so it's possible to get a selection.
-                return true;
+                // Good, the editor is in "source" mode, so it's possible to get a selection, caret position or other editing related information.
+                return;
             default:
-                throw new Error("EditorVariable: Unrecognised view mode: " + view_mode);
+                this.throw("Unrecognised view mode: " + view_mode);
+                break;
         }
     }
 

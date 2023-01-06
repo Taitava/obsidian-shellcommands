@@ -17,39 +17,26 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getView} from "../Common";
 import {EditorVariable} from "./EditorVariable";
-import {Editor} from "obsidian";
 import {EOL} from "os";
 
 export class Variable_Selection extends EditorVariable {
     public variable_name = "selection";
     public help_text = "Gives the currently selected text.";
 
-    protected async generateValue(): Promise<string|null> {
+    protected async generateValue(): Promise<string> {
 
         // Check that we are able to get an editor
-        if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
-            // Nope.
-            return null;
-        }
+        const editor = this.getEditorOrThrow();
 
         // Check the view mode
-        if (this.isViewModeSource()) {
-            // Good, the editor is in "source" mode, so it's possible to get a selection.
-            if (this.editor.somethingSelected()) {
-                return this.editor.getSelection();
-            }
-            this.newErrorMessage("Nothing is selected. "+EOL+EOL+"(This error message was added in SC 0.18.0. Earlier the variable gave an empty text in this situation. If you want to restore the old behavior, go to SC settings, then to Variables tab, and define a default value for {{selection}}.)");
-            return null;
-        }
-        return null;
-    }
+        this.requireViewModeSource();
 
-    public async isAvailable(): Promise<boolean> {
-        const view = getView(this.app);
-        const hasViewAndEditor: boolean = !!view && this.requireEditor() && view.getMode() === "source";
-        return hasViewAndEditor && (this.editor as Editor).somethingSelected();
+        // Good, the editor is in "source" mode, so it's possible to get a selection.
+        if (editor.somethingSelected()) {
+            return editor.getSelection();
+        }
+        this.throw("Nothing is selected. "+EOL+EOL+"(This error message was added in SC 0.18.0. Earlier the variable gave an empty text in this situation. If you want to restore the old behavior, go to SC settings, then to Variables tab, and define a default value for {{selection}}.)");
     }
 
     public getAvailabilityText(): string {

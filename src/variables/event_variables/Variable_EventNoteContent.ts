@@ -39,19 +39,13 @@ export class Variable_EventNoteContent extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected generateValue(
+    protected async generateValue(
         argumentsAreNotUsed: never,
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            getFileContentWithoutYAML(this.app, sc_event.getFile()).then((file_content: string) => {
-                return resolve(file_content);
-            });
-        });
+        return await getFileContentWithoutYAML(this.app, sc_event.getFile());
     }
 
 }

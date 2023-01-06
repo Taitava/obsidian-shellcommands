@@ -18,7 +18,6 @@
  */
 
 import {
-    ICastedArguments,
     Variable,
 } from "../Variable";
 import {SC_Event} from "../../events/SC_Event";
@@ -34,27 +33,22 @@ export abstract class EventVariable extends Variable {
     protected supported_sc_events: typeof SC_Event[];
 
     /**
-     * Every subclass should call this method in their generateValue() before returning a value. If this method returns false,
-     * then a variable should not generate a value, as the dependent SC_Event is unavailable.
-     *
-     * TODO: Change the error system to throw exceptions instead of relying on return values.
+     * Every subclass should call this method in their generateValue() before generating a value. This method will throw
+     * a VariableError if an incompatible SC_Event is tried to be used with this {{variable}}.
      *
      * @protected
      */
-    protected checkSC_EventSupport(sc_event: SC_Event): boolean{
+    protected requireCorrectEvent(sc_event: SC_Event): void {
         // 1. Check generally that an event is happening.
         // (Maybe this check is not so important anymore, as sc_event is now received as a parameter instead of from a property, but check just in case.)
         if (!sc_event) {
-            this.newErrorMessage("This variable can only be used during events: " + this.getSummaryOfSupportedEvents());
-            return false;
+            this.throw("This variable can only be used during events: " + this.getSummaryOfSupportedEvents());
         }
 
         // 2. Check particularly which event it is.
         if (!this.supportsSC_Event(sc_event.getClass())) {
-            this.newErrorMessage("This variable does not support event '" + sc_event.static().getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
-            return false;
+            this.throw("This variable does not support event '" + sc_event.static().getTitle() + "'. Supported events: " + this.getSummaryOfSupportedEvents());
         }
-        return true;
     }
 
     public supportsSC_Event(sc_event_class: typeof SC_Event): boolean {
@@ -67,13 +61,6 @@ export abstract class EventVariable extends Variable {
             sc_event_titles.push(sc_event_class.getTitle());
         });
         return sc_event_titles.join(", ");
-    }
-
-    public async isAvailable(castedArguments: ICastedArguments, sc_event: SC_Event | null): Promise<boolean> {
-        if (!sc_event) {
-            return false;
-        }
-        return this.supportsSC_Event(sc_event.getClass());
     }
 
     public getAvailabilityText(): string {

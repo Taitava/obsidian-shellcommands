@@ -20,7 +20,6 @@
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {getFileYAMLValue} from "./VariableHelpers";
-import {TFile} from "obsidian";
 
 export class Variable_YAMLValue extends FileVariable {
     public variable_name = "yaml_value";
@@ -33,45 +32,17 @@ export class Variable_YAMLValue extends FileVariable {
         },
     };
 
-    protected generateValue(castedArguments: {property_name: string}): Promise<string|null> {
-        return new Promise((resolve) => {
-            const active_file = this.getFile();
-            if (active_file) {
-                // We do have an active file
-                const result = this.getFileYAMLValue(active_file, castedArguments.property_name);
-                if (Array.isArray(result)) {
-                    // The result contains error message(s).
-                    this.newErrorMessages(result as string[]);
-                    return resolve(null);
-                } else {
-                    // The result is ok, it's a string.
-                    return resolve(result as string);
-                }
-            } else {
-                // No file is active at the moment
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-        });
-    }
-
-    private getFileYAMLValue(active_file: TFile, propertyName: string ): string[] | string {
-        return getFileYAMLValue(this.app, active_file, propertyName);
-    }
-
-    public async isAvailable(castedArguments: {property_name: string}): Promise<boolean> {
-        if (!await super.isAvailable(castedArguments)) {
-            return false;
+    protected async generateValue(castedArguments: {property_name: string}): Promise<string> {
+        // We do have an active file
+        const result = getFileYAMLValue(this.app, this.getFileOrThrow(), castedArguments.property_name);
+        if (Array.isArray(result)) {
+            // The result contains error message(s).
+            this.throw(result.join(" "));
+        } else {
+            // The result is ok, it's a string.
+            return result;
         }
-
-        const activeFile = this.getFile();
-
-        if (null == activeFile) {
-            return false;
-        }
-
-        return typeof this.getFileYAMLValue(activeFile, castedArguments.property_name) === "string";
     }
-
     public getAvailabilityText(): string {
         return super.getAvailabilityText() + " Also, the given YAML property must exist in the file's frontmatter.";
     }

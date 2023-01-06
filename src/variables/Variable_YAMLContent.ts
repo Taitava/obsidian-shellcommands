@@ -18,11 +18,10 @@
  */
 
 import {FileVariable} from "./FileVariable";
-import {
-    getFileYAML,
-} from "../Common";
+import {getFileYAML} from "../Common";
 import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
+import {TFile} from "obsidian";
 
 export class Variable_YAMLContent extends FileVariable {
     public variable_name = "yaml_content";
@@ -35,30 +34,28 @@ export class Variable_YAMLContent extends FileVariable {
         },
     };
 
-    protected generateValue(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<string|null> {
-        return new Promise((resolve) => {
-            const activeFile = this.getFile();
-            if (!activeFile) {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
+    protected generateValue(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<string> {
+        return new Promise((resolve, reject) => {
+            let file: TFile;
+            try {
+                file = this.getFileOrThrow();
+            } catch (error) {
+                // Need to catch here, because Variable.getValue()'s .catch() block won't be able to catch thrown errors,
+                // it can only catch errors that were passed to reject().
+                reject(error);
+                return;
             }
 
-            getFileYAML(this.app, activeFile, "with-dashes" === castedArguments.withDashes).then((yamlContent: string) => {
+            getFileYAML(this.app, file, "with-dashes" === castedArguments.withDashes).then((yamlContent: string) => {
                 if (null === yamlContent) {
-                    this.newErrorMessage("The current file does not contain a YAML frontmatter.");
+                    // No YAML frontmatter.
+                    this.reject("The current file does not contain a YAML frontmatter.", reject);
+                } else {
+                    // Got a YAML frontmatter.
+                    resolve(yamlContent);
                 }
-                resolve(yamlContent);
             });
         });
-    }
-
-    public async isAvailable(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<boolean> {
-        const activeFile = this.getFile();
-
-        if (!await super.isAvailable(castedArguments) || !activeFile) {
-            return false;
-        }
-
-        return null !== await getFileYAML(this.app, activeFile, "with-dashes" === castedArguments.withDashes);
     }
 
     public getAvailabilityText(): string {

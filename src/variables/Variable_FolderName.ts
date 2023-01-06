@@ -23,17 +23,11 @@ export class Variable_FolderName extends FolderVariable {
     public variable_name = "folder_name";
     public help_text = "Gives the current file's parent folder name, or a dot if the folder is the vault's root. No ancestor folders are included.";
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const folder = this.getFolder();
-            if (!folder) {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-            return resolve(
-                folder.isRoot()
-                        ? "." // Return a dot instead of an empty string.
-                        : folder.name
-            );
-        });
+    protected async generateValue(): Promise<string> {
+        const folder = this.getFolderOrThrow();
+        return folder.isRoot()
+            ? "." // Return a dot instead of an empty string.
+            : folder.name
+        ;
     }
 }

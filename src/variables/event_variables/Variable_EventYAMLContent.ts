@@ -26,7 +26,6 @@ import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {getFileYAML} from "../../Common";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
-import {SC_Event} from "../../events/SC_Event";
 import {IParameters} from "../Variable";
 
 export class Variable_EventYAMLContent extends EventVariable {
@@ -52,30 +51,27 @@ export class Variable_EventYAMLContent extends EventVariable {
     protected generateValue(
         castedArguments: {withDashes: "with-dashes" | "no-dashes"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
+    ): Promise<string> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.requireCorrectEvent(sc_event);
+            } catch (error) {
+                // Need to catch here, because Variable.getValue()'s .catch() block won't be able to catch thrown errors,
+                // it can only catch errors that were passed to reject().
+                reject(error);
+                return;
             }
 
             getFileYAML(this.app, sc_event.getFile(), castedArguments.withDashes === "with-dashes").then((yamlContent: string) => {
                 if (null === yamlContent) {
-                    this.newErrorMessage("The event related file does not contain a YAML frontmatter.");
+                    // No YAML frontmatter.
+                    this.reject("The event related file does not contain a YAML frontmatter.", reject);
+                } else {
+                    // Got a YAML frontmatter.
+                    resolve(yamlContent);
                 }
-                resolve(yamlContent);
             });
         });
-    }
-
-    public async isAvailable(
-        castedArguments: {withDashes: "with-dashes" | "no-dashes"},
-        sc_event: SC_Event,
-    ): Promise<boolean> {
-        if (!await super.isAvailable(castedArguments, sc_event) || null == sc_event) { // The null check is redundant, but needed for TS compiler to understand that sc_event.getFile() won't happen on null.
-            return false;
-        }
-
-        return null !== await getFileYAML(this.app, (sc_event as SC_Event_FileMenu).getFile(), castedArguments.withDashes === "with-dashes");
     }
 
     public getAvailabilityText(): string {
