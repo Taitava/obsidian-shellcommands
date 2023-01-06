@@ -18,9 +18,13 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
+- Nothing at the moment.
+
+## [0.18.0] - 2023-01-06
+
 **VERSION 0.18.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES to variables `{{folder_name}}` and `{{event_folder_name}}`, see below.**
 
-### To be Added
+### Added
  - [Ability to pass variable values to stdin (#283)](https://github.com/Taitava/obsidian-shellcommands/issues/283).
  - [Globally default values for variables (#298)](https://github.com/Taitava/obsidian-shellcommands/issues/298).
  - [New variables: {{yaml_content}} and {{event_yaml_content}} (#267)](https://github.com/Taitava/obsidian-shellcommands/issues/267).
@@ -28,7 +32,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [Debug: Create a {{newline}} variable (#295)](https://github.com/Taitava/obsidian-shellcommands/issues/295).
    - Only available in debug mode and used for testing.
 
-### To be Changed
+### Changed
  - [Change {{folder_name}} and {{event_folder_name}} to return a dot instead of an empty string when folder is vault root](https://github.com/Taitava/obsidian-shellcommands/issues/304).
    - **Might be backwards incompatible!** Make sure your shell commands that use `{{folder_name}}`/`{{event_folder_name}}` work as expected when the root folder is denoted as a dot `.` instead of an empty text ` ` (like was before).
  - [{{selection}}: Show an error message if nothing is selected (#303)](https://github.com/Taitava/obsidian-shellcommands/issues/303).
@@ -39,7 +43,7 @@ Features that are in development, but are not released yet. Does not include stu
  - [Internal: Variables: Prevent storing arguments](https://github.com/Taitava/obsidian-shellcommands/issues/312).
  - [Internal: Variables: Handle errors by throwing them instead of returning null](https://github.com/Taitava/obsidian-shellcommands/issues/315).
 
-### To be Fixed
+### Fixed
  - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
  - [`{{caret_paragraph}}` should be able to have a default value defined (#311)](https://github.com/Taitava/obsidian-shellcommands/issues/311).
  - [Menu items have no text when _Preview variables in command palette and menus_ is off (#314)](https://github.com/Taitava/obsidian-shellcommands/issues/314).
@@ -359,7 +363,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...HEAD
+[0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.14.0...0.15.0
