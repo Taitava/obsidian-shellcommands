@@ -36,6 +36,8 @@ Features that are in development, but are not released yet. Does not include stu
  - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
  - [Internal: TypeScript compiler: Use strict null checks (#70)](https://github.com/Taitava/obsidian-shellcommands/issues/70).
      - This should not be visible to users, but as it touches most parts of the plugin, new bugs are always possible, even though the aim is to reduce the risk of new bugs being born.
+ - [Internal: Variables: Prevent storing arguments](https://github.com/Taitava/obsidian-shellcommands/issues/312).
+ - [Internal: Variables: Handle errors by throwing them instead of returning null](https://github.com/Taitava/obsidian-shellcommands/issues/315).
 
 ### To be Fixed
  - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
