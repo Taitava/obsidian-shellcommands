@@ -48,12 +48,12 @@ export class Variable_EventYAMLValue extends EventVariable {
     ];
 
     protected async generateValue(
-        castedArguments: {propertyName: string},
+        castedArguments: {property_name: string},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {
         this.requireCorrectEvent(sc_event);
 
-        const result = getFileYAMLValue(this.app, sc_event.getFile(), castedArguments.propertyName);
+        const result = getFileYAMLValue(this.app, sc_event.getFile(), castedArguments.property_name);
         if (Array.isArray(result)) {
             // The result contains error message(s).
             this.throw(result.join(" "));
