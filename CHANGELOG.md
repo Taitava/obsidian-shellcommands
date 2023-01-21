@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-- Nothing at the moment.
+### To be Fixed
+- Settings: A list of icons defineable for shell commands misses some icons. This is because [a commit](https://github.com/Taitava/obsidian-shellcommands/commit/b6bc939b6112da54a37378cf420d88dd00e0da0d) was accidentally not merged to `0.14.0` release in July 2022. (Original feature: #240).
 
 ## [0.18.0] - 2023-01-06
 
