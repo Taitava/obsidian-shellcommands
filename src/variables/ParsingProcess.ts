@@ -181,10 +181,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
         this.plugin.newErrors(this.getErrorMessages());
     }
 
-    /**
-     * @private Can be made public if needed.
-     */
-    private getErrorMessages() {
+    public getErrorMessages() {
         let error_messages: string[] = [];
         for (const content_key of this.getContentKeys()) {
             const parsingResult: ParsingResult | undefined = this.parsing_results[content_key];
