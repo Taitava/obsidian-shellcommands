@@ -111,7 +111,7 @@ export default class SC_Plugin extends Plugin {
     private autocompleteMenus: AutocompleteResult[] = [];
 
 	public async onload() {
-		debugLog('loading plugin');
+		// debugLog('loading plugin'); // Wouldn't do anything, as DEBUG_ON is not set before settings are loaded.
 
 		// Load settings
 		if (!await this.loadSettings()) {
@@ -120,6 +120,8 @@ export default class SC_Plugin extends Plugin {
 			// stopped manually.
 			return;
 		}
+        // Now debugLog() can be used.
+        debugLog("Loading Shell commands plugin version: " + this.getPluginVersion());
 
 		// Define models
 		introduceModels(this);
