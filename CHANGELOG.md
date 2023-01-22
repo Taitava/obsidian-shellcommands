@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-- Nothing at the moment.
+### To be Fixed
+- Settings: A list of icons defineable for shell commands misses some icons. This is because [a commit](https://github.com/Taitava/obsidian-shellcommands/commit/b6bc939b6112da54a37378cf420d88dd00e0da0d) was accidentally not merged to `0.14.0` release in July 2022. (Original feature: #240).
 
 ## [0.18.0] - 2023-01-06
 
@@ -46,7 +47,6 @@ Features that are in development, but are not released yet. Does not include stu
 ### Fixed
  - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
  - [`{{caret_paragraph}}` should be able to have a default value defined (#311)](https://github.com/Taitava/obsidian-shellcommands/issues/311).
- - [Menu items have no text when _Preview variables in command palette and menus_ is off (#314)](https://github.com/Taitava/obsidian-shellcommands/issues/314).
 
 ## [0.17.0] - 2022-11-26
 

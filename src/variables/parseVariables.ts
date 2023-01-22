@@ -180,7 +180,7 @@ export async function parseVariables(
             }
         }
     }
-    debugLog("parseVariables(): Parsing content " + content + " succeeded.");
+    debugLog("parseVariables(): Parsing content succeeded: From '" + content + "' to '" + parsing_result.parsed_content + "'");
     parsing_result.succeeded = true;
     return parsing_result;
 }

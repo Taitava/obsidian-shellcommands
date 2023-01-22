@@ -31,6 +31,7 @@ import {DocumentationEventsFolderLink} from "../Documentation";
 import {
     ShellCommandExecutor
 } from "../imports";
+import {debugLog} from "../Debug";
 
 /**
  * Named SC_Event instead of just Event, because Event is a class in JavaScript.
@@ -121,6 +122,7 @@ export abstract class SC_Event {
      * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
     protected async trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
+        debugLog(this.constructor.name + ": Event triggers executing shell command id " + t_shell_command.getId());
         // Execute the shell command.
         const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
         await executor.doPreactionsAndExecuteShellCommand(parsing_process);
