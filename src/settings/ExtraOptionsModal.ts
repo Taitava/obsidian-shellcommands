@@ -216,7 +216,7 @@ export class ExtraOptionsModal extends SC_Modal {
                         // Create an option for the icon.
                         dropdown.addOption(icon_id, icon_id);
                     }
-                    dropdown.setValue(current_icon ?? ""); // "" == the 'No icon' option.
+                    dropdown.setValue(current_icon ?? "no-icon"); // "" == the 'No icon' option.
                 })
                 .onChange(async (new_icon) => {
                     if ("no-icon" === new_icon) {
