@@ -18,8 +18,12 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-### To be Fixed
-- Settings: A list of icons defineable for shell commands misses some icons. This is because [a commit](https://github.com/Taitava/obsidian-shellcommands/commit/b6bc939b6112da54a37378cf420d88dd00e0da0d) was accidentally not merged to `0.14.0` release in July 2022. Also fixed a small UI annoyance: 'No icon' was not selected when opening settings for a shell command that had no icon defined. (Original feature: #240).
+- Nothing at the moment.
+
+## [0.18.1] - 2023-01-22
+
+### Fixed
+- Settings: A list of icons definable for shell commands misses some icons. This is because [a commit](https://github.com/Taitava/obsidian-shellcommands/commit/b6bc939b6112da54a37378cf420d88dd00e0da0d) was accidentally not merged to `0.14.0` release in July 2022. Also fixed a small UI annoyance: 'No icon' was not selected when opening settings for a shell command that had no icon defined. (Original feature: #240).
 - [Menu items have no text on macOS (#314)](https://github.com/Taitava/obsidian-shellcommands/issues/314).
 
 ## [0.18.0] - 2023-01-06
@@ -364,7 +368,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...HEAD
+[0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
 [0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.15.0...0.16.0
