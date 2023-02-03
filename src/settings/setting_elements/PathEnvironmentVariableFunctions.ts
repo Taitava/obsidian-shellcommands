@@ -1,6 +1,6 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
                     `Current ${path_variable_name} content`,
                     process.env.PATH,
                     "Close",
-                )
+                );
                 modal.open();
             }),
         )

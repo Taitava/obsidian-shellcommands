@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -27,7 +27,7 @@ import {debugLog} from "../Debug";
 import {
     DocumentationAutocompleteLink,
     DocumentationMainLink,
-    DocumentationBuiltInVariablesLink,
+    DocumentationBuiltInVariablesIndexLink,
     GitHubLink,
     ChangelogLink,
     DocumentationCustomVariablesLink,
@@ -35,7 +35,6 @@ import {
     DocumentationOutputWrappersLink,
     DocumentationCustomShellsLink,
 } from "../Documentation";
-import {Variable} from "../variables/Variable";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
 import {TShellCommand} from "../TShellCommand";
@@ -52,6 +51,7 @@ import {createNewModelInstanceButton} from "../models/createNewModelInstanceButt
 import {ExecutionNotificationMode} from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
+import {createVariableDefaultValueField} from "./setting_elements/createVariableDefaultValueFields";
 import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 
@@ -128,7 +128,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         const copyright_paragraph = containerEl.createEl("p");
         copyright_paragraph.addClass("SC-small-font");
         copyright_paragraph.insertAdjacentHTML("beforeend", `
-            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2022 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
+            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2023 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
         `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
@@ -244,7 +244,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     }
                 }).then((search_component: SearchComponent) => {
                     // Focus on the search field.
-                    search_component.inputEl.addClass("SC-focus-element-on-tab-opening")
+                    search_component.inputEl.addClass("SC-focus-element-on-tab-opening");
                 }),
             )
         ;
@@ -288,7 +288,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 const paragraph_element = container_element.createEl("p", {text: sc_event.static().getTitle()});
                 const list_element = paragraph_element.createEl("ul");
                 event_enabled_t_shell_commands.forEach((t_shell_command: TShellCommand) => {
-                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()})
+                    list_element.createEl("li", {text: t_shell_command.getAliasOrShellCommand()});
                 });
                 found_enabled_event = true;
             }
@@ -331,7 +331,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Autocomplete")
                 .onClick(() => {
-                    gotoURL(DocumentationAutocompleteLink)
+                    gotoURL(DocumentationAutocompleteLink);
                 }),
             )
         ;
@@ -373,30 +373,58 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Built-in variables")
                 .onClick(() => {
-                    gotoURL(DocumentationBuiltInVariablesLink)
+                    gotoURL(DocumentationBuiltInVariablesIndexLink);
                 }),
             )
         ;
 
-        const variables = this.plugin.getVariables();
-        variables.forEach((variable: Variable) => {
+        for (const variable of this.plugin.getVariables()) {
             if (!(variable instanceof CustomVariable)) {
-                const paragraph = container_element.createEl("p");
-                paragraph.insertAdjacentHTML("afterbegin",
-                    variable.getHelpName() +
-                    "<br>" +
-                    variable.help_text
-                );
+                const variableSettingGroupElement = container_element.createDiv();
+                variableSettingGroupElement.addClass("SC-setting-group");
+
+                // Variable name and documentation link
+                const variableHeadingSetting = new Setting(variableSettingGroupElement) // Use container_element instead of variableSettingGroup.
+                    .setHeading()
+                    .addExtraButton(extraButton => extraButton
+                        .setIcon("help")
+                        .setTooltip("Documentation: " + variable.getFullName() + " variable")
+                        .onClick(() => gotoURL(variable.getDocumentationLink()))
+                    )
+                ;
+                variableHeadingSetting.nameEl.insertAdjacentHTML("afterbegin", variable.getHelpName());
+
+                // Variable description
+                const variableDescriptionSetting = new Setting(variableSettingGroupElement)
+                    .setClass("SC-full-description") // Without this, description would be shrunk to 50% of space. This setting does not have control elements, so 100% width is ok.
+                ;
+                variableDescriptionSetting.descEl.insertAdjacentHTML("afterbegin", variable.help_text);
                 const availability_text: string = variable.getAvailabilityText();
                 if (availability_text) {
-                    paragraph.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+                    variableDescriptionSetting.descEl.insertAdjacentHTML("beforeend", "<br>" + availability_text);
+                }
+
+                // Variable default value
+                const defaultValueSettingTitle = "Default value for "+variable.getFullName();
+                if (variable.isAlwaysAvailable()) {
+                    new Setting(variableSettingGroupElement)
+                        .setName(defaultValueSettingTitle)
+                        .setDesc(variable.getFullName() + " is always available, so it cannot have a default value.")
+                    ;
+                } else {
+                    createVariableDefaultValueField(
+                        this.plugin,
+                        variableSettingGroupElement,
+                        defaultValueSettingTitle,
+                        variable,
+                    );
                 }
             }
-        });
+        }
 
         container_element.createEl("p", {text: "When you type variables into commands, a preview text appears under the command field to show how the command will look like when it gets executed with variables substituted with their real values."});
         container_element.createEl("p", {text: "Special characters in variable values are tried to be escaped (except if you use CMD as the shell in Windows). This is to improve security so that a variable won't accidentally cause bad things to happen. If you want to use a raw, unescaped value, add an exclamation mark before the variable's name, e.g. {{!title}}, but be careful, it's dangerous!"});
-        container_element.createEl("p", {text: "There is no way to prevent variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed below. If you would need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please create a discussion in GitHub."});
+        container_element.createEl("p", {text: "There is no way to prevent variable parsing. If you need {{ }} characters in your command, they won't be parsed as variables as long as they do not contain any of the variable names listed above. If you need to pass e.g. {{title}} literally to your command, there is no way to do it atm, please create a discussion in GitHub."});
         container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."});
     }
 

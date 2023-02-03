@@ -1,6 +1,6 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +23,15 @@ export class Variable_CaretParagraph extends EditorVariable {
     public variable_name = "caret_paragraph";
     public help_text = "Gives a text line at the current caret position.";
 
-    protected async generateValue(): Promise<string | null> {
-        if (!this.requireEditor() || !this.isViewModeSource() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
-            return null;
-        }
-        const caretPosition = this.editor.getCursor('to');
-        return this.editor.getLine(caretPosition.line);
+    protected async generateValue(): Promise<string> {
+        const editor = this.getEditorOrThrow();
+        this.requireViewModeSource();
+
+        const caretPosition = editor.getCursor('to');
+        return editor.getLine(caretPosition.line);
     }
 
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Not available in preview mode.";
+    }
 }

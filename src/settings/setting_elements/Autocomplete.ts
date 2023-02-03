@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -18,9 +18,14 @@
  */
 
 import autocomplete from "autocompleter";
-import {parseYaml} from "obsidian";
+import {
+    parseYaml,
+    setIcon,
+} from "obsidian";
 import SC_Plugin from "../../main";
+import {AutocompleteResult} from "autocompleter/autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
+import {gotoURL} from "../../Common";
 
 /**
  *
@@ -31,7 +36,7 @@ import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompl
  */
 export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputElement | HTMLTextAreaElement, call_on_completion: (field_value: string) => void, extra_autocomplete_items: IAutocompleteItem[] = []) {
 
-    autocomplete<IAutocompleteItem>({
+    const autocompleteMenu: AutocompleteResult =  autocomplete<IAutocompleteItem>({
         input: input_element,
         fetch: (input_value_but_not_used: string, update: (items: IAutocompleteItem[]) => void) => {
             const autocomplete_items = merge_and_sort_autocomplete_items(getVariableAutocompleteItems(plugin), CustomAutocompleteItems, extra_autocomplete_items);
@@ -117,6 +122,20 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
                 div_element.createSpan({text: ": ", attr: {class: "SC-autocomplete-separator"}});
                 div_element.createSpan({attr: {class: "SC-autocomplete-help-text"}}).insertAdjacentHTML("beforeend", item.help_text);
             }
+
+            // Documentation link
+            const documentationLink: string | undefined = item.documentationLink;
+            if (undefined !== documentationLink) {
+                const documentationLinkElement = div_element.createEl("a", {attr: {"title": "Documentation: " + item.value}}); // Use "title" instead of "aria-label", because I don't know how to make "aria-label" show a tooltip box on a custom element.
+                setIcon(documentationLinkElement, "help");
+                documentationLinkElement.addClass("SC-autocomplete-link-icon");
+                documentationLinkElement.onClickEvent((event) => {
+                    gotoURL(documentationLink);
+                    // event.preventDefault(); Not needed, I guess.
+                    event.stopImmediatePropagation(); // Do not close the autocomplete menu.
+                });
+            }
+
             return div_element;
         },
         minLength: 2, // Minimum length when autocomplete menu should pop up.
@@ -124,6 +143,9 @@ export function createAutocomplete(plugin: SC_Plugin, input_element: HTMLInputEl
         keysToIgnore: [ 38 /* Up */, 13 /* Enter */, 27 /* Esc */, 16 /* Shift */, 17 /* Ctrl */, 18 /* Alt */, 20 /* CapsLock */, 91 /* WindowsKey */, 9 /* Tab */ ], // Defined just to prevent ignoring left and right keys.
         preventSubmit: true, // Prevents creating newlines in textareas when enter is pressed in the autocomplete menu.
     });
+
+    // Make the plugin able to close the menu if the plugin is disabled (or restarted).
+    plugin.registerAutocompleteMenu(autocompleteMenu);
 }
 
 export interface IAutocompleteItem {
@@ -131,6 +153,7 @@ export interface IAutocompleteItem {
     value: string;
     group: string;
     type: AutocompleteSearchQueryType;
+    documentationLink?: string;
 }
 
 function item_match(item: IAutocompleteItem, search_query: IAutocompleteSearchQuery): boolean {
@@ -232,7 +255,7 @@ export function addCustomAutocompleteItems(custom_autocomplete_yaml: string) {
         return error.message;
     }
     if (null === yaml || typeof yaml !== "object") {
-        return "Unable to parse the content due to unknown reason."
+        return "Unable to parse the content due to unknown reason.";
     }
 
     // Iterate autocomplete item groups

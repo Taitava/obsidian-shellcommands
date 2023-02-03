@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +20,6 @@
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {getFileYAMLValue} from "./VariableHelpers";
-import {TFile} from "obsidian";
 
 export class Variable_YAMLValue extends FileVariable {
     public variable_name = "yaml_value";
@@ -33,56 +32,23 @@ export class Variable_YAMLValue extends FileVariable {
         },
     };
 
-    protected arguments: {
-        property_name: string;
-    }
-
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const active_file = this.getFile();
-            if (active_file) {
-                // We do have an active file
-                const result = this.getFileYAMLValue(active_file);
-                if (Array.isArray(result)) {
-                    // The result contains error message(s).
-                    this.newErrorMessages(result as string[]);
-                    return resolve(null);
-                } else {
-                    // The result is ok, it's a string.
-                    return resolve(result as string);
-                }
-            } else {
-                // No file is active at the moment
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-        });
-    }
-
-    private yaml_value_cache: string[] | string | undefined; // undefined = allow resetting back to undefined in .reset()
-    private getFileYAMLValue(active_file: TFile): string[] | string {
-        if (!this.yaml_value_cache) {
-            this.yaml_value_cache = getFileYAMLValue(this.app, active_file, this.arguments.property_name);
+    protected async generateValue(castedArguments: {property_name: string}): Promise<string> {
+        // We do have an active file
+        const result = getFileYAMLValue(this.app, this.getFileOrThrow(), castedArguments.property_name);
+        if (Array.isArray(result)) {
+            // The result contains error message(s).
+            this.throw(result.join(" "));
+        } else {
+            // The result is ok, it's a string.
+            return result;
         }
-        return this.yaml_value_cache;
+    }
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, the given YAML property must exist in the file's frontmatter.";
     }
 
-    public reset(): void {
-        super.reset();
-        this.yaml_value_cache = undefined;
-    }
-
-    public isAvailable(): boolean {
-        if (!super.isAvailable()) {
-            return false;
-        }
-
-        const activeFile = this.getFile();
-
-        if (null == activeFile) {
-            return false;
-        }
-
-        return typeof this.getFileYAMLValue(activeFile) === "string";
+    public getHelpName(): string {
+        return "<strong>{{yaml_value:property}}</strong>";
     }
 
 }

@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,10 +26,14 @@ import {
     ParentModelOneToManyIdRelation,
 } from "../../imports";
 import {debugLog} from "../../Debug";
+import {
+    GlobalVariableDefaultValueConfiguration,
+} from "../../variables/Variable";
+import {createVariableDefaultValueField} from "../../settings/setting_elements/createVariableDefaultValueFields";
 
 export class CustomVariableModel extends Model {
 
-    private custom_variable_instances: CustomVariableInstanceMap;
+    private custom_variable_instances: CustomVariableInstanceMap = new CustomVariableInstanceMap;
 
     public getSingularName(): string {
         return "Custom variable";
@@ -46,7 +50,7 @@ export class CustomVariableModel extends Model {
 
     public loadInstances(parent_configuration: SC_MainSettings): CustomVariableInstanceMap {
         debugLog(`CustomVariableModel: Loading CustomVariableInstances.`);
-        this.custom_variable_instances = new CustomVariableInstanceMap;
+        this.custom_variable_instances.clear();
         parent_configuration.custom_variables.forEach((custom_variable_configuration: CustomVariableConfiguration) => {
             this.custom_variable_instances.set(
                 custom_variable_configuration.id,
@@ -60,7 +64,7 @@ export class CustomVariableModel extends Model {
         debugLog(`CustomVariableModel: Creating a new CustomVariableInstance.`);
 
         // Create a default configuration object
-        const custom_variable_configuration: CustomVariableConfiguration = this._getDefaultConfiguration();
+        const custom_variable_configuration: CustomVariableConfiguration = this.getDefaultConfiguration();
         parent_configuration.custom_variables.push(custom_variable_configuration);
 
         // Create a CustomVariableInstance for handling the configuration
@@ -97,7 +101,7 @@ export class CustomVariableModel extends Model {
                     // TODO: Find a way to create this kind of trivial onChange() functions in the Model base class.
                     instance.setIfValid("name", new_name).then(async () => {
                         // Valid
-                        heading_setting.setName(instance.getFullName()) // Also removes a possible warning message.
+                        heading_setting.setName(instance.getFullName()); // Also removes a possible warning message.
                         instance.getCustomVariable().updateProperties(); // Update the name also to the operational variable, not only in configuration.
                         await this.plugin.saveSettings();
                         await this.plugin.updateCustomVariableViews();
@@ -131,6 +135,15 @@ export class CustomVariableModel extends Model {
                 }),
             )
         ;
+
+        // Default value setting
+        createVariableDefaultValueField(
+            this.plugin,
+            container_element,
+            "Default value",
+            instance.getCustomVariable(),
+        );
+
         return heading_setting;
     }
 
@@ -163,7 +176,7 @@ export class CustomVariableModel extends Model {
         });
     }
 
-    protected _getDefaultConfiguration(): CustomVariableConfiguration {
+    public getDefaultConfiguration(): CustomVariableConfiguration {
         // Generate a unique name for the variable by using a sequential number.
         let sequential_number = 1;
         while (this.isCustomVariableNameDuplicate(String(sequential_number))) {
@@ -175,6 +188,7 @@ export class CustomVariableModel extends Model {
             id: getIDGenerator().generateID(),
             name: String(sequential_number),
             description: "",
+            default_value: null,
         };
     }
 
@@ -232,6 +246,7 @@ export interface CustomVariableConfiguration {
     id: string,
     name: string,
     description: string,
+    default_value: GlobalVariableDefaultValueConfiguration | null,
 }
 
 export class CustomVariableInstanceMap extends Map<string, CustomVariableInstance> {}

@@ -1,6 +1,6 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ export abstract class SC_VaultEvent extends SC_Event {
                         this.file = file as TFile;
                         break;
                     case "folder":
-                        this.folder = file as TFolder
+                        this.folder = file as TFolder;
                         break;
                 }
 

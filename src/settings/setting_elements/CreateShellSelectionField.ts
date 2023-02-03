@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -48,16 +48,18 @@ export function createShellSelectionField(plugin: SC_Plugin, container_element: 
             .addDropdown(dropdown => dropdown
                 .addOptions(options)
                 .setValue(shells[platform_id] ?? "default")
-                .onChange(((_platform_id: PlatformId) => { return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
-                    if ("default" === value) {
-                        // When using default shell, the value should be unset.
-                        delete shells[_platform_id];
-                    } else {
-                        // Normal case: assign the shell value.
-                        shells[_platform_id] = value;
-                    }
-                    await plugin.saveSettings();
-                }})(platform_id))
+                .onChange(((_platform_id: PlatformId) => {
+                    return async (value: string) => { // Need to use a nested function so that platform_id can be stored statically, otherwise it would always be "win32" (the last value of PlatformNames).
+                        if ("default" === value) {
+                            // When using default shell, the value should be unset.
+                            delete shells[_platform_id];
+                        } else {
+                            // Normal case: assign the shell value.
+                            shells[_platform_id] = value;
+                        }
+                        await plugin.saveSettings();
+                    };
+                })(platform_id))
             )
         ;
     }

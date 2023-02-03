@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -128,7 +128,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
             tab_structure.active_tab_id = activate_tab_id.replace(/^SC-tab-/, ""); // Remove "SC-tab" prefix.
 
             // Focus an element (if a focusable element is present)
-            tab_content.find(".SC-focus-element-on-tab-opening")?.focus() // ? = If not found, do nothing.
+            tab_content.find(".SC-focus-element-on-tab-opening")?.focus(); // ? = If not found, do nothing.
 
             // Apply the max dimensions to this tab
             // But don't do it if this is the main settings modal

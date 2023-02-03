@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -60,6 +60,8 @@ import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
 import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
 import {Variable_Newline} from "./Variable_Newline";
+import {Variable_YAMLContent} from "./Variable_YAMLContent";
+import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLContent";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -69,7 +71,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     // Load CustomVariables
     // Do this before loading built-in variables so that these user-defined variables will appear first in all lists containing variables.
     plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
-        variables.add(custom_variable_instance.createCustomVariable())
+        variables.add(custom_variable_instance.createCustomVariable());
     });
 
     // Load built-in variables.
@@ -96,6 +98,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_Title(plugin),
         new Variable_VaultPath(plugin),
         new Variable_Workspace(plugin),
+        new Variable_YAMLContent(plugin),
         new Variable_YAMLValue(plugin),
 
         // Event variables
@@ -114,6 +117,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_EventOldTitle(plugin),
         new Variable_EventTags(plugin),
         new Variable_EventTitle(plugin),
+        new Variable_EventYAMLContent(plugin),
         new Variable_EventYAMLValue(plugin),
     ];
     if (DEBUG_ON) {

@@ -4,13 +4,54 @@ All notable changes to this plugin will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-
-
+<!--
+Different types of changes:
+ - Added
+ - Changed
+ - Deprecated
+ - Removed
+ - Fixed
+ - Security
+Mind the order!
+-->
 
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
 - Nothing at the moment.
+
+## [0.18.1] - 2023-01-22
+
+### Fixed
+- Settings: A list of icons definable for shell commands misses some icons. This is because [a commit](https://github.com/Taitava/obsidian-shellcommands/commit/b6bc939b6112da54a37378cf420d88dd00e0da0d) was accidentally not merged to `0.14.0` release in July 2022. Also fixed a small UI annoyance: 'No icon' was not selected when opening settings for a shell command that had no icon defined. (Original feature: #240).
+- [Menu items have no text on macOS (#314)](https://github.com/Taitava/obsidian-shellcommands/issues/314).
+
+## [0.18.0] - 2023-01-06
+
+**VERSION 0.18.0 INCLUDES POSSIBLY BACKWARDS INCOMPATIBLE CHANGES to variables `{{folder_name}}` and `{{event_folder_name}}`, see below.**
+
+### Added
+ - [Ability to pass variable values to stdin (#283)](https://github.com/Taitava/obsidian-shellcommands/issues/283).
+ - [Globally default values for variables (#298)](https://github.com/Taitava/obsidian-shellcommands/issues/298).
+ - [New variables: {{yaml_content}} and {{event_yaml_content}} (#267)](https://github.com/Taitava/obsidian-shellcommands/issues/267).
+ - [Settings: Add documentation links to the list of {{variables}} (#302)](https://github.com/Taitava/obsidian-shellcommands/issues/302).
+ - [Debug: Create a {{newline}} variable (#295)](https://github.com/Taitava/obsidian-shellcommands/issues/295).
+   - Only available in debug mode and used for testing.
+
+### Changed
+ - [Change {{folder_name}} and {{event_folder_name}} to return a dot instead of an empty string when folder is vault root](https://github.com/Taitava/obsidian-shellcommands/issues/304).
+   - **Might be backwards incompatible!** Make sure your shell commands that use `{{folder_name}}`/`{{event_folder_name}}` work as expected when the root folder is denoted as a dot `.` instead of an empty text ` ` (like was before).
+ - [{{selection}}: Show an error message if nothing is selected (#303)](https://github.com/Taitava/obsidian-shellcommands/issues/303).
+   - Before this, the variable gave an empty text. The old behavior can be restored by defining a [default value](https://publish.obsidian.md/shellcommands/Variables/Default+values).
+ - [Settings: Hotkey text should not split over multiple lines (#294)](https://github.com/Taitava/obsidian-shellcommands/issues/294).
+ - [Internal: TypeScript compiler: Use strict null checks (#70)](https://github.com/Taitava/obsidian-shellcommands/issues/70).
+     - This should not be visible to users, but as it touches most parts of the plugin, new bugs are always possible, even though the aim is to reduce the risk of new bugs being born.
+ - [Internal: Variables: Prevent storing arguments](https://github.com/Taitava/obsidian-shellcommands/issues/312).
+ - [Internal: Variables: Handle errors by throwing them instead of returning null](https://github.com/Taitava/obsidian-shellcommands/issues/315).
+
+### Fixed
+ - [`{{yaml_value}}`: Crash if a queried property has a null value (#277)](https://github.com/Taitava/obsidian-shellcommands/issues/277).
+ - [`{{caret_paragraph}}` should be able to have a default value defined (#311)](https://github.com/Taitava/obsidian-shellcommands/issues/311).
 
 ## [0.17.0] - 2022-11-26
 
@@ -206,7 +247,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### Changed
 - **Possibly backwards incompatible change:** [{{Variable}} values are escaped when using PowerShell or Bash (#11)](https://github.com/Taitava/obsidian-shellcommands/issues/11). Check that your variables work correctly after this upgrade! Add an exclamation mark `!` in front of the variable name if you need to use unescaped variable values, e.g. `{{!file_name}}`.
 - **Possibly backwards incompatible change:** [Only the following shells will be supported: Bash, Dash, Zsh, Windows CMD, PowerShell 5 and PowerShell Core (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76). While SC now supports changing the shell in settings, it needs to be noted that if your operating system's user preferences are defined to use some other shell than those listed before, SC will no longer allow executing commands, because it will not know how to escape special characters for a shell that is unknown to it. This limitation will be removed later, [when support for different shells gets improved](https://github.com/Taitava/obsidian-shellcommands/issues/108).
-- [Linux and Mac: User's default shell will be used instead of /bin/sh (#76)](#76). SC versions prior to 0.7.0 used `/bin/sh` as a shell on Linux and Mac (`/bin/sh` came as a default value from [Node.js's](https://nodejs.org/en/) [child_process](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)). `0.7.0` changes this so that the default shell is retrieved from the current user's `$SHELL` environment variable. On Windows, default shell is retrieved from `COMSPEC` environment variable, and this has not changed. These are only defaults, and a user can change these shells in settings. If a shell has changed for you, your shell commands might run a bit differently after this upgrade.
+- [Linux and Mac: User's default shell will be used instead of /bin/sh (#76)](https://github.com/Taitava/obsidian-shellcommands/issues/76). SC versions prior to 0.7.0 used `/bin/sh` as a shell on Linux and Mac (`/bin/sh` came as a default value from [Node.js's](https://nodejs.org/en/) [child_process](https://nodejs.org/api/child_process.html#child_processexeccommand-options-callback)). `0.7.0` changes this so that the default shell is retrieved from the current user's `$SHELL` environment variable. On Windows, default shell is retrieved from `COMSPEC` environment variable, and this has not changed. These are only defaults, and a user can change these shells in settings. If a shell has changed for you, your shell commands might run a bit differently after this upgrade.
 - Settings: Split settings content to tabs ([#78](https://github.com/Taitava/obsidian-shellcommands/issues/78) and [#85](https://github.com/Taitava/obsidian-shellcommands/issues/85)).
 - [Settings: Clipboard output channel notification balloon can be turned off (#75)](https://github.com/Taitava/obsidian-shellcommands/issues/75).
 - [Settings: Make extra options modal scrollable (#84)](https://github.com/Taitava/obsidian-shellcommands/issues/84)
@@ -327,7 +368,9 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...HEAD
+[0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
+[0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0
 [0.16.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.15.0...0.16.0
 [0.15.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.14.0...0.15.0

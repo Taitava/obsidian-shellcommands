@@ -1,12 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022:
- *  - Vinay Rajur (created most of the content of the Variable_CaretPosition class)
- *  - Jarkko Linnanvirta (some minor/structural changes)
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,16 +19,14 @@
  *  - Jarkko Linnanvirta: https://github.com/Taitava/
  */
 
-import {getEditor} from "../Common";
 import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {EditorVariable} from "./EditorVariable";
+import {Editor} from "obsidian";
 
 export class Variable_CaretPosition extends EditorVariable {
     public variable_name = "caret_position";
     public help_text = "Gives the line number and column position of the current caret position as 'line:column'. Get only the line number using {{caret_position:line}}, and only the column with {{caret_position:column}}. Line and column numbers are 1-indexed.";
-
-    protected always_available = false;
 
     protected static readonly parameters: IParameters = {
         mode: {
@@ -39,37 +35,27 @@ export class Variable_CaretPosition extends EditorVariable {
         },
     };
 
-    protected arguments: {
-        mode: string;
-    }
+    protected async generateValue(castedArguments: {mode?: string}): Promise<string> {
+        // Check that we are able to get an editor
+        const editor: Editor = this.getEditorOrThrow();
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            // Check that we are able to get an editor
-            if (!this.requireEditor() || !this.editor) { //  || !this.editor is only for making TypeScript compiler understand that this.editor exists later.
-                // Nope.
-                return resolve(null);
+        const position = editor.getCursor('to');
+        const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
+        const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
+
+        if (undefined !== castedArguments.mode) {
+            switch (castedArguments.mode.toLowerCase()) {
+                case "line":
+                    return `${line}`;
+                case "column":
+                    return `${column}`;
+                default:
+                    this.throw("Unrecognised argument: "+castedArguments.mode);
             }
-
-            const position = this.editor.getCursor('to');
-            const line = position.line + 1; // editor position is zero-indexed, line numbers are 1-indexed
-            const column = position.ch + 1; // editor position is zero-indexed, column positions are 1-indexed
-
-            if (Object.keys(this.arguments).length > 0) {
-                switch (this.arguments.mode.toLowerCase()) {
-                    case "line":
-                        return resolve(`${line}`);
-                    case "column":
-                        return resolve(`${column}`);
-                    default:
-                        this.newErrorMessage("Unrecognised argument: "+this.arguments.mode);
-                        return resolve(null);
-                }
-            } else {
-                // default case when no args provided
-                return resolve(`${line}:${column}`);
-            }
-        });
+        } else {
+            // default case when no args provided
+            return `${line}:${column}`;
+        }
     }
 
     public getAutocompleteItems() {
@@ -79,19 +65,22 @@ export class Variable_CaretPosition extends EditorVariable {
                 value: "{{" + this.variable_name + "}}",
                 help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":line}}",
                 help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{" + this.variable_name + ":column}}",
                 help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
-                type: "normal-variable"
+                type: "normal-variable",
+                documentationLink: this.getDocumentationLink(),
             },
 
             // Unescaped variables
@@ -100,18 +89,21 @@ export class Variable_CaretPosition extends EditorVariable {
                 help_text: "Gives the line number and column position of the current caret position as 'line:column'. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":line}}",
                 help_text: "Gives the line number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
                 value: "{{!" + this.variable_name + ":column}}",
                 help_text: "Gives the column number of the current caret position. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
+                documentationLink: this.getDocumentationLink(),
             },
         ];
     }
@@ -120,11 +112,7 @@ export class Variable_CaretPosition extends EditorVariable {
         return "<strong>{{caret_position}}</strong>, <strong>{{caret_position:line}}</strong> or <strong>{{caret_position:column}}</strong>";
     }
 
-    public isAvailable(): boolean {
-        return !!getEditor(this.app);
-    }
-
     public getAvailabilityText(): string {
-        return "<strong>Only available</strong> when a note pane is open, not in graph view, nor when viewing non-text files.";
+        return super.getAvailabilityText() + " Not available in preview mode.";
     }
 }

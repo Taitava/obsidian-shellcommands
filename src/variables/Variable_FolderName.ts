@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,15 +21,13 @@ import {FolderVariable} from "./FolderVariable";
 
 export class Variable_FolderName extends FolderVariable {
     public variable_name = "folder_name";
-    public help_text = "Gives the current file's parent folder name. No ancestor folders are included.";
+    public help_text = "Gives the current file's parent folder name, or a dot if the folder is the vault's root. No ancestor folders are included.";
 
-    protected generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            const folder = this.getFolder();
-            if (!folder) {
-                return resolve(null); // null indicates that getting a value has failed and the command should not be executed.
-            }
-            return resolve(folder.name); // TODO: Consider changing to `folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
-        });
+    protected async generateValue(): Promise<string> {
+        const folder = this.getFolderOrThrow();
+        return folder.isRoot()
+            ? "." // Return a dot instead of an empty string.
+            : folder.name
+        ;
     }
 }

@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -61,7 +61,7 @@ export class PromptModel extends Model {
         // TODO: Move this logic to the base Model class.
 
         // Setup a default configuration and generate an ID
-        const prompt_configuration = this._getDefaultConfiguration();
+        const prompt_configuration = this.getDefaultConfiguration();
 
         // Instantiate a Prompt
         const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings);
@@ -102,7 +102,7 @@ export class PromptModel extends Model {
         modal.open();
     }
 
-    private _getDefaultConfiguration(): PromptConfiguration {
+    public getDefaultConfiguration(): PromptConfiguration {
         return {
             id: getIDGenerator().generateID(),
             title: "",

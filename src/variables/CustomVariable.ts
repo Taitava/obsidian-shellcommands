@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Variable} from "./Variable";
+import {
+    GlobalVariableDefaultValueConfiguration,
+    Variable,
+} from "./Variable";
 import SC_Plugin from "../main";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {resetVariableAutocompleteItems} from "./getVariableAutocompleteItems";
@@ -42,15 +45,12 @@ export class CustomVariable extends Variable {
         debugLog(`Loaded CustomVariable ${this.variable_name}.`);
     }
 
-    public generateValue(): Promise<string|null> {
-        return new Promise((resolve) => {
-            if (null === this.value) {
-                debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`)
-                this.newErrorMessage("This custom variable does not have a value yet, and no default value is defined.")
-                return resolve(null);
-            }
-            return resolve(this.value);
-        });
+    public async generateValue(): Promise<string> {
+        if (null === this.value) {
+            debugLog(`Custom variable ${this.variable_name} does not have a value yet, and no default value is defined.`);
+            this.throw("This custom variable does not have a value yet, and no default value is defined.");
+        }
+        return this.value;
     }
 
     /**
@@ -102,11 +102,12 @@ export class CustomVariable extends Variable {
         }
     }
 
-    /**
-     * Returns true if the CustomVariable has an assigned value.
-     */
-    public isAvailable(): boolean {
-        return null !== this.value;
+    public getConfiguration() {
+        return this.custom_variable_instance.configuration;
+    }
+
+    public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
+        return this.custom_variable_instance.configuration.default_value;
     }
 }
 

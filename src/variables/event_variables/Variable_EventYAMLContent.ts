@@ -24,18 +24,17 @@ import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentMod
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
-import {getFileExtension} from "../VariableHelpers";
-import {IParameters} from "../Variable";
+import {getFileYAML} from "../../Common";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
-import {Shell} from "../../shells/Shell";
+import {IParameters} from "../Variable";
 
-export class Variable_EventFileExtension extends EventVariable {
-    public variable_name = "event_file_extension";
-    public help_text = "Gives the event related file name's ending. Use {{event_file_extension:with-dot}} to include a preceding dot. If the extension is empty, no dot is added. {{event_file_extension:no-dot}} never includes a dot.";
+export class Variable_EventYAMLContent extends EventVariable {
+    public variable_name = "event_yaml_content";
+    public help_text = "Gives the event related note's YAML frontmatter. Dashes --- can be included or excluded.";
 
-    protected static parameters: IParameters = {
-        "dot": {
-            options: ["with-dot", "no-dot"],
+    protected static readonly parameters: IParameters = {
+        withDashes: {
+            options: ["with-dashes", "no-dashes"],
             required: true,
         },
     };
@@ -49,29 +48,49 @@ export class Variable_EventFileExtension extends EventVariable {
         SC_Event_FileRenamed,
     ];
 
-    protected async generateValue(
-        shell: Shell,
-        castedArguments: {"dot": "with-dot" | "no-dot"},
+    protected generateValue(
+        castedArguments: {withDashes: "with-dashes" | "no-dashes"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {
-        this.requireCorrectEvent(sc_event);
+        return new Promise((resolve, reject) => {
+            try {
+                this.requireCorrectEvent(sc_event);
+            } catch (error) {
+                // Need to catch here, because Variable.getValue()'s .catch() block won't be able to catch thrown errors,
+                // it can only catch errors that were passed to reject().
+                reject(error);
+                return;
+            }
 
-        return getFileExtension(sc_event.getFile(), castedArguments.dot === "with-dot");
+            getFileYAML(this.app, sc_event.getFile(), castedArguments.withDashes === "with-dashes").then((yamlContent: string) => {
+                if (null === yamlContent) {
+                    // No YAML frontmatter.
+                    this.reject("The event related file does not contain a YAML frontmatter.", reject);
+                } else {
+                    // Got a YAML frontmatter.
+                    resolve(yamlContent);
+                }
+            });
+        });
+    }
+
+    public getAvailabilityText(): string {
+        return super.getAvailabilityText() + " Also, a YAML frontmatter section needs to be present.";
     }
 
     public getAutocompleteItems() {
         return [
             // Normal variables
             <IAutocompleteItem>{
-                value: "{{" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the event related file name's ending without a preceding dot. " + this.getAvailabilityText(),
+                value: "{{" + this.variable_name + ":with-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, wrapped between --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
                 documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
-                value: "{{" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the event related file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
+                value: "{{" + this.variable_name + ":no-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, excluding top and bottom --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "normal-variable",
                 documentationLink: this.getDocumentationLink(),
@@ -79,15 +98,15 @@ export class Variable_EventFileExtension extends EventVariable {
 
             // Unescaped variables
             <IAutocompleteItem>{
-                value: "{{!" + this.variable_name + ":no-dot}}",
-                help_text: "Gives the event related file name's ending without a preceding dot. " + this.getAvailabilityText(),
+                value: "{{!" + this.variable_name + ":with-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, wrapped between --- lines." + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
                 documentationLink: this.getDocumentationLink(),
             },
             <IAutocompleteItem>{
-                value: "{{!" + this.variable_name + ":with-dot}}",
-                help_text: "Gives the event related file name's ending with a preceding dot. If the extension is empty, no dot is included. " + this.getAvailabilityText(),
+                value: "{{!" + this.variable_name + ":no-dashes}}",
+                help_text: "Gives the event related note's YAML frontmatter, excluding top and bottom --- lines. " + this.getAvailabilityText(),
                 group: "Variables",
                 type: "unescaped-variable",
                 documentationLink: this.getDocumentationLink(),
@@ -96,7 +115,7 @@ export class Variable_EventFileExtension extends EventVariable {
     }
 
     public getHelpName(): string {
-        return "<strong>{{event_file_extension:with-dot}}</strong> or <strong>{{event_file_extension:no-dot}}</strong>";
+        return "<strong>{{event_yaml_content:with-dashes}}</strong> or <strong>{{event_yaml_content:no-dashes}}</strong>";
     }
 
 }

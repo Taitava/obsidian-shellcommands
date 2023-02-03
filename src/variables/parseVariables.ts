@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,7 +21,11 @@ import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
 import {VariableSet} from "./loadVariables";
-import {Variable, VariableValueResult} from "./Variable";
+import {
+    IRawArguments,
+    Variable,
+    VariableValueResult,
+} from "./Variable";
 import {TShellCommand} from "../TShellCommand";
 import {removeFromSet} from "../Common";
 import {Shell} from "../shells/Shell";
@@ -67,9 +71,6 @@ export async function parseVariables(
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray | null;
         while ((argument_matches = pattern.exec(content)) !== null) {
-            // Make sure the variable does not contain old arguments or old error messages. Needed because variable instances are reused between parsing calls.
-            variable.reset();
-
             // Count how many times any variables have appeared.
             parsing_result.count_parsed_variables++;
 
@@ -88,13 +89,14 @@ export async function parseVariables(
             const substitute: string = _arguments.shift() as string; // '_arguments[0]' contains the whole match, not just an argument. Get it and remove it from '_arguments'. 'as string' is used to tell TypeScript that _arguments[0] is always defined.
 
             // Iterate all arguments
+            const presentArguments: IRawArguments = {};
             for (const i in _arguments) {
                 // Check that the argument is not omitted. It can be omitted (= undefined), if the parameter is optional.
                 if (undefined !== _arguments[i]) {
                     // The argument is present.
                     const argument = _arguments[i].slice(1); // .slice(1): Remove a preceding :
                     const parameter_name = parameter_names[i];
-                    variable.setArgument(parameter_name, argument);
+                    presentArguments[parameter_name] = argument;
                 }
             }
 
@@ -111,6 +113,7 @@ export async function parseVariables(
                 shell,
                 t_shell_command,
                 sc_event,
+                presentArguments,
 
                 // Define a recursive callback that can be used to parse possible variables in a default value of the current variable.
                 (raw_default_value) => {
@@ -176,7 +179,7 @@ export async function parseVariables(
             }
         }
     }
-    debugLog("parseVariables(): Parsing content " + content + " succeeded.");
+    debugLog("parseVariables(): Parsing content succeeded: From '" + content + "' to '" + parsing_result.parsed_content + "'");
     parsing_result.succeeded = true;
     return parsing_result;
 }
@@ -194,7 +197,7 @@ export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables()
+    const search_for_variables: VariableSet = plugin.getVariables();
     const found_variables = new VariableSet();
     
     for (const variable of search_for_variables)

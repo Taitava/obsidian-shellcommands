@@ -66,6 +66,8 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 20.04) | Mac |
 | ----------------------| ---------- | --------------------- | --- |
+| SC 0.18.1 | Obsidian 1.1.12<br>Works | Obsidian 1.1.12<br>Works | Obsidian 1.1.12<br>Tested that [fix #314](https://github.com/Taitava/obsidian-shellcommands/issues/314) works. |
+| SC 0.18.0 | Obsidian 1.1.9<br>Works   | Obsidian 1.1.9<br>Works | |
 | SC 0.17.0 | Obsidian 1.0.3<br>Works | Obsidian 1.0.3<br>[Works otherwise but there's the already reported newline bug](https://github.com/Taitava/obsidian-shellcommands/discussions/250#discussioncomment-4243529). | |
 | SC 0.16.0 | Obsidian 0.16.3<br>Works | Obsidian 0.16.3<br>Works | |
 | SC 0.15.0 | Obsidian 0.15.9<br>Works | Obsidian 0.15.9<br>Works | |
@@ -132,7 +134,7 @@ This project is free open source software and receives no funding. I want to tha
 
 ## Copyright
 
-Copyright (C) 2021 - 2022 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
+Copyright (C) 2021 - 2023 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

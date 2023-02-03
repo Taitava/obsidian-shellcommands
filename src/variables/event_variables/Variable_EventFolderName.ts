@@ -1,10 +1,10 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2022 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2023 Jarkko Linnanvirta
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, version 3 of the License.
+ * the Free Software Foundation, version 3.0 of the License.
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -33,7 +33,7 @@ import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFolderName extends EventVariable {
     public variable_name = "event_folder_name";
-    public help_text = "File events: Gives the event related file's parent folder name. Folder events: Gives the selected folder's name. No ancestor folders are included.";
+    public help_text = "File events: Gives the event related file's parent folder name. Folder events: Gives the selected folder's name. Gives a dot if the folder is the vault's root. No ancestor folders are included.";
 
     protected supported_sc_events = [
         SC_Event_FileMenu,
@@ -49,17 +49,17 @@ export class Variable_EventFolderName extends EventVariable {
         SC_Event_FolderRenamed,
     ];
 
-    protected generateValue(
+    protected async generateValue(
         shell: Shell,
-        sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed
-    ): Promise<string | null> {
-        return new Promise((resolve) => {
-            if (!this.checkSC_EventSupport(sc_event)) {
-                return resolve(null);
-            }
+        argumentsAreNotUsed: never,
+        sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed,
+    ): Promise<string> {
+        this.requireCorrectEvent(sc_event);
 
-            const folder = sc_event.getFolder();
-            return resolve(folder.name); // TODO: Consider changing to `folder.isRoot() ? "." : folder.name;` as is done in Variable_NewNoteFileName.
-        });
+        const folder = sc_event.getFolder();
+        return folder.isRoot()
+                ? "." // Return a dot instead of an empty string.
+                : folder.name
+        ;
     }
 }
