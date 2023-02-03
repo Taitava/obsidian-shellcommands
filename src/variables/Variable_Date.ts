@@ -19,6 +19,7 @@
 
 import {moment} from "obsidian";
 import {IParameters, Variable} from "./Variable";
+import {Shell} from "../shells/Shell";
 
 export class Variable_Date extends Variable {
     public variable_name = "date";
@@ -31,7 +32,10 @@ export class Variable_Date extends Variable {
         },
     };
 
-    protected async generateValue(castedArguments: {format: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {format: string},
+    ): Promise<string> {
         return moment().format(castedArguments.format);
     }
 }

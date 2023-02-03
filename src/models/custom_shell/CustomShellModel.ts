@@ -101,7 +101,7 @@ export class CustomShellModel extends Model {
         debugLog(`CustomShellModel: Creating a new CustomShellInstance.`);
 
         // Create a default configuration object
-        const customShellConfiguration: CustomShellConfiguration = this._getDefaultConfiguration();
+        const customShellConfiguration: CustomShellConfiguration = this.getDefaultConfiguration();
         parentConfiguration.custom_shells.push(customShellConfiguration);
 
         // Create a CustomShellInstance for handling the configuration
@@ -118,7 +118,7 @@ export class CustomShellModel extends Model {
         return Promise.resolve(undefined);
     }
 
-    private _getDefaultConfiguration(): CustomShellConfiguration {
+    public getDefaultConfiguration(): CustomShellConfiguration {
         return {
             id: getIDGenerator().generateID(), // TODO: Think about should the generated id be replaced with static id derived from binary file name?
             name: "",

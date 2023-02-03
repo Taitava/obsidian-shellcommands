@@ -18,6 +18,7 @@
  */
 
 import {IParameters, Variable} from "./Variable";
+import {Shell} from "../shells/Shell";
 
 export class Variable_Environment extends Variable {
     public variable_name = "environment";
@@ -32,7 +33,10 @@ export class Variable_Environment extends Variable {
         },
     };
 
-    protected async generateValue(castedArguments: {variable: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {variable: string},
+    ): Promise<string> {
         // Check that the requested environment variable exists.
         if (undefined !== process.env[castedArguments.variable]) {
             // Yes, it exists.

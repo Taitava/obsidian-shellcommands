@@ -20,6 +20,7 @@
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {getFileTags} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_Tags extends FileVariable {
     public variable_name = "tags";
@@ -32,7 +33,10 @@ export class Variable_Tags extends FileVariable {
         }
     };
 
-    protected async generateValue(castedArguments: {separator: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {separator: string},
+    ): Promise<string> {
         return getFileTags(this.app, this.getFileOrThrow()).join(castedArguments.separator);
     }
 }
