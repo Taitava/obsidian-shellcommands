@@ -30,6 +30,7 @@ import {
     PlatformId,
     PlatformNames,
 } from "../../settings/SC_MainSettings";
+import {getOperatingSystem} from "../../Common";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -131,6 +132,28 @@ export class CustomShellSettingsModal extends SC_Modal {
             ;
         }
 
+        // Shell operating system
+        const hostPlatformName = PlatformNames[getOperatingSystem()];
+        new Setting(containerElement)
+            .setName("Shell's operating system")
+            .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the current host (" + hostPlatformName + "), select it here. This is used to make directory paths etc. work correctly.")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOption("none", "Same as the current host (" + hostPlatformName + ")")
+                .addOptions(PlatformNames as Record<string, string>) // FIXME: Find a better way to tell TypeScript that PlatformNames is of a correct type.
+                .setValue(this.customShellInstance.configuration.shell_platform ?? "none")
+                .onChange(async (newShellPlatform: string) => {
+                    switch (newShellPlatform as PlatformId | "none") {
+                        case "none":
+                            this.customShellInstance.configuration.shell_platform = null;
+                            break;
+                        default:
+                            this.customShellInstance.configuration.shell_platform = newShellPlatform as PlatformId;
+                    }
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
+
         // Special characters escaping // TODO: Create a div.SC-setting-group
         new Setting(containerElement)
             .setName("Special characters escaping")
@@ -155,7 +178,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("The character between folder names, e.g. myFolder/anotherFolder vs. myFolder\\anotherFolder.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions({
-                    "platform": "Same as the current host operating system uses",
+                    "platform": "Same as the shell's operating system uses",
                     "\\": "Backslash \\",
                     "/": "Forward slash /",
                 })
@@ -173,7 +196,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("The character separating multiple file paths. Used when adding folders to the " + getPATHEnvironmentVariableName() + " environment variable.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions({
-                    "platform": "Same as the current host operating system uses",
+                    "platform": "Same as the shell's operating system uses",
                     ":": "Colon :",
                     ";": "Semicolon ;",
                 })

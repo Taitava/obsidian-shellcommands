@@ -24,7 +24,7 @@ import {PlatformId} from "../settings/SC_MainSettings";
 import {PowerShellEscaper} from "../variables/escapers/PowerShellEscaper";
 import {ShEscaper} from "../variables/escapers/ShEscaper";
 import {
-    isWindows,
+    getOperatingSystem,
     normalizePath2,
 } from "../Common";
 import SC_Plugin from "../main";
@@ -68,11 +68,26 @@ export class CustomShell extends Shell {
         return this.customShellInstance.configuration.supported_platforms;
     }
 
+    /**
+     * @see CustomShellConfiguration.shell_platform
+     * @private Can be made public if needed.
+     */
+    private getShellPlatformId(): PlatformId {
+        return this.customShellInstance.configuration.shell_platform ?? getOperatingSystem();
+    }
+
+    /**
+     * @private Can be made public if needed.
+     */
+    private shellPlatformIsWindows() {
+        return this.getShellPlatformId() === "win32";
+    }
+
     public getPathSeparator(): ":" | ";" {
         const pathSeparator = this.customShellInstance.configuration.path_separator;
         if ("platform" === pathSeparator) {
             // Decide by the current platform.
-            return isWindows() ? ";" : ":";
+            return this.shellPlatformIsWindows() ? ";" : ":";
         }
         return pathSeparator;
     }
@@ -81,7 +96,7 @@ export class CustomShell extends Shell {
         const directorySeparator = this.customShellInstance.configuration.directory_separator;
         if ("platform" === directorySeparator) {
             // Decide by the current platform.
-            return isWindows() ? "\\" : "/";
+            return this.shellPlatformIsWindows() ? "\\" : "/";
         }
         return directorySeparator;
     }

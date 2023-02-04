@@ -127,6 +127,7 @@ export class CustomShellModel extends Model {
             supported_platforms: [
                 getOperatingSystem(), // Support the current OS by default, nothing else.
             ],
+            shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             directory_separator: "platform",
             path_separator: "platform",
@@ -187,9 +188,19 @@ export interface CustomShellConfiguration {
     binary_path: string,
 
     /**
-     * A list of operating systems on which this shell can be used.
+     * A list of host operating systems on which this shell can be used.
      */
     supported_platforms: PlatformId[],
+
+    /**
+     * An operating system that this shell virtualizes, uses as a subsystem, or otherwise emulates. Used for determining:
+     * - which directory separator to use.
+     * - which $PATH separator to use.
+     * - which environment variable to use for $PATH, i.e. $PATH (Linux & macOS) or $Path (Windows).
+     *
+     * If null (default), the current host operating system is used.
+     */
+    shell_platform: PlatformId | null,
 
     /**
      * What mechanism to use for escaping special characters in variable values.
