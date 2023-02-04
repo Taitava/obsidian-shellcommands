@@ -222,7 +222,7 @@ export class ShellCommandExecutor {
                 // The shell is not supported.
                 const shellIdentifier: string | undefined = this.t_shell_command.getShellIdentifier();
                 debugLog("Shell is not supported: " + shellIdentifier);
-                this.plugin.newError("This plugin does not support the following shell: " + shellIdentifier);
+                this.plugin.newError("This plugin does not support the following shell directly: " + shellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings.");
             } else {
                 // Rethrow some other error.
                 throw error;
