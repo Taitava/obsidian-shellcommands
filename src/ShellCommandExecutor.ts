@@ -189,7 +189,26 @@ export class ShellCommandExecutor {
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
     private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): void {
-        const working_directory = this.t_shell_command.getShell().getWorkingDirectory();
+        // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
+        // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
+        // shell can be written there.
+        let shell: Shell;
+        try {
+           shell = this.t_shell_command.getShell();
+        } catch (error) {
+            if (error instanceof UnrecognisedShellError) {
+                // The shell is not supported.
+                const shellIdentifier: string | undefined = this.t_shell_command.getShellIdentifier();
+                debugLog("Shell is not supported: " + shellIdentifier);
+                this.plugin.newError("This plugin does not support the following shell directly: " + shellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings.");
+            } else {
+                // Rethrow some other error.
+                throw error;
+            }
+            return;
+        }
+
+        const working_directory = shell.getWorkingDirectory();
 
         // Define output channels
         let outputChannels = this.t_shell_command.getOutputChannels();
@@ -208,25 +227,6 @@ export class ShellCommandExecutor {
             const error_message = this.getErrorMessageForEmptyShellCommand();
             debugLog(error_message);
             this.plugin.newError(error_message);
-            return;
-        }
-
-        // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
-        // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
-        // shell can be written there.
-        let shell: Shell;
-        try {
-           shell = this.t_shell_command.getShell();
-        } catch (error) {
-            if (error instanceof UnrecognisedShellError) {
-                // The shell is not supported.
-                const shellIdentifier: string | undefined = this.t_shell_command.getShellIdentifier();
-                debugLog("Shell is not supported: " + shellIdentifier);
-                this.plugin.newError("This plugin does not support the following shell directly: " + shellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings.");
-            } else {
-                // Rethrow some other error.
-                throw error;
-            }
             return;
         }
 
