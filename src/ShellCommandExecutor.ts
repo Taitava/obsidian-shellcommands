@@ -32,7 +32,7 @@ import {
     startRealtimeOutputHandling,
 } from "./output_channels/OutputChannelFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {UnecognisedShellError} from "./shells/ShellFunctions";
+import {UnrecognisedShellError} from "./shells/ShellFunctions";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
@@ -214,11 +214,11 @@ export class ShellCommandExecutor {
         // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
         // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
         // shell can be written there.
-        let shell: Shell
+        let shell: Shell;
         try {
            shell = this.t_shell_command.getShell();
         } catch (error) {
-            if (error instanceof UnecognisedShellError) {
+            if (error instanceof UnrecognisedShellError) {
                 // The shell is not supported.
                 const shellIdentifier: string | undefined = this.t_shell_command.getShellIdentifier();
                 debugLog("Shell is not supported: " + shellIdentifier);

@@ -68,10 +68,10 @@ export function getShell(shellIdentifier: string): Shell {
             return shell;
         }
     }
-    throw new UnecognisedShellError("No shell was found for identifier: " + shellIdentifier);
+    throw new UnrecognisedShellError("No shell was found for identifier: " + shellIdentifier);
 }
 
-export class UnecognisedShellError extends Error {}
+export class UnrecognisedShellError extends Error {}
 
 export function getShells() {
     return shells;
