@@ -84,21 +84,11 @@ export class CustomShell extends Shell {
     }
 
     public getPathSeparator(): ":" | ";" {
-        const pathSeparator = this.customShellInstance.configuration.path_separator;
-        if ("platform" === pathSeparator) {
-            // Decide by the current platform.
-            return this.shellPlatformIsWindows() ? ";" : ":";
-        }
-        return pathSeparator;
+        return this.shellPlatformIsWindows() ? ";" : ":";
     }
 
     private getDirectorySeparator(): "\\" | "/" {
-        const directorySeparator = this.customShellInstance.configuration.directory_separator;
-        if ("platform" === directorySeparator) {
-            // Decide by the current platform.
-            return this.shellPlatformIsWindows() ? "\\" : "/";
-        }
-        return directorySeparator;
+        return this.shellPlatformIsWindows() ? "\\" : "/";
     }
 
     public translateAbsolutePath(originalPath: string): string {

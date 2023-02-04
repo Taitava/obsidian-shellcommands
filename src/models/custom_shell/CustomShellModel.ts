@@ -129,8 +129,6 @@ export class CustomShellModel extends Model {
             ],
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
-            directory_separator: "platform",
-            path_separator: "platform",
             path_translator: null,
         };
     }
@@ -209,17 +207,6 @@ export interface CustomShellConfiguration {
      * done at all, but it's highly discouraged!
      */
     escaper: "UnixShell" | "PowerShell" | "none",
-
-    /**
-     * All directories, e.g. current working directory and directories from file related variables, will use this character
-     * between folder names.
-     */
-    directory_separator: "\\" | "/" | "platform",
-
-    /**
-     * Used to separate directories for the PATH environment variable.
-     */
-    path_separator: ":" | ";" | "platform", // Probably could support a freeform text, too.
 
     /**
      * A JavaScript function that receives a path working in the host operating system, and returns a path that should work

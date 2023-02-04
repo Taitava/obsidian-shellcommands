@@ -22,9 +22,6 @@ import SC_Plugin from "../../main";
 import {
     Setting,
 } from "obsidian";
-import {
-    getPATHEnvironmentVariableName,
-} from "../../imports";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {
     PlatformId,
@@ -172,47 +169,11 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
 
-        // Directory separator // TODO: Create a div.SC-setting-group
-        new Setting(containerElement)
-            .setName("Directory separator")
-            .setDesc("The character between folder names, e.g. myFolder/anotherFolder vs. myFolder\\anotherFolder.")
-            .addDropdown(dropdownComponent => dropdownComponent
-                .addOptions({
-                    "platform": "Same as the shell's operating system uses",
-                    "\\": "Backslash \\",
-                    "/": "Forward slash /",
-                })
-                .setValue(this.customShellInstance.configuration.directory_separator)
-                .onChange(async (newSeparator) => {
-                    this.customShellInstance.configuration.directory_separator = newSeparator as "\\" | "/" | "platform";
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
-
-        // Path separator // TODO: Create a div.SC-setting-group
-        new Setting(containerElement)
-            .setName("Path separator")
-            .setDesc("The character separating multiple file paths. Used when adding folders to the " + getPATHEnvironmentVariableName() + " environment variable.")
-            .addDropdown(dropdownComponent => dropdownComponent
-                .addOptions({
-                    "platform": "Same as the shell's operating system uses",
-                    ":": "Colon :",
-                    ";": "Semicolon ;",
-                })
-                .setValue(this.customShellInstance.configuration.path_separator)
-                .onChange(async (newSeparator) => {
-                    this.customShellInstance.configuration.path_separator = newSeparator as ":" | ";" | "platform";
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
-
         // Path translator
         const pathTranslatorContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(pathTranslatorContainer)
             .setName("Path translator")
-            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different path than in the host operating system. A custom JavaScript function can be defined to convert file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done here - they are already changed based on the 'Directory separator' setting, if needed. Path translation is optional.")
+            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different path than in the host operating system. A custom JavaScript function can be defined to convert file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done here - they are already changed based on the 'Shell's operating system' setting, if needed. Path translation is optional.")
             .setClass("SC-path-translator-setting")
             .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
                 .setValue(this.customShellInstance.configuration.path_translator ?? "")
