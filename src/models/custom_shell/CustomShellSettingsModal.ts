@@ -26,6 +26,7 @@ import {CustomShellInstance} from "./CustomShellInstance";
 import {
     PlatformId,
     PlatformNames,
+    PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
 import {getOperatingSystem} from "../../Common";
 
@@ -108,9 +109,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setHeading()
         ;
         const supportedPlatformsContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
-        let platformId: PlatformId;
-        for (platformId in PlatformNames) {
-            const platformName: string = PlatformNames[platformId] as string;
+        for (const [platformId, platformName] of PlatformNamesMap) {
             new Setting(supportedPlatformsContainer)
                 .setName("Enable on " + platformName)
                 .addToggle(toggleComponent => toggleComponent

@@ -172,6 +172,12 @@ export const PlatformNames: IPlatformSpecificString = {
 };
 
 /**
+ * Same content as PlatformNames, but in a better accessible Map format.
+ * TODO: Replace PlatformNames with this map, and convert usages of the old PlatformNames.
+ */
+export const PlatformNamesMap: Map<PlatformId, string> = new Map(Object.entries(PlatformNames) as [PlatformId,string][]);
+
+/**
  * All OSes supported by the Shell commands plugin.
  * Values are borrowed from NodeJS.Platform.
  *
