@@ -458,7 +458,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         // CustomShells
         new Setting(container_element)
         .setName("Custom shells")
-        .setDesc("Here you can define shells that are not among the built-in ones that SC supports out-of-the-box.")
+        .setDesc("Define e.g. WSL (Windows Subsystem for Linux), MinGW-w64 (Git Bash), or Wine here.")
         .setHeading() // Make the "Custom shells" text bold.
         .addExtraButton(extra_button => extra_button
             .setIcon("help")
