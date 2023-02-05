@@ -124,14 +124,17 @@ export abstract class Shell {
      * @param shellCommandContent
      * @param extraSpawnOptions
      */
-    public spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv): ChildProcess {
+    public spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv): ChildProcess | null {
         // Allow subclasses to alter shellCommandContent and define other options.
         const spawnAugmentation = {
             shellCommandContent: shellCommandContent,
             spawnOptions: {},
             spawnArguments: [],
         };
-        this.augmentSpawn(spawnAugmentation);
+        if (!this.augmentSpawn(spawnAugmentation)) {
+            // Something failed in the augmentation and execution should be cancelled. An error notification is already displayed.
+            return null;
+        }
 
         // Combine SpawnOptions. Do this after calling augmentSpawn(), so that it cannot accidentally override extraSpawnOptions.
         const combinedSpawnOptions: SpawnOptions = Object.assign(
@@ -154,7 +157,12 @@ export abstract class Shell {
         );
     }
 
-    protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation): void;
+    /**
+     * @param spawnAugmentation
+     * @return False: Indicate that execution should be cancelled. True: can execute the shell command.
+     * @protected
+     */
+    protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation): boolean;
 
 }
 

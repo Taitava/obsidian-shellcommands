@@ -60,8 +60,9 @@ export abstract class BuiltinShell extends Shell {
      * @param spawnAugmentation
      * @protected
      */
-    protected augmentSpawn(spawnAugmentation: SpawnAugmentation): void {
+    protected augmentSpawn(spawnAugmentation: SpawnAugmentation): boolean {
         spawnAugmentation.spawnOptions.shell = this.getBinaryPath();
+        return true;
     }
 
 }

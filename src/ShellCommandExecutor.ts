@@ -265,6 +265,10 @@ export class ShellCommandExecutor {
             // Execute the shell command
             try {
                 const child_process = shell.spawnChildProcess(shell_command, options);
+                if (null === child_process) {
+                    // No spawn() call was made due to some shell configuration error. Just cancel everything.
+                    return;
+                }
 
                 // Pass stdin content (if defined)
                 if (undefined !== shell_command_parsing_result.stdinContent) {
