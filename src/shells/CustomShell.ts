@@ -134,7 +134,18 @@ export class CustomShell extends Shell {
     }
 
     protected augmentSpawn(spawnAugmentation: SpawnAugmentation): void {
-        spawnAugmentation.spawnOptions.shell = this.getBinaryPath(); // FIXME: This is temporarily the same as in BuiltinShell. Make it work with custom shells in another commit.
+        // Disable Node.js's builtin shell feature.
+        // CustomShells need to be able to define their own shell invoking command line options, so the Node.js's shell feature would be too limited.
+        spawnAugmentation.spawnOptions.shell = false; // It's probably false by default in Node.js's spawn(), but make it explicit.
+
+        // Use shell command content as a spawn argument instead of letting spawn() execute it directly.
+        spawnAugmentation.spawnArguments = [
+            spawnAugmentation.shellCommandContent, // FIXME: Doesn't work usually. Only works if the command contains no parameters. E.g. `pwd` works, but `echo Hello` does not work. At least in WSL.
+            // TODO: Add an ability to define additional arguments in CustomShellConfiguration - both before and after the shell command content.
+        ];
+
+        // Tell spawn() to use the shell binary path as an executable command.
+        spawnAugmentation.shellCommandContent = this.getBinaryPath(); // Needs to come AFTER the original shellCommandContent is taken to spawnArguments!
     }
 
 }
