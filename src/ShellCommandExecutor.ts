@@ -19,8 +19,6 @@
 
 import {
     ChildProcess,
-    spawn,
-    SpawnOptions,
 } from "child_process";
 import {
     cloneObject,
@@ -57,7 +55,10 @@ import {Readable} from "stream";
 import {Notice} from "obsidian";
 import {OutputChannel} from "./output_channels/OutputChannel";
 import {ParsingResult} from "./variables/parseVariables";
-import {Shell} from "./shells/Shell";
+import {
+    CwdAndEnv,
+    Shell,
+} from "./shells/Shell";
 
 export class ShellCommandExecutor {
 
@@ -256,16 +257,14 @@ export class ShellCommandExecutor {
         } else {
             // Working directory is OK
             // Prepare execution options
-            const options: SpawnOptions = {
+            const options: CwdAndEnv = {
                 "cwd": working_directory,
-                "shell": shell.getBinaryPath(),
                 "env": environment_variables,
             };
 
             // Execute the shell command
-            debugLog("Executing command " + shell_command + " in " + working_directory + "...");
             try {
-                const child_process = spawn(shell_command, options);
+                const child_process = shell.spawnChildProcess(shell_command, options);
 
                 // Pass stdin content (if defined)
                 if (undefined !== shell_command_parsing_result.stdinContent) {

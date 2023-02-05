@@ -20,6 +20,12 @@
 import {Escaper} from "../variables/escapers/Escaper";
 import {PlatformId} from "../settings/SC_MainSettings";
 import SC_Plugin from "../main";
+import {
+    ChildProcess,
+    spawn,
+    SpawnOptions,
+} from "child_process";
+import {debugLog} from "../Debug";
 
 export abstract class Shell {
 
@@ -111,5 +117,64 @@ export abstract class Shell {
      * @param originalPath
      */
     public abstract translateRelativePath(originalPath: string): string;
+
+    /**
+     * Executes the given shellCommandContent string using this shell. Retrieves spawning options from subclasses.
+     *
+     * @param shellCommandContent
+     * @param extraSpawnOptions
+     */
+    public spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv): ChildProcess {
+        // Allow subclasses to alter shellCommandContent and define other options.
+        const spawnAugmentation = {
+            shellCommandContent: shellCommandContent,
+            spawnOptions: {},
+            spawnArguments: [],
+        };
+        this.augmentSpawn(spawnAugmentation);
+
+        // Combine SpawnOptions. Do this after calling augmentSpawn(), so that it cannot accidentally override extraSpawnOptions.
+        const combinedSpawnOptions: SpawnOptions = Object.assign(
+            spawnAugmentation.spawnOptions,  // Doesn't contain 'cwd' (= working directory) nor "env".
+            extraSpawnOptions,              // Adds "cwd" and "env".
+        );
+
+        // Execute the shell command.
+        debugLog(
+            "Executing shell command: spawn(",
+            spawnAugmentation.shellCommandContent, ",",
+            combinedSpawnOptions, ",",
+            spawnAugmentation.spawnArguments,
+            ") ...",
+        );
+        return spawn(
+            spawnAugmentation.shellCommandContent,
+            spawnAugmentation.spawnArguments,
+            combinedSpawnOptions,
+        );
+    }
+
+    protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation): void;
+
 }
 
+/**
+ * SpawnOptions that only contain the properties "cwd" and "env".
+ *
+ * The name of this interface can be changed to something more general that doesn't contain the property names.
+ */
+export interface CwdAndEnv {
+    cwd: SpawnOptions["cwd"],
+    env: SpawnOptions["env"],
+}
+
+/**
+ * SpawnOptions that do not contain the properties of CwdAndEnv.
+ */
+type ReducedSpawnOptions = Omit<SpawnOptions, keyof CwdAndEnv>;
+
+export interface SpawnAugmentation {
+    spawnOptions: ReducedSpawnOptions,
+    spawnArguments: ReadonlyArray<string>,
+    shellCommandContent: string,
+}

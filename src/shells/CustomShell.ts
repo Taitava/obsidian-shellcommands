@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Shell} from "./Shell";
+import {
+    Shell,
+    SpawnAugmentation,
+} from "./Shell";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 import {Escaper} from "../variables/escapers/Escaper";
 import {PlatformId} from "../settings/SC_MainSettings";
@@ -128,6 +131,10 @@ export class CustomShell extends Shell {
             this.plugin.newError(this.getName() + ": Translating path (" + path + ", " + absoluteOrRelative + ") failed: " + error.message);
             throw error; // Rethrow.
         }
+    }
+
+    protected augmentSpawn(spawnAugmentation: SpawnAugmentation): void {
+        spawnAugmentation.spawnOptions.shell = this.getBinaryPath(); // FIXME: This is temporarily the same as in BuiltinShell. Make it work with custom shells in another commit.
     }
 
 }

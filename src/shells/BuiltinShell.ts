@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Shell} from "./Shell";
+import {
+    Shell,
+    SpawnAugmentation,
+} from "./Shell";
 import {extractFileName} from "../Common";
 
 export abstract class BuiltinShell extends Shell {
@@ -48,4 +51,17 @@ export abstract class BuiltinShell extends Shell {
             return ownedShellBinary.toLocaleLowerCase() === shellFileName.toLocaleLowerCase();
         });
     }
+
+    /**
+     * Tells what shell binary to use during spawning.
+     *
+     * BuiltinShells do not need to alter the executable shell command, nor define any spawn arguments.
+     *
+     * @param spawnAugmentation
+     * @protected
+     */
+    protected augmentSpawn(spawnAugmentation: SpawnAugmentation): void {
+        spawnAugmentation.spawnOptions.shell = this.getBinaryPath();
+    }
+
 }
