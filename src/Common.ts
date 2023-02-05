@@ -385,3 +385,30 @@ export async function getFileYAML(app: App, file: TFile, withDashes: boolean): P
         });
     });
 }
+
+/**
+ * Tries to provide a simple try...catch interface that rethrows unrecognised exceptions on your behalf.
+ * @param act Try to do this. If it succeeds, tryTo() returns what act() returns, and does not touch the other arguments.
+ * @param fix An exception handler that gets called if act() throws an exception that matches any one in bust.
+ * @param bust An array of Error classes that can be caught. Any other exceptions will be rethrown.
+ */
+export function tryTo<returnType>(
+    act: () => returnType,
+    fix: () => returnType,
+    ...bust: Error["constructor"][]
+): returnType {
+    try {
+        // Try to do stuff and see if an exception occurs.
+        return act();
+    } catch (exception) {
+        // An exception has happened. Check if it's included in the list of handleable exceptions.
+        const canCatch: boolean = bust.filter(catchable => exception instanceof catchable.constructor).length > 0;
+        if (canCatch) {
+            // This exception can be handled.
+            return fix();
+        } else {
+            // This exception cannot be handled. Rethrow it.
+            throw exception;
+        }
+    }
+}
