@@ -190,7 +190,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
         new Setting(pathTranslatorContainer)
-            .setDesc("The JavaScript code will be enclosed in a function that receives the following parameters: 'path' is the file/folder path needed to be translated. 'mode' is either \"absolute\" or \"relative\". If absolute, the path starts from the beginning of the file system. If relative, the path starts from the Obsidian vault's root folder. The function should return the converted path.")
+            .setDesc("The JavaScript code will be enclosed in a function that receives the following parameters: 'path' is the file/folder path needed to be translated. 'type' is either \"absolute\" or \"relative\". If absolute, the path starts from the beginning of the file system. If relative, the path starts from the Obsidian vault's root folder. The function should return the converted path.")
         ;
         new Setting(pathTranslatorContainer)
             .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect.")
