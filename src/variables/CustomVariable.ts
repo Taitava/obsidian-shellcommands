@@ -54,6 +54,17 @@ export class CustomVariable extends Variable {
     }
 
     /**
+     * A simpler way to access the value than Variable.getValue(). Both methods can return the value, but Variable.getValue()
+     * would require providing a Shell object (which would not be even used because CustomVariables do not need it) and
+     * it would return a VariableValueResult object.
+     *
+     * @return null if not value is yet set for this CustomVariable, or a string otherwise.
+     */
+    public getCustomVariableValue(): string | null  {
+        return this.value;
+    }
+
+    /**
      * TODO: Make it possible to prevent calling onChange callbacks:
      *  - Make it possible to call the callbacks later outside this class.
      *  - This makes it possible to prevent unnecessary CustomVariableView updates when multiple CustomVariables are assigned values in one go (via Shell command URI).
