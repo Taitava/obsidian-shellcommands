@@ -209,6 +209,17 @@ export default class SC_Plugin extends Plugin {
 		return this.t_shell_commands;
 	}
 
+    /**
+     * TODO: Change this.t_shell_commands to a Map, so that getTShellCommands() returns a Map, and remove this method.
+     */
+    public getTShellCommandsAsMap(): Map<string, TShellCommand> {
+        const tShellCommandsMap = new Map<string, TShellCommand>();
+        for (const shellCommandId of Object.getOwnPropertyNames(this.t_shell_commands)) {
+            tShellCommandsMap.set(shellCommandId, this.t_shell_commands[shellCommandId]);
+        }
+        return tShellCommandsMap;
+    }
+
 	public getVariables() {
 		return this.variables;
 	}

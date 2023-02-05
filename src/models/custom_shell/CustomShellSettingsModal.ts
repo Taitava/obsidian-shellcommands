@@ -29,6 +29,7 @@ import {
     PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
 import {getOperatingSystem} from "../../Common";
+import {TShellCommand} from "../../TShellCommand";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -203,8 +204,21 @@ export class CustomShellSettingsModal extends SC_Modal {
                         // Add to supported platforms
                         this.customShellInstance.configuration.supported_platforms.push(platformId);
                     } else {
-                        // Remove from supported platforms
-                        this.customShellInstance.configuration.supported_platforms.remove(platformId);
+                        // Remove from supported platforms - but only if the shell is not in use.
+                        const relatedTShellCommands = this.customShellInstance.getTShellCommandsByPlatform(platformId);
+                        if (relatedTShellCommands.size > 0) {
+                            // Cannot disable.
+                            const relatedTShellCommandsString: string =
+                                Array.from(relatedTShellCommands.values())
+                                .map((tShellCommand: TShellCommand) => tShellCommand.getAliasOrShellCommand())
+                                .join(', ')
+                            ;
+                            this.plugin.newError("Cannot disable this shell on " + platformName + ": It's used by: " + relatedTShellCommandsString);
+                            toggleComponent.setValue(true); // Re-enable.
+                        } else {
+                            // Can disable.
+                            this.customShellInstance.configuration.supported_platforms.remove(platformId);
+                        }
                     }
                     await this.plugin.saveSettings();
                 }),

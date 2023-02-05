@@ -22,12 +22,16 @@ import {
     CustomShellConfiguration,
     CustomShellModel,
 } from "./CustomShellModel";
-import {SC_MainSettings} from "../../settings/SC_MainSettings";
+import {
+    PlatformId,
+    SC_MainSettings,
+} from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
 import {debugLog} from "../../Debug";
 import {CustomShell} from "../../shells/CustomShell";
 import {Shell} from "../../shells/Shell";
 import {registerShell} from "../../shells/ShellFunctions";
+import {TShellCommand} from "../../TShellCommand";
 
 export class CustomShellInstance extends Instance {
     public readonly parent_configuration: SC_MainSettings;
@@ -67,5 +71,15 @@ export class CustomShellInstance extends Instance {
 
     public getCustomShell(): CustomShell {
         return this.customShell;
+    }
+
+    /**
+     * Returns all TShellCommands that currently use this custom shell on the given platform.
+     */
+    public getTShellCommandsByPlatform(platformId: PlatformId): Map<string, TShellCommand> {
+        return new Map<string, TShellCommand>(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
+            const tShellCommand: TShellCommand = entry[1];
+            return tShellCommand.getShells()[platformId] === this.getId();
+        }));
     }
 }
