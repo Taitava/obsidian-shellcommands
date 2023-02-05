@@ -29,6 +29,7 @@ import {
     PromptConfiguration,
     PromptFieldModel,
 } from "../../../imports";
+import {Shell} from "../../../shells/Shell";
 
 export abstract class PromptField extends Instance {
 
@@ -97,7 +98,7 @@ export abstract class PromptField extends Instance {
         const parsing_result = await parseVariables(
             this.prompt.model.plugin,
             default_value,
-            t_shell_command ? t_shell_command.getShell() : this.prompt.model.plugin.getDefaultShell(), // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+            this.getShell(t_shell_command),
             false,
             t_shell_command,
             sc_event
@@ -142,7 +143,7 @@ export abstract class PromptField extends Instance {
         const parsing_result = await parseVariables(
             this.prompt.model.plugin,
             this.getValue(),
-            t_shell_command ? t_shell_command.getShell() : this.prompt.model.plugin.getDefaultShell(), // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+            this.getShell(t_shell_command),
             false,
             t_shell_command,
             sc_event
@@ -237,6 +238,14 @@ export abstract class PromptField extends Instance {
     public getTargetVariable(): CustomVariable {
         const custom_variable_instance = this.getTargetVariableInstance();
         return custom_variable_instance.getCustomVariable();
+    }
+
+    private getShell(tShellCommand: TShellCommand | null): Shell {
+        if (tShellCommand) {
+            return tShellCommand.getShell(); // FIXME: Add a try...catch block for UnrecognisedShellError
+        }
+        // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+        return this.prompt.model.plugin.getDefaultShell(); // FIXME: Add a try...catch block for UnrecognisedShellError. Decide what to do if a Shell can't be retrieved.
     }
 }
 
