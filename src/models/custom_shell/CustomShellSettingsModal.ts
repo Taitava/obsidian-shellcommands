@@ -110,22 +110,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
         const supportedPlatformsContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         for (const [platformId, platformName] of PlatformNamesMap) {
-            new Setting(supportedPlatformsContainer)
-                .setName("Enable on " + platformName)
-                .addToggle(toggleComponent => toggleComponent
-                    .setValue(this.customShellInstance.configuration.supported_platforms.includes(platformId))
-                    .onChange(async (shouldInclude: boolean) => {
-                        if (shouldInclude) {
-                            // Add to supported platforms
-                            this.customShellInstance.configuration.supported_platforms.push(platformId);
-                        } else {
-                            // Remove from supported platforms
-                            this.customShellInstance.configuration.supported_platforms.remove(platformId);
-                        }
-                        await this.plugin.saveSettings();
-                    }),
-                )
-            ;
+            this.createSupportedHostPlatformField(supportedPlatformsContainer, platformId, platformName);
         }
 
         // Shell operating system
@@ -206,6 +191,25 @@ export class CustomShellSettingsModal extends SC_Modal {
                 )
             ;
         }
+    }
+
+    private createSupportedHostPlatformField(containerElement: HTMLElement, platformId: PlatformId, platformName: string) {
+        new Setting(containerElement)
+            .setName("Enable on " + platformName)
+            .addToggle(toggleComponent => toggleComponent
+                .setValue(this.customShellInstance.configuration.supported_platforms.includes(platformId))
+                .onChange(async (shouldInclude: boolean) => {
+                    if (shouldInclude) {
+                        // Add to supported platforms
+                        this.customShellInstance.configuration.supported_platforms.push(platformId);
+                    } else {
+                        // Remove from supported platforms
+                        this.customShellInstance.configuration.supported_platforms.remove(platformId);
+                    }
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
     }
 
     protected approve(): void {
