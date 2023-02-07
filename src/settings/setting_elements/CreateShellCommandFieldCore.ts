@@ -29,13 +29,27 @@ import {EOL} from "os";
 import {decorateMultilineField} from "./multilineField";
 import {Shell} from "../../shells/Shell";
 
+/**
+ * Creates a multiline text field for inputting a shell command, and an automatic preview text for it, that shows parsed {{variables}}.
+ *
+ * @param plugin
+ * @param container_element
+ * @param setting_icon_and_name
+ * @param shell_command Textual shell command content.
+ * @param shell
+ * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
+ * @param show_autocomplete_menu
+ * @param extra_on_change
+ * @param shell_command_placeholder
+ * @constructor
+ */
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_icon_and_name: string,
     shell_command: string,
     shell: Shell,
-    t_shell_command: TShellCommand,
+    t_shell_command: TShellCommand | null,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
     shell_command_placeholder = "Enter your command"
@@ -99,13 +113,13 @@ export function CreateShellCommandFieldCore(
 /**
  *
  * @param plugin
- * @param shell_command
+ * @param shell_command Textual shell command content.
  * @param shell
- * @param t_shell_command
+ * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<string> {
     const parsing_result = await parseVariables(plugin, shell_command, shell, true, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.

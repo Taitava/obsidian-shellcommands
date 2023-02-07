@@ -30,6 +30,13 @@ import {
 } from "../../settings/SC_MainSettings";
 import {getOperatingSystem} from "../../Common";
 import {TShellCommand} from "../../TShellCommand";
+import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
+import {ShellCommandExecutor} from "../../ShellCommandExecutor";
+import {
+    parseVariables,
+    ParsingResult,
+} from "../../variables/parseVariables";
+import {CustomShell} from "../../shells/CustomShell";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -181,6 +188,8 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect.")
         ;
 
+        // Shell testing field.
+        this.createShellTestField(containerElement);
 
         // Ok button
         const okButtonText: string | undefined = this.okButtonText;
@@ -223,6 +232,93 @@ export class CustomShellSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 }),
             )
+            // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on this platform. Disable clicking the icon if the toggle created above is off.
+        ;
+    }
+
+    private createShellTestField(containerElement: HTMLElement) {
+        // Test the shell.
+        containerElement.createEl("hr"); // Separate non-savable form fields visually from savable settings fields.
+        let testShellCommandContent = "";
+        const customShell: CustomShell = this.customShellInstance.getCustomShell();
+        const testSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
+        new Setting(testSettingsContainer)
+        .setName("Execute a test command using the shell")
+        .setDesc("The content of this field is not saved anywhere! It's meant for temporary testing only. {{variables}} are supported. Output appears in a notification balloon.")
+        .setClass("SC-full-description")
+        .addExtraButton(button => button
+            .setTooltip("Execute the test command using this shell.")
+            .setIcon("run-command")
+            .onClick(async () => {
+                const testShellCommandParsingResult: ParsingResult = await parseVariables(
+                    this.plugin,
+                    testShellCommandContent,
+                    customShell,
+                    true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
+                    null, // No TShellCommand, so no access for default values.
+                    null, // This execution is not launched by an event.
+                );
+                if (testShellCommandParsingResult.succeeded) {
+                    // Can execute.
+                    const childProcess = customShell.spawnChildProcess(
+                        testShellCommandParsingResult.parsed_content as string,
+                        {
+                            cwd: ShellCommandExecutor.getWorkingDirectory(this.plugin),
+                            env: undefined, // TODO: Consider adding support for PATH augmentation here. It would require parsing this.plugin.settings.environment_variable_path_augmentations and extracting environment variable handling logic from ShellCommandExecutor.executeShellCommand() into a new, static method in that class and then calling it from here.
+                        }
+                    );
+                    if (null === childProcess) {
+                        // No spawn() call was made due to some shell configuration error. Just cancel everything.
+                        return;
+                    }
+                    childProcess.on("error", (error: Error) => {
+                        // Probably most errors will NOT end up here, I guess this event occurs for some rare errors.
+                        this.plugin.newError("Shell test failed to execute. Error: " + error.message);
+                    });
+                    childProcess.on("exit", (exitCode: number | null) => {
+                        // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
+
+                        // Show outputs.
+                        let notified = false;
+                        if (null === childProcess.stdout || null == childProcess.stderr) {
+                            throw new Error("Child process's stdout and/or stderr stream is null.");
+                        }
+                        childProcess.stdout.setEncoding("utf8"); // Receive stdout and ...
+                        childProcess.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
+                        const stdout: string = childProcess.stdout.read();
+                        const stderr: string = childProcess.stderr.read();
+                        if (stdout) {
+                            this.plugin.newNotification(stdout);
+                            notified = true;
+                        }
+                        if (stderr) {
+                            this.plugin.newError("[" + exitCode + "]: " + stderr);
+                            notified = true;
+                        }
+                        if (!notified) {
+                            this.plugin.newNotification("Shell test finished. No output was received.");
+                        }
+                    });
+                } else {
+                    // Some variable has failed.
+                    this.plugin.newErrors(testShellCommandParsingResult.error_messages);
+                }
+            }),
+        );
+        CreateShellCommandFieldCore(
+            this.plugin,
+            testSettingsContainer,
+            "",
+            testShellCommandContent,
+            customShell,
+            null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
+            this.plugin.settings.show_autocomplete_menu,
+            (newTestShellCommandContent: string) => testShellCommandContent = newTestShellCommandContent,
+            "Enter a temporary shell command for testing."
+        ).shell_command_setting.setClass("SC-no-description");
+        new Setting(testSettingsContainer)
+        .setDesc("(If you have defined additions to the PATH environment variable in this plugin's settings, they do NOT work in this test. Maybe in the future. However, they should work when you execute real shell commands using this shell.)")
+        .setClass("SC-full-description")
         ;
     }
 

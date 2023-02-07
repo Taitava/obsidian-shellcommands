@@ -211,7 +211,7 @@ export class ShellCommandExecutor {
             return;
         }
 
-        const working_directory = this.getWorkingDirectory();
+        const working_directory = ShellCommandExecutor.getWorkingDirectory(this.plugin);
 
         // Define output channels
         let outputChannels = this.t_shell_command.getOutputChannels();
@@ -473,16 +473,16 @@ export class ShellCommandExecutor {
         });
     }
 
-    private getWorkingDirectory() {
+    public static getWorkingDirectory(plugin: SC_Plugin) {
         // Returns either a user defined working directory, or an automatically detected one.
-        const working_directory = this.plugin.settings.working_directory;
-        if (working_directory.length == 0) {
+        const working_directory = plugin.settings.working_directory;
+        if (working_directory.length === 0) {
             // No working directory specified, so use the vault directory.
-            return getVaultAbsolutePath(this.plugin.app);
+            return getVaultAbsolutePath(plugin.app);
         } else if (!path.isAbsolute(working_directory)) {
             // The working directory is relative.
             // Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
-            return path.join(getVaultAbsolutePath(this.plugin.app), working_directory);
+            return path.join(getVaultAbsolutePath(plugin.app), working_directory);
         }
         return working_directory;
     }
