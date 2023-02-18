@@ -126,20 +126,56 @@ export class CustomShellModel extends Model {
             description: "",
             binary_path: "",
             host_platforms: {
-                darwin: {
-                    enabled: isMacOS(),
-                },
-                linux: {
-                    enabled: isLinux(),
-                },
-                win32: {
-                    enabled: isWindows(),
-                }
+                darwin: CustomShellModel.getDefaultHostPlatformMacOSConfiguration(),
+                linux: CustomShellModel.getDefaultHostPlatformLinuxConfiguration(),
+                win32: CustomShellModel.getDefaultHostPlatformWindowsConfiguration(),
             },
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             path_translator: null,
         };
+    }
+
+    private static getDefaultHostPlatformMacOSConfiguration(): CustomShellConfiguration["host_platforms"]["darwin"] {
+        return {
+            enabled: isMacOS(),
+        };
+    }
+
+    private static getDefaultHostPlatformLinuxConfiguration(): CustomShellConfiguration["host_platforms"]["linux"] {
+        return {
+            enabled: isLinux(),
+        };
+    }
+
+    public static getDefaultHostPlatformWindowsConfiguration(enabled: false): {enabled: false}; // This override is not used at the moment, but have it just for completeness.
+    public static getDefaultHostPlatformWindowsConfiguration(enabled: true): WindowsSpecificShellConfigurationEnabled;
+    public static getDefaultHostPlatformWindowsConfiguration(): WindowsSpecificShellConfiguration;
+    public static getDefaultHostPlatformWindowsConfiguration(enabled: boolean = isWindows()): WindowsSpecificShellConfiguration {
+        if (enabled) {
+            // Return an enabled default configuration. It _must_ include additional properties and their default values.
+            return {
+                enabled: true,
+                // TODO: Add additional properties.
+            };
+        } else {
+            // Return a disabled default configuration. It _could_ include additional properties in theory, but as they
+            // are not inputted by a user in this case, there's no need to include them, so keep it simple and clean.
+            return {
+                enabled: false,
+            };
+        }
+    }
+
+    public static getDefaultHostPlatformConfiguration(platformId: PlatformId): CustomShellConfiguration["host_platforms"][typeof platformId] {
+        switch (platformId) {
+            case "darwin":
+                return CustomShellModel.getDefaultHostPlatformMacOSConfiguration();
+            case "linux":
+                return CustomShellModel.getDefaultHostPlatformLinuxConfiguration();
+            case "win32":
+                return CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
+        }
     }
 
     protected _deleteInstance(customShellInstance: CustomShellInstance): void {
@@ -204,9 +240,7 @@ export interface CustomShellConfiguration {
         linux: {
             enabled: boolean,
         },
-        win32: {
-            enabled: boolean,
-        }
+        win32: WindowsSpecificShellConfiguration,
     },
 
     /**
@@ -241,3 +275,18 @@ export interface CustomShellConfiguration {
      */
     path_translator: string | null,
 }
+
+interface WindowsSpecificAdditionalShellProperties {
+
+    // TODO: Add additional properties.
+}
+
+interface WindowsSpecificShellConfigurationEnabled extends WindowsSpecificAdditionalShellProperties {
+    enabled: true,
+}
+
+interface WindowsSpecificShellConfigurationDisabled extends Partial<WindowsSpecificAdditionalShellProperties> {
+    enabled: false,
+}
+
+type WindowsSpecificShellConfiguration = WindowsSpecificShellConfigurationEnabled | WindowsSpecificShellConfigurationDisabled;

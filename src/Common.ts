@@ -126,8 +126,27 @@ export function cloneObject<ObjectType>(object: Object): ObjectType{
  * @param objects
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function combineObjects(...objects: Object[]) {
+export function combineObjects(...objects: Object[]) { // TODO: Change Object to object (lower-case) and remove eslint-disable-next-line . Do the same for other Objects in this file, too.
     return Object.assign({}, ...objects);
+}
+
+/**
+ * Assigns properties from defaultObject to targetObject, if they don't exist yet in the target. Existing properties are
+ * NOT overridden.
+ *
+ * This can be thought of as merging two objects together, but inline, as opposed to combineObjects(), which creates a
+ * new object.
+ *
+ * @param targetObject
+ * @param defaultObject
+ */
+export function ensureObjectHasProperties(targetObject: object, defaultObject: object) {
+    for (const defaultPropertyName of Object.getOwnPropertyNames(defaultObject) as (keyof typeof defaultObject)[]) {
+        if (undefined === targetObject[defaultPropertyName]) {
+            // A property does not exist on targetObject. Create it, and use a value from defaultObject.
+            targetObject[defaultPropertyName] = defaultObject[defaultPropertyName];
+        }
+    }
 }
 
 export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<SetType> {

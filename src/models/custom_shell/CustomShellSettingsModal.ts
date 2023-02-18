@@ -36,6 +36,7 @@ import {
     ParsingResult,
 } from "../../variables/parseVariables";
 import {CustomShell} from "../../shells/CustomShell";
+import {CustomShellModel} from "./CustomShellModel";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -207,8 +208,8 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Enable on " + platformName)
             .addToggle(toggleComponent => toggleComponent
                 .setValue(this.customShellInstance.configuration.host_platforms[platformId].enabled)
-                .onChange(async (shouldInclude: boolean) => {
-                    if (shouldInclude) {
+                .onChange(async (enable: boolean) => {
+                    if (enable) {
                         // Enable this host platform.
                         this.customShellInstance.enableHostPlatform(platformId);
                         await this.plugin.saveSettings();
@@ -224,10 +225,40 @@ export class CustomShellSettingsModal extends SC_Modal {
                             await this.plugin.saveSettings();
                         }
                     }
+
+                    // Show or hide any platform specific settings.
+                    updatePlatformSpecificSettingsVisibility(enable);
                 }),
             )
             // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on this platform. Disable clicking the icon if the toggle created above is off.
         ;
+
+        // Platform specific settings.
+        let platformSpecificSettingsContainer: HTMLElement;
+        const updatePlatformSpecificSettingsVisibility = (enabled: boolean) => platformSpecificSettingsContainer?.[enabled ? "removeClass" : "addClass"]("SC-hide");
+        if (platformId === "win32") {
+            // Create Windows specific settings.
+            platformSpecificSettingsContainer = containerElement.createDiv({attr: {class: 'SC-indent'}});
+            this.createHostPlatformWindowsSpecificSettings(platformSpecificSettingsContainer);
+
+            // Update Windows settings visibility immediately.
+            updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platforms.win32.enabled);
+        }
+        // If platform is not Windows, platformSpecificSettingsContainer will stay empty, and
+        // updatePlatformSpecificSettingsVisibility() toggles the visibility of an empty container. Not neat, but should
+        // not cause problems, and at least it should offer an easy-ish way to later add settings for other platforms, too.
+    }
+
+    private createHostPlatformWindowsSpecificSettings(containerElement: HTMLElement) {
+        /* Enable this heading if Windows will have more than one setting.
+        new Setting(containerElement)
+            .setName("Windows specific")
+            .setHeading()
+            .setDesc("These settings are only used when your workstation uses Windows.")
+        ;
+        */
+
+        // TODO: Create setting fields.
     }
 
     private createShellTestField(containerElement: HTMLElement) {

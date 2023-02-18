@@ -45,6 +45,13 @@
     font-size: 80%;
 }
 
+/**
+ * Used for indenting setting elements when they have relations to each other.
+ */
+.SC-indent {
+    margin-left: 20px;
+}
+
 /*
  * SETTING GROUPS
  * Related setting fields combined together.

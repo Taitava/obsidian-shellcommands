@@ -32,6 +32,7 @@ import {CustomShell} from "../../shells/CustomShell";
 import {Shell} from "../../shells/Shell";
 import {registerShell} from "../../shells/ShellFunctions";
 import {TShellCommand} from "../../TShellCommand";
+import {ensureObjectHasProperties} from "../../Common";
 
 export class CustomShellInstance extends Instance {
     public readonly parent_configuration: SC_MainSettings;
@@ -94,6 +95,14 @@ export class CustomShellInstance extends Instance {
      */
     public enableHostPlatform(platformId: PlatformId): void {
         this.configuration.host_platforms[platformId].enabled = true;
+
+        // Ensure the host platform configuration contains all properties a default configuration contains. A disabled
+        // platform's configuration might be condensed to only contain {enabled: false}. However, default values MUST NOT
+        // override any possibly existing values.
+        ensureObjectHasProperties(
+            this.configuration.host_platforms[platformId],
+            CustomShellModel.getDefaultHostPlatformConfiguration(platformId),
+        );
     }
 
     /**
@@ -105,6 +114,10 @@ export class CustomShellInstance extends Instance {
      */
     private disableHostPlatform(platformId: PlatformId): void {
         this.configuration.host_platforms[platformId].enabled = false;
+
+        // Do not remove additional configuration properties. Even though setting 'enabled' to false makes the additional
+        // properties not to be in effect, they should be conserved, as they might have been inputted by a user and might
+        // be needed if the platform is re-enabled later.
     }
 
     /**
