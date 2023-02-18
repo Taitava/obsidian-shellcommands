@@ -75,8 +75,10 @@ export class CustomShellInstance extends Instance {
 
     /**
      * Returns all TShellCommands that currently use this custom shell on the given platform.
+     *
+     * @private Can be made public, if needed.
      */
-    public getTShellCommandsByPlatform(platformId: PlatformId): Map<string, TShellCommand> {
+    private getTShellCommandsByPlatform(platformId: PlatformId): Map<string, TShellCommand> {
         return new Map<string, TShellCommand>(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
             const tShellCommand: TShellCommand = entry[1];
             return tShellCommand.getShells()[platformId] === this.getId();
@@ -101,7 +103,32 @@ export class CustomShellInstance extends Instance {
      *
      * @param platformId
      */
-    public disableHostPlatform(platformId: PlatformId): void {
+    private disableHostPlatform(platformId: PlatformId): void {
         this.configuration.host_platforms[platformId].enabled = false;
+    }
+
+    /**
+     * Calls disableHostPlatform(), but only if the shell is not used by any shell command on the given platform.
+     *
+     * Note that the caller should save plugin settings, it's not done by this method.
+     *
+     * @param platformId
+     * @return If disabling failed: A string containing shell command aliases (or command contents) that use this shell. If disabling succeeded: true.
+     */
+    public disableHostPlatformIfNotUsed(platformId: PlatformId): true | string {
+        const relatedTShellCommands = this.getTShellCommandsByPlatform(platformId);
+        if (relatedTShellCommands.size > 0) {
+            // Cannot disable.
+            const relatedTShellCommandsString: string =
+                Array.from(relatedTShellCommands.values())
+                .map((tShellCommand: TShellCommand) => tShellCommand.getAliasOrShellCommand())
+                .join(', ')
+            ;
+            return relatedTShellCommandsString;
+        } else {
+            // Can disable.
+            this.disableHostPlatform(platformId);
+            return true;
+        }
     }
 }

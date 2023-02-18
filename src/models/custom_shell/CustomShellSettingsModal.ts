@@ -29,7 +29,6 @@ import {
     PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
 import {getOperatingSystem} from "../../Common";
-import {TShellCommand} from "../../TShellCommand";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
 import {
@@ -212,24 +211,19 @@ export class CustomShellSettingsModal extends SC_Modal {
                     if (shouldInclude) {
                         // Enable this host platform.
                         this.customShellInstance.enableHostPlatform(platformId);
+                        await this.plugin.saveSettings();
                     } else {
                         // Disable this host platform - but only if the shell is not in use.
-                        const relatedTShellCommands = this.customShellInstance.getTShellCommandsByPlatform(platformId);
-                        if (relatedTShellCommands.size > 0) {
+                        const disablingResult = this.customShellInstance.disableHostPlatformIfNotUsed(platformId);
+                        if ("string" === typeof disablingResult) {
                             // Cannot disable.
-                            const relatedTShellCommandsString: string =
-                                Array.from(relatedTShellCommands.values())
-                                .map((tShellCommand: TShellCommand) => tShellCommand.getAliasOrShellCommand())
-                                .join(', ')
-                            ;
-                            this.plugin.newError("Cannot disable this shell on " + platformName + ": It's used by: " + relatedTShellCommandsString);
+                            this.plugin.newError("Cannot disable this shell on " + platformName + " because it's used by: " + disablingResult);
                             toggleComponent.setValue(true); // Re-enable.
                         } else {
-                            // Can disable.
-                            this.customShellInstance.disableHostPlatform(platformId);
+                            // Save the disablation.
+                            await this.plugin.saveSettings();
                         }
                     }
-                    await this.plugin.saveSettings();
                 }),
             )
             // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on this platform. Disable clicking the icon if the toggle created above is off.
