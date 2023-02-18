@@ -28,6 +28,7 @@ import {PowerShellEscaper} from "../variables/escapers/PowerShellEscaper";
 import {ShEscaper} from "../variables/escapers/ShEscaper";
 import {
     getOperatingSystem,
+    isWindows,
     normalizePath2,
 } from "../Common";
 import SC_Plugin from "../main";
@@ -155,9 +156,19 @@ export class CustomShell extends Shell {
         // CustomShells need to be able to define their own shell invoking command line options, so the Node.js's shell feature would be too limited.
         spawnAugmentation.spawnOptions.shell = false; // It's probably false by default in Node.js's spawn(), but make it explicit.
 
+        // Windows specific settings.
+        const windowsSpecificSettings = this.getConfiguration().host_platforms.win32;
+        if (isWindows() && windowsSpecificSettings.enabled) { // The .enabled check tells TypeScript that .quote_shell_arguments surely exists.
+            // If .quote_shell_arguments is false, deny Node.js's child_process.spawn() from:
+            // - adding double quotes "" around arguments that contain spaces,
+            // - post-fixing existing double quotes with backslashes \
+            // Note that .quote_shell_arguments is inverted comparing to windowsVerbatimArguments.
+            spawnAugmentation.spawnOptions.windowsVerbatimArguments = !windowsSpecificSettings.quote_shell_arguments;
+        }
+
         // Use shell command content as a spawn argument instead of letting spawn() execute it directly.
         spawnAugmentation.spawnArguments = [
-            spawnAugmentation.shellCommandContent, // FIXME: Doesn't work usually. Only works if the command contains no parameters. E.g. `pwd` works, but `echo Hello` does not work. At least in WSL.
+            spawnAugmentation.shellCommandContent,
             // TODO: Add an ability to define additional arguments in CustomShellConfiguration - both before and after the shell command content.
         ];
 

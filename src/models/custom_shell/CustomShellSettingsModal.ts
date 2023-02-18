@@ -250,7 +250,7 @@ export class CustomShellSettingsModal extends SC_Modal {
     }
 
     private createHostPlatformWindowsSpecificSettings(containerElement: HTMLElement) {
-        /* Enable this heading if Windows will have more than one setting.
+        /* Enable this heading if Windows will have more than one setting. Then remove the texts "Windows: " and "The setting doesn't affect macOS/Linux" below.
         new Setting(containerElement)
             .setName("Windows specific")
             .setHeading()
@@ -258,7 +258,23 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
         */
 
-        // TODO: Create setting fields.
+        // 'Quote shell arguments' setting.
+        const quoteShellArgumentsInitialValue: boolean =
+            this.customShellInstance.configuration.host_platforms.win32.quote_shell_arguments // Use value from user configuration if defined.
+            ?? CustomShellModel.getDefaultHostPlatformWindowsConfiguration(true).quote_shell_arguments // Otherwise get a default value.
+        ;
+        new Setting(containerElement)
+            .setName("Windows: Quote shell arguments")
+            .setDesc('Wraps shell arguments in double quotes if they contain spaces (e.g. echo Hi becomes "echo Hi"). If arguments contain double quotes already, they are escaped by preceding them with a backslash (e.g. echo "Hi there" becomes "echo \\"Hi there\\""). If your shell complains that a command does not exist, try changing this setting. (The setting doesn\'t affect macOS/Linux. The quoting is done by Node.js, not by the SC plugin.)')
+            .setClass("SC-full-description")
+            .addToggle(toggleComponent => toggleComponent
+                .setValue(quoteShellArgumentsInitialValue)
+                .onChange(async (quoteShellArgumentsNewValue: boolean) => {
+                    this.customShellInstance.configuration.host_platforms.win32.quote_shell_arguments = quoteShellArgumentsNewValue;
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
     }
 
     private createShellTestField(containerElement: HTMLElement) {

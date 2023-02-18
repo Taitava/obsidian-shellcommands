@@ -156,7 +156,7 @@ export class CustomShellModel extends Model {
             // Return an enabled default configuration. It _must_ include additional properties and their default values.
             return {
                 enabled: true,
-                // TODO: Add additional properties.
+                quote_shell_arguments: true,
             };
         } else {
             // Return a disabled default configuration. It _could_ include additional properties in theory, but as they
@@ -278,7 +278,13 @@ export interface CustomShellConfiguration {
 
 interface WindowsSpecificAdditionalShellProperties {
 
-    // TODO: Add additional properties.
+    /**
+     * If true, quotes are added around arguments that contain spaces, and already existing quotes are escaped
+     * by preceding them with backslashes. Default: true.
+     *
+     * This is an inverse switch for Node.js's child_process.spawn()'s 'windowsVerbatimArguments' option.
+     */
+    quote_shell_arguments: boolean,
 }
 
 interface WindowsSpecificShellConfigurationEnabled extends WindowsSpecificAdditionalShellProperties {
