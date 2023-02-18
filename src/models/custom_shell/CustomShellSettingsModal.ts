@@ -207,13 +207,13 @@ export class CustomShellSettingsModal extends SC_Modal {
         new Setting(containerElement)
             .setName("Enable on " + platformName)
             .addToggle(toggleComponent => toggleComponent
-                .setValue(this.customShellInstance.configuration.host_platforms.includes(platformId))
+                .setValue(this.customShellInstance.configuration.host_platforms[platformId].enabled)
                 .onChange(async (shouldInclude: boolean) => {
                     if (shouldInclude) {
-                        // Add to supported platforms
-                        this.customShellInstance.configuration.host_platforms.push(platformId);
+                        // Enable this host platform.
+                        this.customShellInstance.enableHostPlatform(platformId);
                     } else {
-                        // Remove from supported platforms - but only if the shell is not in use.
+                        // Disable this host platform - but only if the shell is not in use.
                         const relatedTShellCommands = this.customShellInstance.getTShellCommandsByPlatform(platformId);
                         if (relatedTShellCommands.size > 0) {
                             // Cannot disable.
@@ -226,7 +226,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                             toggleComponent.setValue(true); // Re-enable.
                         } else {
                             // Can disable.
-                            this.customShellInstance.configuration.host_platforms.remove(platformId);
+                            this.customShellInstance.disableHostPlatform(platformId);
                         }
                     }
                     await this.plugin.saveSettings();

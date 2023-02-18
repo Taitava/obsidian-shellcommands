@@ -82,4 +82,26 @@ export class CustomShellInstance extends Instance {
             return tShellCommand.getShells()[platformId] === this.getId();
         }));
     }
+
+    /**
+     * Marks the given host operating system as enabled in CustomShellConfiguration.
+     *
+     * Note that the caller should save plugin settings, it's not done by this method.
+     *
+     * @param platformId
+     */
+    public enableHostPlatform(platformId: PlatformId): void {
+        this.configuration.host_platforms[platformId].enabled = true;
+    }
+
+    /**
+     * Marks the given host operating system as disabled in CustomShellConfiguration.
+     *
+     * Note that the caller should save plugin settings, it's not done by this method.
+     *
+     * @param platformId
+     */
+    public disableHostPlatform(platformId: PlatformId): void {
+        this.configuration.host_platforms[platformId].enabled = false;
+    }
 }

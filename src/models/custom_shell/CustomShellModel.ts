@@ -28,7 +28,8 @@ import {Setting} from "obsidian";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {debugLog} from "../../Debug";
 import {
-    getOperatingSystem,
+    isLinux,
+    isMacOS,
     isWindows,
 } from "../../Common";
 import {
@@ -124,9 +125,17 @@ export class CustomShellModel extends Model {
             name: "",
             description: "",
             binary_path: "",
-            host_platforms: [
-                getOperatingSystem(), // Support the current OS by default, nothing else.
-            ],
+            host_platforms: {
+                darwin: {
+                    enabled: isMacOS(),
+                },
+                linux: {
+                    enabled: isLinux(),
+                },
+                win32: {
+                    enabled: isWindows(),
+                }
+            },
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             path_translator: null,
@@ -188,7 +197,17 @@ export interface CustomShellConfiguration {
     /**
      * A list of host operating systems on which this shell can be used.
      */
-    host_platforms: PlatformId[],
+    host_platforms: {
+        darwin: {
+            enabled: boolean,
+        },
+        linux: {
+            enabled: boolean,
+        },
+        win32: {
+            enabled: boolean,
+        }
+    },
 
     /**
      * An operating system that this shell virtualizes, uses as a subsystem, or otherwise emulates. Used for determining:

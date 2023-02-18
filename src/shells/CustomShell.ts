@@ -70,7 +70,15 @@ export class CustomShell extends Shell {
     }
 
     public getSupportedHostPlatforms(): PlatformId[] {
-        return this.getConfiguration().host_platforms;
+        const hostPlatforms = this.getConfiguration().host_platforms;
+        const supportedHostPlatforms: PlatformId[] = [];
+        let platformId: PlatformId;
+        for (platformId of Object.getOwnPropertyNames(hostPlatforms) as (keyof typeof hostPlatforms)[]) {
+            if (hostPlatforms[platformId].enabled) {
+                supportedHostPlatforms.push(platformId);
+            }
+        }
+        return supportedHostPlatforms;
     }
 
     /**
