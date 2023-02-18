@@ -32,6 +32,7 @@ import {
 } from "../Common";
 import SC_Plugin from "../main";
 import * as fs from "fs";
+import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 
 export class CustomShell extends Shell {
 
@@ -43,11 +44,11 @@ export class CustomShell extends Shell {
     }
 
     public getBinaryPath(): string {
-        return this.customShellInstance.configuration.binary_path;
+        return this.getConfiguration().binary_path;
     }
 
     protected getEscaper(rawValue: string): Escaper | null {
-        const escaper = this.customShellInstance.configuration.escaper;
+        const escaper = this.getConfiguration().escaper;
         switch (escaper) {
             case "PowerShell":
                 return new PowerShellEscaper(rawValue);
@@ -65,11 +66,11 @@ export class CustomShell extends Shell {
     }
 
     public getName(): string {
-        return this.customShellInstance.configuration.name;
+        return this.getConfiguration().name;
     }
 
     public getSupportedPlatforms(): PlatformId[] {
-        return this.customShellInstance.configuration.supported_platforms;
+        return this.getConfiguration().supported_platforms;
     }
 
     /**
@@ -77,7 +78,7 @@ export class CustomShell extends Shell {
      * @private Can be made public if needed.
      */
     private getShellPlatformId(): PlatformId {
-        return this.customShellInstance.configuration.shell_platform ?? getOperatingSystem();
+        return this.getConfiguration().shell_platform ?? getOperatingSystem();
     }
 
     /**
@@ -112,7 +113,7 @@ export class CustomShell extends Shell {
     }
 
     private callPathTranslator(path: string, absoluteOrRelative: "absolute" | "relative"): string {
-        const pathTranslatorCode: string | null = this.customShellInstance.configuration.path_translator;
+        const pathTranslatorCode: string | null = this.getConfiguration().path_translator;
         if (null === pathTranslatorCode) {
             // No translator is defined.
             // Return the path without modifications.
@@ -157,4 +158,7 @@ export class CustomShell extends Shell {
         return true; // Allow execution.
     }
 
+    private getConfiguration(): CustomShellConfiguration {
+        return this.customShellInstance.configuration;
+    }
 }
