@@ -99,7 +99,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         // Binary path
         new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Executable binary file path")
-            .setDesc("Can be absolute, or relative from the working directory defined in the main settings pane.")
+            .setDesc("This should only contain a directory and a file name (or just a file name), not any possible command line options/arguments. They will be configured below.")
             .addText(textComponent => textComponent
                 .setValue(this.customShellInstance.configuration.binary_path)
                 .onChange(async (newBinaryPath: string) => {
@@ -220,7 +220,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                             this.plugin.newError("Cannot disable this shell on " + platformName + " because it's used by: " + disablingResult);
                             toggleComponent.setValue(true); // Re-enable.
                         } else {
-                            // Save the disablation.
+                            // Save the disabling.
                             await this.plugin.saveSettings();
                         }
                     }
@@ -238,7 +238,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const testSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(testSettingsContainer)
         .setName("Execute a test command using the shell")
-        .setDesc("The content of this field is not saved anywhere! It's meant for temporary testing only. {{variables}} are supported. Output appears in a notification balloon.")
+        .setDesc("The content of this field is not saved anywhere! It's meant for temporary testing only. {{variables}} are supported. Output appears in a notification balloon. When playing around, keep in mind that the command is really executed, so avoid using possibly dangerous commands.")
         .setClass("SC-full-description")
         .addExtraButton(button => button
             .setTooltip("Execute the test command using this shell.")
