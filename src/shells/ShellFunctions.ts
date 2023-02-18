@@ -84,7 +84,7 @@ export function getShells() {
  */
 export function getShellsForPlatform(platformId: PlatformId) {
     return Array.from(shells).filter((shell: Shell) => {
-        return shell.getSupportedPlatforms().includes(platformId);
+        return shell.getSupportedHostPlatforms().includes(platformId);
     });
 }
 

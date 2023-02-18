@@ -39,7 +39,7 @@ export class Shell_Zsh extends BuiltinShell {
         return "/bin/zsh";
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "darwin", // macOS
             "linux",

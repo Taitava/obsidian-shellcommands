@@ -62,7 +62,7 @@ export abstract class Shell {
     /**
      * Determines which operating systems this shell can be used on.
      */
-    public abstract getSupportedPlatforms(): PlatformId[];
+    public abstract getSupportedHostPlatforms(): PlatformId[];
 
     /**
      * Returns a character used to separate different paths in the PATH environment variable. Note that a _path separator_

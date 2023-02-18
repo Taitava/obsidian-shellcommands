@@ -69,8 +69,8 @@ export class CustomShell extends Shell {
         return this.getConfiguration().name;
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
-        return this.getConfiguration().supported_platforms;
+    public getSupportedHostPlatforms(): PlatformId[] {
+        return this.getConfiguration().host_platforms;
     }
 
     /**

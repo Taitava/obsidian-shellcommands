@@ -40,7 +40,7 @@ export class Shell_Bash extends BuiltinShell {
         return "/bin/bash";
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "darwin", // macOS
             "linux",

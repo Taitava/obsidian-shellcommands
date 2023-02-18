@@ -39,7 +39,7 @@ export class Shell_Dash extends BuiltinShell {
         return "/bin/dash";
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "darwin", // macOS
             "linux",

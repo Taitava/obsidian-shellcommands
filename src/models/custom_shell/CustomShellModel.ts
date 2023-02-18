@@ -124,7 +124,7 @@ export class CustomShellModel extends Model {
             name: "",
             description: "",
             binary_path: "",
-            supported_platforms: [
+            host_platforms: [
                 getOperatingSystem(), // Support the current OS by default, nothing else.
             ],
             shell_platform: null,
@@ -188,7 +188,7 @@ export interface CustomShellConfiguration {
     /**
      * A list of host operating systems on which this shell can be used.
      */
-    supported_platforms: PlatformId[],
+    host_platforms: PlatformId[],
 
     /**
      * An operating system that this shell virtualizes, uses as a subsystem, or otherwise emulates. Used for determining:

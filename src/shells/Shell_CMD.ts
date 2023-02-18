@@ -39,7 +39,7 @@ export class Shell_CMD extends BuiltinShell {
         return "CMD.EXE";
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "win32",
         ];

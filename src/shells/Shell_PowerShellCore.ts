@@ -47,7 +47,7 @@ export class Shell_PowerShellCore extends BuiltinShell {
     /**
      * PowerShell Core could be used on all platforms, but SC currently supports it only on Windows.
      */
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "win32",
             // "darwin", // Support for these can be added later.

@@ -40,7 +40,7 @@ export class Shell_PowerShell5 extends BuiltinShell {
         return "PowerShell.exe";
     }
 
-    public getSupportedPlatforms(): PlatformId[] {
+    public getSupportedHostPlatforms(): PlatformId[] {
         return [
             "win32",
         ];
