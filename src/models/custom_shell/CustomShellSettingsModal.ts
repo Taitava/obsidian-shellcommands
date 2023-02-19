@@ -165,7 +165,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const pathTranslatorContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(pathTranslatorContainer)
             .setName("Path translator")
-            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different path than in the host operating system. A custom JavaScript function can be defined to convert file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done here - they are already changed based on the 'Shell's operating system' setting, if needed. Path translation is optional.")
+            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
             .setClass("SC-path-translator-setting")
             .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
                 .setValue(this.customShellInstance.configuration.path_translator ?? "")
@@ -182,10 +182,10 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
         new Setting(pathTranslatorContainer)
-            .setDesc("The JavaScript code will be enclosed in a function that receives the following parameters: 'path' is the file/folder path needed to be translated. 'type' is either \"absolute\" or \"relative\". If absolute, the path starts from the beginning of the file system. If relative, the path starts from the Obsidian vault's root folder. The function should return the converted path.")
+            .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + hostPlatformName + " file system), and the function should convert it to start from the root of the sub-environment.")
         ;
         new Setting(pathTranslatorContainer)
-            .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect.")
+            .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
         ;
 
         // Shell testing field.

@@ -111,7 +111,7 @@ export class CustomShell extends Shell {
         const normalizedPath = normalizePath2(originalPath, this.getDirectorySeparator() === "\\"); // TODO: Think about changing normalizePath2() so that it would take the directory separator as a parameter, rather than a boolean. There's also a possible issue as normalizePath2() does not convert \ to / if needed, it can only convert the other way around, / to \ .
 
         // 2. Pass to a custom translator (if defined).
-        return this.callPathTranslator(normalizedPath, "absolute");
+        return this.callAbsolutePathTranslator(normalizedPath);
     }
 
     public translateRelativePath(originalPath: string): string {
@@ -119,10 +119,13 @@ export class CustomShell extends Shell {
         const normalizedPath = normalizePath2(originalPath, this.getDirectorySeparator() === "\\"); // TODO: Same as above.
 
         // 2. Pass to a custom translator (if defined).
-        return this.callPathTranslator(normalizedPath, "relative");
+        // Actually, custom translator support for relative paths was removed before the custom shell feature was released,
+        // as I can't think about any need for it. If needed, the feature can be added later, but it should use a separate
+        // user defined function to make it cleaner - no need to have if (type === 'relative') { ... } code in the function.
+        return normalizedPath;
     }
 
-    private callPathTranslator(path: string, absoluteOrRelative: "absolute" | "relative"): string {
+    private callAbsolutePathTranslator(path: string): string {
         const pathTranslatorCode: string | null = this.getConfiguration().path_translator;
         if (null === pathTranslatorCode) {
             // No translator is defined.
@@ -133,14 +136,14 @@ export class CustomShell extends Shell {
         try {
             // Create a JS function for doing the translation.
             const translatorFunction = new Function(
-                "path", "type", // Parameter names
+                "absolutePath", // Parameter names
                 pathTranslatorCode // Function content
             );
-            return translatorFunction(path, absoluteOrRelative);
+            return translatorFunction(path);
         } catch (error) {
             // Something failed.
             // Display an error balloon.
-            this.plugin.newError(this.getName() + ": Translating path (" + path + ", " + absoluteOrRelative + ") failed: " + error.message);
+            this.plugin.newError(this.getName() + ": Translating path (" + path + ") failed: " + error.message);
             throw error; // Rethrow.
         }
     }

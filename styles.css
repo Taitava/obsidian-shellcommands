@@ -189,7 +189,7 @@ li.SC-custom-variable-view-list-item {
  * CUSTOM SHELL SETTINGS
  */
 div.SC-path-translator-setting div.setting-item-control::before {
-    content: "function (path, type) {";
+    content: "function (absolutePath) {";
     white-space: nowrap;
 }
 
