@@ -29,11 +29,21 @@ import {ShEscaper} from "../variables/escapers/ShEscaper";
 import {
     getOperatingSystem,
     isWindows,
+    mergeSets,
     normalizePath2,
 } from "../Common";
 import SC_Plugin from "../main";
 import * as fs from "fs";
 import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
+import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
+import {
+    parseVariables,
+    ParsingResult,
+} from "../variables/parseVariables";
+import {VariableSet} from "../variables/loadVariables";
+import {TShellCommand} from "../TShellCommand";
+import {SC_Event} from "../events/SC_Event";
+import {debugLog} from "../Debug";
 
 export class CustomShell extends Shell {
 
@@ -148,7 +158,8 @@ export class CustomShell extends Shell {
         }
     }
 
-    protected augmentSpawn(spawnAugmentation: SpawnAugmentation): boolean {
+    protected async augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean> {
+        const debugLogBase = this.constructor.name + ".augmentSpawn(): ";
         const shellBinaryPath = this.getBinaryPath();
         if (!fs.existsSync(shellBinaryPath)) {
             // Shell binary does not exist.
@@ -170,11 +181,31 @@ export class CustomShell extends Shell {
             spawnAugmentation.spawnOptions.windowsVerbatimArguments = !windowsSpecificSettings.quote_shell_arguments;
         }
 
-        // Use shell command content as a spawn argument instead of letting spawn() execute it directly.
-        spawnAugmentation.spawnArguments = [
-            spawnAugmentation.shellCommandContent,
-            // TODO: Add an ability to define additional arguments in CustomShellConfiguration - both before and after the shell command content.
-        ];
+        // Define shell arguments.
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, spawnAugmentation.shellCommandContent);
+        const rawShellArguments = this.getConfiguration().shell_arguments;
+        const parsedShellArguments: string[] = [];
+        for (const rawShellArgument of rawShellArguments) {
+            debugLog(debugLogBase + "Parsing shell argument: " + rawShellArgument);
+            const shellArgumentParsingResult: ParsingResult = await parseVariables(
+                this.plugin,
+                rawShellArgument,
+                this,
+                false, // No escaping, because we are not in the shell's context yet, we are executing the shell binary file in a non-shell context.
+                tShellCommand,
+                scEvent,
+                mergeSets(this.plugin.getVariables(), new VariableSet([shellCommandContentVariable])),
+            );
+            if (!shellArgumentParsingResult.succeeded) {
+                // Shell argument parsing failed.
+                debugLog(debugLogBase + "Parsing failed for shell argument: " + rawShellArgument);
+                this.plugin.newErrors(shellArgumentParsingResult.error_messages);
+                return false; // Deny execution.
+            }
+            debugLog(debugLogBase + "Shell argument " + rawShellArgument + " was successfully parsed to: " + shellArgumentParsingResult.parsed_content);
+            parsedShellArguments.push(shellArgumentParsingResult.parsed_content as string);
+        }
+        spawnAugmentation.spawnArguments = parsedShellArguments;
 
         // Tell spawn() to use the shell binary path as an executable command.
         spawnAugmentation.shellCommandContent = shellBinaryPath; // Needs to come AFTER the original shellCommandContent is taken to spawnArguments!

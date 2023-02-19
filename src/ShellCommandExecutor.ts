@@ -169,7 +169,7 @@ export class ShellCommandExecutor {
                         error_messages: [],
                     };
                     debugLog("Will call ShellCommandExecutor.executeShellCommand().");
-                    this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
+                    await this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
                 } else {
                     // Parsing has failed.
                     debugLog("Parsing the rest of the variables failed.");
@@ -191,7 +191,7 @@ export class ShellCommandExecutor {
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
-    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): void {
+    private async executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): Promise<void> {
         // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
         // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
         // shell can be written there.
@@ -264,7 +264,7 @@ export class ShellCommandExecutor {
 
             // Execute the shell command
             try {
-                const child_process = shell.spawnChildProcess(shell_command, options);
+                const child_process = await shell.spawnChildProcess(shell_command, options, this.t_shell_command, this.sc_event);
                 if (null === child_process) {
                     // No spawn() call was made due to some shell configuration error. Just cancel everything.
                     return;

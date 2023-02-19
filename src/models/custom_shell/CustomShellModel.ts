@@ -125,6 +125,7 @@ export class CustomShellModel extends Model {
             name: "",
             description: "",
             binary_path: "",
+            shell_arguments: ["-c", "{{shell_command_content}}"],
             host_platforms: {
                 darwin: CustomShellModel.getDefaultHostPlatformMacOSConfiguration(),
                 linux: CustomShellModel.getDefaultHostPlatformLinuxConfiguration(),
@@ -229,6 +230,8 @@ export interface CustomShellConfiguration {
      * Either just a file name, or a complete path to the shell's executable binary file.
      */
     binary_path: string,
+
+    shell_arguments: string[],
 
     /**
      * A list of host operating systems on which this shell can be used.

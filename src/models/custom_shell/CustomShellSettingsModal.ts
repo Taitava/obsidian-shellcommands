@@ -21,6 +21,7 @@ import {SC_Modal} from "../../SC_Modal";
 import SC_Plugin from "../../main";
 import {
     Setting,
+    TextAreaComponent,
 } from "obsidian";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {
@@ -44,6 +45,8 @@ import {IRawArguments} from "../../variables/Variable";
 import {Variable_VaultPath} from "../../variables/Variable_VaultPath";
 import {Variable_FolderPath} from "../../variables/Variable_FolderPath";
 import {Variable_FilePath} from "../../variables/Variable_FilePath";
+import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
+import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -114,6 +117,30 @@ export class CustomShellSettingsModal extends SC_Modal {
                     this.customShellInstance.configuration.binary_path = newBinaryPath;
                     await this.plugin.saveSettings();
                 }),
+            )
+        ;
+
+        // Shell arguments.
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // For getting an autocomplete item.
+        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
+            .setName("Shell arguments")
+            .setDesc("Command line options/arguments to execute the shell's binary file with. The executable shell command should be one of them; {{shell_command_content}} provides it. Other {{variables}} are supported, too. No special characters are escaped in variable values. Separate different arguments with a newline. Possible newlines coming from {{variable}} values are not considered as separators.")
+            .addTextArea((textareaComponent: TextAreaComponent) => textareaComponent
+                .setValue(this.customShellInstance.configuration.shell_arguments.join("\n"))
+                .onChange(async (concatenatedShellArguments) => {
+                    this.customShellInstance.configuration.shell_arguments = concatenatedShellArguments.split("\n");
+                    await this.plugin.saveSettings();
+                })
+                .then((textareaComponent: TextAreaComponent) => {
+                    if (this.plugin.settings.show_autocomplete_menu) {
+                        createAutocomplete(
+                            this.plugin,
+                            textareaComponent.inputEl,
+                            () => textareaComponent.onChanged(),
+                            shellCommandContentVariable.getAutocompleteItems(),
+                        );
+                    }
+                })
             )
         ;
 
@@ -353,12 +380,14 @@ export class CustomShellSettingsModal extends SC_Modal {
                 );
                 if (testShellCommandParsingResult.succeeded) {
                     // Can execute.
-                    const childProcess = customShell.spawnChildProcess(
+                    const childProcess = await customShell.spawnChildProcess(
                         testShellCommandParsingResult.parsed_content as string,
                         {
                             cwd: ShellCommandExecutor.getWorkingDirectory(this.plugin),
                             env: undefined, // TODO: Consider adding support for PATH augmentation here. It would require parsing this.plugin.settings.environment_variable_path_augmentations and extracting environment variable handling logic from ShellCommandExecutor.executeShellCommand() into a new, static method in that class and then calling it from here.
-                        }
+                        },
+                        null, // No TShellCommand is available during testing.
+                        null, // Testing is not triggered by any SC_Event.
                     );
                     if (null === childProcess) {
                         // No spawn() call was made due to some shell configuration error. Just cancel everything.

@@ -26,6 +26,8 @@ import {
     SpawnOptions,
 } from "child_process";
 import {debugLog} from "../Debug";
+import {TShellCommand} from "../TShellCommand";
+import {SC_Event} from "../events/SC_Event";
 
 export abstract class Shell {
 
@@ -123,15 +125,17 @@ export abstract class Shell {
      *
      * @param shellCommandContent
      * @param extraSpawnOptions
+     * @param tShellCommand Used for getting default values when parsing shell arguments.
+     * @param scEvent Allows using {{event_*}} variables in shell arguments.
      */
-    public spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv): ChildProcess | null {
+    public async spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<ChildProcess | null> {
         // Allow subclasses to alter shellCommandContent and define other options.
         const spawnAugmentation = {
             shellCommandContent: shellCommandContent,
             spawnOptions: {},
             spawnArguments: [],
         };
-        if (!this.augmentSpawn(spawnAugmentation)) {
+        if (!await this.augmentSpawn(spawnAugmentation, tShellCommand, scEvent)) {
             // Something failed in the augmentation and execution should be cancelled. An error notification is already displayed.
             return null;
         }
@@ -159,10 +163,12 @@ export abstract class Shell {
 
     /**
      * @param spawnAugmentation
+     * @param tShellCommand Used for getting default values when parsing shell arguments.
+     * @param scEvent Allows using {{event_*}} variables in shell arguments.
      * @return False: Indicate that execution should be cancelled. True: can execute the shell command.
      * @protected
      */
-    protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation): boolean;
+    protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean>;
 
 }
 
