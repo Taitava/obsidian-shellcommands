@@ -153,9 +153,9 @@ export class CustomShellSettingsModal extends SC_Modal {
                     "PowerShell": "PowerShell style with ` as escape character",
                     "none": "No escaping (not recommended)",
                 })
-                .setValue(this.customShellInstance.configuration.escaper)
-                .onChange(async (newEscaper) => {
-                    this.customShellInstance.configuration.escaper = newEscaper as "UnixShell" | "PowerShell" | "none";
+                .setValue(this.customShellInstance.configuration.escaper ?? "none")
+                .onChange(async (newEscaper: "UnixShell" | "PowerShell" | "none") => {
+                    this.customShellInstance.configuration.escaper = newEscaper === "none" ? null : newEscaper;
                     await this.plugin.saveSettings();
                 })
             )

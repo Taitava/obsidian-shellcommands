@@ -259,7 +259,7 @@ export interface CustomShellConfiguration {
      * Set to null if the shell does not support any of the predefined escaping mechanisms. Null means escaping won't be
      * done at all, but it's highly discouraged!
      */
-    escaper: "UnixShell" | "PowerShell" | "none",
+    escaper: "UnixShell" | "PowerShell" | null,
 
     /**
      * A JavaScript function that receives a path working in the host operating system, and returns a path that should work

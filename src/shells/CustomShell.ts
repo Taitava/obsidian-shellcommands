@@ -55,7 +55,8 @@ export class CustomShell extends Shell {
                 return new PowerShellEscaper(rawValue);
             case "UnixShell":
                 return new ShEscaper(rawValue);
-            case "none":
+            case null:
+                // No escaping is wanted for this shell.
                 return null;
             default:
                 throw new Error("Unrecognised escaper: " + escaper);
