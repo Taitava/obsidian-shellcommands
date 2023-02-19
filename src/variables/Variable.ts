@@ -315,8 +315,9 @@ export abstract class Variable {
      *
      * TODO: Change hardcoded {{ }} entries to use this method all around the code.
      */
-    public getFullName(): string {
-        return "{{" + this.variable_name + "}}";
+    public getFullName(variableArguments?: string[]): string {
+        const variableArgumentsString = variableArguments ? ":" + variableArguments.join(":") : "";
+        return "{{" + this.variable_name + variableArgumentsString + "}}";
     }
 
     /**

@@ -40,6 +40,10 @@ import {
 } from "../../variables/parseVariables";
 import {CustomShell} from "../../shells/CustomShell";
 import {CustomShellModel} from "./CustomShellModel";
+import {IRawArguments} from "../../variables/Variable";
+import {Variable_VaultPath} from "../../variables/Variable_VaultPath";
+import {Variable_FolderPath} from "../../variables/Variable_FolderPath";
+import {Variable_FilePath} from "../../variables/Variable_FilePath";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -184,8 +188,28 @@ export class CustomShellSettingsModal extends SC_Modal {
                 })
             )
         ;
+        const pathTranslatorTestVariables = [
+            new Variable_VaultPath(this.plugin),
+            new Variable_FilePath(this.plugin),
+            new Variable_FolderPath(this.plugin),
+        ];
         new Setting(pathTranslatorContainer)
             .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + hostPlatformName + " file system), and the function should convert it to start from the root of the sub-environment.")
+            .addExtraButton(button => button
+                .setTooltip("Test absolute path translation")
+                .setIcon("type")
+                .onClick(async () => {
+                    for (const variable of pathTranslatorTestVariables) {
+                        let variableArguments: IRawArguments = {};
+                        if (variable instanceof Variable_FilePath || variable instanceof Variable_FolderPath) {
+                            variableArguments = {mode: "absolute"};
+                        }
+                        const variableValueResult = await variable.getValue(this.customShellInstance.getCustomShell(), null, null, variableArguments);
+                        const translatedPath = variableValueResult.succeeded ? variableValueResult.value : variableValueResult.error_messages[0];
+                        this.plugin.newNotification(variable.getFullName(Object.values(variableArguments)) + " = " + translatedPath);
+                    }
+                })
+            )
         ;
         new Setting(pathTranslatorContainer)
             .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
