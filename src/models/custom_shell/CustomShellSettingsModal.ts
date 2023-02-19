@@ -28,7 +28,10 @@ import {
     PlatformNames,
     PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
-import {getOperatingSystem} from "../../Common";
+import {
+    createMultilineTextElement,
+    getOperatingSystem,
+} from "../../Common";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
 import {
@@ -187,6 +190,15 @@ export class CustomShellSettingsModal extends SC_Modal {
         new Setting(pathTranslatorContainer)
             .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
         ;
+        createMultilineTextElement("span", `
+        Examples on how {{file_path:absolute}} could be translated:
+        A) From Windows path to Linux path (WSL):
+        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (note that directory separators \\ are already converted to / before the function is called).
+        - Expected return: /mnt/c/Obsidian/MyVault/MyFolder/MyNote.md
+        B) From Windows path to Linux path (MinGW-w64):
+        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (same note as above).
+        - Expected return: /c/Obsidian/MyVault/MyFolder/MyNote.md
+        `.trim(), new Setting(pathTranslatorContainer).setClass("SC-full-description").descEl);
 
         // Shell testing field.
         this.createShellTestField(containerElement);
