@@ -254,7 +254,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const quoteShellArgumentsSetting = new Setting(containerElement)
             .setName("Windows: Quote shell arguments")
             .setDesc('Wraps shell arguments in double quotes if they contain spaces (e.g. echo Hi becomes "echo Hi"). If arguments contain double quotes already, they are escaped by preceding them with a backslash (e.g. echo "Hi there" becomes "echo \\"Hi there\\""). If your shell complains that a command does not exist, try changing this setting. (The setting doesn\'t affect macOS/Linux. The quoting is done by Node.js, not by the SC plugin.)')
-            .setClass("SC-full-description") // .setClass() actually _adds_ a class, so this call...
+            .setClass("SC-wide-description") // .setClass() actually _adds_ a class, so this call...
             .setClass("SC-indent")           // ...is not overridden by this call.
             .addToggle(toggleComponent => toggleComponent
                 .setValue(quoteShellArgumentsInitialValue)
