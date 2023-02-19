@@ -297,6 +297,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ];
         new Setting(containerElement)
             .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + PlatformNames[getOperatingSystem()] + " file system), and the function should convert it to start from the root of the sub-environment.")
+            .setClass("SC-full-description")
             .addExtraButton(button => button
                 .setTooltip("Test absolute path translation")
                 .setIcon("type")
@@ -315,6 +316,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
         new Setting(containerElement)
             .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
+            .setClass("SC-full-description")
         ;
         createMultilineTextElement("span", `
         Examples on how {{file_path:absolute}} could be translated:
