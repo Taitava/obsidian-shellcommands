@@ -234,19 +234,23 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Platform specific settings.
-        let platformSpecificSettingsContainer: HTMLElement;
-        const updatePlatformSpecificSettingsVisibility = (enabled: boolean) => platformSpecificSettingsContainer?.[enabled ? "removeClass" : "addClass"]("SC-hide");
-        if (platformId === "win32") {
-            // Create Windows specific settings.
-            platformSpecificSettingsContainer = containerElement.createDiv({attr: {class: 'SC-indent'}});
-            this.createHostPlatformWindowsSpecificSettings(platformSpecificSettingsContainer);
-
-            // Update Windows settings visibility immediately.
-            updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platforms.win32.enabled);
+        let platformSpecificSettings: Setting[];
+        const updatePlatformSpecificSettingsVisibility = (enabled: boolean) => {
+            platformSpecificSettings.forEach((setting: Setting) => setting.settingEl.toggleClass("SC-hide", !enabled));
+        };
+        switch (platformId) {
+            case "win32": // Create Windows specific settings.
+                platformSpecificSettings = this.createHostPlatformWindowsSpecificSettings(containerElement);
+                break;
+            default:
+                // If platform is not Windows, set platformSpecificSettings to an empty array, so the .forEach() loop in
+                // updatePlatformSpecificSettingsVisibility() does nothing. Maybe not the cleanest solution, but at least
+                // it should offer an easy-ish way to later add settings for other platforms, too.
+                platformSpecificSettings = [];
+                break;
         }
-        // If platform is not Windows, platformSpecificSettingsContainer will stay empty, and
-        // updatePlatformSpecificSettingsVisibility() toggles the visibility of an empty container. Not neat, but should
-        // not cause problems, and at least it should offer an easy-ish way to later add settings for other platforms, too.
+        // Hide the settings immediately, if needed.
+        updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platforms[platformId].enabled);
     }
 
     private createHostPlatformWindowsSpecificSettings(containerElement: HTMLElement) {
@@ -263,10 +267,11 @@ export class CustomShellSettingsModal extends SC_Modal {
             this.customShellInstance.configuration.host_platforms.win32.quote_shell_arguments // Use value from user configuration if defined.
             ?? CustomShellModel.getDefaultHostPlatformWindowsConfiguration(true).quote_shell_arguments // Otherwise get a default value.
         ;
-        new Setting(containerElement)
+        const quoteShellArgumentsSetting = new Setting(containerElement)
             .setName("Windows: Quote shell arguments")
             .setDesc('Wraps shell arguments in double quotes if they contain spaces (e.g. echo Hi becomes "echo Hi"). If arguments contain double quotes already, they are escaped by preceding them with a backslash (e.g. echo "Hi there" becomes "echo \\"Hi there\\""). If your shell complains that a command does not exist, try changing this setting. (The setting doesn\'t affect macOS/Linux. The quoting is done by Node.js, not by the SC plugin.)')
-            .setClass("SC-full-description")
+            .setClass("SC-full-description") // .setClass() actually _adds_ a class, so this call...
+            .setClass("SC-indent")           // ...is not overridden by this call.
             .addToggle(toggleComponent => toggleComponent
                 .setValue(quoteShellArgumentsInitialValue)
                 .onChange(async (quoteShellArgumentsNewValue: boolean) => {
@@ -275,6 +280,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                 })
             )
         ;
+
+        // Return all created settings for visibility control.
+        return [
+            quoteShellArgumentsSetting,
+        ];
     }
 
     private createShellTestField(containerElement: HTMLElement) {
