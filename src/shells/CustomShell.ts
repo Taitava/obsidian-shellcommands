@@ -152,7 +152,7 @@ export class CustomShell extends Shell {
             const translatedPath = translatorFunction(path);
             if ("string" !== typeof translatedPath) {
                 // noinspection ExceptionCaughtLocallyJS . It's ok to catch it locally, it will then be shown in an error balloon.
-                throw new Error("Translator function returned " + (translatedPath.toString() === "" ? typeof translatedPath : translatedPath) + " instead of a string.");
+                throw new Error("Translator function returned " + (String(translatedPath) === "" ? typeof translatedPath : translatedPath) + " instead of a string.");
             }
             return translatedPath;
         } catch (error) {
