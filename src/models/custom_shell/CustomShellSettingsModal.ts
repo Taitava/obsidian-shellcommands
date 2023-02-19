@@ -168,61 +168,9 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
 
-        // Path translator
+        // Path translator.
         const pathTranslatorContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
-        new Setting(pathTranslatorContainer)
-            .setName("Path translator")
-            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
-            .setClass("SC-path-translator-setting")
-            .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
-                .setValue(this.customShellInstance.configuration.path_translator ?? "")
-                .onChange(async (newPathTranslator: string) => {
-                    if ("" === newPathTranslator.trim()) {
-                        // Disable translator
-                        this.customShellInstance.configuration.path_translator = null;
-                    } else {
-                        // Enable or update translator
-                        this.customShellInstance.configuration.path_translator = newPathTranslator;
-                    }
-                    await this.plugin.saveSettings();
-                })
-            )
-        ;
-        const pathTranslatorTestVariables = [
-            new Variable_VaultPath(this.plugin),
-            new Variable_FilePath(this.plugin),
-            new Variable_FolderPath(this.plugin),
-        ];
-        new Setting(pathTranslatorContainer)
-            .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + hostPlatformName + " file system), and the function should convert it to start from the root of the sub-environment.")
-            .addExtraButton(button => button
-                .setTooltip("Test absolute path translation")
-                .setIcon("type")
-                .onClick(async () => {
-                    for (const variable of pathTranslatorTestVariables) {
-                        let variableArguments: IRawArguments = {};
-                        if (variable instanceof Variable_FilePath || variable instanceof Variable_FolderPath) {
-                            variableArguments = {mode: "absolute"};
-                        }
-                        const variableValueResult = await variable.getValue(this.customShellInstance.getCustomShell(), null, null, variableArguments);
-                        const translatedPath = variableValueResult.succeeded ? variableValueResult.value : variableValueResult.error_messages[0];
-                        this.plugin.newNotification(variable.getFullName(Object.values(variableArguments)) + " = " + translatedPath);
-                    }
-                })
-            )
-        ;
-        new Setting(pathTranslatorContainer)
-            .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
-        ;
-        createMultilineTextElement("span", `
-        Examples on how {{file_path:absolute}} could be translated:
-        A) From Windows path to Linux path (WSL):
-        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (note that directory separators \\ are already converted to / before the function is called).
-        - Expected return: /mnt/c/Obsidian/MyVault/MyFolder/MyNote.md
-        B) From Windows path to Linux path (MinGW-w64):
-        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (same note as above).
-        - Expected return: /c/Obsidian/MyVault/MyFolder/MyNote.md
-        `.trim(), new Setting(pathTranslatorContainer).setClass("SC-full-description").descEl);
+        this.createPathTranslatorField(pathTranslatorContainer);
 
         // Shell testing field.
         this.createShellTestField(containerElement);
@@ -321,6 +269,62 @@ export class CustomShellSettingsModal extends SC_Modal {
         return [
             quoteShellArgumentsSetting,
         ];
+    }
+
+    private createPathTranslatorField(containerElement: HTMLElement): void {
+        new Setting(containerElement)
+            .setName("Path translator")
+            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
+            .setClass("SC-path-translator-setting")
+            .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
+                .setValue(this.customShellInstance.configuration.path_translator ?? "")
+                .onChange(async (newPathTranslator: string) => {
+                    if ("" === newPathTranslator.trim()) {
+                        // Disable translator
+                        this.customShellInstance.configuration.path_translator = null;
+                    } else {
+                        // Enable or update translator
+                        this.customShellInstance.configuration.path_translator = newPathTranslator;
+                    }
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
+        const pathTranslatorTestVariables = [
+            new Variable_VaultPath(this.plugin),
+            new Variable_FilePath(this.plugin),
+            new Variable_FolderPath(this.plugin),
+        ];
+        new Setting(containerElement)
+            .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + PlatformNames[getOperatingSystem()] + " file system), and the function should convert it to start from the root of the sub-environment.")
+            .addExtraButton(button => button
+                .setTooltip("Test absolute path translation")
+                .setIcon("type")
+                .onClick(async () => {
+                    for (const variable of pathTranslatorTestVariables) {
+                        let variableArguments: IRawArguments = {};
+                        if (variable instanceof Variable_FilePath || variable instanceof Variable_FolderPath) {
+                            variableArguments = {mode: "absolute"};
+                        }
+                        const variableValueResult = await variable.getValue(this.customShellInstance.getCustomShell(), null, null, variableArguments);
+                        const translatedPath = variableValueResult.succeeded ? variableValueResult.value : variableValueResult.error_messages[0];
+                        this.plugin.newNotification(variable.getFullName(Object.values(variableArguments)) + " = " + translatedPath);
+                    }
+                })
+            )
+        ;
+        new Setting(containerElement)
+            .setDesc("The function SHOULD NOT CAUSE side effects! It must not alter any data outside it. Try to keep the function short and simple, as possible errors are hard to inspect. The function is never called for relative paths.")
+        ;
+        createMultilineTextElement("span", `
+        Examples on how {{file_path:absolute}} could be translated:
+        A) From Windows path to Linux path (WSL):
+        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (note that directory separators \\ are already converted to / before the function is called).
+        - Expected return: /mnt/c/Obsidian/MyVault/MyFolder/MyNote.md
+        B) From Windows path to Linux path (MinGW-w64):
+        - absolutePath: C:/Obsidian/MyVault/MyFolder/MyNote.md (same note as above).
+        - Expected return: /c/Obsidian/MyVault/MyFolder/MyNote.md
+        `.trim(), new Setting(containerElement).setClass("SC-full-description").descEl);
     }
 
     private createShellTestField(containerElement: HTMLElement) {
