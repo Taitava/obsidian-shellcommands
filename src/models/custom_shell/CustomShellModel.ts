@@ -121,7 +121,7 @@ export class CustomShellModel extends Model {
 
     public getDefaultConfiguration(): CustomShellConfiguration {
         return {
-            id: getIDGenerator().generateID(), // TODO: Think about should the generated id be replaced with static id derived from binary file name?
+            id: getIDGenerator().generateID(),
             name: "",
             description: "",
             binary_path: "",
