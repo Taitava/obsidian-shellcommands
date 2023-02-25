@@ -36,11 +36,14 @@ import {
 import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
 
 /**
+ * Creates a shell command textarea (by calling createShellCommandFieldCore()) and related control buttons.
+ *
+ * TODO: Rename this function to createShellCommandSettings() and createShellCommandFieldCore() to createShellCommandTextarea().
  *
  * @param plugin
  * @param container_element
  * @param setting_tab
- * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
+ * @param shell_command_id Either an alphanumeric string or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
  */
 export function createShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, setting_tab: SC_MainSettingsTab, shell_command_id: string, show_autocomplete_menu: boolean) {

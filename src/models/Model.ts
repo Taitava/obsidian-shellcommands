@@ -150,6 +150,9 @@ export abstract class Model {
         throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method. Maybe the class is not supposed to have children?");
     }
 
+    /**
+     * TODO: Refactor this method not to rely on rejecting, as that can be mixed up with program logic errors. Or at least consider if it would be a better approach.
+     */
     public abstract validateValue(instance: Instance, field: string, value: unknown): Promise<void>;
 
 }

@@ -567,7 +567,7 @@ export class TShellCommand {
         const custom_variables = new VariableSet();
         for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommandContentForExecution(null))) {
             // Check that the variable IS a CustomVariable.
-            if (custom_variable instanceof CustomVariable) {
+            if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
                 custom_variables.add(custom_variable);
             }
         }

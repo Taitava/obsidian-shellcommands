@@ -243,7 +243,7 @@ export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables();
+    const search_for_variables: VariableSet = plugin.getVariables(); // TODO: Make this VariableSet to be a parameter (optional), so that the set of searchable variables can be limited to certain variables only.
     const found_variables = new VariableSet();
     
     for (const variable of search_for_variables)
@@ -274,3 +274,27 @@ export interface ParsingResult {
     error_messages: string[];
     count_parsed_variables: number;
 }
+
+/*
+// TODO: Rewrite ParsingResult to the following format that better defines the 'succeeded' property's relationship to 'parsed_content' and 'error_messages'.
+// Then find all "parsed_content as string" expressions in the whole project and remove the "as string" parts, they should be redundant after this change.
+
+export type ParsingResult = ParsingResultSucceeded | ParsingResultFailed;
+
+interface ParsingResultSucceeded extends ParsingResultBase {
+    succeeded: true;
+    parsed_content: string;
+    error_messages: []; // An always empty array.
+}
+
+interface ParsingResultFailed extends ParsingResultBase {
+    succeeded: false;
+    parsed_content: null;
+    error_messages: [string, ...string[]]; // A non-empty array of strings.
+}
+
+interface ParsingResultBase {
+    original_content: string;
+    count_parsed_variables: number;
+}
+ */
