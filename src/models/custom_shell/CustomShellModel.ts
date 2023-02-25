@@ -134,6 +134,7 @@ export class CustomShellModel extends Model {
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             path_translator: null,
+            shell_command_test: null,
         };
     }
 
@@ -277,6 +278,12 @@ export interface CustomShellConfiguration {
      * based on the directory_separator property.
      */
     path_translator: string | null,
+
+    /**
+     * Can be executed in the CustomShellSettingsModal to see that the shell is configured properly. Not used for
+     * anything else outside the settings modal. Possible output is shown in a notification balloon.
+     */
+    shell_command_test: string | null
 }
 
 interface WindowsSpecificAdditionalShellProperties {

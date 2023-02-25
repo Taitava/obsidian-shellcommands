@@ -359,20 +359,23 @@ export class CustomShellSettingsModal extends SC_Modal {
     private createShellTestField(containerElement: HTMLElement) {
         // Test the shell.
         containerElement.createEl("hr"); // Separate non-savable form fields visually from savable settings fields.
-        let testShellCommandContent = "";
         const customShell: CustomShell = this.customShellInstance.getCustomShell();
         const testSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(testSettingsContainer)
-        .setName("Execute a test command using the shell")
-        .setDesc("The content of this field is not saved anywhere! It's meant for temporary testing only. {{variables}} are supported. Output appears in a notification balloon. When playing around, keep in mind that the command is really executed, so avoid using possibly dangerous commands.")
+        .setName("Execute a command to test the shell")
+        .setDesc("This command is only executed from this settings modal. {{variables}} are supported. Output appears in a notification balloon. When playing around, keep in mind that the command is really executed, so avoid using possibly dangerous commands.")
         .setClass("SC-full-description")
         .addExtraButton(button => button
             .setTooltip("Execute the test command using this shell.")
             .setIcon("run-command")
             .onClick(async () => {
+                if (null === this.customShellInstance.configuration.shell_command_test) {
+                    this.plugin.newError("The test shell command is empty.");
+                    return;
+                }
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    testShellCommandContent,
+                    this.customShellInstance.configuration.shell_command_test,
                     customShell,
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.
@@ -431,11 +434,14 @@ export class CustomShellSettingsModal extends SC_Modal {
             this.plugin,
             testSettingsContainer,
             "",
-            testShellCommandContent,
+            this.customShellInstance.configuration.shell_command_test ?? "",
             customShell,
             null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
             this.plugin.settings.show_autocomplete_menu,
-            (newTestShellCommandContent: string) => testShellCommandContent = newTestShellCommandContent,
+            async (newTestShellCommandContent: string) => {
+                this.customShellInstance.configuration.shell_command_test = (newTestShellCommandContent === "") ? null : newTestShellCommandContent;
+                await this.plugin.saveSettings();
+            },
             "Enter a temporary shell command for testing."
         ).shell_command_setting.setClass("SC-no-description");
         new Setting(testSettingsContainer)
