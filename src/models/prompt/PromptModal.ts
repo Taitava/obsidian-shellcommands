@@ -136,7 +136,7 @@ export class PromptModal extends SC_Modal {
                 shell_command_preview_text = shellCommandParsingResult.parsed_content as string; // as string = if shellCommandParsingResult?.succeeded is true, then .parsed_content is always string.
             } else if (this.t_shell_command) {
                 // Show a real shell command. No preparsed content is available. This content does not have any variables parsed yet.
-                shell_command_preview_text = this.t_shell_command.getShellCommand();
+                shell_command_preview_text = this.t_shell_command.getShellCommandContentForPreview(); // ForPreview() is good, no need to show Shell augmentations as they would just clutter up the preview.
             } else {
                 // Make up a fake "shell command" for previewing.
                 shell_command_preview_text = this.prompt.getExampleShellCommand();

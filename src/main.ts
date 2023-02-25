@@ -341,7 +341,7 @@ export default class SC_Plugin extends Plugin {
 		// Register an Obsidian command
 		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: generateObsidianCommandName(this, t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
+			name: generateObsidianCommandName(this, t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
 				if (is_opening_command_palette) {
@@ -376,13 +376,13 @@ export default class SC_Plugin extends Plugin {
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
                             } else {
                                 // Parsing failed, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias());
                                 this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                             }
                         });
                     } else {
                         // Parsing is disabled, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias());
                         this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                     }
 

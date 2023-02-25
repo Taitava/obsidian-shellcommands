@@ -255,6 +255,7 @@ export function gotoURL(url: string) {
 
 export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
     const prefix = plugin.settings.obsidian_command_palette_prefix;
+    // TODO: Replace shell_command and alias parameters with one parameter: aliasOrShellCommand.
     if (alias) {
         // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
         return prefix + alias;

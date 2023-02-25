@@ -112,12 +112,9 @@ export class TShellCommand {
     }
 
     /**
-     * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
-     * command does not have an explicit version for the current OS.
-     *
-     * TODO: Make this method private and create a public wrapper method getShellCommandContentForPreview(). The wrapper will not make any modifications to the returned value.
+     * @private Should only be called from getShellCommandContentForExecution() and getShellCommandContentForPreview().
      */
-    public getShellCommand(): string {
+    private getShellCommandContent(): string {
         // Check if the shell command has defined a specific command for this operating system.
         const platformSpecificShellCommand: string | undefined = this.configuration.platform_specific_commands[getOperatingSystem()];
         if (undefined === platformSpecificShellCommand) {
@@ -131,12 +128,24 @@ export class TShellCommand {
     }
 
     /**
-     * Same as getShellCommand(), but lets a shell augment the command. CustomShells may use the augmenting feature to
+     * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
+     * command does not have an explicit version for the current OS.
+     *
+     * Does not include any possible Shell provided augmentations to the return shell command content. This is good for
+     * previews where complete content is not needed, i.e. where Shell augmentations would just make previewing a command
+     * messier. When executing a shell command, getShellCommandContentForExecution() should be used instead.
+     */
+    public getShellCommandContentForPreview() {
+        return this.getShellCommandContent();
+    }
+
+    /**
+     * Same as getShellCommandContentForPreview(), but lets a shell augment the command. CustomShells may use the augmenting feature to
      * add prefix/postfix commands, e.g. to set character encodings etc.
      * @param scEvent For accessing {{event_*}} variables.
      */
     public getShellCommandContentForExecution(scEvent: SC_Event | null): string {
-        return this.getShell().augmentShellCommandContent(this.getShellCommand(), this, scEvent);
+        return this.getShell().augmentShellCommandContent(this.getShellCommandContent(), this, scEvent);
     }
 
     /**
@@ -189,10 +198,10 @@ export class TShellCommand {
     }
 
     /**
-     * TODO: Use this method in all places where similar logic is needed.
+     * TODO: Use this method in all places where similar logic is needed. I guess generateObsidianCommandName() is the only place left.
      */
     public getAliasOrShellCommand(): string {
-        return this.configuration.alias || this.getShellCommand();
+        return this.configuration.alias || this.getShellCommandContentForPreview(); // TODO: Use this.getAlias().
     }
 
     public getConfirmExecution() {
