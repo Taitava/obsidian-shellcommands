@@ -24,6 +24,8 @@ export class Variable_ShellCommandContent extends Variable {
     public variable_name = "shell_command_content";
     public help_text = "Gives the executable shell command statements that should be passed to a shell.";
 
+    protected always_available = true; // Make the variable not shown in default value settings. The default of this property is already true, but enforce this in case the default is some day changed to false.
+
     constructor(
         plugin: SC_Plugin,
         private shellCommandContent: string,
