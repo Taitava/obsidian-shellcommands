@@ -145,7 +145,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Supported operating systems
-        new Setting(containerElement)
+        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Supported operating systems")
             .setDesc("Select all operating systems that you have this shell installed on. Note that in case your shell belongs to a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you need to select the *host* system, as the sub-system's operating system does not matter here.")
             .setHeading()
@@ -157,7 +157,7 @@ export class CustomShellSettingsModal extends SC_Modal {
 
         // Shell operating system
         const hostPlatformName = PlatformNames[getOperatingSystem()];
-        new Setting(containerElement)
+        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Shell's operating system")
             .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the current host (" + hostPlatformName + "), select it here. This is used to make directory paths etc. work correctly.")
             .addDropdown(dropdownComponent => dropdownComponent
@@ -177,8 +177,8 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
 
-        // Special characters escaping // TODO: Create a div.SC-setting-group
-        new Setting(containerElement)
+        // Special characters escaping
+        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Special characters escaping")
             .setDesc("Used to quote special characters (= other than alphabets, numbers and _) in {{variable}} values.")
             .addDropdown(dropdownComponent => dropdownComponent
