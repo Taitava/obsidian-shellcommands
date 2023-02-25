@@ -21,7 +21,10 @@ import SC_Plugin from "../../main";
 import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseVariables} from "../../variables/parseVariables";
-import {createAutocomplete} from "./Autocomplete";
+import {
+    createAutocomplete,
+    IAutocompleteItem,
+} from "./Autocomplete";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
@@ -41,6 +44,7 @@ import {Shell} from "../../shells/Shell";
  * @param show_autocomplete_menu
  * @param extra_on_change
  * @param shell_command_placeholder
+ * @param extraAutocompleteItems
  * @constructor
  */
 export function CreateShellCommandFieldCore(
@@ -52,7 +56,8 @@ export function CreateShellCommandFieldCore(
     t_shell_command: TShellCommand | null,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
-    shell_command_placeholder = "Enter your command"
+    shell_command_placeholder = "Enter your command",
+    extraAutocompleteItems?: IAutocompleteItem[],
     ) {
 
     async function on_change(shell_command: string) {
@@ -104,7 +109,12 @@ export function CreateShellCommandFieldCore(
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
-        createAutocomplete(plugin, setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement, on_change);
+        createAutocomplete(
+            plugin,
+            setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement,
+            on_change,
+            extraAutocompleteItems,
+        );
     }
 
     return setting_group;

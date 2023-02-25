@@ -170,6 +170,19 @@ export abstract class Shell {
      */
     protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean>;
 
+    /**
+     * Child classes can do custom additions to the shell command.
+     *
+     * @param shellCommandContent
+     * @param tShellCommand For accessing default value configuration.
+     * @param scEvent For supporting {{event_*}} variables.
+     * @return The same shellCommandContent with possible additions.
+     */
+    public augmentShellCommandContent(shellCommandContent: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): string {
+        // No augmentation by default.
+        return shellCommandContent;
+    }
+
 }
 
 /**

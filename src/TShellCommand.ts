@@ -114,6 +114,8 @@ export class TShellCommand {
     /**
      * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
      * command does not have an explicit version for the current OS.
+     *
+     * TODO: Make this method private and create a public wrapper method getShellCommandContentForPreview(). The wrapper will not make any modifications to the returned value.
      */
     public getShellCommand(): string {
         // Check if the shell command has defined a specific command for this operating system.
@@ -126,6 +128,15 @@ export class TShellCommand {
             // The shell command has defined a specific command for this operating system.
             return platformSpecificShellCommand;
         }
+    }
+
+    /**
+     * Same as getShellCommand(), but lets a shell augment the command. CustomShells may use the augmenting feature to
+     * add prefix/postfix commands, e.g. to set character encodings etc.
+     * @param scEvent For accessing {{event_*}} variables.
+     */
+    public getShellCommandContentForExecution(scEvent: SC_Event | null): string {
+        return this.getShell().augmentShellCommandContent(this.getShellCommand(), this, scEvent);
     }
 
     /**
@@ -421,7 +432,7 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                shell_command: this.getShellCommand(),
+                shell_command: this.getShellCommandContentForExecution(sc_event),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
                 stdinContent: this.configuration.input_contents.stdin ?? undefined,
@@ -545,7 +556,7 @@ export class TShellCommand {
 
         // Get a list CustomVariables that the shell command uses.
         const custom_variables = new VariableSet();
-        for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommand())) {
+        for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommandContentForExecution(null))) {
             // Check that the variable IS a CustomVariable.
             if (custom_variable instanceof CustomVariable) {
                 custom_variables.add(custom_variable);

@@ -134,6 +134,7 @@ export class CustomShellModel extends Model {
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             path_translator: null,
+            shell_command_wrapper: null,
             shell_command_test: null,
         };
     }
@@ -278,6 +279,15 @@ export interface CustomShellConfiguration {
      * based on the directory_separator property.
      */
     path_translator: string | null,
+
+    /**
+     * Can be used to prefix and/or postfix shell commands with a boilerplate script, e.g.
+     *  - Set character encodings.
+     *  - Add conditional execution logic.
+     * If not null, should include {{shell_command_content}} variable, otherwise the wrapper discards the shell command
+     * completely.
+     */
+    shell_command_wrapper: string | null,
 
     /**
      * Can be executed in the CustomShellSettingsModal to see that the shell is configured properly. Not used for

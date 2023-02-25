@@ -28,6 +28,7 @@ import {ParsingResult} from "./parseVariables";
 import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
 import {EOL} from "os";
 import {Shell} from "../shells/Shell";
+import {tryTo} from "../Common";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -160,6 +161,35 @@ export abstract class Variable {
         variableArguments: ICastedArguments,
         sc_event: SC_Event | null,
     ): Promise<string>;
+
+    /**
+     * Called from parseVariableSynchronously(), only used on some special Variables that are not included in
+     * loadVariables()/SC_Plugin.getVariables().
+     *
+     * Can only support non-async Variables. Also, parameters are not supported, at least at the moment.
+     */
+    public getValueSynchronously(): VariableValueResult {
+        return tryTo((): VariableValueResult => ({
+                value: this.generateValueSynchronously(),
+                succeeded: true,
+                error_messages: [],
+            }),
+        (variableError: VariableError): VariableValueResult => ({
+                value: null,
+                succeeded: false,
+                error_messages: [variableError.message],
+            }),
+            VariableError
+        );
+    }
+
+    /**
+     * Variables that support parseVariableSynchronously() should define this. Most Variables don't need this.
+     */
+    protected generateValueSynchronously(): string {
+        throw new Error("generateValueSynchronously() is not implemented for " + this.constructor.name + ".");
+        // Use Error instead of VariableError, because this is not a problem that a user could fix. It's a program error.
+    }
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;

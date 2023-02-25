@@ -199,6 +199,9 @@ export class CustomShellSettingsModal extends SC_Modal {
         const pathTranslatorContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         this.createPathTranslatorField(pathTranslatorContainer);
 
+        // Shell command wrapper.
+        this.createShellCommandWrapperField(containerElement);
+
         // Shell testing field.
         this.createShellTestField(containerElement);
 
@@ -356,6 +359,33 @@ export class CustomShellSettingsModal extends SC_Modal {
         `.trim(), new Setting(containerElement).setClass("SC-full-description").descEl);
     }
 
+    private createShellCommandWrapperField(containerElement: HTMLElement) {
+        // Test the shell.
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // Only used for autocomplete, so does not need a real value.
+        const customShell: CustomShell = this.customShellInstance.getCustomShell(); // TODO: Create a private method this.getCustomShell() that returns this.customShellInstance.getCustomShell(). Remove this variable then.
+        const wrapperSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
+        new Setting(wrapperSettingsContainer)
+            .setName("Wrapper for shell command")
+            .setDesc("Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for setting character encodings. {{variables}} are supported. " + shellCommandContentVariable.getFullName() + " must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.")
+            .setClass("SC-full-description")
+        ;
+        CreateShellCommandFieldCore(
+            this.plugin,
+            wrapperSettingsContainer,
+            "",
+            this.customShellInstance.configuration.shell_command_wrapper ?? "",
+            customShell,
+            null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
+            this.plugin.settings.show_autocomplete_menu,
+            async (newShellCommandWrapper: string) => {
+                this.customShellInstance.configuration.shell_command_wrapper = (newShellCommandWrapper === "") ? null : newShellCommandWrapper;
+                await this.plugin.saveSettings();
+            },
+            shellCommandContentVariable.getFullName(), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
+            shellCommandContentVariable.getAutocompleteItems(),
+        ).shell_command_setting.setClass("SC-no-description");
+    }
+
     private createShellTestField(containerElement: HTMLElement) {
         // Test the shell.
         containerElement.createEl("hr"); // Separate non-savable form fields visually from savable settings fields.
@@ -375,7 +405,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                 }
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    this.customShellInstance.configuration.shell_command_test,
+                    this.customShellInstance.getCustomShell().augmentShellCommandContent(this.customShellInstance.configuration.shell_command_test, null, null), // TODO: Create a private method this.getCustomShell() that returns this.customShellInstance.getCustomShell(). And another method: getConfiguration().
                     customShell,
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.

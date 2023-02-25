@@ -31,11 +31,19 @@ export class Variable_ShellCommandContent extends Variable {
         super(plugin);
     }
 
+    /**
+     * TODO: Remove this method. Do not use this variable with parseVariables(), use parseVariableSynchronously() instead.
+     * @protected
+     */
     protected async generateValue(): Promise<string> {
         return this.shellCommandContent;
     }
 
+    protected generateValueSynchronously() {
+        return this.shellCommandContent;
+    }
+
     public getAvailabilityText(): string {
-        return "<strong>Only available</strong> when defining arguments for <em>custom shells</em>. Cannot be used as part of a shell command, as a shell command content cannot refer to itself.";
+        return "<strong>Only available</strong> in  <em>custom shells'</em> settings: for defining shell arguments, or a shell command wrapper.";
     }
 }

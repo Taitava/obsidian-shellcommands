@@ -67,7 +67,7 @@ export async function parseVariables(
 
     for (const variable of variables)
     {
-        const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+        const pattern = getVariableRegExp(variable);
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray | null;
         while ((argument_matches = pattern.exec(content)) !== null) {
@@ -185,6 +185,52 @@ export async function parseVariables(
 }
 
 /**
+ * Parses just a single Variable in content, and does it synchronously. An alternative to parseVariables() in situations
+ * where asynchronous functions should be avoided, e.g. in Obsidian Command palette, or file/folder/editor menus (although
+ * this is not used in those menus atm).
+ *
+ * Does not support escaping special characters in variable values atm!
+ *
+ * @param content
+ * @param variable Can only be a Variable that implements the method generateValueSynchronously(). Otherwise an Error is thrown. Also, does not support variables that have parameters, at least at the moment.
+ * @return A ParsingResult similar to what parseVariables() returns, but directly, not in a Promise.
+ */
+export function parseVariableSynchronously(content: string, variable: Variable): ParsingResult {
+    if (variable.getParameterNames().length > 0) {
+        throw new Error("parseVariableSynchronously() does not support variables with parameters at the moment. Variable: " + variable.constructor.name);
+    }
+
+    const parsingResult: ParsingResult = {
+        // Initial values, will be overridden.
+        succeeded: false,
+        original_content: content,
+        parsed_content: null,
+        error_messages: [],
+        count_parsed_variables: 0,
+    };
+
+    // Get the Variable's value.
+    const variableValueResult: VariableValueResult = variable.getValueSynchronously();
+
+    if (variableValueResult.succeeded) {
+        // Parsing succeeded.
+        parsingResult.succeeded = true;
+        parsingResult.parsed_content = content.replaceAll(
+            getVariableRegExp(variable), // Even thought this regexp actually supports arguments, supplying arguments to variables is not implemented in variable.getValueSynchronously(), so variables expecting parameters cannot be supported at the moment.
+            () => {
+                parsingResult.count_parsed_variables++; // The count is not used (at least at the moment of writing this), but might be used in the future.
+                return variableValueResult.value as string; // Replace {{variable}} with a value.
+            },
+        );
+    } else {
+        // Parsing failed.
+        parsingResult.error_messages = variableValueResult.error_messages;
+    }
+
+    return parsingResult;
+}
+
+/**
  * Reads all variables from the content string, and returns a VariableSet containing all the found variables.
  *
  * This is needed in situations where variables will not be parsed (= variable values are not needed), but where it's just
@@ -210,6 +256,10 @@ export function getUsedVariables(
     }
 
     return found_variables;
+}
+
+function getVariableRegExp(variable: Variable) {
+    return new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
 }
 
 export interface ParsingResult {

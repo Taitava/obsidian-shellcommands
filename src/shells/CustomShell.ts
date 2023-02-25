@@ -38,6 +38,7 @@ import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel"
 import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 import {
     parseVariables,
+    parseVariableSynchronously,
     ParsingResult,
 } from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
@@ -215,6 +216,37 @@ export class CustomShell extends Shell {
         // Tell spawn() to use the shell binary path as an executable command.
         spawnAugmentation.shellCommandContent = shellBinaryPath; // Needs to come AFTER the original shellCommandContent is taken to spawnArguments!
         return true; // Allow execution.
+    }
+
+    /**
+     * Apply a possible wrapper on an executable shell command content.
+     *
+     * This method is called before .augmentSpawn() is called, i.e. the result of this method is available in SpawnAugmentation.shellCommandContent when .augmentSpawn() is called.
+     *
+     * @param shellCommandContent
+     * @param tShellCommand
+     * @param scEvent
+     */
+    public augmentShellCommandContent(shellCommandContent: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): string {
+        const shellCommandContentWrapper = this.getConfiguration().shell_command_wrapper;
+        if (null === shellCommandContentWrapper) {
+            // No wrapper is defined, so return the shell command content without modifications.
+            return shellCommandContent;
+        }
+
+        // Wrap the shell command.
+        const wrapperParsingResult = parseVariableSynchronously(
+            shellCommandContentWrapper,
+            new Variable_ShellCommandContent(this.plugin, shellCommandContent),
+        );
+        if (!wrapperParsingResult.succeeded) {
+            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
+            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
+        }
+
+        // TODO: Consider reading wrapperParsingResult.count_parsed_variables. If it's 0, {{shell_command_content}} was not present in the wrapper, and an error should be shown. But need to design it in a way that the error is only shown if a command is really being executed - otherwise the error should be suppressed. E.g. 'Copy Shell command URI' button in settings calls TShellCommand.getShellCommandContentForExecution() because it needs to read possible custom variables used in the shell's wrapper, too, but errors should be suppressed in that context.
+
+        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
     }
 
     private getConfiguration(): CustomShellConfiguration {
