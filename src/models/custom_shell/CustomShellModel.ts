@@ -200,6 +200,11 @@ export class CustomShellModel extends Model {
             }
         }
 
+        // If any platforms use this shell by default, deselect it.
+        for (const platformId of customShellInstance.getPlatformIdsUsingThisShellAsDefault()) {
+            delete this.plugin.settings.default_shells[platformId];
+        }
+
         // Delete CustomShell
         try {
             getShells().delete(customShellInstance.getCustomShell());

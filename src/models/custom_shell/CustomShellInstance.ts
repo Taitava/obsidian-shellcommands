@@ -23,6 +23,7 @@ import {
     CustomShellModel,
 } from "./CustomShellModel";
 import {
+    IPlatformSpecificString,
     PlatformId,
     SC_MainSettings,
 } from "../../settings/SC_MainSettings";
@@ -84,6 +85,24 @@ export class CustomShellInstance extends Instance {
             const tShellCommand: TShellCommand = entry[1];
             return tShellCommand.getShells()[platformId] === this.getId();
         }));
+    }
+
+    /**
+     * Returns a list of operating system ids that are configured to use this shell as their default shell.
+     *
+     * TODO: Consider moving this method to Shell.
+     *
+     * @private Can be made public, if needed.
+     */
+    public getPlatformIdsUsingThisShellAsDefault() {
+        const platformIdsUsingThisShell: PlatformId[] = [];
+        const defaultShells: IPlatformSpecificString = this.model.plugin.settings.default_shells;
+        for (const platformId of Object.getOwnPropertyNames(defaultShells) as PlatformId[]) {
+            if (defaultShells[platformId] === this.getId()) {
+                platformIdsUsingThisShell.push(platformId);
+            }
+        }
+        return platformIdsUsingThisShell;
     }
 
     /**
