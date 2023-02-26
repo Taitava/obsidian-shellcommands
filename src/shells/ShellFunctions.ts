@@ -58,17 +58,31 @@ export function getUsersDefaultShellIdentifier(): string {
     }
 }
 
+
 /**
+ * @private Use this in getShell() only.
+ */
+const matchedShellsCache: Map<string, Shell> = new Map;
+
+/**
+ * Looks for a shell with the given filesystem path or id string. As the search is not as simple as just checking the equality of strings, the result is cached so that calling this multiple times should not cause overhead.
+ *
  * @param shellIdentifier
  * @throws NonRecognisedShellError if a shell with the given identifier was not found.
  */
 export function getShell(shellIdentifier: string): Shell {
-    for (const shell of shells) {
-        if (shell.matchesIdentifier(shellIdentifier)) {
-            return shell;
+    const cachedShell = matchedShellsCache.get(shellIdentifier);
+    if (cachedShell) {
+        return cachedShell;
+    } else {
+        for (const shell of shells) {
+            if (shell.matchesIdentifier(shellIdentifier)) {
+                matchedShellsCache.set(shellIdentifier, shell);
+                return shell;
+            }
         }
+        throw new UnrecognisedShellError("No shell was found for identifier: " + shellIdentifier);
     }
-    throw new UnrecognisedShellError("No shell was found for identifier: " + shellIdentifier);
 }
 
 export class UnrecognisedShellError extends Error {}
