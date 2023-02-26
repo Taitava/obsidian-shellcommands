@@ -32,7 +32,10 @@ import {debugLog} from "../../Debug";
 import {CustomShell} from "../../shells/CustomShell";
 import {Shell} from "../../shells/Shell";
 import {registerShell} from "../../shells/ShellFunctions";
-import {TShellCommand} from "../../TShellCommand";
+import {
+    TShellCommand,
+    TShellCommandMap,
+} from "../../TShellCommand";
 import {ensureObjectHasProperties} from "../../Common";
 
 export class CustomShellInstance extends Instance {
@@ -80,8 +83,8 @@ export class CustomShellInstance extends Instance {
      *
      * @private Can be made public, if needed.
      */
-    private getTShellCommandsByPlatform(platformId: PlatformId): Map<string, TShellCommand> {
-        return new Map<string, TShellCommand>(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
+    private getTShellCommandsByPlatform(platformId: PlatformId): TShellCommandMap {
+        return new TShellCommandMap(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
             const tShellCommand: TShellCommand = entry[1];
             return tShellCommand.getShells()[platformId] === this.getId();
         }));

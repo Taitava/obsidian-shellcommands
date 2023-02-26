@@ -58,7 +58,12 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
-import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
+import {
+    ShellCommandParsingProcess,
+    TShellCommand,
+    TShellCommandContainer,
+    TShellCommandMap,
+} from "./TShellCommand";
 import {
     getShell,
     getUsersDefaultShellIdentifier,
@@ -212,8 +217,8 @@ export default class SC_Plugin extends Plugin {
     /**
      * TODO: Change this.t_shell_commands to a Map, so that getTShellCommands() returns a Map, and remove this method.
      */
-    public getTShellCommandsAsMap(): Map<string, TShellCommand> {
-        const tShellCommandsMap = new Map<string, TShellCommand>();
+    public getTShellCommandsAsMap(): TShellCommandMap {
+        const tShellCommandsMap = new TShellCommandMap();
         for (const shellCommandId of Object.getOwnPropertyNames(this.t_shell_commands)) {
             tShellCommandsMap.set(shellCommandId, this.t_shell_commands[shellCommandId]);
         }

@@ -612,6 +612,8 @@ export class TShellCommand {
     }
 }
 
+export class TShellCommandMap extends Map<string, TShellCommand> {}
+
 /**
  * TODO: The name ShellCommandParsingResult sounds like this would be a sub-interface of ParsingResult, although the interfaces are very different. Rename this to something better. Candidate names:
  *  - ParsedShellCommandProperties
