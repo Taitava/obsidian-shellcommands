@@ -346,7 +346,7 @@ export abstract class Variable {
      * TODO: Change hardcoded {{ }} entries to use this method all around the code.
      */
     public getFullName(variableArguments?: string[]): string {
-        const variableArgumentsString = variableArguments ? ":" + variableArguments.join(":") : "";
+        const variableArgumentsString = variableArguments?.length ? ":" + variableArguments.join(":") : ""; // Check .length too: empty array should not cause a colon to appear.
         return "{{" + this.variable_name + variableArgumentsString + "}}";
     }
 
