@@ -232,7 +232,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                         const disablingResult = this.customShellInstance.disableHostPlatformIfNotUsed(platformId);
                         if ("string" === typeof disablingResult) {
                             // Cannot disable.
-                            this.plugin.newError("Cannot disable this shell on " + platformName + " because it's used by: " + disablingResult);
+                            this.plugin.newError("Cannot disable this shell on " + platformName + " because it's used " + disablingResult + ".");
                             toggleComponent.setValue(true); // Re-enable.
                         } else {
                             // Save the disabling.

@@ -40,6 +40,7 @@ import {
 import {getIDGenerator} from "../../IDGenerator";
 import {CustomShellSettingsModal} from "./CustomShellSettingsModal";
 import {getShells} from "../../shells/ShellFunctions";
+import {ConfirmationModal} from "../../ConfirmationModal";
 
 export class CustomShellModel extends Model {
 
@@ -178,6 +179,32 @@ export class CustomShellModel extends Model {
                 return CustomShellModel.getDefaultHostPlatformLinuxConfiguration();
             case "win32":
                 return CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
+        }
+    }
+
+    protected augmentDeletionConfirmationModal(confirmationModal: ConfirmationModal, customShellInstance: CustomShellInstance) {
+        const usages: string[] = customShellInstance.getUsages();
+
+        // Display where this Shell is used (if anywhere).
+        if (usages.length > 0) {
+            const usageInfoElement: HTMLElement = document.createElement("div");
+            const usageParagraph = usageInfoElement.createEl("p");
+            usageParagraph.innerText = customShellInstance.configuration.name + " is used";
+            let plural = "";
+            if (usages.length === 1) {
+                // One usage.
+                usageParagraph.innerText += ` ${usages[0]}.`; // Preceding space is intentional.
+            } else {
+                // Multiple usages.
+                usageParagraph.innerText += ":";
+                const usageListElement = usageInfoElement.createEl("ul");
+                for (const usage of usages) {
+                    usageListElement.createEl("li", {text: usage});
+                }
+                plural = "s";
+            }
+            usageInfoElement.createEl("p", {text: `If you delete the shell, the mentioned item${plural} will switch to use another shell.`});
+            confirmationModal.setExtraContent(usageInfoElement);
         }
     }
 

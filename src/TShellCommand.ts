@@ -107,8 +107,15 @@ export class TShellCommand {
         return getShell(this.getShellIdentifier());
     }
 
+    /**
+     * TODO: Rename to getShellIdentifiers().
+     */
     public getShells() {
         return this.configuration.shells;
+    }
+
+    public getShellIdentifiersAsSet(): Set<string> {
+        return new Set(Object.values(this.configuration.shells));
     }
 
     /**

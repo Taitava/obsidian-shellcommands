@@ -25,6 +25,7 @@ import {
 import {
     IPlatformSpecificString,
     PlatformId,
+    PlatformNamesMap,
     SC_MainSettings,
 } from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
@@ -81,12 +82,28 @@ export class CustomShellInstance extends Instance {
     /**
      * Returns all TShellCommands that currently use this custom shell on the given platform.
      *
+     * TODO: Consider moving this method to Shell.
+     *
      * @private Can be made public, if needed.
      */
     private getTShellCommandsByPlatform(platformId: PlatformId): TShellCommandMap {
         return new TShellCommandMap(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
             const tShellCommand: TShellCommand = entry[1];
             return tShellCommand.getShells()[platformId] === this.getId();
+        }));
+    }
+
+    /**
+     * Returns all TShellCommands that currently use this CustomShell on any platform.
+     *
+     * TODO: Consider moving this method to Shell.
+     *
+     * @private Can be made public, if needed.
+     */
+    private getTShellCommands(): TShellCommandMap {
+        return new TShellCommandMap(Array.from(this.model.plugin.getTShellCommandsAsMap()).filter((entry: [string, TShellCommand]) => {
+            const tShellCommand: TShellCommand = entry[1];
+            return tShellCommand.getShellIdentifiersAsSet().has(this.getId());
         }));
     }
 
@@ -151,19 +168,38 @@ export class CustomShellInstance extends Instance {
      * @return If disabling failed: A string containing shell command aliases (or command contents) that use this shell. If disabling succeeded: true.
      */
     public disableHostPlatformIfNotUsed(platformId: PlatformId): true | string {
-        const relatedTShellCommands = this.getTShellCommandsByPlatform(platformId);
-        if (relatedTShellCommands.size > 0) {
+        const usages = this.getUsages(platformId);
+        if (usages.length > 0) {
             // Cannot disable.
-            const relatedTShellCommandsString: string =
-                Array.from(relatedTShellCommands.values())
-                .map((tShellCommand: TShellCommand) => tShellCommand.getAliasOrShellCommand())
-                .join(', ')
-            ;
-            return relatedTShellCommandsString;
+            return usages.join(", ");
         } else {
             // Can disable.
             this.disableHostPlatform(platformId);
             return true;
         }
+    }
+
+    /**
+     * Returns a human-readable list of shell commands using this Shell, and platforms where this is a default Shell.
+     *
+     * @param platformId Optional, can be used to narrow the list of shell commands to only those using this Shell on a specific platform.
+     */
+    public getUsages(platformId?: PlatformId): string[] {
+        const usedByTShellCommands = platformId ? this.getTShellCommandsByPlatform(platformId) : this.getTShellCommands();
+        const usedByPlatformDefaults = (undefined === platformId)
+            ? this.getPlatformIdsUsingThisShellAsDefault()
+            : this.getPlatformIdsUsingThisShellAsDefault().filter(_platformId => _platformId === platformId) // if platformId is present, the list will contain zero or one item.
+        ;
+        const usages: string[] = [];
+
+        if (usedByTShellCommands.size > 0) {
+            usages.push(...Array.from(usedByTShellCommands.values()).map((tShellCommand: TShellCommand) => "by " + tShellCommand.getAliasOrShellCommand()));
+        }
+
+        if (usedByPlatformDefaults.length > 0) {
+            usages.push(...usedByPlatformDefaults.map(platformId => "as a default shell for " + PlatformNamesMap.get(platformId)));
+        }
+
+        return usages;
     }
 }
