@@ -157,7 +157,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 /**
  * All OSes supported by the Shell commands plugin.
  * Values are borrowed from NodeJS.Platform.
- * "darwin" = Macintosh.
+ * "darwin" is macOS.
  *
  * This type must be synchronous to IPlatformSpecificString interface.
  *
@@ -166,7 +166,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 export type PlatformId = "darwin" | "linux" | "win32";
 
 export const PlatformNames: IPlatformSpecificString = {
-    darwin: "Macintosh",
+    darwin: "macOS",
     linux: "Linux",
     win32: "Windows",
 };
@@ -185,8 +185,8 @@ export const PlatformNamesMap: Map<PlatformId, string> = new Map(Object.entries(
  *
  * @see NodeJS.Platform
  */
-export interface IPlatformSpecificString {
-    /** This is Macintosh */
+export interface IPlatformSpecificString { // TODO: Rename to plural form: IPlatformSpecificStrings
+    /** This is macOS */
     darwin?: string,
     linux?: string,
     win32?: string,
