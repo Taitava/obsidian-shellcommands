@@ -150,10 +150,8 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("Select all operating systems that you have this shell installed on. Note that in case your shell belongs to a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you need to select the *host* system, as the sub-system's operating system does not matter here.")
             .setHeading()
         ;
-        const supportedPlatformsContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
-        for (const [platformId, platformName] of PlatformNamesMap) {
-            this.createSupportedHostPlatformField(supportedPlatformsContainer, platformId, platformName);
-        }
+        const hostPlatformContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
+        this.createHostPlatformField(hostPlatformContainer);
 
         // Shell operating system
         const hostPlatformName = PlatformNames[getOperatingSystem()];
@@ -217,54 +215,40 @@ export class CustomShellSettingsModal extends SC_Modal {
         }
     }
 
-    private createSupportedHostPlatformField(containerElement: HTMLElement, platformId: PlatformId, platformName: string) {
+    private createHostPlatformField(containerElement: HTMLElement) {
+
         new Setting(containerElement)
-            .setName("Enable on " + platformName)
-            .addToggle(toggleComponent => toggleComponent
-                .setValue(this.customShellInstance.configuration.host_platforms[platformId].enabled)
-                .onChange(async (enable: boolean) => {
-                    if (enable) {
-                        // Enable this host platform.
-                        this.customShellInstance.enableHostPlatform(platformId);
-                        await this.plugin.saveSettings();
+            .setName("Host platform")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions(Object.fromEntries(PlatformNamesMap))
+                .setValue(this.customShellInstance.configuration.host_platform)
+                .onChange(async (newHostPlatform: PlatformId) => {
+                    const changeResult: true | string = this.customShellInstance.changeHostPlatformIfCan(newHostPlatform);
+                    if ("string" === typeof changeResult) {
+                        // Cannot change the host platform, because the shell has usages.
+                        this.plugin.newError("Cannot change the host platform, because the shell is used " + changeResult + ".");
+                        dropdownComponent.setValue(this.customShellInstance.configuration.host_platform); // Undo changing dropdown selection.
                     } else {
-                        // Disable this host platform - but only if the shell is not in use.
-                        const disablingResult = this.customShellInstance.disableHostPlatformIfNotUsed(platformId);
-                        if ("string" === typeof disablingResult) {
-                            // Cannot disable.
-                            this.plugin.newError("Cannot disable this shell on " + platformName + " because it's used " + disablingResult + ".");
-                            toggleComponent.setValue(true); // Re-enable.
-                        } else {
-                            // Save the disabling.
-                            await this.plugin.saveSettings();
-                        }
+                        // The host platform was changed ok.
+                        await this.plugin.saveSettings();
                     }
 
                     // Show or hide any platform specific settings.
-                    updatePlatformSpecificSettingsVisibility(enable);
+                    updatePlatformSpecificSettingsVisibility(newHostPlatform);
                 }),
             )
-            // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on this platform. Disable clicking the icon if the toggle created above is off.
+            // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on the selected platform.
         ;
 
         // Platform specific settings.
-        let platformSpecificSettings: Setting[];
-        const updatePlatformSpecificSettingsVisibility = (enabled: boolean) => {
-            platformSpecificSettings.forEach((setting: Setting) => setting.settingEl.toggleClass("SC-hide", !enabled));
+        const windowsSpecificSettings = this.createHostPlatformWindowsSpecificSettings(containerElement);
+        const updatePlatformSpecificSettingsVisibility = (newHostPlatform: PlatformId) => {
+            // Update Windows settings visibility.
+            windowsSpecificSettings.forEach((setting: Setting) => setting.settingEl.toggleClass("SC-hide", "win32" !== newHostPlatform));
         };
-        switch (platformId) {
-            case "win32": // Create Windows specific settings.
-                platformSpecificSettings = this.createHostPlatformWindowsSpecificSettings(containerElement);
-                break;
-            default:
-                // If platform is not Windows, set platformSpecificSettings to an empty array, so the .forEach() loop in
-                // updatePlatformSpecificSettingsVisibility() does nothing. Maybe not the cleanest solution, but at least
-                // it should offer an easy-ish way to later add settings for other platforms, too.
-                platformSpecificSettings = [];
-                break;
-        }
+
         // Hide the settings immediately, if needed.
-        updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platforms[platformId].enabled);
+        updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platform);
     }
 
     private createHostPlatformWindowsSpecificSettings(containerElement: HTMLElement) {
@@ -278,8 +262,8 @@ export class CustomShellSettingsModal extends SC_Modal {
 
         // 'Quote shell arguments' setting.
         const quoteShellArgumentsInitialValue: boolean =
-            this.customShellInstance.configuration.host_platforms.win32.quote_shell_arguments // Use value from user configuration if defined.
-            ?? CustomShellModel.getDefaultHostPlatformWindowsConfiguration(true).quote_shell_arguments // Otherwise get a default value.
+            this.customShellInstance.configuration.host_platform_configurations.win32?.quote_shell_arguments // Use value from user configuration if defined.
+            ?? CustomShellModel.getDefaultHostPlatformWindowsConfiguration().quote_shell_arguments // Otherwise get a default value.
         ;
         const quoteShellArgumentsSetting = new Setting(containerElement)
             .setName("Windows: Quote shell arguments")
@@ -289,7 +273,11 @@ export class CustomShellSettingsModal extends SC_Modal {
             .addToggle(toggleComponent => toggleComponent
                 .setValue(quoteShellArgumentsInitialValue)
                 .onChange(async (quoteShellArgumentsNewValue: boolean) => {
-                    this.customShellInstance.configuration.host_platforms.win32.quote_shell_arguments = quoteShellArgumentsNewValue;
+                    if (undefined === this.customShellInstance.configuration.host_platform_configurations.win32) {
+                        // If win32 is not defined, create an object for it with default values - which can be overridden immediately.
+                        this.customShellInstance.configuration.host_platform_configurations.win32 = CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
+                    }
+                    this.customShellInstance.configuration.host_platform_configurations.win32.quote_shell_arguments = quoteShellArgumentsNewValue;
                     await this.plugin.saveSettings();
                 })
             )

@@ -80,15 +80,7 @@ export class CustomShell extends Shell {
     }
 
     public getSupportedHostPlatforms(): PlatformId[] {
-        const hostPlatforms = this.getConfiguration().host_platforms;
-        const supportedHostPlatforms: PlatformId[] = [];
-        let platformId: PlatformId;
-        for (platformId of Object.getOwnPropertyNames(hostPlatforms) as (keyof typeof hostPlatforms)[]) {
-            if (hostPlatforms[platformId].enabled) {
-                supportedHostPlatforms.push(platformId);
-            }
-        }
-        return supportedHostPlatforms;
+        return [this.getConfiguration().host_platform];
     }
 
     /**
@@ -175,8 +167,12 @@ export class CustomShell extends Shell {
         spawnAugmentation.spawnOptions.shell = false; // It's probably false by default in Node.js's spawn(), but make it explicit.
 
         // Windows specific settings.
-        const windowsSpecificSettings = this.getConfiguration().host_platforms.win32;
-        if (isWindows() && windowsSpecificSettings.enabled) { // The .enabled check tells TypeScript that .quote_shell_arguments surely exists.
+        if (isWindows()) {
+            const windowsSpecificSettings = this.getConfiguration().host_platform_configurations.win32;
+            if (undefined === windowsSpecificSettings) {
+                // Should not be undefined at this point. The settings file should contain a WindowsSpecificShellConfiguration is host_platform is "win32" (which it apparently is, if we got here).
+                throw new Error("Windows specific CustomShell configuration is undefined.");
+            }
             // If .quote_shell_arguments is false, deny Node.js's child_process.spawn() from:
             // - adding double quotes "" around arguments that contain spaces,
             // - post-fixing existing double quotes with backslashes \

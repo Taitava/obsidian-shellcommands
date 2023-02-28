@@ -130,51 +130,28 @@ export class CustomShellInstance extends Instance {
      *
      * Note that the caller should save plugin settings, it's not done by this method.
      *
-     * @param platformId
+     * @param newPlatformId
      */
-    public enableHostPlatform(platformId: PlatformId): void {
-        this.configuration.host_platforms[platformId].enabled = true;
+    public changeHostPlatformIfCan(newPlatformId: PlatformId): true | string {
 
-        // Ensure the host platform configuration contains all properties a default configuration contains. A disabled
-        // platform's configuration might be condensed to only contain {enabled: false}. However, default values MUST NOT
-        // override any possibly existing values.
-        ensureObjectHasProperties(
-            this.configuration.host_platforms[platformId],
-            CustomShellModel.getDefaultHostPlatformConfiguration(platformId),
-        );
-    }
-
-    /**
-     * Marks the given host operating system as disabled in CustomShellConfiguration.
-     *
-     * Note that the caller should save plugin settings, it's not done by this method.
-     *
-     * @param platformId
-     */
-    private disableHostPlatform(platformId: PlatformId): void {
-        this.configuration.host_platforms[platformId].enabled = false;
-
-        // Do not remove additional configuration properties. Even though setting 'enabled' to false makes the additional
-        // properties not to be in effect, they should be conserved, as they might have been inputted by a user and might
-        // be needed if the platform is re-enabled later.
-    }
-
-    /**
-     * Calls disableHostPlatform(), but only if the shell is not used by any shell command on the given platform.
-     *
-     * Note that the caller should save plugin settings, it's not done by this method.
-     *
-     * @param platformId
-     * @return If disabling failed: A string containing shell command aliases (or command contents) that use this shell. If disabling succeeded: true.
-     */
-    public disableHostPlatformIfNotUsed(platformId: PlatformId): true | string {
-        const usages = this.getUsages(platformId);
+        const usages: string[] = this.getUsages();
         if (usages.length > 0) {
-            // Cannot disable.
+            // Cannot change the host platform because there are usages.
             return usages.join(", ");
         } else {
-            // Can disable.
-            this.disableHostPlatform(platformId);
+            // Can change the host platform.
+            this.configuration.host_platform = newPlatformId;
+
+            // Ensure the host platform configuration contains all properties a default configuration contains. However,
+            // default values MUST NOT override any possibly existing values.
+            switch (newPlatformId) {
+                case "win32":
+                    ensureObjectHasProperties(
+                        this.configuration.host_platform_configurations,
+                        {win32: CustomShellModel.getDefaultHostPlatformWindowsConfiguration()},
+                    );
+                    break;
+            }
             return true;
         }
     }

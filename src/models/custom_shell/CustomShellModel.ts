@@ -28,8 +28,7 @@ import {Setting} from "obsidian";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {debugLog} from "../../Debug";
 import {
-    isLinux,
-    isMacOS,
+    getOperatingSystem,
     isWindows,
 } from "../../Common";
 import {
@@ -127,11 +126,10 @@ export class CustomShellModel extends Model {
             description: "",
             binary_path: "",
             shell_arguments: ["-c", "{{shell_command_content}}"],
-            host_platforms: {
-                darwin: CustomShellModel.getDefaultHostPlatformMacOSConfiguration(),
-                linux: CustomShellModel.getDefaultHostPlatformLinuxConfiguration(),
+            host_platform: getOperatingSystem(),
+            host_platform_configurations: isWindows() ? {
                 win32: CustomShellModel.getDefaultHostPlatformWindowsConfiguration(),
-            },
+            } : {},
             shell_platform: null,
             escaper: isWindows() ? "PowerShell" : "UnixShell",
             path_translator: null,
@@ -140,46 +138,10 @@ export class CustomShellModel extends Model {
         };
     }
 
-    private static getDefaultHostPlatformMacOSConfiguration(): CustomShellConfiguration["host_platforms"]["darwin"] {
+    public static getDefaultHostPlatformWindowsConfiguration(): WindowsSpecificShellConfiguration {
         return {
-            enabled: isMacOS(),
+            quote_shell_arguments: true,
         };
-    }
-
-    private static getDefaultHostPlatformLinuxConfiguration(): CustomShellConfiguration["host_platforms"]["linux"] {
-        return {
-            enabled: isLinux(),
-        };
-    }
-
-    public static getDefaultHostPlatformWindowsConfiguration(enabled: false): {enabled: false}; // This override is not used at the moment, but have it just for completeness.
-    public static getDefaultHostPlatformWindowsConfiguration(enabled: true): WindowsSpecificShellConfigurationEnabled;
-    public static getDefaultHostPlatformWindowsConfiguration(): WindowsSpecificShellConfiguration;
-    public static getDefaultHostPlatformWindowsConfiguration(enabled: boolean = isWindows()): WindowsSpecificShellConfiguration {
-        if (enabled) {
-            // Return an enabled default configuration. It _must_ include additional properties and their default values.
-            return {
-                enabled: true,
-                quote_shell_arguments: true,
-            };
-        } else {
-            // Return a disabled default configuration. It _could_ include additional properties in theory, but as they
-            // are not inputted by a user in this case, there's no need to include them, so keep it simple and clean.
-            return {
-                enabled: false,
-            };
-        }
-    }
-
-    public static getDefaultHostPlatformConfiguration(platformId: PlatformId): CustomShellConfiguration["host_platforms"][typeof platformId] {
-        switch (platformId) {
-            case "darwin":
-                return CustomShellModel.getDefaultHostPlatformMacOSConfiguration();
-            case "linux":
-                return CustomShellModel.getDefaultHostPlatformLinuxConfiguration();
-            case "win32":
-                return CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
-        }
     }
 
     protected augmentDeletionConfirmationModal(confirmationModal: ConfirmationModal, customShellInstance: CustomShellInstance) {
@@ -268,17 +230,16 @@ export interface CustomShellConfiguration {
     shell_arguments: string[],
 
     /**
-     * A list of host operating systems on which this shell can be used.
+     * The host operating system on which this shell can be used.
      */
-    host_platforms: {
-        darwin: {
-            enabled: boolean,
-        },
-        linux: {
-            enabled: boolean,
-        },
-        win32: WindowsSpecificShellConfiguration,
-    },
+    host_platform: PlatformId
+
+    /**
+     * Settings only needed for specific operating systems. For now, only Windows has dedicated settings.
+     */
+    host_platform_configurations: {
+        win32?: WindowsSpecificShellConfiguration
+    }
 
     /**
      * An operating system that this shell virtualizes, uses as a subsystem, or otherwise emulates. Used for determining:
@@ -328,7 +289,7 @@ export interface CustomShellConfiguration {
     shell_command_test: string | null
 }
 
-interface WindowsSpecificAdditionalShellProperties {
+interface WindowsSpecificShellConfiguration {
 
     /**
      * If true, quotes are added around arguments that contain spaces, and already existing quotes are escaped
@@ -338,13 +299,3 @@ interface WindowsSpecificAdditionalShellProperties {
      */
     quote_shell_arguments: boolean,
 }
-
-interface WindowsSpecificShellConfigurationEnabled extends WindowsSpecificAdditionalShellProperties {
-    enabled: true,
-}
-
-interface WindowsSpecificShellConfigurationDisabled extends Partial<WindowsSpecificAdditionalShellProperties> {
-    enabled: false,
-}
-
-type WindowsSpecificShellConfiguration = WindowsSpecificShellConfigurationEnabled | WindowsSpecificShellConfigurationDisabled;
