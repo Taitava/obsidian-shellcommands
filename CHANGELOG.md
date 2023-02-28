@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-- Nothing at the moment.
+### Changed
+- [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
 
 ## [0.18.1] - 2023-01-22
 
