@@ -145,11 +145,6 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Supported operating systems
-        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
-            .setName("Supported operating systems")
-            .setDesc("Select all operating systems that you have this shell installed on. Note that in case your shell belongs to a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you need to select the *host* system, as the sub-system's operating system does not matter here.")
-            .setHeading()
-        ;
         const hostPlatformContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         this.createHostPlatformField(hostPlatformContainer);
 
@@ -157,7 +152,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const hostPlatformName = PlatformNames[getOperatingSystem()];
         new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Shell's operating system")
-            .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the current host (" + hostPlatformName + "), select it here. This is used to make directory paths etc. work correctly.")
+            .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the selected host operating system, select it here. This is used to make directory paths etc. work correctly.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOption("none", "Same as the current host (" + hostPlatformName + ")")
                 .addOptions(PlatformNames as Record<string, string>) // FIXME: Find a better way to tell TypeScript that PlatformNames is of a correct type.
@@ -218,7 +213,8 @@ export class CustomShellSettingsModal extends SC_Modal {
     private createHostPlatformField(containerElement: HTMLElement) {
 
         new Setting(containerElement)
-            .setName("Host platform")
+            .setName("Host operating system")
+            .setDesc("The shell is only available when Obsidian runs on the selected operating system. Note that in case your shell utilizes a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you still need to select the operating system Obsidian is running on, not the sub-system's operating system.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions(Object.fromEntries(PlatformNamesMap))
                 .setValue(this.customShellInstance.configuration.host_platform)
