@@ -18,12 +18,19 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
+## [0.19.0] - Unreleased
+
 ### To be Added
 - [Support for custom shells(#297)](https://github.com/Taitava/obsidian-shellcommands/issues/297).
   - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells).
 
 ### To be Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
+
+## [0.18.2] - Unreleased
+
+### To be Fixed
+- [Global default values for variables not working when previewing a Prompt (#327)](https://github.com/Taitava/obsidian-shellcommands/issues/327).
 
 ## [0.18.1] - 2023-01-22
 
