@@ -87,7 +87,7 @@ export abstract class Variable {
                     debugLog(this.constructor.name + ".getValue(): Caught a VariableError and will determine how to handle it: " + error.message);
 
                     // Check what should be done.
-                    const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+                    const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return null, and t_shell_command can be null.
                     const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
                     const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
                     switch (default_value_type) {
