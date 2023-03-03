@@ -321,7 +321,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                         if (variable instanceof Variable_FilePath || variable instanceof Variable_FolderPath) {
                             variableArguments = {mode: "absolute"};
                         }
-                        const variableValueResult = await variable.getValue(this.customShellInstance.getCustomShell(), null, null, variableArguments);
+                        const variableValueResult = await variable.getValue(this.getCustomShell(), null, null, variableArguments);
                         const translatedPath = variableValueResult.succeeded ? variableValueResult.value : variableValueResult.error_messages[0];
                         this.plugin.newNotification(variable.getFullName(Object.values(variableArguments)) + " = " + translatedPath);
                     }
@@ -346,7 +346,6 @@ export class CustomShellSettingsModal extends SC_Modal {
     private createShellCommandWrapperField(containerElement: HTMLElement) {
         // Test the shell.
         const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // Only used for autocomplete, so does not need a real value.
-        const customShell: CustomShell = this.customShellInstance.getCustomShell(); // TODO: Create a private method this.getCustomShell() that returns this.customShellInstance.getCustomShell(). Remove this variable then.
         const wrapperSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(wrapperSettingsContainer)
             .setName("Wrapper for shell command")
@@ -358,7 +357,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             wrapperSettingsContainer,
             "",
             this.customShellInstance.configuration.shell_command_wrapper ?? "",
-            customShell,
+            this.getCustomShell(),
             null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
             this.plugin.settings.show_autocomplete_menu,
             async (newShellCommandWrapper: string) => {
@@ -373,7 +372,6 @@ export class CustomShellSettingsModal extends SC_Modal {
     private createShellTestField(containerElement: HTMLElement) {
         // Test the shell.
         containerElement.createEl("hr"); // Separate non-savable form fields visually from savable settings fields.
-        const customShell: CustomShell = this.customShellInstance.getCustomShell();
         const testSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(testSettingsContainer)
         .setName("Execute a command to test the shell")
@@ -389,15 +387,15 @@ export class CustomShellSettingsModal extends SC_Modal {
                 }
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    this.customShellInstance.getCustomShell().augmentShellCommandContent(this.customShellInstance.configuration.shell_command_test, null, null), // TODO: Create a private method this.getCustomShell() that returns this.customShellInstance.getCustomShell(). And another method: getConfiguration().
-                    customShell,
+                    this.getCustomShell().augmentShellCommandContent(this.customShellInstance.configuration.shell_command_test, null, null), // TODO: Create a private method getConfiguration().
+                    this.getCustomShell(),
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.
                     null, // This execution is not launched by an event.
                 );
                 if (testShellCommandParsingResult.succeeded) {
                     // Can execute.
-                    const childProcess = await customShell.spawnChildProcess(
+                    const childProcess = await this.getCustomShell().spawnChildProcess(
                         testShellCommandParsingResult.parsed_content as string,
                         {
                             cwd: ShellCommandExecutor.getWorkingDirectory(this.plugin),
@@ -449,7 +447,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             testSettingsContainer,
             "",
             this.customShellInstance.configuration.shell_command_test ?? "",
-            customShell,
+            this.getCustomShell(),
             null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
             this.plugin.settings.show_autocomplete_menu,
             async (newTestShellCommandContent: string) => {
@@ -462,6 +460,10 @@ export class CustomShellSettingsModal extends SC_Modal {
         .setDesc("(If you have defined additions to the PATH environment variable in this plugin's settings, they do NOT work in this test. Maybe in the future. However, they should work when you execute real shell commands using this shell.)")
         .setClass("SC-full-description")
         ;
+    }
+
+    private getCustomShell(): CustomShell {
+        return this.customShellInstance.getCustomShell();
     }
 
     protected approve(): void {
