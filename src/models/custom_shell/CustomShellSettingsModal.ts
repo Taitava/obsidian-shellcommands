@@ -40,7 +40,10 @@ import {
     ParsingResult,
 } from "../../variables/parseVariables";
 import {CustomShell} from "../../shells/CustomShell";
-import {CustomShellModel} from "./CustomShellModel";
+import {
+    CustomShellConfiguration,
+    CustomShellModel,
+} from "./CustomShellModel";
 import {IRawArguments} from "../../variables/Variable";
 import {Variable_VaultPath} from "../../variables/Variable_VaultPath";
 import {Variable_FolderPath} from "../../variables/Variable_FolderPath";
@@ -77,9 +80,9 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Shell name")
             .setDesc("A label used to select the shell in settings.")
             .addText(text => text
-                .setValue(this.customShellInstance.configuration.name)
+                .setValue(this.getCustomShellConfiguration().name)
                 .onChange(async (newName: string) => {
-                    this.customShellInstance.configuration.name = newName;
+                    this.getCustomShellConfiguration().name = newName;
                     await this.plugin.saveSettings();
 
                     // Update the title in a name setting. (Only if the modal was created from a place where a CustomShellInstance name element exists).
@@ -96,9 +99,9 @@ export class CustomShellSettingsModal extends SC_Modal {
         new Setting(titleAndDescriptionGroupElement)
             .setName("Description")
             .addTextArea(textarea => textarea
-                .setValue(this.customShellInstance.configuration.description)
+                .setValue(this.getCustomShellConfiguration().description)
                 .onChange(async (newDescription: string) => {
-                    this.customShellInstance.configuration.description = newDescription;
+                    this.getCustomShellConfiguration().description = newDescription;
                     await this.plugin.saveSettings();
 
                     // Update the description in a name setting. (Only if the modal was created from a place where a CustomShellInstance name element exists).
@@ -112,9 +115,9 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Executable binary file path")
             .setDesc("This should only contain a directory and a file name (or just a file name), not any possible command line options/arguments. They will be configured below.")
             .addText(textComponent => textComponent
-                .setValue(this.customShellInstance.configuration.binary_path)
+                .setValue(this.getCustomShellConfiguration().binary_path)
                 .onChange(async (newBinaryPath: string) => {
-                    this.customShellInstance.configuration.binary_path = newBinaryPath;
+                    this.getCustomShellConfiguration().binary_path = newBinaryPath;
                     await this.plugin.saveSettings();
                 }),
             )
@@ -126,9 +129,9 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Shell arguments")
             .setDesc("Command line options/arguments to execute the shell's binary file with. The executable shell command should be one of them; {{shell_command_content}} provides it. Other {{variables}} are supported, too. No special characters are escaped in variable values. Separate different arguments with a newline. Possible newlines coming from {{variable}} values are not considered as separators.")
             .addTextArea((textareaComponent: TextAreaComponent) => textareaComponent
-                .setValue(this.customShellInstance.configuration.shell_arguments.join("\n"))
+                .setValue(this.getCustomShellConfiguration().shell_arguments.join("\n"))
                 .onChange(async (concatenatedShellArguments) => {
-                    this.customShellInstance.configuration.shell_arguments = concatenatedShellArguments.split("\n");
+                    this.getCustomShellConfiguration().shell_arguments = concatenatedShellArguments.split("\n");
                     await this.plugin.saveSettings();
                 })
                 .then((textareaComponent: TextAreaComponent) => {
@@ -156,14 +159,14 @@ export class CustomShellSettingsModal extends SC_Modal {
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOption("none", "Same as the current host (" + hostPlatformName + ")")
                 .addOptions(PlatformNames as Record<string, string>) // FIXME: Find a better way to tell TypeScript that PlatformNames is of a correct type.
-                .setValue(this.customShellInstance.configuration.shell_platform ?? "none")
+                .setValue(this.getCustomShellConfiguration().shell_platform ?? "none")
                 .onChange(async (newShellPlatform: string) => {
                     switch (newShellPlatform as PlatformId | "none") {
                         case "none":
-                            this.customShellInstance.configuration.shell_platform = null;
+                            this.getCustomShellConfiguration().shell_platform = null;
                             break;
                         default:
-                            this.customShellInstance.configuration.shell_platform = newShellPlatform as PlatformId;
+                            this.getCustomShellConfiguration().shell_platform = newShellPlatform as PlatformId;
                     }
                     await this.plugin.saveSettings();
                 })
@@ -180,9 +183,9 @@ export class CustomShellSettingsModal extends SC_Modal {
                     "PowerShell": "PowerShell style with ` as escape character",
                     "none": "No escaping (not recommended)",
                 })
-                .setValue(this.customShellInstance.configuration.escaper ?? "none")
+                .setValue(this.getCustomShellConfiguration().escaper ?? "none")
                 .onChange(async (newEscaper: "UnixShell" | "PowerShell" | "none") => {
-                    this.customShellInstance.configuration.escaper = newEscaper === "none" ? null : newEscaper;
+                    this.getCustomShellConfiguration().escaper = newEscaper === "none" ? null : newEscaper;
                     await this.plugin.saveSettings();
                 })
             )
@@ -217,13 +220,13 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("The shell is only available when Obsidian runs on the selected operating system. Note that in case your shell utilizes a sub-operating system (e.g. Windows Subsystem for Linux, WSL), you still need to select the operating system Obsidian is running on, not the sub-system's operating system.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions(Object.fromEntries(PlatformNamesMap))
-                .setValue(this.customShellInstance.configuration.host_platform)
+                .setValue(this.getCustomShellConfiguration().host_platform)
                 .onChange(async (newHostPlatform: PlatformId) => {
                     const changeResult: true | string = this.customShellInstance.changeHostPlatformIfCan(newHostPlatform);
                     if ("string" === typeof changeResult) {
                         // Cannot change the host platform, because the shell has usages.
                         this.plugin.newError("Cannot change the host platform, because the shell is used " + changeResult + ".");
-                        dropdownComponent.setValue(this.customShellInstance.configuration.host_platform); // Undo changing dropdown selection.
+                        dropdownComponent.setValue(this.getCustomShellConfiguration().host_platform); // Undo changing dropdown selection.
                     } else {
                         // The host platform was changed ok.
                         await this.plugin.saveSettings();
@@ -244,7 +247,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         };
 
         // Hide the settings immediately, if needed.
-        updatePlatformSpecificSettingsVisibility(this.customShellInstance.configuration.host_platform);
+        updatePlatformSpecificSettingsVisibility(this.getCustomShellConfiguration().host_platform);
     }
 
     private createHostPlatformWindowsSpecificSettings(containerElement: HTMLElement) {
@@ -258,7 +261,7 @@ export class CustomShellSettingsModal extends SC_Modal {
 
         // 'Quote shell arguments' setting.
         const quoteShellArgumentsInitialValue: boolean =
-            this.customShellInstance.configuration.host_platform_configurations.win32?.quote_shell_arguments // Use value from user configuration if defined.
+            this.getCustomShellConfiguration().host_platform_configurations.win32?.quote_shell_arguments // Use value from user configuration if defined.
             ?? CustomShellModel.getDefaultHostPlatformWindowsConfiguration().quote_shell_arguments // Otherwise get a default value.
         ;
         const quoteShellArgumentsSetting = new Setting(containerElement)
@@ -269,11 +272,12 @@ export class CustomShellSettingsModal extends SC_Modal {
             .addToggle(toggleComponent => toggleComponent
                 .setValue(quoteShellArgumentsInitialValue)
                 .onChange(async (quoteShellArgumentsNewValue: boolean) => {
-                    if (undefined === this.customShellInstance.configuration.host_platform_configurations.win32) {
+                    const customShellConfiguration: CustomShellConfiguration = this.getCustomShellConfiguration();
+                    if (undefined === customShellConfiguration.host_platform_configurations.win32) {
                         // If win32 is not defined, create an object for it with default values - which can be overridden immediately.
-                        this.customShellInstance.configuration.host_platform_configurations.win32 = CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
+                        customShellConfiguration.host_platform_configurations.win32 = CustomShellModel.getDefaultHostPlatformWindowsConfiguration();
                     }
-                    this.customShellInstance.configuration.host_platform_configurations.win32.quote_shell_arguments = quoteShellArgumentsNewValue;
+                    customShellConfiguration.host_platform_configurations.win32.quote_shell_arguments = quoteShellArgumentsNewValue;
                     await this.plugin.saveSettings();
                 })
             )
@@ -291,14 +295,14 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setDesc("Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
             .setClass("SC-path-translator-setting")
             .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
-                .setValue(this.customShellInstance.configuration.path_translator ?? "")
+                .setValue(this.getCustomShellConfiguration().path_translator ?? "")
                 .onChange(async (newPathTranslator: string) => {
                     if ("" === newPathTranslator.trim()) {
                         // Disable translator
-                        this.customShellInstance.configuration.path_translator = null;
+                        this.getCustomShellConfiguration().path_translator = null;
                     } else {
                         // Enable or update translator
-                        this.customShellInstance.configuration.path_translator = newPathTranslator;
+                        this.getCustomShellConfiguration().path_translator = newPathTranslator;
                     }
                     await this.plugin.saveSettings();
                 })
@@ -356,12 +360,12 @@ export class CustomShellSettingsModal extends SC_Modal {
             this.plugin,
             wrapperSettingsContainer,
             "",
-            this.customShellInstance.configuration.shell_command_wrapper ?? "",
+            this.getCustomShellConfiguration().shell_command_wrapper ?? "",
             this.getCustomShell(),
             null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
             this.plugin.settings.show_autocomplete_menu,
             async (newShellCommandWrapper: string) => {
-                this.customShellInstance.configuration.shell_command_wrapper = (newShellCommandWrapper === "") ? null : newShellCommandWrapper;
+                this.getCustomShellConfiguration().shell_command_wrapper = (newShellCommandWrapper === "") ? null : newShellCommandWrapper;
                 await this.plugin.saveSettings();
             },
             shellCommandContentVariable.getFullName(), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
@@ -381,13 +385,14 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setTooltip("Execute the test command using this shell.")
             .setIcon("run-command")
             .onClick(async () => {
-                if (null === this.customShellInstance.configuration.shell_command_test) {
+                const customShellConfiguration: CustomShellConfiguration = this.getCustomShellConfiguration();
+                if (null === customShellConfiguration.shell_command_test) {
                     this.plugin.newError("The test shell command is empty.");
                     return;
                 }
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    this.getCustomShell().augmentShellCommandContent(this.customShellInstance.configuration.shell_command_test, null, null), // TODO: Create a private method getConfiguration().
+                    this.getCustomShell().augmentShellCommandContent(customShellConfiguration.shell_command_test, null, null),
                     this.getCustomShell(),
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.
@@ -446,12 +451,12 @@ export class CustomShellSettingsModal extends SC_Modal {
             this.plugin,
             testSettingsContainer,
             "",
-            this.customShellInstance.configuration.shell_command_test ?? "",
+            this.getCustomShellConfiguration().shell_command_test ?? "",
             this.getCustomShell(),
             null, // No need to pass a TShellCommand. It would only be used for accessing variable default values in a preview text.
             this.plugin.settings.show_autocomplete_menu,
             async (newTestShellCommandContent: string) => {
-                this.customShellInstance.configuration.shell_command_test = (newTestShellCommandContent === "") ? null : newTestShellCommandContent;
+                this.getCustomShellConfiguration().shell_command_test = (newTestShellCommandContent === "") ? null : newTestShellCommandContent;
                 await this.plugin.saveSettings();
             },
             "Enter a temporary shell command for testing."
@@ -464,6 +469,10 @@ export class CustomShellSettingsModal extends SC_Modal {
 
     private getCustomShell(): CustomShell {
         return this.customShellInstance.getCustomShell();
+    }
+
+    private getCustomShellConfiguration(): CustomShellConfiguration {
+        return this.customShellInstance.configuration;
     }
 
     protected approve(): void {
