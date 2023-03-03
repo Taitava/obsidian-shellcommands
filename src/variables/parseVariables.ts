@@ -248,7 +248,7 @@ export function getUsedVariables(
     
     for (const variable of search_for_variables)
     {
-        const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+        const pattern = getVariableRegExp(variable);
         if (pattern.exec(content) !== null) {
             // This variable was found.
             found_variables.add(variable);
