@@ -232,8 +232,6 @@ export class CustomShell extends Shell {
             throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
         }
 
-        // TODO: Consider reading wrapperParsingResult.count_parsed_variables. If it's 0, {{shell_command_content}} was not present in the wrapper, and an error should be shown. But need to design it in a way that the error is only shown if a command is really being executed - otherwise the error should be suppressed. E.g. 'Copy Shell command URI' button in settings calls TShellCommand.getShellCommandContentForExecution() because it needs to read possible custom variables used in the shell's wrapper, too, but errors should be suppressed in that context.
-
         return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
     }
 

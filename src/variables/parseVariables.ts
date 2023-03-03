@@ -238,15 +238,21 @@ export function parseVariableSynchronously(content: string, variable: Variable):
  *
  * @param plugin
  * @param content
+ * @param searchForVariables If not defined, will use all variables.
  */
 export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
+        searchForVariables: VariableSet | Variable = plugin.getVariables(),
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables(); // TODO: Make this VariableSet to be a parameter (optional), so that the set of searchable variables can be limited to certain variables only.
+    if (searchForVariables instanceof Variable) {
+        // searchForVariables is a single Variable.
+        // Convert it to a VariableSet.
+        searchForVariables = new VariableSet([searchForVariables]);
+    }
     const found_variables = new VariableSet();
-    
-    for (const variable of search_for_variables)
+
+    for (const variable of searchForVariables)
     {
         const pattern = getVariableRegExp(variable);
         if (pattern.exec(content) !== null) {

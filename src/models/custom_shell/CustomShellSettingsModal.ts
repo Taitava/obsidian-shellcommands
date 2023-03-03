@@ -36,6 +36,7 @@ import {
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
 import {
+    getUsedVariables,
     parseVariables,
     ParsingResult,
 } from "../../variables/parseVariables";
@@ -50,6 +51,7 @@ import {Variable_FolderPath} from "../../variables/Variable_FolderPath";
 import {Variable_FilePath} from "../../variables/Variable_FilePath";
 import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
+import {SettingFieldGroup} from "../../settings/SC_MainSettingsTab";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -349,14 +351,14 @@ export class CustomShellSettingsModal extends SC_Modal {
 
     private createShellCommandWrapperField(containerElement: HTMLElement) {
         // Test the shell.
-        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // Only used for autocomplete, so does not need a real value.
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // Does not need a real value.
         const wrapperSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(wrapperSettingsContainer)
             .setName("Wrapper for shell command")
             .setDesc("Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for setting character encodings. {{variables}} are supported. " + shellCommandContentVariable.getFullName() + " must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.")
             .setClass("SC-full-description")
         ;
-        CreateShellCommandFieldCore(
+        const settingGroup: SettingFieldGroup = CreateShellCommandFieldCore(
             this.plugin,
             wrapperSettingsContainer,
             "",
@@ -367,10 +369,26 @@ export class CustomShellSettingsModal extends SC_Modal {
             async (newShellCommandWrapper: string) => {
                 this.getCustomShellConfiguration().shell_command_wrapper = (newShellCommandWrapper === "") ? null : newShellCommandWrapper;
                 await this.plugin.saveSettings();
+                updateNoShellCommandContentVariableWarning();
             },
             shellCommandContentVariable.getFullName(), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
             shellCommandContentVariable.getAutocompleteItems(),
-        ).shell_command_setting.setClass("SC-no-description");
+        );
+        settingGroup.shell_command_setting.setClass("SC-no-description");
+        settingGroup.preview_setting.setClass("SC-full-description");
+
+        const updateNoShellCommandContentVariableWarning = () => {
+            const warningText = "Warning! The wrapper should contain " + shellCommandContentVariable.getFullName() + ". Otherwise, the shell will be called without the actual shell command that was supposed to be executed.";
+            const shellCommandWrapper: string | null = this.getCustomShellConfiguration().shell_command_wrapper;
+            if (null !== shellCommandWrapper && 0 === getUsedVariables(this.plugin, shellCommandWrapper, shellCommandContentVariable).size) {
+                // The wrapper does not contain {{shell_command_content}}. Show a warning.
+                settingGroup.preview_setting.setDesc(warningText);
+            }
+            // Don't clear the warning by setting the preview description to "", because it might actually contain parsed
+            // variables. Let just CreateShellCommandFieldCore() remove the warning when it sets its preview text to the
+            // description element.
+        };
+        updateNoShellCommandContentVariableWarning();
     }
 
     private createShellTestField(containerElement: HTMLElement) {
