@@ -58,7 +58,7 @@ export function CreateShellCommandFieldCore(
     extra_on_change: (shell_command: string) => void,
     shell_command_placeholder = "Enter your command",
     extraAutocompleteItems?: IAutocompleteItem[],
-    ) {
+    ): SettingFieldGroup {
 
     async function on_change(shell_command: string) {
         // Update preview
