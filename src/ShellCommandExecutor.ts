@@ -32,7 +32,6 @@ import {
     startRealtimeOutputHandling,
 } from "./output_channels/OutputChannelFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {UnrecognisedShellError} from "./shells/ShellFunctions";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
@@ -192,25 +191,8 @@ export class ShellCommandExecutor {
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
     private async executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): Promise<void> {
-        // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
-        // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
-        // shell can be written there.
-        let shell: Shell;
-        try {
-           shell = this.t_shell_command.getShell();
-        } catch (error) {
-            if (error instanceof UnrecognisedShellError) {
-                // The shell is not supported.
-                const shellIdentifier: string | undefined = this.t_shell_command.getShellIdentifier();
-                debugLog("Shell is not supported: " + shellIdentifier);
-                this.plugin.newError("This plugin does not support the following shell directly: " + shellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings.");
-            } else {
-                // Rethrow some other error.
-                throw error;
-            }
-            return;
-        }
 
+        const shell: Shell = this.t_shell_command.getShell();
         const working_directory = ShellCommandExecutor.getWorkingDirectory(this.plugin);
 
         // Define output channels

@@ -104,7 +104,7 @@ export class TShellCommand {
     }
 
     public getShell(): Shell {
-        return getShell(this.getShellIdentifier());
+        return getShell(this.plugin, this.getShellIdentifier());
     }
 
     /**

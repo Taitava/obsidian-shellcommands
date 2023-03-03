@@ -27,6 +27,8 @@ import {Shell_PowerShellCore} from "./Shell_PowerShellCore";
 import {Shell_PowerShell5} from "./Shell_PowerShell5";
 import {Shell_CMD} from "./Shell_CMD";
 import SC_Plugin from "../main";
+import {UnsupportedShell} from "./UnsupportedShell";
+import {debugLog} from "../Debug";
 
 // Register shells
 const shells: Set<Shell> = new Set;
@@ -67,10 +69,11 @@ const matchedShellsCache: Map<string, Shell> = new Map;
 /**
  * Looks for a shell with the given filesystem path or id string. As the search is not as simple as just checking the equality of strings, the result is cached so that calling this multiple times should not cause overhead.
  *
+ * @param plugin
  * @param shellIdentifier
- * @throws NonRecognisedShellError if a shell with the given identifier was not found.
+ * @returns {{UnsupportedShell}} if a shell with the given identifier was not found. Otherwise, returns the queried Shell.
  */
-export function getShell(shellIdentifier: string): Shell {
+export function getShell(plugin: SC_Plugin, shellIdentifier: string): Shell {
     const cachedShell = matchedShellsCache.get(shellIdentifier);
     if (cachedShell) {
         return cachedShell;
@@ -81,11 +84,14 @@ export function getShell(shellIdentifier: string): Shell {
                 return shell;
             }
         }
-        throw new UnrecognisedShellError("No shell was found for identifier: " + shellIdentifier);
+        debugLog("getShell(): Didn't recognise " + shellIdentifier + ", so will return an UnsupportedShell.");
+        // No Shell matched the given identifier. Return a no-can-do Shell that can be passed around in the program, but
+        // that will show a visible error message if a shell command is tried to be executed with it.
+        const unsupportedShell = new UnsupportedShell(plugin, shellIdentifier);
+        matchedShellsCache.set(shellIdentifier, unsupportedShell);
+        return unsupportedShell;
     }
 }
-
-export class UnrecognisedShellError extends Error {}
 
 export function getShells() {
     return shells;

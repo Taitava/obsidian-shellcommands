@@ -30,14 +30,6 @@ import {
     PromptFieldModel,
 } from "../../../imports";
 import {Shell} from "../../../shells/Shell";
-import {
-    getOperatingSystem,
-    tryTo,
-} from "../../../Common";
-import {
-    getShellsForPlatform,
-    UnrecognisedShellError,
-} from "../../../shells/ShellFunctions";
 
 export abstract class PromptField extends Instance {
 
@@ -249,18 +241,11 @@ export abstract class PromptField extends Instance {
     }
 
     protected getShell(tShellCommand: TShellCommand | null): Shell {
-        return tryTo<Shell>(() => {
-            if (tShellCommand) {
-                return tShellCommand.getShell();
-            }
-            // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
-            return this.prompt.model.plugin.getDefaultShell();
-        }, () => {
-            // Either tShellCommand.getShell() failed, or plugin.getDefaultShell() failed. This is because a user has an
-            // unsupported shell defined in their operating system's environment variables, and no overriding shell is
-            // configured in the plugin's settings. Just use the first shell defined for the current platform.
-            return getShellsForPlatform(getOperatingSystem()).first() as Shell; // It's not undefined, there's always a shell.
-        }, UnrecognisedShellError);
+        if (tShellCommand) {
+            return tShellCommand.getShell();
+        }
+        // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+        return this.prompt.model.plugin.getDefaultShell();
     }
 }
 

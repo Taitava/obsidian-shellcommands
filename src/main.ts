@@ -720,7 +720,7 @@ export default class SC_Plugin extends Plugin {
 	}
 
     public getDefaultShell(): Shell {
-        return getShell(this.getDefaultShellIdentifier());
+        return getShell(this, this.getDefaultShellIdentifier());
     }
 
 	public createCustomVariableView(): void {
