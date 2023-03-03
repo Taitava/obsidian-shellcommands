@@ -248,7 +248,7 @@ export abstract class PromptField extends Instance {
         return custom_variable_instance.getCustomVariable();
     }
 
-    private getShell(tShellCommand: TShellCommand | null): Shell {
+    protected getShell(tShellCommand: TShellCommand | null): Shell {
         return tryTo<Shell>(() => {
             if (tShellCommand) {
                 return tShellCommand.getShell();
