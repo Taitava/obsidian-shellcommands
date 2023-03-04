@@ -112,18 +112,8 @@ export class CustomShellSettingsModal extends SC_Modal {
             )
         ;
 
-        // Binary path
-        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
-            .setName("Executable binary file path")
-            .setDesc("This should only contain a directory and a file name (or just a file name), not any possible command line options/arguments. They will be configured below.")
-            .addText(textComponent => textComponent
-                .setValue(this.getCustomShellConfiguration().binary_path)
-                .onChange(async (newBinaryPath: string) => {
-                    this.getCustomShellConfiguration().binary_path = newBinaryPath;
-                    await this.plugin.saveSettings();
-                }),
-            )
-        ;
+        // Binary path.
+        this.createBinaryPathSetting(containerElement.createDiv({attr: {class: "SC-setting-group"}}));
 
         // Shell arguments.
         this.createShellArgumentsSetting(containerElement.createDiv({attr: {class: "SC-setting-group"}}));
@@ -192,6 +182,20 @@ export class CustomShellSettingsModal extends SC_Modal {
                 )
             ;
         }
+    }
+
+    private createBinaryPathSetting(containerElement: HTMLElement): void {
+        new Setting(containerElement)
+            .setName("Executable binary file path")
+            .setDesc("This should only contain a directory and a file name (or just a file name), not any possible command line options/arguments. They will be configured below.")
+            .addText(textComponent => textComponent
+                .setValue(this.getCustomShellConfiguration().binary_path)
+                .onChange(async (newBinaryPath: string) => {
+                    this.getCustomShellConfiguration().binary_path = newBinaryPath;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
     }
 
     private createShellArgumentsSetting(containerElement: HTMLElement): void {
