@@ -30,7 +30,7 @@ import {
     PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
 import {
-    binaryFilePathExists,
+    lookUpFileWithBinaryExtensionsOnWindows,
     createMultilineTextElement,
     getCurrentPlatformName,
     getOperatingSystem,
@@ -55,6 +55,7 @@ import {createAutocomplete} from "../../settings/setting_elements/Autocomplete";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 import {SettingFieldGroup} from "../../settings/SC_MainSettingsTab";
 import * as path from "path";
+import * as fs from "fs";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -209,28 +210,39 @@ export class CustomShellSettingsModal extends SC_Modal {
                 // No binary path.
                 binaryPathWarningDescription.setDesc("Note: No binary path is defined.");
                 binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short texts should be aligned to the right, so that they are under the binary path input field.
-            } else if (binaryFilePathExists(this.getCustomShellConfiguration().binary_path)) {
-                // OK: The binary path exists.
-                binaryPathWarningDescription.setDesc("Good, " + binaryPath + " exists.");
-                binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short texts should be aligned to the right, so that they are under the binary path input field.
             } else {
-                // The binary path does not exist.
-                if (this.getCustomShellConfiguration().host_platform === getOperatingSystem()) {
-                    // The shell is supposed to work on the current operating system.
-                    const notExistsText = `Note: ${binaryPath} does not seem to exist.`;
-                    const testShellText = " You can test the shell at the bottom of this modal.";
-                    if (path.isAbsolute(binaryPath)) {
-                        // The path is absolute, so it's probable that the shell won't work, as absolute binary paths are not likely to be found via the PATH environment variable.
-                        binaryPathWarningDescription.setDesc(`${notExistsText} It's good that the path is absolute, but maybe it contains a typing error?${testShellText}`);
+                // A binary path is defined.
+                const actualBinaryPathExists = fs.existsSync(binaryPath);
+                const appendedBinaryPathExists = !actualBinaryPathExists && lookUpFileWithBinaryExtensionsOnWindows(binaryPath); // No need to do lookup if actualBinaryPathExists.
+                if (actualBinaryPathExists || appendedBinaryPathExists) {
+                    // The binary path exists.
+                    if (actualBinaryPathExists && fs.lstatSync(binaryPath).isDirectory()) { // Don't check for a folder if the file was determined by adding an extension to the file name, because fs.lstatSync() breaks if a non-existing path is passed to it.
+                        // The binary path is a folder.
+                        binaryPathWarningDescription.setDesc("Note: " + binaryPath + " is a directory. A file is expected.");
                     } else {
-                        // The path is relative, so it might be executable, if it happens to be findable via the PATH environment variable.
-                        binaryPathWarningDescription.setDesc(`${notExistsText} However, it might still work if the operating system recognises it as an executable command.${testShellText} If you encounter problems, try using an absolute path, i.e. a full path starting from the root of the file system.`);
+                        // OK: A file exists.
+                        binaryPathWarningDescription.setDesc("Good, " + binaryPath + " exists.");
                     }
+                    binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short texts should be aligned to the right, so that they are under the binary path input field.
                 } else {
-                    // The shell is meant for another operating system, so it's understandable that the binary might not be present on this OS.
-                    binaryPathWarningDescription.setDesc("Note: The shell is configured to be used on a different operating system than " + getCurrentPlatformName() + ", so the existence of the binary file cannot be reliably verified.");
+                    // The binary path does not exist.
+                    if (this.getCustomShellConfiguration().host_platform === getOperatingSystem()) {
+                        // The shell is supposed to work on the current operating system.
+                        const notExistsText = `Note: ${binaryPath} does not seem to exist.`;
+                        const testShellText = " You can test the shell at the bottom of this modal.";
+                        if (path.isAbsolute(binaryPath)) {
+                            // The path is absolute, so it's probable that the shell won't work, as absolute binary paths are not likely to be found via the PATH environment variable.
+                            binaryPathWarningDescription.setDesc(`${notExistsText} It's good that the path is absolute, but maybe it contains a typing error?${testShellText}`);
+                        } else {
+                            // The path is relative, so it might be executable, if it happens to be findable via the PATH environment variable.
+                            binaryPathWarningDescription.setDesc(`${notExistsText} However, it might still work if the operating system recognises it as an executable command.${testShellText} If you encounter problems, try using an absolute path, i.e. a full path starting from the root of the file system.`);
+                        }
+                    } else {
+                        // The shell is meant for another operating system, so it's understandable that the binary might not be present on this OS.
+                        binaryPathWarningDescription.setDesc("Note: The shell is configured to be used on a different operating system than " + getCurrentPlatformName() + ", so the existence of the binary file cannot be reliably verified.");
+                    }
+                    binaryPathWarningDescription.descEl.removeClass("SC-text-right"); // Long texts should be aligned to the left.
                 }
-                binaryPathWarningDescription.descEl.removeClass("SC-text-right"); // Long texts should be aligned to the left.
             }
         };
         updateBinaryPathWarning();

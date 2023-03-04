@@ -233,19 +233,18 @@ export function extractFileParentPath(file_path: string) {
 }
 
 /**
- * Same as fs.existsSync(binaryPath), but if on Windows, also looks up file names appended with extensions from the
- * PATHEXT environment variable. This can notice that e.g. "CMD" exists as a file name, when it's checked as "CMD.EXE".
+ * On Windows: Checks if the given filePath exists WHEN ADDING any extension from the PATHEXT environment variable to the
+ * end of the file path. This can notice that e.g. "CMD" exists as a file name, when it's checked as "CMD.EXE".
+ * On other platforms than Windows: Returns always false.
+ * Note: This DOES NOT CHECK existence of the original filePath without any additions. The caller should check it themselves.
  */
-export function binaryFilePathExists(binaryPath: string): boolean {
-    if (fs.existsSync(binaryPath)) {
-        return true;
-    }
+export function lookUpFileWithBinaryExtensionsOnWindows(filePath: string): boolean {
     if (isWindows()) {
         // Windows: Binary path may be missing a file extension, but it's still a valid and working path, so check
         // the path with additional extensions, too.
         const pathExt = process.env.PATHEXT ?? "";
         for (const extension of pathExt.split(";")) {
-            if (fs.existsSync(binaryPath + extension)) {
+            if (fs.existsSync(filePath + extension)) {
                 return true;
             }
         }
