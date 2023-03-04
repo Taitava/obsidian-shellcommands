@@ -17,11 +17,14 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Instance} from "../Instance";
 import {
+    CustomShell,
     CustomShellConfiguration,
     CustomShellModel,
-} from "./CustomShellModel";
+    Instance,
+    registerShell,
+    Shell,
+} from "../../imports";
 import {
     IPlatformSpecificString,
     PlatformId,
@@ -30,9 +33,6 @@ import {
 } from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
 import {debugLog} from "../../Debug";
-import {CustomShell} from "../../shells/CustomShell";
-import {Shell} from "../../shells/Shell";
-import {registerShell} from "../../shells/ShellFunctions";
 import {
     TShellCommand,
     TShellCommandMap,
