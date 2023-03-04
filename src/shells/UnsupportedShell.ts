@@ -17,13 +17,12 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 import {
-    getOperatingSystem,
+    getCurrentPlatformName,
     isWindows,
     normalizePath2,
 } from "../Common";
 import {
     PlatformId,
-    PlatformNames,
 } from "../settings/SC_MainSettings";
 import {Escaper} from "../variables/escapers/Escaper";
 import {SC_Event} from "../events/SC_Event";
@@ -93,7 +92,7 @@ export class UnsupportedShell extends Shell {
     }
 
     protected async augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean> {
-        this.plugin.newError("This plugin does not support the following shell directly: " + this.unrecognisedShellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings. Then select the custom shell as a default for " + PlatformNames[getOperatingSystem()] + " in the plugin's settings.");
+        this.plugin.newError("This plugin does not support the following shell directly: " + this.unrecognisedShellIdentifier + ". Please consider setting it up as a custom shell in the plugin's settings. Then select the custom shell as a default for " + getCurrentPlatformName() + " in the plugin's settings.");
         return false;
     }
 

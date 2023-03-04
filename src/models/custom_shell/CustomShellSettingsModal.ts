@@ -32,6 +32,7 @@ import {
 import {
     binaryFilePathExists,
     createMultilineTextElement,
+    getCurrentPlatformName,
     getOperatingSystem,
 } from "../../Common";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
@@ -125,7 +126,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         this.createHostPlatformField(hostPlatformContainer);
 
         // Shell operating system
-        const hostPlatformName = PlatformNames[getOperatingSystem()];
+        const hostPlatformName = getCurrentPlatformName();
         new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Shell's operating system")
             .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the selected host operating system, select it here. This is used to make directory paths etc. work correctly.")
@@ -223,7 +224,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                     }
                 } else {
                     // The shell is meant for another operating system, so it's understandable that the binary might not be present on this OS.
-                    binaryPathWarningDescription.setDesc("Note: The shell is configured to be used on a different operating system than " + PlatformNames[getOperatingSystem()] + ", so the existence of the binary file cannot be reliably verified.");
+                    binaryPathWarningDescription.setDesc("Note: The shell is configured to be used on a different operating system than " + getCurrentPlatformName() + ", so the existence of the binary file cannot be reliably verified.");
                 }
                 binaryPathWarningDescription.descEl.removeClass("SC-text-right"); // Long texts should be aligned to the left.
             }
@@ -372,7 +373,7 @@ export class CustomShellSettingsModal extends SC_Modal {
             new Variable_FolderPath(this.plugin),
         ];
         new Setting(containerElement)
-            .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + PlatformNames[getOperatingSystem()] + " file system), and the function should convert it to start from the root of the sub-environment.")
+            .setDesc("The JavaScript code will be enclosed in a function that receives 'absolutePath' as a parameter (the file/folder path needed to be translated). As it's always absolute, the path starts from the root of the host platform's file system (" + getCurrentPlatformName() + " file system), and the function should convert it to start from the root of the sub-environment.")
             .setClass("SC-full-description")
             .addExtraButton(button => button
                 .setTooltip("Test absolute path translation")

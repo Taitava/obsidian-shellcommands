@@ -22,7 +22,7 @@ import {
 } from "child_process";
 import {
     cloneObject,
-    getOperatingSystem,
+    getCurrentPlatformName,
     getPlatformName,
     getVaultAbsolutePath,
 } from "./Common";
@@ -44,7 +44,6 @@ import {
 import SC_Plugin from "./main";
 import {
     ExecutionNotificationMode,
-    PlatformNames,
 } from "./settings/SC_MainSettings";
 import {
     OutputChannelCode,
@@ -510,7 +509,7 @@ export class ShellCommandExecutor {
     private getErrorMessageForEmptyShellCommand(): string {
         if (this.t_shell_command.getNonEmptyPlatformIds().length > 0) {
             // The shell command contains versions for other platforms, but not for the current one.
-            const current_platform_name = PlatformNames[getOperatingSystem()];
+            const current_platform_name = getCurrentPlatformName();
             const version_word = this.t_shell_command.getNonEmptyPlatformIds().length > 1 ? "versions" : "a version";
             const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => getPlatformName(platform_id)).join(" and ");
             return `The shell command does not have a version for ${current_platform_name}, it only has ${version_word} for ${other_platform_names}.`;

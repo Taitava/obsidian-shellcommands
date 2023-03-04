@@ -20,7 +20,7 @@
 import {App, PluginSettingTab, SearchComponent, Setting} from "obsidian";
 import SC_Plugin from "../main";
 import {
-    getOperatingSystem,
+    getCurrentPlatformName,
     getVaultAbsolutePath,
     gotoURL,
 } from "../Common";
@@ -47,7 +47,6 @@ import {
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
     ExecutionNotificationMode,
-    PlatformNames,
 } from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
@@ -430,7 +429,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
     private tabEnvironments(container_element: HTMLElement) {
         // "Working directory" field
-        const platformName: string | undefined = PlatformNames[getOperatingSystem()];
+        const platformName: string | undefined = getCurrentPlatformName();
         new Setting(container_element)
             .setName("Working directory")
             .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from " + platformName + " filesystem root). If you are using a shell that virtualizes another operating system than " + platformName + " (e.g. 'Windows Subsystem for Linux'), you should still enter a " + platformName + " formatted path. Your shell will do a conversion if needed.")

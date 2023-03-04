@@ -73,7 +73,7 @@ export function isWindows() {
 
 /**
  * This is just a wrapper around platform() in order to cast the type to PlatformId.
- * TODO: Consider renaming this to getPlatformId().
+ * TODO: Consider renaming this to getCurrentPlatformId().
  */
 export function getOperatingSystem(): PlatformId  {
     // @ts-ignore In theory, platform() can return an OS name not included in OperatingSystemName. But as Obsidian
@@ -81,6 +81,10 @@ export function getOperatingSystem(): PlatformId  {
     // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
     // three.
     return platform();
+}
+
+export function getCurrentPlatformName(): string {
+    return getPlatformName(getOperatingSystem());
 }
 
 export function getPlatformName(platformId: PlatformId) {
