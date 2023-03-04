@@ -204,6 +204,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                 .onChange(async (concatenatedShellArguments) => {
                     this.getCustomShellConfiguration().shell_arguments = concatenatedShellArguments.split("\n");
                     await this.plugin.saveSettings();
+                    updateNoShellCommandContentVariableWarning();
                 })
                 .then((textareaComponent: TextAreaComponent) => {
                     if (this.plugin.settings.show_autocomplete_menu) {
@@ -214,9 +215,23 @@ export class CustomShellSettingsModal extends SC_Modal {
                             shellCommandContentVariable.getAutocompleteItems(),
                         );
                     }
-                }),
+                })
             )
         ;
+        const shellArgumentsWarningDescription = new Setting(containerElement)
+            .setClass("SC-full-description")
+        ;
+        const updateNoShellCommandContentVariableWarning = () => {
+            const shellArguments: string = this.getCustomShellConfiguration().shell_arguments.join("\n"); // Then join glue does not really matter here.
+            if (0 === getUsedVariables(this.plugin, shellArguments, shellCommandContentVariable).size) {
+                // The arguments do not contain {{shell_command_content}}. Show a warning.
+                shellArgumentsWarningDescription.setDesc(this.getShellCommandContentWarningText("arguments", shellCommandContentVariable));
+            } else {
+                // Clear a possible earlier warning.
+                shellArgumentsWarningDescription.setDesc("");
+            }
+        };
+        updateNoShellCommandContentVariableWarning();
     }
 
     private createHostPlatformField(containerElement: HTMLElement) {
@@ -382,11 +397,10 @@ export class CustomShellSettingsModal extends SC_Modal {
         settingGroup.preview_setting.setClass("SC-full-description");
 
         const updateNoShellCommandContentVariableWarning = () => {
-            const warningText = "Warning! The wrapper should contain " + shellCommandContentVariable.getFullName() + ". Otherwise, the shell will be called without the actual shell command that was supposed to be executed.";
             const shellCommandWrapper: string | null = this.getCustomShellConfiguration().shell_command_wrapper;
             if (null !== shellCommandWrapper && 0 === getUsedVariables(this.plugin, shellCommandWrapper, shellCommandContentVariable).size) {
                 // The wrapper does not contain {{shell_command_content}}. Show a warning.
-                settingGroup.preview_setting.setDesc(warningText);
+                settingGroup.preview_setting.setDesc(this.getShellCommandContentWarningText("wrapper", shellCommandContentVariable));
             }
             // Don't clear the warning by setting the preview description to "", because it might actually contain parsed
             // variables. Let just CreateShellCommandFieldCore() remove the warning when it sets its preview text to the
@@ -495,6 +509,10 @@ export class CustomShellSettingsModal extends SC_Modal {
 
     private getCustomShellConfiguration(): CustomShellConfiguration {
         return this.customShellInstance.configuration;
+    }
+
+    private getShellCommandContentWarningText(subject: string, shellCommandContentVariable: Variable_ShellCommandContent): string {
+        return "Warning! The " + subject + " should contain " + shellCommandContentVariable.getFullName() + ". Otherwise, the shell will be called without the actual shell command that was supposed to be executed.";
     }
 
     protected approve(): void {
