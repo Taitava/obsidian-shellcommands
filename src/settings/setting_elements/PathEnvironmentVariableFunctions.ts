@@ -33,7 +33,7 @@ import {
 } from "../../Common";
 import {ConfirmationModal} from "../../ConfirmationModal";
 import {createAutocomplete} from "./Autocomplete";
-import {DocumentationPATHAugmentationsLink} from "../../Documentation";
+import {Documentation} from "../../Documentation";
 import {Shell} from "../../shells/Shell";
 import {getShellsForPlatform} from "../../shells/ShellFunctions";
 
@@ -67,7 +67,7 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
         .addExtraButton(button => button
             .setIcon("help")
             .setTooltip(`Documentation: Additions to the ${path_variable_name} environment variable`)
-            .onClick(() => gotoURL(DocumentationPATHAugmentationsLink))
+            .onClick(() => gotoURL(Documentation.environments.additionsToPathEnvironmentVariable))
         )
     ;
 

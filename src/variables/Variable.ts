@@ -25,7 +25,7 @@ import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
-import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
+import {Documentation} from "../Documentation";
 import {EOL} from "os";
 import {Shell} from "../shells/Shell";
 import {tryTo} from "../Common";
@@ -354,7 +354,7 @@ export abstract class Variable {
      * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
      */
     public getDocumentationLink(): string {
-        return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
+        return Documentation.variables.folder + encodeURI(this.getFullName());
     }
 
     /**

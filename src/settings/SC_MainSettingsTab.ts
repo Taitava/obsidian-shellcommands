@@ -29,15 +29,8 @@ import {createShellCommandField} from "./setting_elements/CreateShellCommandFiel
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
 import {
-    DocumentationAutocompleteLink,
-    DocumentationMainLink,
-    DocumentationBuiltInVariablesIndexLink,
-    GitHubLink,
-    ChangelogLink,
-    DocumentationCustomVariablesLink,
-    LicenseLink,
-    DocumentationOutputWrappersLink,
-    DocumentationCustomShellsLink,
+    Documentation,
+    GitHub,
 } from "../Documentation";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
@@ -126,16 +119,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Documentation link & GitHub links
         containerEl.createEl("p").insertAdjacentHTML("beforeend",
-            "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
-            "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
-            "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
+            "<a href=\"" + Documentation.index + "\">Documentation</a> - " +
+            "<a href=\"" + GitHub.repository + "\">SC on GitHub</a> - " +
+            "<a href=\"" + GitHub.changelog + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
 
         // Copyright notice
         const copyright_paragraph = containerEl.createEl("p");
         copyright_paragraph.addClass("SC-small-font");
         copyright_paragraph.insertAdjacentHTML("beforeend", `
-            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2023 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
+            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2023 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${GitHub.license}">GNU GPL-3.0</a>.
         `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
@@ -338,7 +331,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Autocomplete")
                 .onClick(() => {
-                    gotoURL(DocumentationAutocompleteLink);
+                    gotoURL(Documentation.variables.autocomplete);
                 }),
             )
         ;
@@ -358,7 +351,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Custom variables")
                 .onClick(() => {
-                    gotoURL(DocumentationCustomVariablesLink);
+                    gotoURL(Documentation.variables.customVariables);
                 }),
             )
         ;
@@ -380,7 +373,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Built-in variables")
                 .onClick(() => {
-                    gotoURL(DocumentationBuiltInVariablesIndexLink);
+                    gotoURL(Documentation.variables.allVariables);
                 }),
             )
         ;
@@ -464,7 +457,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             .setIcon("help")
             .setTooltip("Documentation: Custom shells")
             .onClick(() => {
-                gotoURL(DocumentationCustomShellsLink);
+                gotoURL(Documentation.environments.customShells);
             }),
         )
         ;
@@ -521,7 +514,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             .addExtraButton(extra_button => extra_button
                 .setIcon("help")
                 .setTooltip("Documentation: Output wrappers")
-                .onClick(() => gotoURL(DocumentationOutputWrappersLink))
+                .onClick(() => gotoURL(Documentation.outputHandling.outputWrappers))
             )
         ;
         const output_wrappers_container_element = container_element.createDiv();

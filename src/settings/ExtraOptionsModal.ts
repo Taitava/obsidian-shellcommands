@@ -61,10 +61,7 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
-import {
-    DocumentationOutputHandlingModeLink,
-    DocumentationStdinContentLink,
-} from "../Documentation";
+import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
@@ -270,7 +267,7 @@ export class ExtraOptionsModal extends SC_Modal {
             .addExtraButton(extraButtonComponent => extraButtonComponent
                 .setIcon("help")
                 .setTooltip("Documentation: Pass variables to stdin")
-                .onClick(() => gotoURL(DocumentationStdinContentLink))
+                .onClick(() => gotoURL(Documentation.variables.passVariablesToStdin))
             )
         ;
         const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}});
@@ -446,7 +443,7 @@ export class ExtraOptionsModal extends SC_Modal {
             // Documentation link
             .addExtraButton(icon => icon
                 .setIcon("help")
-                .onClick(() => gotoURL(DocumentationOutputHandlingModeLink))
+                .onClick(() => gotoURL(Documentation.outputHandling.outputHandlingMode))
                 .setTooltip("Documentation: Output handling mode"),
             )
         ;
