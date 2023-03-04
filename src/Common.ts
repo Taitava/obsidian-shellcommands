@@ -36,6 +36,8 @@ import SC_Plugin from "./main";
 import {shell} from "electron";
 // @ts-ignore Electron is installed.
 import {clipboard} from "electron";
+import * as fs from "fs";
+import * as process from "process";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -213,6 +215,27 @@ export function extractFileName(file_path: string, with_extension = true) {
 
 export function extractFileParentPath(file_path: string) {
     return path.parse(file_path).dir;
+}
+
+/**
+ * Same as fs.existsSync(binaryPath), but if on Windows, also looks up file names appended with extensions from the
+ * PATHEXT environment variable. This can notice that e.g. "CMD" exists as a file name, when it's checked as "CMD.EXE".
+ */
+export function binaryFilePathExists(binaryPath: string): boolean {
+    if (fs.existsSync(binaryPath)) {
+        return true;
+    }
+    if (isWindows()) {
+        // Windows: Binary path may be missing a file extension, but it's still a valid and working path, so check
+        // the path with additional extensions, too.
+        const pathExt = process.env.PATHEXT ?? "";
+        for (const extension of pathExt.split(";")) {
+            if (fs.existsSync(binaryPath + extension)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types

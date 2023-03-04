@@ -32,7 +32,6 @@ import {
     normalizePath2,
 } from "../Common";
 import SC_Plugin from "../main";
-import * as fs from "fs";
 import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 import {
@@ -155,12 +154,6 @@ export class CustomShell extends Shell {
 
     protected async augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean> {
         const debugLogBase = this.constructor.name + ".augmentSpawn(): ";
-        const shellBinaryPath = this.getBinaryPath();
-        if (!fs.existsSync(shellBinaryPath)) {
-            // Shell binary does not exist.
-            this.plugin.newError("Custom shell " + this.getName() + ": Binary path does not exist: " + shellBinaryPath);
-            return false; // Prevent execution.
-        }
 
         // Disable Node.js's builtin shell feature.
         // CustomShells need to be able to define their own shell invoking command line options, so the Node.js's shell feature would be too limited.
@@ -202,7 +195,7 @@ export class CustomShell extends Shell {
         spawnAugmentation.spawnArguments = parsedShellArguments;
 
         // Tell spawn() to use the shell binary path as an executable command.
-        spawnAugmentation.shellCommandContent = shellBinaryPath; // Needs to come AFTER the original shellCommandContent is taken to spawnArguments!
+        spawnAugmentation.shellCommandContent = this.getBinaryPath(); // Needs to come AFTER the original shellCommandContent is taken to spawnArguments!
         return true; // Allow execution.
     }
 
