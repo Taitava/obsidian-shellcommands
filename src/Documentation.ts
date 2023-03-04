@@ -38,7 +38,9 @@ export const Documentation = {
     variables: {
         folder: "https://publish.obsidian.md/shellcommands/Variables/", // Keep the trailing slash!
         allVariables: "https://publish.obsidian.md/shellcommands/Variables/All+variables",
-        autocomplete: "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete",
+        autocomplete: {
+            index: "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete",
+        },
         customVariables: "https://publish.obsidian.md/shellcommands/Variables/Custom+variables",
         passVariablesToStdin: "https://publish.obsidian.md/shellcommands/Variables/Pass+variables+to+stdin",
     },

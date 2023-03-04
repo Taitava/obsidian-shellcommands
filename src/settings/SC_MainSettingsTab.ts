@@ -331,7 +331,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Autocomplete")
                 .onClick(() => {
-                    gotoURL(Documentation.variables.autocomplete);
+                    gotoURL(Documentation.variables.autocomplete.index);
                 }),
             )
         ;
