@@ -492,10 +492,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                     // Can execute.
                     const childProcess = await this.getCustomShell().spawnChildProcess(
                         testShellCommandParsingResult.parsed_content as string,
-                        {
-                            cwd: ShellCommandExecutor.getWorkingDirectory(this.plugin),
-                            env: undefined, // TODO: Consider adding support for PATH augmentation here. It would require parsing this.plugin.settings.environment_variable_path_augmentations and extracting environment variable handling logic from ShellCommandExecutor.executeShellCommand() into a new, static method in that class and then calling it from here.
-                        },
+                        ShellCommandExecutor.getWorkingDirectory(this.plugin),
                         null, // No TShellCommand is available during testing.
                         null, // Testing is not triggered by any SC_Event.
                     );
@@ -551,10 +548,6 @@ export class CustomShellSettingsModal extends SC_Modal {
             },
             "Enter a temporary shell command for testing."
         ).shell_command_setting.setClass("SC-no-description");
-        new Setting(testSettingsContainer)
-        .setDesc("(If you have defined additions to the PATH environment variable in this plugin's settings, they do NOT work in this test. Maybe in the future. However, they should work when you execute real shell commands using this shell.)")
-        .setClass("SC-full-description")
-        ;
     }
 
     private getCustomShell(): CustomShell {

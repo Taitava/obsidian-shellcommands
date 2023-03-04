@@ -21,7 +21,14 @@ import {
     Shell,
     SpawnAugmentation,
 } from "./Shell";
-import {extractFileName} from "../Common";
+import {
+    extractFileName,
+} from "../Common";
+import {
+    convertNewlinesToPATHSeparators,
+    getPATHEnvironmentVariableName,
+} from "../settings/setting_elements/PathEnvironmentVariableFunctions";
+import {debugLog} from "../Debug";
 
 export abstract class BuiltinShell extends Shell {
 
@@ -31,6 +38,8 @@ export abstract class BuiltinShell extends Shell {
      * @protected
      */
     protected abstract ownedShellBinaries: string[];
+
+    private pathAugmentation: string;
 
     /**
      * Built-in shells use the path to the shell executable as their identifier in configuration files.
@@ -63,6 +72,42 @@ export abstract class BuiltinShell extends Shell {
     protected async augmentSpawn(spawnAugmentation: SpawnAugmentation): Promise<boolean> {
         spawnAugmentation.spawnOptions.shell = this.getBinaryPath();
         return true;
+    }
+
+    public setEnvironmentVariablePathAugmentation(pathAugmentation: string): void {
+        this.pathAugmentation = pathAugmentation;
+    }
+
+    protected augmentPATHEnvironmentVariable(): string {
+        const pathAugmentation = convertNewlinesToPATHSeparators(this.pathAugmentation, this.getPathSeparator());
+        // Check if there's anything to augment.
+        if (pathAugmentation.length > 0) {
+            // Augment.
+            const originalPath: string | undefined = process.env[getPATHEnvironmentVariableName()];
+            if (undefined === originalPath) {
+                throw new Error("process.env does not contain '" + getPATHEnvironmentVariableName() + "'.");
+            }
+            let augmentedPath: string;
+            if (pathAugmentation.contains(originalPath)) {
+                // The augmentation contains the original PATH.
+                // Simply replace the whole original PATH with the augmented one, as there's no need to care about including
+                // the original content.
+                debugLog("Augmenting environment variable PATH so it will become " + pathAugmentation);
+                augmentedPath = pathAugmentation;
+            } else {
+                // The augmentation does not contain the original PATH.
+                // Instead of simply replacing the original PATH, append the augmentation after it.
+                const separator = this.getPathSeparator();
+                debugLog("Augmenting environment variable PATH by adding " + separator + pathAugmentation + " after it.");
+                augmentedPath = originalPath + separator + pathAugmentation;
+            }
+            debugLog("PATH augmentation result: " + augmentedPath);
+            return augmentedPath;
+        } else {
+            // No augmenting is needed.
+            debugLog("No augmentation is defined for environment variable PATH. This is completely ok.");
+            return "";
+        }
     }
 
 }

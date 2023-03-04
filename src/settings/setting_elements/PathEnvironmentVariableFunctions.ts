@@ -99,6 +99,17 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
                 })
             );
         });
+
+    new Setting(container_element)
+        .setHeading()
+        .setName("The " + path_variable_name + " additions do not work in Custom shells")
+        .setDesc("They only work on shells that come predefined in this plugin. For instructions on how to do " + path_variable_name + " additions for custom shells, please click the documentation link on the right.")
+        .addExtraButton(button => button
+            .setIcon("help")
+            .setTooltip("Documentation: " + path_variable_name + " additions for custom shells")
+            .onClick(() => gotoURL(Documentation.environments.customShells + "#Path+additions")) // TODO: Create the section to the documentation page.
+        )
+    ;
 }
 
 /**
@@ -130,8 +141,7 @@ function getVerbosePATHSeparator(platformId: PlatformId) {
     }
 }
 
-export function convertNewlinesToPATHSeparators(path: string, shell: Shell) {
-    const separator = shell.getPathSeparator();
+export function convertNewlinesToPATHSeparators(path: string, separator: string) {
     return path.replace(
         /(\r\n|\r|\n)+/gu, // + means that multiple adjacent newlines can be combined into a single separator character.
         () => separator, // The replacement is a callback in order to avoid problems with $ characters, although that problem would only occur if the separator would contain a $ character, which is does not, but fix it anyway.

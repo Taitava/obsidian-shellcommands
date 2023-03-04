@@ -28,6 +28,8 @@ import {
 import {debugLog} from "../Debug";
 import {TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
+import {cloneObject} from "../Common";
+import {getPATHEnvironmentVariableName} from "../settings/setting_elements/PathEnvironmentVariableFunctions";
 
 export abstract class Shell {
 
@@ -124,11 +126,11 @@ export abstract class Shell {
      * Executes the given shellCommandContent string using this shell. Retrieves spawning options from subclasses.
      *
      * @param shellCommandContent
-     * @param extraSpawnOptions
+     * @param workingDirectory
      * @param tShellCommand Used for getting default values when parsing shell arguments.
      * @param scEvent Allows using {{event_*}} variables in shell arguments.
      */
-    public async spawnChildProcess(shellCommandContent: string, extraSpawnOptions: CwdAndEnv, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<ChildProcess | null> {
+    public async spawnChildProcess(shellCommandContent: string, workingDirectory: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<ChildProcess | null> {
         // Allow subclasses to alter shellCommandContent and define other options.
         const spawnAugmentation = {
             shellCommandContent: shellCommandContent,
@@ -139,6 +141,12 @@ export abstract class Shell {
             // Something failed in the augmentation and execution should be cancelled. An error notification is already displayed.
             return null;
         }
+
+        // Define working directory and environment variables.
+        const extraSpawnOptions: CwdAndEnv = {
+            cwd: workingDirectory,
+            env: this.getEnvironmentVariables(),
+        };
 
         // Combine SpawnOptions. Do this after calling augmentSpawn(), so that it cannot accidentally override extraSpawnOptions.
         const combinedSpawnOptions: SpawnOptions = Object.assign(
@@ -182,6 +190,33 @@ export abstract class Shell {
         // No augmentation by default.
         return shellCommandContent;
     }
+
+    private getEnvironmentVariables(): SpawnOptions["env"] {
+
+        // Augment the PATH environment variable (if wanted and if this Shell has an augmentation method).
+        const augmentedPath = this.augmentPATHEnvironmentVariable?.();
+        if (augmentedPath && augmentedPath.length > 0) {
+            // Define an object for environment variables.
+            const environmentVariables = cloneObject<typeof process.env>(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
+            environmentVariables[getPATHEnvironmentVariableName()] = augmentedPath;
+            return environmentVariables;
+        }
+
+        return undefined; // No need to augment environment variables.
+    }
+
+    /**
+     * BuiltinShells use this to add directories to their PATH environment variable. However, CustomShells have better ways
+     * to extend their PATH environment variable, so they are intentionally left out of the scope of the PATH augmentation
+     * setting.
+     *
+     * The PATH augmentation setting might be removed some day completely.
+     *
+     * @param pathAugmentation
+     */
+    public setEnvironmentVariablePathAugmentation?(pathAugmentation: string): void;
+
+    protected augmentPATHEnvironmentVariable?(): string;
 
 }
 
