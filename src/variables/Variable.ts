@@ -417,6 +417,7 @@ export abstract class Variable {
 
 /**
  * Arguments that are cast to their designed data types, i.e. strings or integers at the moment.
+ * TODO: Rename to CastedVariableArguments.
  */
 export interface ICastedArguments {
     [key: string]: unknown;
@@ -424,6 +425,7 @@ export interface ICastedArguments {
 
 /**
  * Same as ICastedArguments, but not yet cast to the target data types.
+ * TODO: Rename to RawVariableArguments.
  */
 export interface IRawArguments {
     [key: string]: string;
@@ -432,6 +434,7 @@ export interface IRawArguments {
 /**
  * key = string, parameter name
  * value = boolean, is the parameter mandatory or not?
+ * TODO: Rename to VariableParameters.
  */
 export interface IParameters {
     [key: string]: {
