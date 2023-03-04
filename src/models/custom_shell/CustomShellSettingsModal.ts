@@ -126,28 +126,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
 
         // Shell arguments.
-        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // For getting an autocomplete item.
-        new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
-            .setName("Shell arguments")
-            .setDesc("Command line options/arguments to execute the shell's binary file with. The executable shell command should be one of them; " + shellCommandContentVariable.getFullName() + " provides it. Other {{variables}} are supported, too. No special characters are escaped in variable values. Separate different arguments with a newline. Possible newlines coming from {{variable}} values are not considered as separators.")
-            .addTextArea((textareaComponent: TextAreaComponent) => textareaComponent
-                .setValue(this.getCustomShellConfiguration().shell_arguments.join("\n"))
-                .onChange(async (concatenatedShellArguments) => {
-                    this.getCustomShellConfiguration().shell_arguments = concatenatedShellArguments.split("\n");
-                    await this.plugin.saveSettings();
-                })
-                .then((textareaComponent: TextAreaComponent) => {
-                    if (this.plugin.settings.show_autocomplete_menu) {
-                        createAutocomplete(
-                            this.plugin,
-                            textareaComponent.inputEl,
-                            () => textareaComponent.onChanged(),
-                            shellCommandContentVariable.getAutocompleteItems(),
-                        );
-                    }
-                })
-            )
-        ;
+        this.createShellArgumentsSetting(containerElement.createDiv({attr: {class: "SC-setting-group"}}));
 
         // Supported operating systems
         const hostPlatformContainer = containerElement.createDiv({attr: {class: "SC-setting-group"}});
@@ -213,6 +192,31 @@ export class CustomShellSettingsModal extends SC_Modal {
                 )
             ;
         }
+    }
+
+    private createShellArgumentsSetting(containerElement: HTMLElement): void {
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // For getting an autocomplete item.
+        new Setting(containerElement)
+            .setName("Shell arguments")
+            .setDesc("Command line options/arguments to execute the shell's binary file with. The executable shell command should be one of them; " + shellCommandContentVariable.getFullName() + " provides it. Other {{variables}} are supported, too. No special characters are escaped in variable values. Separate different arguments with a newline. Possible newlines coming from {{variable}} values are not considered as separators.")
+            .addTextArea((textareaComponent: TextAreaComponent) => textareaComponent
+                .setValue(this.getCustomShellConfiguration().shell_arguments.join("\n"))
+                .onChange(async (concatenatedShellArguments) => {
+                    this.getCustomShellConfiguration().shell_arguments = concatenatedShellArguments.split("\n");
+                    await this.plugin.saveSettings();
+                })
+                .then((textareaComponent: TextAreaComponent) => {
+                    if (this.plugin.settings.show_autocomplete_menu) {
+                        createAutocomplete(
+                            this.plugin,
+                            textareaComponent.inputEl,
+                            () => textareaComponent.onChanged(),
+                            shellCommandContentVariable.getAutocompleteItems(),
+                        );
+                    }
+                }),
+            )
+        ;
     }
 
     private createHostPlatformField(containerElement: HTMLElement) {
