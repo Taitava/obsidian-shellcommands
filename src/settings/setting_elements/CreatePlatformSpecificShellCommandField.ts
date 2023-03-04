@@ -20,10 +20,11 @@
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import SC_Plugin from "../../main";
 import {TShellCommand} from "../../TShellCommand";
-import {PlatformId, PlatformNames} from "../SC_MainSettings";
+import {PlatformId} from "../SC_MainSettings";
+import {getPlatformName} from "../../Common";
 
 export function createPlatformSpecificShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, t_shell_command: TShellCommand, platform_id: PlatformId, show_autocomplete_menu: boolean) {
-    const platform_name = PlatformNames[platform_id];
+    const platform_name = getPlatformName(platform_id);
     const setting_group = CreateShellCommandFieldCore(
         plugin,
         container_element,

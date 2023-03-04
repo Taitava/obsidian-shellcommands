@@ -23,6 +23,7 @@ import {
 import {
     cloneObject,
     getOperatingSystem,
+    getPlatformName,
     getVaultAbsolutePath,
 } from "./Common";
 import * as path from "path";
@@ -511,7 +512,7 @@ export class ShellCommandExecutor {
             // The shell command contains versions for other platforms, but not for the current one.
             const current_platform_name = PlatformNames[getOperatingSystem()];
             const version_word = this.t_shell_command.getNonEmptyPlatformIds().length > 1 ? "versions" : "a version";
-            const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => PlatformNames[platform_id]).join(" and ");
+            const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => getPlatformName(platform_id)).join(" and ");
             return `The shell command does not have a version for ${current_platform_name}, it only has ${version_word} for ${other_platform_names}.`;
         } else {
             // The shell command doesn't contain a version for any platforms, it's completely empty.

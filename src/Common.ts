@@ -27,7 +27,10 @@ import {
     normalizePath,
     TFile,
 } from "obsidian";
-import {PlatformId} from "./settings/SC_MainSettings";
+import {
+    PlatformId,
+    PlatformNames,
+} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
@@ -78,6 +81,14 @@ export function getOperatingSystem(): PlatformId  {
     // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
     // three.
     return platform();
+}
+
+export function getPlatformName(platformId: PlatformId) {
+    const platformName: string | undefined = PlatformNames[platformId];
+    if (undefined === platformName) {
+        throw new Error("Cannot find a platform name for: " + platformId);
+    }
+    return platformName;
 }
 
 export function getView(app: App) {
