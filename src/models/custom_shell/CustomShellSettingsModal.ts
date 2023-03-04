@@ -205,10 +205,14 @@ export class CustomShellSettingsModal extends SC_Modal {
         ;
         const updateBinaryPathWarning = () => {
             const binaryPath = this.getCustomShellConfiguration().binary_path;
-            if (binaryFilePathExists(this.getCustomShellConfiguration().binary_path)) {
+            if ("" === binaryPath) {
+                // No binary path.
+                binaryPathWarningDescription.setDesc("Note: No binary path is defined.");
+                binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short texts should be aligned to the right, so that they are under the binary path input field.
+            } else if (binaryFilePathExists(this.getCustomShellConfiguration().binary_path)) {
                 // OK: The binary path exists.
                 binaryPathWarningDescription.setDesc("Good, " + binaryPath + " exists.");
-                binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short text should be aligned to the right, so that they are under the binary path input field.
+                binaryPathWarningDescription.descEl.addClass("SC-text-right"); // Short texts should be aligned to the right, so that they are under the binary path input field.
             } else {
                 // The binary path does not exist.
                 if (this.getCustomShellConfiguration().host_platform === getOperatingSystem()) {
