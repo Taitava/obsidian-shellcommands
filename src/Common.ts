@@ -256,7 +256,7 @@ export function joinObjectProperties(object: {}, glue: string) {
  *
  * Idea is copied 2021-10-06 from https://stackoverflow.com/a/33121880/2754026
  */
-export function uniqueArray(array: any[]) {
+export function uniqueArray<Type>(array: Type[]): Type[] {
     return [...new Set(array)];
 }
 
