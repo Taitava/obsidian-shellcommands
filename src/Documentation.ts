@@ -19,7 +19,7 @@
 
 export const DocumentationMainLink = "https://publish.obsidian.md/shellcommands";
 export const DocumentationBuiltInVariablesBaseLink = "https://publish.obsidian.md/shellcommands/Variables/"; // When used, a variable's name will be appended to the end. Keep the trailing slash!
-export const DocumentationBuiltInVariablesIndexLink = "https://publish.obsidian.md/shellcommands/Variables/Variables+-+general+principles#All+variables";
+export const DocumentationBuiltInVariablesIndexLink = "https://publish.obsidian.md/shellcommands/Variables/All+variables";
 export const DocumentationCustomShellsLink = "https://publish.obsidian.md/shellcommands/Environments/Custom+shells";
 export const DocumentationCustomVariablesLink = "https://publish.obsidian.md/shellcommands/Variables/Custom+variables";
 export const DocumentationAutocompleteLink = "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete";
