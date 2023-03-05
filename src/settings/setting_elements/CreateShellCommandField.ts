@@ -93,7 +93,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
+                t_shell_command.renameObsidianCommand(t_shell_command.getUnwrappedShellCommandContent(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();

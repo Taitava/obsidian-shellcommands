@@ -154,7 +154,8 @@ export class ShellCommandExecutor {
                     // Execute the shell command.
                     const parsing_results = parsing_process.getParsingResults();
                     const shell_command_parsing_result: ShellCommandParsingResult = {
-                        shell_command: (parsing_results["shell_command"] as ParsingResult).parsed_content as string,
+                        unwrappedShellCommandContent: (parsing_results.unwrappedShellCommandContent as ParsingResult).parsed_content as string,
+                        wrappedShellCommandContent: (parsing_results.wrappedShellCommandContent as ParsingResult).parsed_content as string,
                         alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
                         environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
                         stdinContent: parsing_results.stdinContent?.parsed_content as string,
@@ -202,8 +203,7 @@ export class ShellCommandExecutor {
         }
 
         // Check that the shell command is not empty
-        const shell_command = shell_command_parsing_result.shell_command.trim();
-        if (!shell_command.length) {
+        if (!shell_command_parsing_result.unwrappedShellCommandContent.trim().length) { // Check unwrapped instead of wrapped so that can detect if the _actual_ shell command is empty. I.e. don't allow a Shell's wrapper to make an empty shell command non-empty.
             // It is empty
             const error_message = this.getErrorMessageForEmptyShellCommand();
             debugLog(error_message);
@@ -236,8 +236,9 @@ export class ShellCommandExecutor {
             }
 
             // Execute the shell command
+            const wrappedShellCommandContent = shell_command_parsing_result.wrappedShellCommandContent;
             try {
-                const child_process = await shell.spawnChildProcess(shell_command, working_directory, this.t_shell_command, this.sc_event);
+                const child_process = await shell.spawnChildProcess(wrappedShellCommandContent, working_directory, this.t_shell_command, this.sc_event);
                 if (null === child_process) {
                     // No spawn() call was made due to some shell configuration error. Just cancel everything.
                     return;
@@ -300,14 +301,14 @@ export class ShellCommandExecutor {
 
                 // Display a notification of the execution (if wanted).
                 if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode, processTerminator);
+                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, this.plugin.settings.execution_notification_mode, processTerminator);
                 }
             } catch (exception) {
                 // An exception has happened.
                 // Check if the shell command was too long.
                 if (exception.message.match(/spawn\s+ENAMETOOLONG/i)) {
                     // It was too long. Show an error message.
-                    this.plugin.newError("Shell command execution failed because it's too long: " + shell_command.length + " characters. (Unfortunately the max limit is unknown).");
+                    this.plugin.newError("Shell command execution failed because it's too long: " + wrappedShellCommandContent.length + " characters. (Unfortunately the max limit is unknown).");
                 } else {
                     // The shell command was not too long, this exception is about something else.
                     // Rethrow the exception.

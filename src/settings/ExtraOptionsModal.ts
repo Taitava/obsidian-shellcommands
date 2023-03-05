@@ -176,7 +176,7 @@ export class ExtraOptionsModal extends SC_Modal {
             this.t_shell_command.getConfiguration().alias = value;
 
             // Update Obsidian command palette
-            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommandContentForPreview(), this.t_shell_command.getAlias());
+            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getUnwrappedShellCommandContent(), this.t_shell_command.getAlias());
 
             // UpdateShell commands settings panel
             this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);

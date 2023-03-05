@@ -30,6 +30,8 @@ import {TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
 import {cloneObject} from "../Common";
 import {getPATHEnvironmentVariableName} from "../settings/setting_elements/PathEnvironmentVariableFunctions";
+import {parseVariableSynchronously} from "../variables/parseVariables";
+import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 
 export abstract class Shell {
 
@@ -73,6 +75,42 @@ export abstract class Shell {
      * is a different thing than a _directory separator_! The latter is used to separate folder names in a single file path.
      */
     public abstract getPathSeparator(): ":" | ";";
+
+    public wrapShellCommandContent(shellCommandContent: string) {
+        const debugMessageBase = `${this.constructor.name}.wrapShellCommandContent(): `;
+        const shellCommandWrapper = this.getShellCommandWrapper();
+        if (undefined === shellCommandWrapper) {
+            // No wrapper is defined, so return the shell command content without modifications.
+            debugLog(`${debugMessageBase}No wrapper is defined.`);
+            return shellCommandContent;
+        }
+        debugLog(`${debugMessageBase}Using wrapper: ${shellCommandWrapper} for shell command: ${shellCommandContent}`);
+
+        // Wrap the shell command.
+        const wrapperParsingResult = parseVariableSynchronously(
+            shellCommandWrapper,
+            new Variable_ShellCommandContent(this.plugin, shellCommandContent),
+        );
+        if (!wrapperParsingResult.succeeded) {
+            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
+            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
+        }
+
+        debugLog(`${debugMessageBase}Wrapped shell command: ${wrapperParsingResult.parsed_content}`);
+        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
+    }
+
+    private getShellCommandWrapper(): string | undefined {
+        if (this._getShellCommandWrapper) {
+            return this._getShellCommandWrapper() ?? undefined; // If the call returns null, convert it to undefined. Null works well in CustomShellConfiguration, but undefined is used in ParsingProcess to denote that some content is not present for parsing.
+        }
+        return undefined;
+    }
+
+    /**
+     * Child classes can define wrappers that augment shell commands.
+     */
+    protected _getShellCommandWrapper?(): string | null;
 
     /**
      * Quotes special characters in {{variable}} values according to an escaping mechanism defined for this shell.
@@ -177,19 +215,6 @@ export abstract class Shell {
      * @protected
      */
     protected abstract augmentSpawn(spawnAugmentation: SpawnAugmentation, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<boolean>;
-
-    /**
-     * Child classes can do custom additions to the shell command.
-     *
-     * @param shellCommandContent
-     * @param tShellCommand For accessing default value configuration.
-     * @param scEvent For supporting {{event_*}} variables.
-     * @return The same shellCommandContent with possible additions.
-     */
-    public augmentShellCommandContent(shellCommandContent: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): string {
-        // No augmentation by default.
-        return shellCommandContent;
-    }
 
     private getEnvironmentVariables(): SpawnOptions["env"] {
 

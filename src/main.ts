@@ -330,7 +330,7 @@ export default class SC_Plugin extends Plugin {
 				// Try to process variables that can be processed before performing preactions.
 				await parsing_process.process();
 			}
-			if (parsing_process.getParsingResults().shell_command?.succeeded) { // .shell_command should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+			if (parsing_process.getParsingResults().wrappedShellCommandContent?.succeeded) { // .wrappedShellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
@@ -348,7 +348,7 @@ export default class SC_Plugin extends Plugin {
 		// Register an Obsidian command
 		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: generateObsidianCommandName(this, t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
+			name: generateObsidianCommandName(this, t_shell_command.getUnwrappedShellCommandContent(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
 				if (is_opening_command_palette) {
@@ -373,7 +373,7 @@ export default class SC_Plugin extends Plugin {
                                 // Rename Obsidian command
                                 const parsingResults = parsing_process.getParsingResults();
                                 /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
-                                const shellCommandParsingResult: ParsingResult = parsingResults["shell_command"] as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+                                const shellCommandParsingResult: ParsingResult = parsingResults.unwrappedShellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
                                 const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
                                 const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
                                 const parsedAlias: string = aliasParsingResult.parsed_content as string;
@@ -383,13 +383,13 @@ export default class SC_Plugin extends Plugin {
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
                             } else {
                                 // Parsing failed, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias());
+                                t_shell_command.renameObsidianCommand(t_shell_command.getUnwrappedShellCommandContent(), t_shell_command.getAlias());
                                 this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                             }
                         });
                     } else {
                         // Parsing is disabled, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContentForPreview(), t_shell_command.getAlias());
+                        t_shell_command.renameObsidianCommand(t_shell_command.getUnwrappedShellCommandContent(), t_shell_command.getAlias());
                         this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                     }
 

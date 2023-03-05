@@ -199,33 +199,8 @@ export class CustomShell extends Shell {
         return true; // Allow execution.
     }
 
-    /**
-     * Apply a possible wrapper on an executable shell command content.
-     *
-     * This method is called before .augmentSpawn() is called, i.e. the result of this method is available in SpawnAugmentation.shellCommandContent when .augmentSpawn() is called.
-     *
-     * @param shellCommandContent
-     * @param tShellCommand
-     * @param scEvent
-     */
-    public augmentShellCommandContent(shellCommandContent: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): string {
-        const shellCommandContentWrapper = this.getConfiguration().shell_command_wrapper;
-        if (null === shellCommandContentWrapper) {
-            // No wrapper is defined, so return the shell command content without modifications.
-            return shellCommandContent;
-        }
-
-        // Wrap the shell command.
-        const wrapperParsingResult = parseVariableSynchronously(
-            shellCommandContentWrapper,
-            new Variable_ShellCommandContent(this.plugin, shellCommandContent),
-        );
-        if (!wrapperParsingResult.succeeded) {
-            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
-            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
-        }
-
-        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
+    protected _getShellCommandWrapper(): string | null {
+        return this.getConfiguration().shell_command_wrapper;
     }
 
     private getConfiguration(): CustomShellConfiguration {

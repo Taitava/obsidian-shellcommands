@@ -119,9 +119,12 @@ export class TShellCommand {
     }
 
     /**
-     * @private Should only be called from getShellCommandContentForExecution() and getShellCommandContentForPreview().
+     * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
+     * command does not have an explicit version for the current OS.
+     *
+     * Does not include any possible Shell provided augmentations to the shell command content.
      */
-    private getShellCommandContent(): string {
+    public getUnwrappedShellCommandContent(): string {
         // Check if the shell command has defined a specific command for this operating system.
         const platformSpecificShellCommand: string | undefined = this.configuration.platform_specific_commands[getOperatingSystem()];
         if (undefined === platformSpecificShellCommand) {
@@ -138,21 +141,12 @@ export class TShellCommand {
      * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
      * command does not have an explicit version for the current OS.
      *
-     * Does not include any possible Shell provided augmentations to the return shell command content. This is good for
-     * previews where complete content is not needed, i.e. where Shell augmentations would just make previewing a command
-     * messier. When executing a shell command, getShellCommandContentForExecution() should be used instead.
+     * Includes possible Shell provided augmentations to the shell command content.
+     *
+     * @private Can be made public if needed.
      */
-    public getShellCommandContentForPreview() {
-        return this.getShellCommandContent();
-    }
-
-    /**
-     * Same as getShellCommandContentForPreview(), but lets a shell augment the command. CustomShells may use the augmenting feature to
-     * add prefix/postfix commands, e.g. to set character encodings etc.
-     * @param scEvent For accessing {{event_*}} variables.
-     */
-    public getShellCommandContentForExecution(scEvent: SC_Event | null): string {
-        return this.getShell().augmentShellCommandContent(this.getShellCommandContent(), this, scEvent);
+    private getWrappedShellCommandContent(): string {
+        return this.getShell().wrapShellCommandContent(this.getUnwrappedShellCommandContent());
     }
 
     /**
@@ -208,7 +202,7 @@ export class TShellCommand {
      * TODO: Use this method in all places where similar logic is needed. I guess generateObsidianCommandName() is the only place left.
      */
     public getAliasOrShellCommand(): string {
-        return this.configuration.alias || this.getShellCommandContentForPreview(); // TODO: Use this.getAlias().
+        return this.configuration.alias || this.getUnwrappedShellCommandContent(); // TODO: Use this.getAlias().
     }
 
     public getConfirmExecution() {
@@ -448,7 +442,8 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                shell_command: this.getShellCommandContentForExecution(sc_event),
+                unwrappedShellCommandContent: this.getUnwrappedShellCommandContent(),
+                wrappedShellCommandContent: this.getWrappedShellCommandContent(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
                 stdinContent: this.configuration.input_contents.stdin ?? undefined,
@@ -572,7 +567,8 @@ export class TShellCommand {
 
         // Get a list CustomVariables that the shell command uses.
         const custom_variables = new VariableSet();
-        for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommandContentForExecution(null))) {
+        const readVariablesFrom = this.getWrappedShellCommandContent(); // FIXME: Should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
+        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom)) {
             // Check that the variable IS a CustomVariable.
             if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
                 custom_variables.add(custom_variable);
@@ -627,7 +623,8 @@ export class TShellCommandMap extends Map<string, TShellCommand> {}
  *  - ParsedShellCommandStrings
  */
 export interface ShellCommandParsingResult {
-    shell_command: string,
+    unwrappedShellCommandContent: string,
+    wrappedShellCommandContent: string,
     alias: string,
     environment_variable_path_augmentation: string,
     stdinContent?: string,
@@ -640,7 +637,8 @@ export interface ShellCommandParsingResult {
 export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
 
 type shell_command_parsing_map = {
-    shell_command: string,
+    unwrappedShellCommandContent: string,
+    wrappedShellCommandContent: string,
     alias: string,
     environment_variable_path_augmentation: string,
     stdinContent?: string,

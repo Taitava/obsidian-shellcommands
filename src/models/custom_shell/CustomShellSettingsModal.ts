@@ -483,7 +483,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                 }
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    this.getCustomShell().augmentShellCommandContent(customShellConfiguration.shell_command_test, null, null),
+                    this.getCustomShell().wrapShellCommandContent(customShellConfiguration.shell_command_test),
                     this.getCustomShell(),
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.
