@@ -107,7 +107,7 @@ export function createPATHAugmentationFields(plugin: SC_Plugin, container_elemen
         .addExtraButton(button => button
             .setIcon("help")
             .setTooltip("Documentation: " + path_variable_name + " additions for custom shells")
-            .onClick(() => gotoURL(Documentation.environments.customShells + "#Path+additions")) // TODO: Create the section to the documentation page.
+            .onClick(() => gotoURL(Documentation.environments.customShells.index + "#Path+additions")) // TODO: Create the section to the documentation page.
         )
     ;
 }

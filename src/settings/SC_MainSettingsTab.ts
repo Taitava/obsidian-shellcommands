@@ -456,7 +456,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             .setIcon("help")
             .setTooltip("Documentation: Custom shells")
             .onClick(() => {
-                gotoURL(Documentation.environments.customShells);
+                gotoURL(Documentation.environments.customShells.index);
             }),
         )
         ;

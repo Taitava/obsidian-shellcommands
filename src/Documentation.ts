@@ -26,7 +26,9 @@ export const Documentation = {
     index: "https://publish.obsidian.md/shellcommands",
     environments: {
         additionsToPathEnvironmentVariable: "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable",
-        customShells: "https://publish.obsidian.md/shellcommands/Environments/Custom+shells",
+        customShells: {
+            index: "https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells",
+        },
     },
     events: {
         folder: "https://publish.obsidian.md/shellcommands/Events/", // Keep the trailing slash!
