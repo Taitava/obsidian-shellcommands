@@ -368,7 +368,7 @@ export class CustomShellSettingsModal extends SC_Modal {
     private createPathTranslatorField(containerElement: HTMLElement): void {
         new Setting(containerElement)
             .setName("Path translator")
-            .setDesc("Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
+            .setDesc("Certain {{variables}} return file system paths, which can be converted to work in this shell. Some shells introduce sub-environments where the same file is referred to using a different absolute path than in the host operating system. A custom JavaScript function can be defined to convert absolute file paths from the host operating system's format to the one expected by the target system. Note that no directory separator changes are needed to be done - they are already changed based on the 'Shell's operating system' setting. Path translation is optional.")
             .setClass("SC-path-translator-setting")
             .addTextArea(textareaComponent => textareaComponent // TODO: Make the textarea grow based on content height.
                 .setValue(this.getCustomShellConfiguration().path_translator ?? "")
