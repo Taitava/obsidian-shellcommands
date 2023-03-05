@@ -34,6 +34,7 @@ import {
     createMultilineTextElement,
     getCurrentPlatformName,
     getOperatingSystem,
+    getPlatformName,
 } from "../../Common";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
@@ -131,12 +132,11 @@ export class CustomShellSettingsModal extends SC_Modal {
         this.createHostPlatformField(hostPlatformContainer);
 
         // Shell operating system
-        const hostPlatformName = getCurrentPlatformName();
         new Setting(containerElement.createDiv({attr: {class: "SC-setting-group"}}))
             .setName("Shell's operating system")
             .setDesc("If the shell virtualizes, uses as a subsystem, or otherwise emulates another operating system than the selected host operating system, select it here. This is used to make directory paths etc. work correctly.")
             .addDropdown(dropdownComponent => dropdownComponent
-                .addOption("none", "Same as the current host (" + hostPlatformName + ")")
+                .addOption("none", "Same as 'Host platform' (" + getPlatformName(this.getCustomShellConfiguration().host_platform) + ")")
                 .addOptions(PlatformNames as Record<string, string>) // FIXME: Find a better way to tell TypeScript that PlatformNames is of a correct type.
                 .setValue(this.getCustomShellConfiguration().shell_platform ?? "none")
                 .onChange(async (newShellPlatform: string) => {
