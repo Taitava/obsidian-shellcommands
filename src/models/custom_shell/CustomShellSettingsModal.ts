@@ -56,6 +56,7 @@ import {Variable_ShellCommandContent} from "../../variables/Variable_ShellComman
 import {SettingFieldGroup} from "../../settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
+import {getPATHEnvironmentVariableName} from "../../settings/setting_elements/PathEnvironmentVariableFunctions";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -428,7 +429,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const wrapperSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(wrapperSettingsContainer)
             .setName("Wrapper for shell command")
-            .setDesc("Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for setting character encodings. {{variables}} are supported. " + shellCommandContentVariable.getFullName() + " must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.")
+            .setDesc(`Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for adding directories to the ${getPATHEnvironmentVariableName()} environment variable, or setting character encodings. {{variables}} are supported. ${shellCommandContentVariable.getFullName()} must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.`)
             .setClass("SC-full-description")
         ;
         const settingGroup: SettingFieldGroup = CreateShellCommandFieldCore(
