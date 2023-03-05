@@ -22,7 +22,7 @@ Features that are in development, but are not released yet. Does not include stu
 
 ### To be Added
 - [Support for custom shells(#297)](https://github.com/Taitava/obsidian-shellcommands/issues/297).
-  - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells).
+  - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells).
 
 ### To be Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
