@@ -88,6 +88,7 @@ export class PromptModel extends Model {
                 }),
             )
         ;
+        // TODO: Add Prompt description here. Make sure it supports multiline, take a look at CustomShellModel._createSettingFields().
         return prompt_name_setting;
     }
 

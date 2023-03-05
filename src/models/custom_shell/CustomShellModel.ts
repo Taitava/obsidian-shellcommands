@@ -28,6 +28,7 @@ import {Setting} from "obsidian";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {debugLog} from "../../Debug";
 import {
+    createMultilineTextElement,
     getOperatingSystem,
     isWindows,
 } from "../../Common";
@@ -54,7 +55,6 @@ export class CustomShellModel extends Model {
         const nameSetting = new Setting(containerElement)
             // Configuration button
             .setName(customShellInstance.getTitle())
-            .setDesc(customShellInstance.configuration.description)
             .addExtraButton(button => button
                 .setTooltip("Configure binary file location, escaping, directory handling etc.")
                 .setIcon("gear")
@@ -63,6 +63,7 @@ export class CustomShellModel extends Model {
                 }),
             )
         ;
+        createMultilineTextElement("span", customShellInstance.configuration.description, nameSetting.descEl);
 
         return nameSetting;
     }

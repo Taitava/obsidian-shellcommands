@@ -112,7 +112,10 @@ export class CustomShellSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
 
                     // Update the description in a name setting. (Only if the modal was created from a place where a CustomShellInstance name element exists).
-                    this.nameSetting?.setDesc(newDescription);
+                    if (this.nameSetting) {
+                        this.nameSetting.setDesc(""); // Clear a possible old description.
+                        createMultilineTextElement("span", newDescription, this.nameSetting.descEl);
+                    }
                 })
             )
         ;
