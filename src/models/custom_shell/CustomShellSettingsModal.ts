@@ -481,6 +481,11 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setIcon("run-command")
             .onClick(async () => {
                 const customShellConfiguration: CustomShellConfiguration = this.getCustomShellConfiguration();
+                if (!this.getCustomShell().getSupportedHostPlatforms().includes(getOperatingSystem())) {
+                    // Unsupported platform.
+                    this.plugin.newError("This shell is not defined to support " + getCurrentPlatformName() + ".");
+                    return;
+                }
                 if (null === customShellConfiguration.shell_command_test) {
                     this.plugin.newError("The test shell command is empty.");
                     return;
