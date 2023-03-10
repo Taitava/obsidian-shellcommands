@@ -30,7 +30,10 @@ import {getSC_Events} from "./events/SC_EventList";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {VariableSet} from "./variables/loadVariables";
-import {getUsedVariables} from "./variables/parseVariables";
+import {
+    getUsedVariables,
+    parseVariableSynchronously,
+} from "./variables/parseVariables";
 import {
     createPreaction,
     CustomVariable,
@@ -53,6 +56,7 @@ import {OutputStream} from "./output_channels/OutputChannelCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
+import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -124,7 +128,7 @@ export class TShellCommand {
      *
      * Does not include any possible Shell provided augmentations to the shell command content.
      */
-    public getUnwrappedShellCommandContent(): string {
+    public getShellCommandContent(): string {
         // Check if the shell command has defined a specific command for this operating system.
         const platformSpecificShellCommand: string | undefined = this.configuration.platform_specific_commands[getOperatingSystem()];
         if (undefined === platformSpecificShellCommand) {
@@ -135,18 +139,6 @@ export class TShellCommand {
             // The shell command has defined a specific command for this operating system.
             return platformSpecificShellCommand;
         }
-    }
-
-    /**
-     * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
-     * command does not have an explicit version for the current OS.
-     *
-     * Includes possible Shell provided augmentations to the shell command content.
-     *
-     * @private Can be made public if needed.
-     */
-    private getWrappedShellCommandContent(): string {
-        return this.getShell().wrapShellCommandContent(this.getUnwrappedShellCommandContent());
     }
 
     /**
@@ -202,7 +194,7 @@ export class TShellCommand {
      * TODO: Use this method in all places where similar logic is needed. I guess generateObsidianCommandName() is the only place left.
      */
     public getAliasOrShellCommand(): string {
-        return this.configuration.alias || this.getUnwrappedShellCommandContent(); // TODO: Use this.getAlias().
+        return this.configuration.alias || this.getShellCommandContent(); // TODO: Use this.getAlias().
     }
 
     public getConfirmExecution() {
@@ -442,8 +434,8 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                unwrappedShellCommandContent: this.getUnwrappedShellCommandContent(),
-                wrappedShellCommandContent: this.getWrappedShellCommandContent(),
+                shellCommandContent: this.getShellCommandContent(),
+                shellCommandWrapper: this.getShell().getShellCommandWrapper(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
                 stdinContent: this.configuration.input_contents.stdin ?? undefined,
@@ -567,7 +559,16 @@ export class TShellCommand {
 
         // Get a list CustomVariables that the shell command uses.
         const custom_variables = new VariableSet();
-        const readVariablesFrom = this.getWrappedShellCommandContent(); // FIXME: Should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
+        const shellCommandWrapper: string | undefined = this.getShell().getShellCommandWrapper();
+        const readVariablesFrom = shellCommandWrapper
+            ? TShellCommand.wrapShellCommandContent(
+                this.plugin,
+                this.getShellCommandContent(),
+                shellCommandWrapper,
+            )
+            : this.getShellCommandContent() // Use unwrapped content.
+        ;
+        // FIXME: readVariablesFrom should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
         for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom)) {
             // Check that the variable IS a CustomVariable.
             if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
@@ -613,6 +614,31 @@ export class TShellCommand {
         }
         return t_shell_commands[this_index - 1];
     }
+
+    /**
+     * Replaces all occurrences of {{shell_command_content}} in shellCommandWrapper with shellCommandContent.
+     *
+     * @param plugin
+     * @param shellCommandContent
+     * @param shellCommandWrapper
+     */
+    public static wrapShellCommandContent(plugin: SC_Plugin, shellCommandContent: string, shellCommandWrapper: string) {
+        const debugMessageBase = `${this.constructor.name}.wrapShellCommandContent(): `;
+        debugLog(`${debugMessageBase}Using wrapper: ${shellCommandWrapper} for shell command: ${shellCommandContent}`);
+
+        // Wrap the shell command.
+        const wrapperParsingResult = parseVariableSynchronously(
+            shellCommandWrapper,
+            new Variable_ShellCommandContent(plugin, shellCommandContent),
+        );
+        if (!wrapperParsingResult.succeeded) {
+            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
+            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
+        }
+
+        debugLog(`${debugMessageBase}Wrapped shell command: ${wrapperParsingResult.parsed_content}`);
+        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
+    }
 }
 
 export class TShellCommandMap extends Map<string, TShellCommand> {}
@@ -637,8 +663,8 @@ export interface ShellCommandParsingResult {
 export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
 
 type shell_command_parsing_map = {
-    unwrappedShellCommandContent: string,
-    wrappedShellCommandContent: string,
+    shellCommandContent: string,
+    shellCommandWrapper?: string,
     alias: string,
     environment_variable_path_augmentation: string,
     stdinContent?: string,

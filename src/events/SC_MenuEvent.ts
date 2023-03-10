@@ -66,7 +66,7 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
                         // Parsing succeeded.
                         const parsing_results = parsing_process.getParsingResults();
                         const aliasParsingResult: ParsingResult = parsing_results["alias"] as ParsingResult; // as ParsingResult: Tells TypeScript that the object exists.
-                        const unwrappedShellCommandParsingResult: ParsingResult = parsing_results.unwrappedShellCommandContent as ParsingResult; // as ParsingResult: Tells TypeScript that the object exists.
+                        const unwrappedShellCommandParsingResult: ParsingResult = parsing_results.shellCommandContent as ParsingResult; // as ParsingResult: Tells TypeScript that the object exists.
                         title = aliasParsingResult.parsed_content || unwrappedShellCommandParsingResult.parsed_content as string; // Try to use a parsed alias, but if no alias is available, use a (short, unwrapped) parsed shell command instead. as string = parsed shell command always exist when the parsing itself has succeeded.
                         debugLog(debugLogBaseMessage + "Menu title parsing succeeded. Will use title: " + title);
                         menuItem.setTitle(title);

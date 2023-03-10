@@ -152,10 +152,19 @@ export class ShellCommandExecutor {
                 if (await parsing_process.processRest()) {
                     // Parsing the rest of the variables succeeded
                     // Execute the shell command.
+                    // TODO: Create a new class ShellCommandParsingProcess (extends ParsingProcess) whose .getParsingResults() returns the shell_command_parsing_result below. I.e. extract the parsing result conversion logic to a separate class. Note that the class should only accept shell_command_parsing_map (defined in TShellCommand.ts) as it's original_contents parameter/property.
                     const parsing_results = parsing_process.getParsingResults();
+                    const unwrappedShellCommandContent: string = (parsing_results.shellCommandContent as ParsingResult).parsed_content as string;
                     const shell_command_parsing_result: ShellCommandParsingResult = {
-                        unwrappedShellCommandContent: (parsing_results.unwrappedShellCommandContent as ParsingResult).parsed_content as string,
-                        wrappedShellCommandContent: (parsing_results.wrappedShellCommandContent as ParsingResult).parsed_content as string,
+                        unwrappedShellCommandContent: unwrappedShellCommandContent,
+                        wrappedShellCommandContent: parsing_results.shellCommandWrapper?.parsed_content
+                            ? TShellCommand.wrapShellCommandContent(
+                                this.plugin,
+                                unwrappedShellCommandContent,
+                                parsing_results.shellCommandWrapper.parsed_content as string,
+                            )
+                            : unwrappedShellCommandContent // No wrapper, use unwrapped shell command content as wrapped.
+                        ,
                         alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
                         environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
                         stdinContent: parsing_results.stdinContent?.parsed_content as string,

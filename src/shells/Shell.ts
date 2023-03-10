@@ -30,8 +30,6 @@ import {TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
 import {cloneObject} from "../Common";
 import {getPATHEnvironmentVariableName} from "../settings/setting_elements/PathEnvironmentVariableFunctions";
-import {parseVariableSynchronously} from "../variables/parseVariables";
-import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 
 export abstract class Shell {
 
@@ -76,31 +74,7 @@ export abstract class Shell {
      */
     public abstract getPathSeparator(): ":" | ";";
 
-    public wrapShellCommandContent(shellCommandContent: string) {
-        const debugMessageBase = `${this.constructor.name}.wrapShellCommandContent(): `;
-        const shellCommandWrapper = this.getShellCommandWrapper();
-        if (undefined === shellCommandWrapper) {
-            // No wrapper is defined, so return the shell command content without modifications.
-            debugLog(`${debugMessageBase}No wrapper is defined.`);
-            return shellCommandContent;
-        }
-        debugLog(`${debugMessageBase}Using wrapper: ${shellCommandWrapper} for shell command: ${shellCommandContent}`);
-
-        // Wrap the shell command.
-        const wrapperParsingResult = parseVariableSynchronously(
-            shellCommandWrapper,
-            new Variable_ShellCommandContent(this.plugin, shellCommandContent),
-        );
-        if (!wrapperParsingResult.succeeded) {
-            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
-            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
-        }
-
-        debugLog(`${debugMessageBase}Wrapped shell command: ${wrapperParsingResult.parsed_content}`);
-        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
-    }
-
-    private getShellCommandWrapper(): string | undefined {
+    public getShellCommandWrapper(): string | undefined {
         if (this._getShellCommandWrapper) {
             return this._getShellCommandWrapper() ?? undefined; // If the call returns null, convert it to undefined. Null works well in CustomShellConfiguration, but undefined is used in ParsingProcess to denote that some content is not present for parsing.
         }

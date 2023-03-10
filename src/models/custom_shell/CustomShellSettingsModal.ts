@@ -58,6 +58,7 @@ import {SettingFieldGroup} from "../../settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {getPATHEnvironmentVariableName} from "../../settings/setting_elements/PathEnvironmentVariableFunctions";
+import {TShellCommand} from "../../TShellCommand";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -484,9 +485,17 @@ export class CustomShellSettingsModal extends SC_Modal {
                     this.plugin.newError("The test shell command is empty.");
                     return;
                 }
+                const wrappedShellCommandContent: string = customShellConfiguration.shell_command_wrapper
+                    ? TShellCommand.wrapShellCommandContent(
+                        this.plugin,
+                        customShellConfiguration.shell_command_test,
+                        customShellConfiguration.shell_command_wrapper,
+                    )
+                    : customShellConfiguration.shell_command_test // No wrapper, use unwrapped shell command content.
+                ;
                 const testShellCommandParsingResult: ParsingResult = await parseVariables(
                     this.plugin,
-                    this.getCustomShell().wrapShellCommandContent(customShellConfiguration.shell_command_test),
+                    wrappedShellCommandContent,
                     this.getCustomShell(),
                     true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
                     null, // No TShellCommand, so no access for default values.
