@@ -407,7 +407,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                         }
                         const variableValueResult = await variable.getValue(this.getCustomShell(), null, null, variableArguments);
                         const translatedPath = variableValueResult.succeeded ? variableValueResult.value : variableValueResult.error_messages[0];
-                        this.plugin.newNotification(variable.getFullName(Object.values(variableArguments)) + " = " + translatedPath);
+                        this.plugin.newNotification(variable.getFullName(false, Object.values(variableArguments)) + " = " + translatedPath);
                     }
                 })
             )
