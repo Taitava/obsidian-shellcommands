@@ -34,13 +34,19 @@ export class Variable_ShellCommandContent extends Variable {
     }
 
     /**
-     * TODO: Remove this method. Do not use this variable with parseVariables(), use parseVariableSynchronously() instead.
+     * Used when parsing shell arguments.
+     *
      * @protected
      */
     protected async generateValue(): Promise<string> {
         return this.shellCommandContent;
     }
 
+    /**
+     * Used when doing shell command parsing, i.e. when wrapping parsed shell command content in a wrapper specified by a CustomShell.
+     *
+     * @protected
+     */
     protected generateValueSynchronously() {
         return this.shellCommandContent;
     }
