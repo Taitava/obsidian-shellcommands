@@ -29,15 +29,18 @@ import {ShEscaper} from "../variables/escapers/ShEscaper";
 import {
     getOperatingSystem,
     isWindows,
+    mergeSets,
     normalizePath2,
 } from "../Common";
 import SC_Plugin from "../main";
 import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 import {
+    parseVariables,
     parseVariableSynchronously,
     ParsingResult,
 } from "../variables/parseVariables";
+import {VariableSet} from "../variables/loadVariables";
 import {TShellCommand} from "../TShellCommand";
 import {SC_Event} from "../events/SC_Event";
 import {debugLog} from "../Debug";
@@ -179,9 +182,14 @@ export class CustomShell extends Shell {
         const parsedShellArguments: string[] = [];
         for (const rawShellArgument of rawShellArguments) {
             debugLog(debugLogBase + "Parsing shell argument: " + rawShellArgument);
-            const shellArgumentParsingResult: ParsingResult = await parseVariableSynchronously(
+            const shellArgumentParsingResult: ParsingResult = await parseVariables(
+                this.plugin,
                 rawShellArgument,
-                shellCommandContentVariable,
+                this,
+                false, // No escaping, because we are not in the shell's context yet, we are executing the shell binary file in a non-shell context.
+                tShellCommand,
+                scEvent,
+                mergeSets(this.plugin.getVariables(), new VariableSet([shellCommandContentVariable])),
             );
             if (!shellArgumentParsingResult.succeeded) {
                 // Shell argument parsing failed.

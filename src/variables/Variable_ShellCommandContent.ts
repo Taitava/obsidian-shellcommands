@@ -33,9 +33,12 @@ export class Variable_ShellCommandContent extends Variable {
         super(plugin);
     }
 
+    /**
+     * TODO: Remove this method. Do not use this variable with parseVariables(), use parseVariableSynchronously() instead.
+     * @protected
+     */
     protected async generateValue(): Promise<string> {
-        throw new Error(this.constructor.name + ".generateValue() must not be called. Call .generateValueSynchronously() instead. I.e. use parseVariableSynchronously(), not parseVariables().");
-        // TODO: Make it possible not to define generateValue() in subclasses of Variable. Move the above exception throwing to happen in Variable.getValue() and add some mechanism for Variable subclasses to define which method they support.
+        return this.shellCommandContent;
     }
 
     protected generateValueSynchronously() {
