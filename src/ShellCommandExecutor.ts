@@ -162,6 +162,7 @@ export class ShellCommandExecutor {
                                 this.plugin,
                                 unwrappedShellCommandContent,
                                 parsing_results.shellCommandWrapper.parsed_content as string,
+                                this.t_shell_command.getShell(),
                             )
                             : unwrappedShellCommandContent // No wrapper, use unwrapped shell command content as wrapped.
                         ,

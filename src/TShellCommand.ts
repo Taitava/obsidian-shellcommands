@@ -565,6 +565,7 @@ export class TShellCommand {
                 this.plugin,
                 this.getShellCommandContent(),
                 shellCommandWrapper,
+                this.getShell(),
             )
             : this.getShellCommandContent() // Use unwrapped content.
         ;
@@ -621,8 +622,14 @@ export class TShellCommand {
      * @param plugin
      * @param shellCommandContent
      * @param shellCommandWrapper
+     * @param shell
      */
-    public static wrapShellCommandContent(plugin: SC_Plugin, shellCommandContent: string, shellCommandWrapper: string) {
+    public static wrapShellCommandContent(
+        plugin: SC_Plugin,
+        shellCommandContent: string,
+        shellCommandWrapper: string,
+        shell: Shell,
+    ) {
         const debugMessageBase = `${this.constructor.name}.wrapShellCommandContent(): `;
         debugLog(`${debugMessageBase}Using wrapper: ${shellCommandWrapper} for shell command: ${shellCommandContent}`);
 
@@ -630,6 +637,7 @@ export class TShellCommand {
         const wrapperParsingResult = parseVariableSynchronously(
             shellCommandWrapper,
             new Variable_ShellCommandContent(plugin, shellCommandContent),
+            shell,
         );
         if (!wrapperParsingResult.succeeded) {
             // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.

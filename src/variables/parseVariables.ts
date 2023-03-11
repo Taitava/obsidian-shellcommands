@@ -102,7 +102,7 @@ export async function parseVariables(
 
             // Should the variable's value be escaped? (Usually yes).
             let escapeCurrentVariable = escapeVariables;
-            if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
+            if (doesOccurrenceDenyEscaping(substitute)) {
                 // The variable usage begins with {{! instead of {{
                 // This means the variable's value should NOT be escaped.
                 escapeCurrentVariable = false;
@@ -189,13 +189,16 @@ export async function parseVariables(
  * where asynchronous functions should be avoided, e.g. in Obsidian Command palette, or file/folder/editor menus (although
  * this is not used in those menus atm).
  *
- * Does not support escaping special characters in variable values atm!
- *
  * @param content
  * @param variable Can only be a Variable that implements the method generateValueSynchronously(). Otherwise an Error is thrown. Also, does not support variables that have parameters, at least at the moment.
+ * @param shell
  * @return A ParsingResult similar to what parseVariables() returns, but directly, not in a Promise.
  */
-export function parseVariableSynchronously(content: string, variable: Variable): ParsingResult {
+export function parseVariableSynchronously(
+        content: string,
+        variable: Variable,
+        shell: Shell,
+    ): ParsingResult {
     if (variable.getParameterNames().length > 0) {
         throw new Error("parseVariableSynchronously() does not support variables with parameters at the moment. Variable: " + variable.constructor.name);
     }
@@ -210,16 +213,25 @@ export function parseVariableSynchronously(content: string, variable: Variable):
     };
 
     // Get the Variable's value.
-    const variableValueResult: VariableValueResult = variable.getValueSynchronously();
+    const variableValueResult: VariableValueResult = variable.getValueSynchronously(); // Shell could be passed here as a parameter, if there will ever be a need to use this method to access any variables that need the Shell (e.g. file path related variables that do path translation). It's not done now, as there's no need for now.
 
     if (variableValueResult.succeeded) {
         // Parsing succeeded.
         parsingResult.succeeded = true;
         parsingResult.parsed_content = content.replaceAll(
             getVariableRegExp(variable), // Even thought this regexp actually supports arguments, supplying arguments to variables is not implemented in variable.getValueSynchronously(), so variables expecting parameters cannot be supported at the moment.
-            () => {
+            (occurrence: string) => {
                 parsingResult.count_parsed_variables++; // The count is not used (at least at the moment of writing this), but might be used in the future.
-                return variableValueResult.value as string; // Replace {{variable}} with a value.
+
+                // Check if special characters should be escaped or not.
+                const escape = !doesOccurrenceDenyEscaping(occurrence);
+                if (escape) {
+                    // Do escape.
+                    return shell.escapeValue(variableValueResult.value as string);
+                } else {
+                    // No escaping.
+                    return variableValueResult.value as string; // Replace {{variable}} with a value.
+                }
             },
         );
     } else {
@@ -266,6 +278,10 @@ export function getUsedVariables(
 
 function getVariableRegExp(variable: Variable) {
     return new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+}
+
+function doesOccurrenceDenyEscaping(occurrence: string): boolean {
+    return "{{!" === occurrence.slice(0, 3); // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
 }
 
 export interface ParsingResult {

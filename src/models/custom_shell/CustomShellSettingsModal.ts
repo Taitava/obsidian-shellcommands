@@ -433,7 +433,7 @@ export class CustomShellSettingsModal extends SC_Modal {
         const wrapperSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(wrapperSettingsContainer)
             .setName("Wrapper for shell command")
-            .setDesc(`Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for adding directories to the ${getPATHEnvironmentVariableName()} environment variable, or setting character encodings. {{variables}} are supported. ${shellCommandContentVariable.getFullName()} must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.`)
+            .setDesc(`Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for adding directories to the ${getPATHEnvironmentVariableName()} environment variable, or setting character encodings. {{variables}} are supported. ${shellCommandContentVariable.getFullName(true)} must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.`)
             .setClass("SC-full-description")
         ;
         const settingGroup: SettingFieldGroup = CreateShellCommandFieldCore(
@@ -449,11 +449,15 @@ export class CustomShellSettingsModal extends SC_Modal {
                 await this.plugin.saveSettings();
                 updateNoShellCommandContentVariableWarning();
             },
-            shellCommandContentVariable.getFullName(), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
+            shellCommandContentVariable.getFullName(true), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
             shellCommandContentVariable.getAutocompleteItems(),
         );
         settingGroup.shell_command_setting.setClass("SC-no-description");
         settingGroup.preview_setting.setClass("SC-full-description");
+        new Setting(wrapperSettingsContainer)
+            .setDesc(`Use ! in ${shellCommandContentVariable.getFullName(true)} to disable escaping special characters in the shell command content. Variables used in the actual shell command are already escaped if needed, so this avoids double escaping. However, you can use the ${shellCommandContentVariable.getFullName(false)} form, if you want to e.g. store shell command content in a log file. Example: echo ${shellCommandContentVariable.getFullName(false)} >> executedShellCommands.log`)
+            .setClass("SC-full-description")
+        ;
 
         const updateNoShellCommandContentVariableWarning = () => {
             const shellCommandWrapper: string | null = this.getCustomShellConfiguration().shell_command_wrapper;
@@ -495,6 +499,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                         this.plugin,
                         customShellConfiguration.shell_command_test,
                         customShellConfiguration.shell_command_wrapper,
+                        this.getCustomShell(),
                     )
                     : customShellConfiguration.shell_command_test // No wrapper, use unwrapped shell command content.
                 ;
@@ -577,7 +582,7 @@ export class CustomShellSettingsModal extends SC_Modal {
     }
 
     private getShellCommandContentWarningText(subject: string, shellCommandContentVariable: Variable_ShellCommandContent): string {
-        return "Warning! The " + subject + " should contain " + shellCommandContentVariable.getFullName() + ". Otherwise, the shell will be called without the actual shell command that was supposed to be executed.";
+        return "Warning! The " + subject + " should contain " + shellCommandContentVariable.getFullName(true) + ". Otherwise, the shell will be called without the actual shell command that was supposed to be executed.";
     }
 
     protected approve(): void {
