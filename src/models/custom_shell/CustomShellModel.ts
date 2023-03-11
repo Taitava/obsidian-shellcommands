@@ -41,6 +41,7 @@ import {getIDGenerator} from "../../IDGenerator";
 import {CustomShellSettingsModal} from "./CustomShellSettingsModal";
 import {getShells} from "../../shells/ShellFunctions";
 import {ConfirmationModal} from "../../ConfirmationModal";
+import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 
 export class CustomShellModel extends Model {
 
@@ -121,12 +122,13 @@ export class CustomShellModel extends Model {
     }
 
     public getDefaultConfiguration(): CustomShellConfiguration {
+        const shellCommandContentVariable = new Variable_ShellCommandContent(this.plugin, ""); // Content doesn't matter here, it's only used for getting the variable name.
         return {
             id: getIDGenerator().generateID(),
             name: "",
             description: "",
             binary_path: "",
-            shell_arguments: ["-c", "{{shell_command_content}}"],
+            shell_arguments: ["-c", shellCommandContentVariable.getFullName(true)],
             host_platform: getOperatingSystem(),
             host_platform_configurations: isWindows() ? {
                 win32: CustomShellModel.getDefaultHostPlatformWindowsConfiguration(),

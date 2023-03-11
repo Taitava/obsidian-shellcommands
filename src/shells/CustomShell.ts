@@ -185,7 +185,7 @@ export class CustomShell extends Shell {
                 this.plugin,
                 rawShellArgument,
                 this,
-                false, // No escaping, because we are not in the shell's context yet, we are executing the shell binary file in a non-shell context.
+                true, // Escape special characters, even though we are in a non-shell context atm. As arguments are parsed by a shell (after it's invoked), they will be used in the shell's context and might need escaping.
                 tShellCommand,
                 scEvent,
                 mergeSets(this.plugin.getVariables(), new VariableSet([shellCommandContentVariable])),
