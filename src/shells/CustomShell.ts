@@ -37,7 +37,6 @@ import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel"
 import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";
 import {
     parseVariables,
-    parseVariableSynchronously,
     ParsingResult,
 } from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
