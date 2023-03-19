@@ -18,6 +18,17 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
+## [0.20.0] - Unreleased
+
+### To be Added
+- [Font styling for output (ANSI code) (#329)](https://github.com/Taitava/obsidian-shellcommands/issues/329).
+  - Some shell programs style their text output with colors, emphasis, boldings, links etc. by inserting [ANSI code](https://en.wikipedia.org/wiki/ANSI_escape_code) to output. Previously, the plugin didn't do anything for ANSI code, and it ended up cluttering output. Now it's possible to convert ANSI code to HTML or turn the conversion off (on by default).
+  - Also, [Notification/error balloon](https://publish.obsidian.md/shellcommands/Output+handling/Output+channel+-+Notification+balloon) now displays monospaced output (can be turned off in settings). Improves error messages' readability (and code-like output's readability, too).
+  
+### To be Changed
+- [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
+  - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
+
 ## [0.19.0] - Unreleased
 
 ### To be Added
