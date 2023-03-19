@@ -431,7 +431,7 @@ export class ExtraOptionsModal extends SC_Modal {
         this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
         
         // ANSI code conversion.
-        this.newAnsiCodeConversionSetting(container_element, sanitizeHTMLToDom("Shell programs may output ANSI code to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
+        this.newAnsiCodeConversionSetting(container_element, sanitizeHTMLToDom("Shell programs may output <a href=\"https://en.wikipedia.org/wiki/ANSI_escape_code\">ANSI code</a> to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
 
         // Output handling mode
         new Setting(container_element)
