@@ -33,7 +33,7 @@ import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
 import {
     generateIgnoredErrorCodesIconTitle,
-    generateShellCommandFieldIconAndName
+    generateShellCommandFieldIconAndName,
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";

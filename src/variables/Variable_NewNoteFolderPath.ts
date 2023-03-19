@@ -32,7 +32,7 @@ export class Variable_NewNoteFolderPath extends Variable {
         mode: {
             options: ["absolute", "relative"],
             required: true,
-        }
+        },
     };
 
     protected async generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string> {

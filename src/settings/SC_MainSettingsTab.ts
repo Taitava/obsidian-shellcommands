@@ -44,7 +44,7 @@ import {
     getModel,
     createPATHAugmentationFields,
     Prompt,
-    PromptModel
+    PromptModel,
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {ExecutionNotificationMode} from "./SC_MainSettings";

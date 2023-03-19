@@ -372,7 +372,7 @@ export default class SC_Plugin extends Plugin {
                         return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
                     });
 				}
-			}
+			},
 		};
 		this.addCommand(obsidian_command);
 		this.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.

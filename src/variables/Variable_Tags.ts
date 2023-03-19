@@ -29,7 +29,7 @@ export class Variable_Tags extends FileVariable {
         separator: {
             type: "string",
             required: true,
-        }
+        },
     };
 
     protected async generateValue(castedArguments: {separator: string}): Promise<string> {

@@ -38,7 +38,7 @@ import {
     getPATHAugmentation,
     ParsingProcess,
     Preaction,
-    PreactionConfiguration
+    PreactionConfiguration,
 } from "./imports";
 import {
     Variable,

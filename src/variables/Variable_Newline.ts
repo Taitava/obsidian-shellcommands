@@ -27,7 +27,7 @@ export class Variable_Newline extends Variable {
         count: {
             type: "integer",
             required: false,
-        }
+        },
     };
 
     protected async generateValue(castedArguments: {count?: number}): Promise<string> {

@@ -19,7 +19,7 @@
 
 import {debugLog} from "../Debug";
 import {
-    Model
+    Model,
 } from "../imports";
 
 export abstract class Instance {

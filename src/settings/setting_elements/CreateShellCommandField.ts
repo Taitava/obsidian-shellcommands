@@ -31,7 +31,7 @@ import {
     copyToClipboard,
 } from "../../Common";
 import {
-    ShellCommandExecutor
+    ShellCommandExecutor,
 } from "../../imports";
 import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
 

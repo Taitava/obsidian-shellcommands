@@ -31,7 +31,7 @@ import {
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
 import {InheritableVariableDefaultValueConfiguration} from "../variables/Variable";
 import {
-    PreactionConfiguration
+    PreactionConfiguration,
 } from "../imports";
 import {OutputChannel} from "../output_channels/OutputChannel";
 
