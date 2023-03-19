@@ -17,7 +17,13 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {App, PluginSettingTab, SearchComponent, Setting} from "obsidian";
+import {
+    App,
+    PluginSettingTab,
+    sanitizeHTMLToDom,
+    SearchComponent,
+    Setting,
+} from "obsidian";
 import SC_Plugin from "../main";
 import {getVaultAbsolutePath, gotoURL} from "../Common";
 import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
@@ -518,10 +524,10 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        // "Output channel 'Clipboard' displays a notification message, too" field
+        // "Outputting to 'Clipboard' displays a notification message, too" field
         new Setting(container_element)
-            .setName("Output channel 'Clipboard' displays a notification message, too")
-            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box on the top right corner. This helps to notice what was inserted into clipboard.")
+            .setName(sanitizeHTMLToDom("Outputting to <em>Clipboard</em> displays a notification message, too"))
+            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box in the top right corner. This helps to notice what was inserted into clipboard.")
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.output_channel_clipboard_also_outputs_to_notification)
                 .onChange(async (value: boolean) => {
@@ -531,10 +537,10 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
         
-        // "Output channel 'Notification/error balloon' uses monospace formatting" field.
+        // "Outputting to 'Notification/error balloon' uses monospace formatting" field.
         const initialNotificationDecoration: boolean | "stderr" = this.plugin.settings.output_channel_notification_decorates_output;
         new Setting(container_element)
-            .setName("Output channel 'Notification/error balloon' uses monospace formatting")
+            .setName(sanitizeHTMLToDom("Outputting to <em>Notification/error balloon</em> uses monospace formatting"))
             .setDesc("Monospace formatting is achieved by wrapping output in a <code></code> element. It's good for error messages, but not optimal for long natural language texts. The formatting is only applied for messages originating from shell command execution, not for the plugin's own error messages or notifications.")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions({
