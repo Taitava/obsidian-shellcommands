@@ -19,6 +19,7 @@
 
 import {OutputChannel} from "./OutputChannel";
 import {EOL} from "os";
+import {sanitizeHTMLToDom} from "obsidian";
 
 export class OutputChannel_StatusBar extends OutputChannel {
     protected static readonly title = "Status bar";
@@ -56,10 +57,13 @@ export class OutputChannel_StatusBar extends OutputChannel {
 
         // Full output (shown when hovering with mouse)
         status_bar_element.setAttr("aria-label", outputContent);
+        // FIXME: Make the statusbar element support HTML content better. Need to:
+        //  - Make the hover content appear in a real HTML element, not in aria-label="" attribute.
+        //  - Ensure the always visible bottom line contains all formatting that might come from lines above it.
 
         // Show last line permanently.
-        const output_message_lines = outputContent.split(/(\r\n|\r|\n)/u);
+        const output_message_lines = outputContent.split(/(\r\n|\r|\n|<br>)/u); // <br> is here just in case, haven't tested if ansi_up adds it or not.
         const last_output_line = output_message_lines[output_message_lines.length - 1];
-        status_bar_element.setText(last_output_line);
+        status_bar_element.setText(sanitizeHTMLToDom(last_output_line));
     }
 }

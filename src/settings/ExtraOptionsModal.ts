@@ -18,7 +18,10 @@
  */
 
 // @ts-ignore
-import {Setting} from "obsidian";
+import {
+    sanitizeHTMLToDom,
+    Setting,
+} from "obsidian";
 import SC_Plugin from "../main";
 import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
 import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
@@ -426,6 +429,10 @@ export class ExtraOptionsModal extends SC_Modal {
         // Output wrappers
         this.newOutputWrapperSetting(container_element, "Output wrapper for stdout", "stdout", "Output wrappers can be used to surround output with predefined text, e.g. to put output into a code block. Note: If 'Output mode' is 'Realtime', wrappers will probably appear multiple times in output!");
         this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
+        
+        // ANSI code conversion.
+        this.newAnsiCodeConversionSetting(container_element, "stdout", sanitizeHTMLToDom("Shell programs may output ANSI code to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
+        this.newAnsiCodeConversionSetting(container_element, "stderr");
 
         // Output handling mode
         new Setting(container_element)
@@ -702,6 +709,20 @@ export class ExtraOptionsModal extends SC_Modal {
                         }
                     }
                 })
+            )
+        ;
+    }
+    
+    private newAnsiCodeConversionSetting(containerElement: HTMLElement, outputStreamName: OutputStream, description: string | DocumentFragment = "") {
+        new Setting(containerElement)
+            .setName("Detect colors, font styles etc. in " + outputStreamName + "'s ANSI code")
+            .setDesc(description)
+            .addToggle(toggle => toggle
+                .setValue(this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code)
+                .onChange(async (convert) => {
+                    this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code = convert;
+                    await this.plugin.saveSettings();
+                }),
             )
         ;
     }

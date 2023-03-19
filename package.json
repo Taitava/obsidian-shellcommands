@@ -19,6 +19,7 @@
     "@types/node": "^14.14.37",
     "@typescript-eslint/eslint-plugin": "^5.2.0",
     "@typescript-eslint/parser": "^5.2.0",
+    "ansi_up": "https://github.com/Taitava/ansi_up/archive/refs/tags/for-obsidian-shell-commands-1.tar.gz",
     "autocompleter": "https://github.com/Taitava/autocomplete/archive/refs/tags/obsidian-shellcommands-0.13.0.tar.gz",
     "esbuild": "0.13.11",
     "eslint": "8.20.0",

@@ -19,7 +19,10 @@
 
 import {OutputChannel} from "./OutputChannel";
 import {OutputStreams} from "./OutputChannelFunctions";
-import {OutputStream} from "./OutputHandlerCode";
+import {
+    OutputHandlerApplicableConfiguration,
+    OutputStream,
+} from "./OutputHandlerCode";
 import {
     EditorSelectionOrCaret,
     normalizePath,
@@ -46,6 +49,15 @@ export class OutputChannel_OpenFiles extends OutputChannel {
      * @protected
      */
     protected static readonly accepted_output_streams: OutputStream[] = ["stdout"];
+    
+    /**
+     * When opening files, the output is not supposed to have any ANSI codes, as it's just a list of file names.
+     *
+     * @protected
+     */
+    protected static override readonly applicableConfiguration: OutputHandlerApplicableConfiguration = {
+        convert_ansi_code: false,
+    };
 
     protected _handleBuffered(output: OutputStreams, error_code: number | null): Promise<void> {
         let handlingPipeline = Promise.resolve();

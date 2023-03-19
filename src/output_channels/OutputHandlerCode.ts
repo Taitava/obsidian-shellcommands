@@ -37,4 +37,12 @@ export type OutputHandlingMode = "buffered" | "realtime";
 
 export interface OutputHandlerConfiguration {
     handler: OutputHandlerCode,
+    convert_ansi_code: boolean,
 }
+
+/**
+ * Booleans telling whether particular configuration properties are utilized by a OutputChannel.
+ */
+export type OutputHandlerApplicableConfiguration = {
+    [key in keyof Omit<OutputHandlerConfiguration, "handler">]: boolean;
+};

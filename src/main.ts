@@ -638,7 +638,7 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	public newError(
-        message: string,
+        message: string | DocumentFragment,
         timeout: number = this.getErrorMessageDurationMs(),
     ) {
 		return new Notice(message, timeout);
@@ -656,7 +656,7 @@ export default class SC_Plugin extends Plugin {
      * @param timeout Custom timeout in milliseconds. If not set, the timeout will be fetched from user configurable settings. Use 0 if you want to disable the timeout, i.e. show the notification until it's explicitly hidden by clinking it, or via code.
      */
 	public newNotification(
-        message: string,
+        message: string | DocumentFragment,
         timeout = this.getNotificationMessageDurationMs(),
     ) {
 		return new Notice(message, timeout);
