@@ -98,7 +98,12 @@ export class OutputChannel_Notification extends OutputChannel {
             }
 
             // Use the updated output
-            this.realtimeNotice.setMessage(this.prepareHTML(updatedMessage));
+            this.realtimeNotice.setMessage(
+                this.prepareHTML(
+                    this.realtimeHasStderrOccurred ? "stderr" : "stdout",
+                    updatedMessage,
+                )
+            );
 
             // Update notice hiding timeout
             window.clearTimeout(this.realtimeNoticeTimeout); // Remove old timeout
@@ -132,11 +137,14 @@ export class OutputChannel_Notification extends OutputChannel {
         if (exitCode !== 0 || this.realtimeHasStderrOccurred) {
             // If a Notice exists, update it with the exitCode
             this.realtimeNotice?.setMessage(
-                this.prepareHTML(OutputChannel_Notification.formatErrorMessage(
-                    this.realtimeContentBuffer,
-                    exitCode, // If exitCode is null, it means user terminated the process, and it will show up as "[...]". It's ok, it indicates that no exit code was received.
+                this.prepareHTML(
+                    this.realtimeHasStderrOccurred ? "stderr" : "stdout",
+                    OutputChannel_Notification.formatErrorMessage(
+                        this.realtimeContentBuffer,
+                        exitCode, // If exitCode is null, it means user terminated the process, and it will show up as "[...]". It's ok, it indicates that no exit code was received.
+                    )
                 )
-            ));
+            );
         }
 
         // Remove terminating button
@@ -161,13 +169,16 @@ export class OutputChannel_Notification extends OutputChannel {
             case "stdout":
                 // Normal output
                 return this.plugin.newNotification(
-                    this.prepareHTML(outputContent),
+                    this.prepareHTML(outputStreamName, outputContent),
                     noticeTimeout ?? undefined,
                 );
             case "stderr":
                 // Error output
                 return this.plugin.newError(
-                    this.prepareHTML(OutputChannel_Notification.formatErrorMessage(outputContent, exitCode)),
+                    this.prepareHTML(
+                        outputStreamName,
+                        OutputChannel_Notification.formatErrorMessage(outputContent, exitCode),
+                    ),
                     noticeTimeout ?? undefined,
                 );
         }
@@ -219,10 +230,28 @@ export class OutputChannel_Notification extends OutputChannel {
     
     /**
      * Wraps the given string content in a `<code></code>` element and creates a DocumentFragment for it.
+     * @param outputStreamName Used to determine whether output can be wrapped in <code></code>.
      * @param outputContent
      * @private
      */
-    private prepareHTML(outputContent: string): DocumentFragment {
-        return sanitizeHTMLToDom("<code>" + outputContent + "</code>"); // Use <code> instead of <pre> to allow line wrapping.
+    private prepareHTML(outputStreamName: OutputStream, outputContent: string): DocumentFragment {
+        
+        // Can output be wrapped in <code></code> block?
+        const decorationOption: boolean | "stderr" = this.plugin.settings.output_channel_notification_decorates_output;
+        let canDecorate: boolean;
+        switch (decorationOption) {
+            case "stderr":
+                // Can only wrap stderr output.
+                canDecorate = outputStreamName === "stderr";
+                break;
+            default:
+                // decorationOption is true or false.
+                canDecorate = decorationOption;
+                break;
+        }
+        return sanitizeHTMLToDom(canDecorate
+            ? "<code>" + outputContent + "</code>" // Use <code> instead of <pre> to allow line wrapping.
+            : outputContent
+        );
     }
 }

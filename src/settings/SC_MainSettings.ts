@@ -58,6 +58,7 @@ export interface SC_MainSettings {
     notification_message_duration: number;
     execution_notification_mode: ExecutionNotificationMode;
     output_channel_clipboard_also_outputs_to_notification: boolean;
+    output_channel_notification_decorates_output: boolean | "stderr";
 
     // Events:
     enable_events: boolean;
@@ -122,6 +123,7 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         notification_message_duration: 10,
         execution_notification_mode: "disabled",
         output_channel_clipboard_also_outputs_to_notification: true,
+        output_channel_notification_decorates_output: true,
 
         // Events:
         enable_events: true,
