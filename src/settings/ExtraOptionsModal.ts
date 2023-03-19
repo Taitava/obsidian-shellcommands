@@ -431,8 +431,7 @@ export class ExtraOptionsModal extends SC_Modal {
         this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
         
         // ANSI code conversion.
-        this.newAnsiCodeConversionSetting(container_element, "stdout", sanitizeHTMLToDom("Shell programs may output ANSI code to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
-        this.newAnsiCodeConversionSetting(container_element, "stderr");
+        this.newAnsiCodeConversionSetting(container_element, sanitizeHTMLToDom("Shell programs may output ANSI code to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
 
         // Output handling mode
         new Setting(container_element)
@@ -713,18 +712,27 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
     }
     
-    private newAnsiCodeConversionSetting(containerElement: HTMLElement, outputStreamName: OutputStream, description: string | DocumentFragment = "") {
-        new Setting(containerElement)
-            .setName("Detect colors, font styles etc. in " + outputStreamName + "'s ANSI code")
+    private newAnsiCodeConversionSetting(containerElement: HTMLElement, description: string | DocumentFragment) {
+        const ansiCodeSetting = new Setting(containerElement)
+            .setName("Detect colors, font styles etc. in output (ANSI code)")
             .setDesc(description)
-            .addToggle(toggle => toggle
-                .setValue(this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code)
-                .onChange(async (convert) => {
-                    this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code = convert;
+        ;
+    
+        const addAnsiCodeFieldForOutputStream = (outputStreamName: OutputStream) => {
+            ansiCodeSetting.addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enable: outputStreamName + ": Enable",
+                    disable: outputStreamName + ": Disable",
+                })
+                .setValue(this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code ? "enable" : "disable")
+                .onChange(async (enableString: string) => {
+                    this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code = (enableString === "enable");
                     await this.plugin.saveSettings();
                 }),
-            )
-        ;
+            );
+        };
+        addAnsiCodeFieldForOutputStream("stdout");
+        addAnsiCodeFieldForOutputStream("stderr");
     }
 
     protected approve(): void {
