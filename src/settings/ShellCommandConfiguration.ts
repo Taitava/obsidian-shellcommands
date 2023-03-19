@@ -18,10 +18,11 @@
  */
 
 import {
-    OutputChannelCodes,
+    OutputHandlerCode,
+    OutputHandlerConfigurations,
     OutputChannelOrder,
     OutputHandlingMode,
-} from "../output_channels/OutputChannelCode";
+} from "../output_channels/OutputHandlerCode";
 import {
     ICommandPaletteOptions,
     IPlatformSpecificString,
@@ -32,6 +33,7 @@ import {InheritableVariableDefaultValueConfiguration} from "../variables/Variabl
 import {
     PreactionConfiguration
 } from "../imports";
+import {OutputChannel} from "../output_channels/OutputChannel";
 
 export interface ShellCommandConfiguration {
     id: string,
@@ -49,7 +51,8 @@ export interface ShellCommandConfiguration {
     input_contents: {
         stdin: string | null,
     },
-    output_channels: OutputChannelCodes,
+    output_handlers: OutputHandlerConfigurations,
+
     output_wrappers: {
         stdout: string | null,
         stderr: string | null,
@@ -64,6 +67,8 @@ export interface ShellCommandConfiguration {
     };
 
     // LEGACY
+    /** @deprecated Migrated to output_handlers. */
+    output_channels?: {stdout: OutputHandlerCode, stderr: OutputHandlerCode},
     /** @deprecated Can only be used for migration. */
     shell_command?: string;
 }
@@ -82,9 +87,9 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         input_contents: {
             stdin: null,
         },
-        output_channels: {
-            stdout: "ignore",
-            stderr: "notification",
+        output_handlers: {
+            stdout: OutputChannel.getDefaultConfiguration("ignore"),
+            stderr: OutputChannel.getDefaultConfiguration("notification"),
         },
         output_wrappers: {
             stdout: null,

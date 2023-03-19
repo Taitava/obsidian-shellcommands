@@ -22,11 +22,11 @@
  * Designed additional values for later: "specific-file-top" | "specific-file-bottom" | "specific-file-caret" (if possible)
  * See discussion: https://github.com/Taitava/obsidian-shellcommands/discussions/16
  */
-export type OutputChannelCode = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files";
+export type OutputHandlerCode = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files";
 
-export interface OutputChannelCodes {
-    stdout: OutputChannelCode,
-    stderr: OutputChannelCode,
+export interface OutputHandlerConfigurations {
+    stdout: OutputHandlerConfiguration,
+    stderr: OutputHandlerConfiguration,
 }
 
 export type OutputChannelOrder = "stdout-first" | "stderr-first";
@@ -34,3 +34,7 @@ export type OutputChannelOrder = "stdout-first" | "stderr-first";
 export type OutputStream = "stdout" | "stderr";
 
 export type OutputHandlingMode = "buffered" | "realtime";
+
+export interface OutputHandlerConfiguration {
+    handler: OutputHandlerCode,
+}

@@ -49,7 +49,7 @@ import {
     PlatformNames,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
-import {OutputStream} from "./output_channels/OutputChannelCode";
+import {OutputStream} from "./output_channels/OutputHandlerCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 
 export interface TShellCommandContainer {
@@ -194,8 +194,8 @@ export class TShellCommand {
         return this.configuration.output_channel_order;
     }
 
-    public getOutputChannels() {
-        return this.configuration.output_channels;
+    public getOutputHandlers() {
+        return this.configuration.output_handlers;
     }
 
     public getOutputHandlingMode() {

@@ -104,7 +104,7 @@ export function getEditor(app: App): Editor | null {
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function cloneObject<ObjectType>(object: Object): ObjectType{
+export function cloneObject<ObjectType extends Object>(object: ObjectType): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
 

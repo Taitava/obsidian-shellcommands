@@ -21,9 +21,12 @@ import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelFunctions";
 import {
+    OutputHandlerCode,
+    OutputHandlerConfiguration,
+    OutputHandlerConfigurations,
     OutputHandlingMode,
     OutputStream,
-} from "./OutputChannelCode";
+} from "./OutputHandlerCode";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {joinObjectProperties} from "../Common";
@@ -295,6 +298,12 @@ export abstract class OutputChannel {
 
     public static() {
         return this.constructor as typeof OutputChannel;
+    }
+
+    public static getDefaultConfiguration(outputChannelCode: OutputHandlerCode): OutputHandlerConfiguration {
+        return {
+            handler: outputChannelCode,
+        };
     }
 }
 

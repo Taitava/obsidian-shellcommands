@@ -19,7 +19,7 @@
 
 import {OutputChannel} from "./OutputChannel";
 import {OutputStreams} from "./OutputChannelFunctions";
-import {OutputStream} from "./OutputChannelCode";
+import {OutputStream} from "./OutputHandlerCode";
 import {
     EditorSelectionOrCaret,
     normalizePath,
