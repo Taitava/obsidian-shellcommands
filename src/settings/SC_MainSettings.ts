@@ -196,6 +196,13 @@ export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificStr
     default: string,
 }
 
+/**
+ * Similar to IPlatformSpecificString, but for a custom type and without possibility to omit any property.
+ */
+export type IPlatformSpecificValues<Type>  = {
+    [key in PlatformId]: Type
+}
+
 export type ICommandPaletteOptions = {
     enabled: string;
     unlisted: string;

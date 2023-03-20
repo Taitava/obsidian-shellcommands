@@ -17,14 +17,21 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {App, PluginSettingTab, SearchComponent, Setting} from "obsidian";
+import {
+    App,
+    BaseComponent,
+    DropdownComponent,
+    PluginSettingTab,
+    SearchComponent,
+    Setting,
+} from "obsidian";
 import SC_Plugin from "../main";
 import {
     getCurrentPlatformName,
     getVaultAbsolutePath,
     gotoURL,
 } from "../Common";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
@@ -47,6 +54,7 @@ import {
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
     ExecutionNotificationMode,
+    PlatformId,
 } from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
@@ -445,7 +453,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
 
         // Platforms' default shells
-        createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+        const shellSelectionSettings = createShellSelectionFields(this.plugin, container_element, this.plugin.settings.default_shells, true);
 
         // CustomShells
         new Setting(container_element)
@@ -475,8 +483,21 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             this.plugin.settings
         ).then((result: {instance: CustomShellInstance, main_setting: Setting}) => {
             // A new CustomShell is created.
+            const customShellInstance = result.instance;
+            
             // Open settings modal.
-            customShellModel.openSettingsModal(result.instance, result.main_setting);
+            customShellModel.openSettingsModal(customShellInstance, result.main_setting).then(() => {
+                // CustomShellModal is closed. Can get a shell name now.
+                // Add the new shell to shell selection dropdown.
+                const customShellHostPlatformId: PlatformId = customShellInstance.configuration.host_platform;
+                shellSelectionSettings[customShellHostPlatformId].components.forEach((component: BaseComponent) => {
+                    if (component instanceof DropdownComponent) {
+                        // Add the new shell to the dropdown.
+                        component.addOption(customShellInstance.getId(), customShellInstance.getTitle());
+                    }
+                });
+            });
+            
         });
 
         // PATH environment variable fields

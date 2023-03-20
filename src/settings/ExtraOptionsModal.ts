@@ -30,7 +30,7 @@ import {
 } from "../output_channels/OutputChannelCode";
 import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {
     generateIgnoredErrorCodesIconTitle,
     generateShellCommandFieldIconAndName
@@ -521,7 +521,7 @@ export class ExtraOptionsModal extends SC_Modal {
         }
 
         // Platform specific shell selection
-        createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+        createShellSelectionFields(this.plugin, container_element, this.t_shell_command.getShells(), false);
     }
 
     private tabEvents(container_element: HTMLElement) {
