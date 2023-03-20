@@ -59,8 +59,8 @@ export class CustomShellModel extends Model {
             .addExtraButton(button => button
                 .setTooltip("Configure binary file location, escaping, directory handling etc.")
                 .setIcon("gear")
-                .onClick(() => {
-                    this.openSettingsModal(customShellInstance, nameSetting);
+                .onClick(async () => {
+                    await this.openSettingsModal(customShellInstance, nameSetting);
                 }),
             )
         ;
@@ -69,10 +69,19 @@ export class CustomShellModel extends Model {
         return nameSetting;
     }
 
-    public openSettingsModal(customShellInstance: CustomShellInstance, nameSetting: Setting) {
-        debugLog("Opening settings modal for a CustomShellInstance.");
-        const modal = new CustomShellSettingsModal(this.plugin, customShellInstance, nameSetting);
-        modal.open();
+    public openSettingsModal(customShellInstance: CustomShellInstance, nameSetting: Setting): Promise<void> {
+        return new Promise((resolve) => {
+            debugLog("Opening settings modal for a CustomShellInstance.");
+            const modal = new CustomShellSettingsModal(
+                this.plugin,
+                customShellInstance,
+                nameSetting,
+                undefined,
+                () => resolve(), // Resolve whether the user "approves" or "cancels".
+                () => resolve(), // This what actually gets called, because there's no ok button.
+            );
+            modal.open();
+        });
     }
 
     protected defineParentConfigurationRelation(customShellInstance: CustomShellInstance): ParentModelOneToManyIdRelation {
