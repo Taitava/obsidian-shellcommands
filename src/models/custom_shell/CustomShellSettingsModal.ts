@@ -180,17 +180,6 @@ export class CustomShellSettingsModal extends SC_Modal {
 
         // Shell testing field.
         this.createShellTestField(containerElement);
-
-        // Ok button
-        const okButtonText: string | undefined = this.okButtonText;
-        if (okButtonText) {
-            new Setting(containerElement)
-                .addButton(button => button
-                    .setButtonText(okButtonText)
-                    .onClick(() => this.approve()),
-                )
-            ;
-        }
     }
 
     private createBinaryPathSetting(containerElement: HTMLElement): void {
