@@ -359,7 +359,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
-        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings).then();
+        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings);
 
 
         // Built-in variable instructions
@@ -462,10 +462,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         });
 
         // 'New prompt' button
-        const new_prompt_button_promise = createNewModelInstanceButton<PromptModel, Prompt>(this.plugin, PromptModel.name, container_element, prompts_container_element, this.plugin.settings);
-        new_prompt_button_promise.then((result: {instance: Prompt, main_setting: Setting}) => {
-            prompt_model.openSettingsModal(result.instance, result.main_setting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
-        });
+        createNewModelInstanceButton<PromptModel, Prompt>(
+            this.plugin,
+            PromptModel.name,
+            container_element,
+            prompts_container_element,
+            this.plugin.settings,
+            (instance: Prompt, mainSetting: Setting) => {
+                prompt_model.openSettingsModal(instance, mainSetting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
+            },
+        );
     }
 
     private tabOutput(container_element: HTMLElement) {
@@ -487,10 +493,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         });
 
         // 'New output wrapper' button
-        const new_output_wrapper_button_promise = createNewModelInstanceButton<OutputWrapperModel, OutputWrapper>(this.plugin, OutputWrapperModel.name, container_element, output_wrappers_container_element, this.plugin.settings);
-        new_output_wrapper_button_promise.then((result: {instance: OutputWrapper, main_setting: Setting}) => {
-            output_wrapper_model.openSettingsModal(result.instance, result.main_setting); // Open the output wrapper settings modal, as the user will probably want to configure it now anyway.
-        });
+        createNewModelInstanceButton<OutputWrapperModel, OutputWrapper>(
+            this.plugin,
+            OutputWrapperModel.name,
+            container_element,
+            output_wrappers_container_element,
+            this.plugin.settings,
+            (instance: OutputWrapper, mainSetting) => {
+                output_wrapper_model.openSettingsModal(instance, mainSetting); // Open the output wrapper settings modal, as the user will probably want to configure it now anyway.
+            },
+        );
 
 
         // "Error message duration" field
