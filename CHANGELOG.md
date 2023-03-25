@@ -43,6 +43,7 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Fixed
 - [Global default values for variables not working when previewing a Prompt (#327)](https://github.com/Taitava/obsidian-shellcommands/issues/327).
 - [Settings: Clicking 'New xxx' button does not always open a modal for editing the new item's settings (#332)](https://github.com/Taitava/obsidian-shellcommands/issues/332).
+- [Output channel Ask after execution: Hotkeys only work for stdout if both stdout and stderr outputs are present (#335)](https://github.com/Taitava/obsidian-shellcommands/issues/335).
 
 ## [0.18.1] - 2023-01-22
 
