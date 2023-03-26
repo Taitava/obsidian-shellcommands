@@ -87,7 +87,7 @@ export abstract class Variable {
                     debugLog(this.constructor.name + ".getValue(): Caught a VariableError and will determine how to handle it: " + error.message);
 
                     // Check what should be done.
-                    const default_value_configuration = t_shell_command?.getDefaultValueConfigurationForVariable(this); // The method can return undefined, and t_shell_command can be null.
+                    const default_value_configuration = this.getDefaultValueConfiguration(t_shell_command);
                     const default_value_type = default_value_configuration ? default_value_configuration.type : "show-errors";
                     const debug_message_base = "Variable " + this.getFullName() + " is not available. ";
                     switch (default_value_type) {
@@ -375,6 +375,18 @@ export abstract class Variable {
     public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
         // Works for built-in variables only. CustomVariable class needs to override this method and not call the parent!
         return this.plugin.settings.builtin_variables[this.getIdentifier()]?.default_value; // Can return null
+    }
+
+    /**
+     * @param tShellCommand If defined, a default value configuration is first tried to be found from the TShellCommand. If null, or if the TShellCommand didn't contain a configuration (or if the configuration's type is "inherit"), returns a configuration from getGlobalDefaultValueConfiguration().
+     * @return Returns an object complying to GlobalVariableDefaultValueConfiguration even if the configuration was found from a TShellCommand, because the returned configuration will never have type "inherit".
+     */
+    public getDefaultValueConfiguration(tShellCommand: TShellCommand | null): GlobalVariableDefaultValueConfiguration | null {
+        const defaultValueConfigurationFromShellCommand = tShellCommand?.getDefaultValueConfigurationForVariable(this); // tShellCommand can be null, or the method can return null.
+        if (!defaultValueConfigurationFromShellCommand || defaultValueConfigurationFromShellCommand.type === "inherit") {
+            return this.getGlobalDefaultValueConfiguration(); // Also this method can return null.
+        }
+        return defaultValueConfigurationFromShellCommand as GlobalVariableDefaultValueConfiguration; // For some reason TypeScript does not realize that defaultValueConfigurationFromShellCommand.type cannot be "inherit" in this situation, so the 'as ...' part is needed.
     }
 }
 
