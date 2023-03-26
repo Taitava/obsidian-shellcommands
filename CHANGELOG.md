@@ -38,9 +38,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
 
-## [0.18.2] - Unreleased
+## [0.18.2] - 2023-03-26
 
-### To be Fixed
+### Fixed
 - [Global default values for variables not working when previewing a Prompt (#327)](https://github.com/Taitava/obsidian-shellcommands/issues/327).
 - [Settings panel opening does not always scroll precisely back to previous position (#336)](https://github.com/Taitava/obsidian-shellcommands/issues/336).
 - [Settings: Clicking 'New xxx' button does not always open a modal for editing the new item's settings (#332)](https://github.com/Taitava/obsidian-shellcommands/issues/332).
@@ -394,7 +394,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...HEAD
+[0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2
 [0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
 [0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0
