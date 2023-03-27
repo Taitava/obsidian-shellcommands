@@ -491,25 +491,23 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             CustomShellModel.name,
             container_element,
             customShellContainer,
-            this.plugin.settings
-        ).then((result: {instance: CustomShellInstance, main_setting: Setting}) => {
-            // A new CustomShell is created.
-            const customShellInstance = result.instance;
-            
-            // Open settings modal.
-            customShellModel.openSettingsModal(customShellInstance, result.main_setting).then(() => {
-                // CustomShellModal is closed. Can get a shell name now.
-                // Add the new shell to shell selection dropdown.
-                const customShellHostPlatformId: PlatformId = customShellInstance.configuration.host_platform;
-                shellSelectionSettings[customShellHostPlatformId].components.forEach((component: BaseComponent) => {
-                    if (component instanceof DropdownComponent) {
-                        // Add the new shell to the dropdown.
-                        component.addOption(customShellInstance.getId(), customShellInstance.getTitle());
-                    }
+            this.plugin.settings,
+            (customShellInstance: CustomShellInstance, main_setting: Setting) => {
+                // A new CustomShell is created.
+                // Open settings modal.
+                customShellModel.openSettingsModal(customShellInstance, main_setting).then(() => {
+                    // CustomShellModal is closed. Can get a shell name now.
+                    // Add the new shell to shell selection dropdown.
+                    const customShellHostPlatformId: PlatformId = customShellInstance.configuration.host_platform;
+                    shellSelectionSettings[customShellHostPlatformId].components.forEach((component: BaseComponent) => {
+                        if (component instanceof DropdownComponent) {
+                            // Add the new shell to the dropdown.
+                            component.addOption(customShellInstance.getId(), customShellInstance.getTitle());
+                        }
+                    });
                 });
-            });
-            
-        });
+            }
+        );
 
         // PATH environment variable fields
         createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
