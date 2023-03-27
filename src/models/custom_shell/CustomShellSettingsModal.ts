@@ -438,6 +438,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                 await this.plugin.saveSettings();
                 updateNoShellCommandContentVariableWarning();
             },
+            undefined,
             shellCommandContentVariable.getFullName(true), // Indicate that if no wrapper is defined, the shell command content is executed as-is, without additions.
             shellCommandContentVariable.getAutocompleteItems(),
         );
@@ -558,6 +559,7 @@ export class CustomShellSettingsModal extends SC_Modal {
                 this.getCustomShellConfiguration().shell_command_test = (newTestShellCommandContent === "") ? null : newTestShellCommandContent;
                 await this.plugin.saveSettings();
             },
+            undefined,
             "Enter a temporary shell command for testing."
         ).shell_command_setting.setClass("SC-no-description");
     }
