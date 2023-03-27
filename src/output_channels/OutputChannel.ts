@@ -36,6 +36,9 @@ import {parseVariables} from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
 import {default as AnsiUp} from "ansi_up";
 
+/**
+ * TODO: Rename to OutputHandler.
+ */
 export abstract class OutputChannel {
 
     // Class specific properties
