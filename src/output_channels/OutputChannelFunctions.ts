@@ -116,7 +116,7 @@ export function handleBufferedOutput(
     }
 
     // Should stderr be processed same time with stdout?
-    if (outputHandlers.stdout === outputHandlers.stderr) {
+    if (outputHandlers.stdout.handler === outputHandlers.stderr.handler) {
         // Stdout and stderr use the same channel.
         // Make one handling call.
         handle_stream(
@@ -206,7 +206,7 @@ export function startRealtimeOutputHandling(
 
     // stderr
     if ("ignore" !== outputHandlerConfigurations.stderr.handler) {
-        if (outputHandlerConfigurations.stderr === outputHandlerConfigurations.stdout) {
+        if (outputHandlerConfigurations.stderr.handler === outputHandlerConfigurations.stdout.handler) {
             // stderr should use the same channel instance as stdout.
             outputChannels.stderr = outputChannels.stdout;
         } else {
