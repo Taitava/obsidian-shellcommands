@@ -104,7 +104,7 @@ export function createVariableDefaultValueField(
     let defaultValueConfiguration: GlobalVariableDefaultValueConfiguration | InheritableVariableDefaultValueConfiguration | null;
     switch (targetType) {
         case "tShellCommand":
-            defaultValueConfiguration = (targetObject as TShellCommand).getDefaultValueConfigurationForVariable(variable, false);
+            defaultValueConfiguration = (targetObject as TShellCommand).getDefaultValueConfigurationForVariable(variable);
             break;
         case "builtinVariable": // Both classes have...
         case "customVariable":  // ... the getGlobalDefaultValueConfiguration() method.

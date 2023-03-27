@@ -513,21 +513,11 @@ export class TShellCommand {
     }
 
     /**
-     * @return Returns undefined, if no configuration is defined for this variable.
+     * @return Returns null, if no configuration is defined for this variable.
      * @param variable
-     * @param canInherit If true, can get default value configuration from Variable configuration (= upper level configuration in this case). Can be set to false in situations where it's important to know what the shell command itself has defined or not defined.
      */
-    public getDefaultValueConfigurationForVariable(variable: Variable, canInherit = true): InheritableVariableDefaultValueConfiguration | null {
-        const defaultValueConfiguration: InheritableVariableDefaultValueConfiguration | undefined = this.configuration.variable_default_values[variable.getIdentifier()];
-        if (undefined === defaultValueConfiguration || defaultValueConfiguration.type === "inherit") {
-            // This shell command does not specify a default value.
-            if (canInherit) {
-                // Return a global configuration (but even that can be undefined).
-                return variable.getGlobalDefaultValueConfiguration(); // Can return undefined.
-            }
-            // If inheriting is denied, pass to return the defaultValueConfiguration that were gotten from this.configuration.variable_default_values.
-        }
-        return defaultValueConfiguration;
+    public getDefaultValueConfigurationForVariable(variable: Variable): InheritableVariableDefaultValueConfiguration | null {
+        return this.configuration.variable_default_values[variable.getIdentifier()] ?? null;
     }
 
     /**

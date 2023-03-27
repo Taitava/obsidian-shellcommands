@@ -75,50 +75,42 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        this.tab_structure = createTabs(containerEl, {
-            "main-shell-commands": {
-                title: "Shell commands",
-                icon: "run-command",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabShellCommands(container_element);
+        this.tab_structure = createTabs(
+            containerEl,
+            {
+                "main-shell-commands": {
+                    title: "Shell commands",
+                    icon: "run-command",
+                    content_generator: (container_element: HTMLElement) => this.tabShellCommands(container_element),
+                },
+                "main-environments": {
+                    title: "Environments",
+                    icon: "stacked-levels",
+                    content_generator: (container_element: HTMLElement) => this.tabEnvironments(container_element),
+                },
+                "main-preactions": {
+                    title: "Preactions",
+                    icon: "note-glyph",
+                    content_generator: (container_element: HTMLElement) => this.tabPreactions(container_element),
+                },
+                "main-output": {
+                    title: "Output",
+                    icon: "lines-of-text",
+                    content_generator: (container_element: HTMLElement) => this.tabOutput(container_element),
+                },
+                "main-events": {
+                    title: "Events",
+                    icon: "dice",
+                    content_generator: (container_element: HTMLElement) => this.tabEvents(container_element),
+                },
+                "main-variables": {
+                    title: "Variables",
+                    icon: "code-glyph",
+                    content_generator: (container_element: HTMLElement) => this.tabVariables(container_element),
                 },
             },
-            "main-environments": {
-                title: "Environments",
-                icon: "stacked-levels",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabEnvironments(container_element);
-                },
-            },
-            "main-preactions": {
-                title: "Preactions",
-                icon: "note-glyph",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabPreactions(container_element);
-                },
-            },
-            "main-output": {
-                title: "Output",
-                icon: "lines-of-text",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabOutput(container_element);
-                },
-            },
-            "main-events": {
-                title: "Events",
-                icon: "dice",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabEvents(container_element);
-                },
-            },
-            "main-variables": {
-                title: "Variables",
-                icon: "code-glyph",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabVariables(container_element);
-                },
-            },
-        });
+            this.last_position.tab_name,
+        );
 
         // Documentation link & GitHub links
         containerEl.createEl("p").insertAdjacentHTML("beforeend",
@@ -135,41 +127,61 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
-        this.rememberLastPosition(containerEl);
+        // Scroll to the position when the settings modal was last open, but do it after content generating has finished.
+        // In practise, shell command previews may take some time to appear.
+        this.tab_structure.contentGeneratorPromises[this.tab_structure.active_tab_id].then(() => {
+            this.rememberLastPosition(containerEl);
+        });
     }
 
-    private tabShellCommands(container_element: HTMLElement) {
-        // Show a search field
-        this.createSearchField(container_element);
-
-        // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
-        const command_fields_container = container_element.createEl("div");
-
-        // Fields for modifying existing commands
-        let shell_commands_exist = false;
-        for (const command_id in this.plugin.getTShellCommands()) {
-            createShellCommandField(this.plugin, command_fields_container, this, command_id, this.plugin.settings.show_autocomplete_menu);
-            shell_commands_exist = true;
-        }
-
-        // 'No shell commands yet' paragraph.
-        const no_shell_commands_paragraph = container_element.createEl("p", {text: "No shell commands yet, click the 'New shell command' button below."});
-        if (shell_commands_exist) {
-            // Shell commands exist, so do not show the "No shell commands yet" text.
-            no_shell_commands_paragraph.hide();
-        }
-
-        // "New command" button
-        new Setting(container_element)
-            .addButton(button => button
-                .setButtonText("New shell command")
-                .onClick(async () => {
-                    createShellCommandField(this.plugin, command_fields_container, this, "new", this.plugin.settings.show_autocomplete_menu);
-                    no_shell_commands_paragraph.hide();
-                    debugLog("New empty command created.");
-                })
-            )
-        ;
+    private tabShellCommands(container_element: HTMLElement): Promise<void> {
+        return new Promise((resolveWholeContent) => {
+            
+            // Show a search field
+            this.createSearchField(container_element);
+    
+            // A <div> element for all command input fields. New command fields can be created at the bottom of this element.
+            const command_fields_container = container_element.createEl("div");
+    
+            // Fields for modifying existing commands
+            let shell_commands_exist = false;
+            const previewPromises: Promise<void>[] = [];
+            for (const command_id in this.plugin.getTShellCommands()) {
+                previewPromises.push(new Promise((resolveOnePreview) => {
+                    createShellCommandField(
+                        this.plugin,
+                        command_fields_container,
+                        this,
+                        command_id,
+                        this.plugin.settings.show_autocomplete_menu,
+                        () => resolveOnePreview(),
+                    );
+                }));
+                shell_commands_exist = true;
+            }
+            
+            // After all shell commands' previews have been generated, resolve this tab's Promise.
+            Promise.allSettled(previewPromises).then(() => resolveWholeContent());
+    
+            // 'No shell commands yet' paragraph.
+            const no_shell_commands_paragraph = container_element.createEl("p", {text: "No shell commands yet, click the 'New shell command' button below."});
+            if (shell_commands_exist) {
+                // Shell commands exist, so do not show the "No shell commands yet" text.
+                no_shell_commands_paragraph.hide();
+            }
+    
+            // "New command" button
+            new Setting(container_element)
+                .addButton(button => button
+                    .setButtonText("New shell command")
+                    .onClick(async () => {
+                        createShellCommandField(this.plugin, command_fields_container, this, "new", this.plugin.settings.show_autocomplete_menu);
+                        no_shell_commands_paragraph.hide();
+                        debugLog("New empty command created.");
+                    })
+                )
+            ;
+        });
     }
 
     private createSearchField(container_element: HTMLElement) {
@@ -253,7 +265,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
     }
 
-    private tabEvents(container_element: HTMLElement) {
+    private async tabEvents(container_element: HTMLElement): Promise<void>  {
 
         // A general description about events
         container_element.createEl("p", {text: "Events introduce a way to execute shell commands automatically in certain situations, e.g. when Obsidian starts. They are set up for each shell command separately, but this tab contains general options for them."});
@@ -301,8 +313,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         }
     }
 
-    private tabVariables(container_element: HTMLElement)
-    {
+    private async tabVariables(container_element: HTMLElement): Promise<void> {
         // "Preview variables in command palette" field
         new Setting(container_element)
             .setName("Preview variables in command palette and menus")
@@ -365,7 +376,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
-        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings).then();
+        createNewModelInstanceButton<CustomVariableModel, CustomVariableInstance>(this.plugin, CustomVariableModel.name, container_element, custom_variable_container, this.plugin.settings);
 
 
         // Built-in variable instructions
@@ -431,7 +442,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         container_element.createEl("p", {text: "All variables that access the current file, may cause the command preview to fail if you had no file panel active when you opened the settings window - e.g. you had focus on graph view instead of a note = no file is currently active. But this does not break anything else than the preview."});
     }
 
-    private tabEnvironments(container_element: HTMLElement) {
+    private async tabEnvironments(container_element: HTMLElement): Promise<void>  {
         // "Working directory" field
         new Setting(container_element)
             .setName("Working directory")
@@ -454,7 +465,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
     }
 
-    private tabPreactions(container_element: HTMLElement) {
+    private async tabPreactions(container_element: HTMLElement): Promise<void>  {
 
         // Prompts
         const prompt_model = getModel<PromptModel>(PromptModel.name);
@@ -468,13 +479,19 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         });
 
         // 'New prompt' button
-        const new_prompt_button_promise = createNewModelInstanceButton<PromptModel, Prompt>(this.plugin, PromptModel.name, container_element, prompts_container_element, this.plugin.settings);
-        new_prompt_button_promise.then((result: {instance: Prompt, main_setting: Setting}) => {
-            prompt_model.openSettingsModal(result.instance, result.main_setting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
-        });
+        createNewModelInstanceButton<PromptModel, Prompt>(
+            this.plugin,
+            PromptModel.name,
+            container_element,
+            prompts_container_element,
+            this.plugin.settings,
+            (instance: Prompt, mainSetting: Setting) => {
+                prompt_model.openSettingsModal(instance, mainSetting); // Open the prompt settings modal, as the user will probably want to configure it now anyway.
+            },
+        );
     }
 
-    private tabOutput(container_element: HTMLElement) {
+    private async tabOutput(container_element: HTMLElement): Promise<void>  {
 
         // Output wrappers
         const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
@@ -493,10 +510,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         });
 
         // 'New output wrapper' button
-        const new_output_wrapper_button_promise = createNewModelInstanceButton<OutputWrapperModel, OutputWrapper>(this.plugin, OutputWrapperModel.name, container_element, output_wrappers_container_element, this.plugin.settings);
-        new_output_wrapper_button_promise.then((result: {instance: OutputWrapper, main_setting: Setting}) => {
-            output_wrapper_model.openSettingsModal(result.instance, result.main_setting); // Open the output wrapper settings modal, as the user will probably want to configure it now anyway.
-        });
+        createNewModelInstanceButton<OutputWrapperModel, OutputWrapper>(
+            this.plugin,
+            OutputWrapperModel.name,
+            container_element,
+            output_wrappers_container_element,
+            this.plugin.settings,
+            (instance: OutputWrapper, mainSetting) => {
+                output_wrapper_model.openSettingsModal(instance, mainSetting); // Open the output wrapper settings modal, as the user will probably want to configure it now anyway.
+            },
+        );
 
 
         // "Error message duration" field
@@ -604,12 +627,14 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Go to last position now
         this.tab_structure.buttons[last_position.tab_name].click();
-        window.setTimeout(() => { // Need to delay the scrolling a bit. Without this, something else would override scrolling and scroll back to 0.
+        // window.setTimeout(() => { // Need to delay the scrolling a bit. Without this, something else would override scrolling and scroll back to 0.
             container_element.scrollTo({
                 top: this.last_position.scroll_position,
                 behavior: "auto",
             });
-        }, 0); // 'timeout' can be 0 ms, no need to wait any longer.
+        // }, 0); // 'timeout' can be 0 ms, no need to wait any longer.
+        // I guess there's no need for setTimeout() anymore, as rememberLastPosition() is now called after waiting for asynchronous tab content generating is finished.
+        // TODO: Remove the commented code after a while.
 
         // Listen to changes
         container_element.addEventListener("scroll", (event) => {

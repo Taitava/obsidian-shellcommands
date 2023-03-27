@@ -102,50 +102,42 @@ export class ExtraOptionsModal extends SC_Modal {
         this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});  // TODO: Use this.setTitle() instead.
 
         // Tabs
-        this.tab_structure = createTabs(this.modalEl, {
-            "extra-options-general": {
-                title: "General",
-                icon: "gear",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabGeneral(container_element);
+        this.tab_structure = createTabs(
+            this.modalEl,
+            {
+                "extra-options-general": {
+                    title: "General",
+                    icon: "gear",
+                    content_generator: (container_element: HTMLElement) => this.tabGeneral(container_element),
+                },
+                "extra-options-preactions": {
+                    title: "Preactions",
+                    icon: "note-glyph",
+                    content_generator: (container_element: HTMLElement) => this.tabPreactions(container_element),
+                },
+                "extra-options-output": {
+                    title: "Output",
+                    icon: "lines-of-text",
+                    content_generator: (container_element: HTMLElement) => this.tabOutput(container_element),
+                },
+                "extra-options-environments": {
+                    title: "Environments",
+                    icon: "stacked-levels",
+                    content_generator: (container_element: HTMLElement) => this.tabEnvironments(container_element),
+                },
+                "extra-options-events": {
+                    title: "Events",
+                    icon: "dice",
+                    content_generator: (container_element: HTMLElement) => this.tabEvents(container_element),
+                },
+                "extra-options-variables": {
+                    title: "Variables",
+                    icon: "code-glyph",
+                    content_generator: (container_element: HTMLElement) => this.tabVariables(container_element),
                 },
             },
-            "extra-options-preactions": {
-                title: "Preactions",
-                icon: "note-glyph",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabPreactions(container_element);
-                },
-            },
-            "extra-options-output": {
-                title: "Output",
-                icon: "lines-of-text",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabOutput(container_element);
-                },
-            },
-            "extra-options-environments": {
-                title: "Environments",
-                icon: "stacked-levels",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabEnvironments(container_element);
-                },
-            },
-            "extra-options-events": {
-                title: "Events",
-                icon: "dice",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabEvents(container_element);
-                },
-            },
-            "extra-options-variables": {
-                title: "Variables",
-                icon: "code-glyph",
-                content_generator: (container_element: HTMLElement) => {
-                    this.tabVariables(container_element);
-                },
-            },
-        });
+            "extra-options-general",
+        );
 
         // Hotkeys for moving to next/previous shell command
         const switch_to_t_shell_command = (t_shell_command: TShellCommand) => {
@@ -171,7 +163,7 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
     }
 
-    private tabGeneral(container_element: HTMLElement) {
+    private async tabGeneral(container_element: HTMLElement): Promise<void> {
         // Alias field
         const alias_container = container_element.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(alias_container)
@@ -331,7 +323,7 @@ export class ExtraOptionsModal extends SC_Modal {
         }
     }
 
-    private tabPreactions(container_element: HTMLElement) {
+    private async tabPreactions(container_element: HTMLElement): Promise<void> {
         container_element.createEl("p", {text: "Preactions are performed before the actual shell command gets executed, to do certain preparations for the shell command."});
         const preactions_configuration = this.t_shell_command.getConfiguration().preactions;
 
@@ -421,7 +413,7 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
     }
 
-    private tabOutput(container_element: HTMLElement) {
+    private async tabOutput(container_element: HTMLElement): Promise<void> {
         // Output channeling
         const stdout_channel_setting = this.newOutputChannelSetting(container_element, "Output channel for stdout", "stdout");
         this.newOutputChannelSetting(container_element, "Output channel for stderr", "stderr", "If both stdout and stderr use the same channel, stderr will be combined to same message with stdout.");
@@ -516,7 +508,7 @@ export class ExtraOptionsModal extends SC_Modal {
         ;
     }
 
-    private tabEnvironments(container_element: HTMLElement) {
+    private async tabEnvironments(container_element: HTMLElement): Promise<void> {
         // Platform specific shell commands
         let platform_id: PlatformId;
         let is_first = true;
@@ -533,7 +525,7 @@ export class ExtraOptionsModal extends SC_Modal {
         createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
     }
 
-    private tabEvents(container_element: HTMLElement) {
+    private async tabEvents(container_element: HTMLElement): Promise<void> {
         // Command palette
         const command_palette_availability_setting = new Setting(container_element)
             .setName("Availability in Obsidian's command palette")
@@ -609,7 +601,7 @@ export class ExtraOptionsModal extends SC_Modal {
         });
     }
 
-    private tabVariables(containerElement: HTMLElement) {
+    private async tabVariables(containerElement: HTMLElement): Promise<void> {
 
         // Default values for variables
         new Setting(containerElement)

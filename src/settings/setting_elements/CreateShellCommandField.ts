@@ -42,8 +42,16 @@ import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
  * @param setting_tab
  * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
+ * @param onAfterPreviewGenerated
  */
-export function createShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, setting_tab: SC_MainSettingsTab, shell_command_id: string, show_autocomplete_menu: boolean) {
+export function createShellCommandField(
+    plugin: SC_Plugin,
+    container_element: HTMLElement,
+    setting_tab: SC_MainSettingsTab,
+    shell_command_id: string,
+    show_autocomplete_menu: boolean,
+    onAfterPreviewGenerated?: () => void,
+) {
     const is_new = "new" === shell_command_id;
     let t_shell_command: TShellCommand;
     if (is_new) {
@@ -95,6 +103,7 @@ export function createShellCommandField(plugin: SC_Plugin, container_element: HT
             }
             await plugin.saveSettings();
         },
+        onAfterPreviewGenerated,
     );
     setting_tab.setting_groups[shell_command_id] = setting_group;
 
