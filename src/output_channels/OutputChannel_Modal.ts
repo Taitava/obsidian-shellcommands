@@ -216,7 +216,7 @@ class OutputModal extends SC_Modal {
         
         // Define hotkeys.
         const outputChannelClasses: {[p: string]: typeof OutputChannel} = getOutputChannelClasses();
-        for (const outputChannelName of Object.getOwnPropertyNames(outputChannelClasses) as OutputChannelCode[]) {
+        for (const outputChannelName of Object.getOwnPropertyNames(outputChannelClasses) as OutputHandlerCode[]) {
             const outputChannelClass = outputChannelClasses[outputChannelName];
             // Ensure this channel is not excluded by checking that is has a hotkey defined.
             if (outputChannelClass.hotkey_letter) {
@@ -326,7 +326,7 @@ class OutputModal extends SC_Modal {
         return textarea_setting;
     }
     
-    private async redirectOutput(outputChannelName: OutputChannelCode, outputStreamName: OutputStream, sourceTextarea: HTMLTextAreaElement): Promise<void> {
+    private async redirectOutput(outputChannelName: OutputHandlerCode, outputStreamName: OutputStream, sourceTextarea: HTMLTextAreaElement): Promise<void> {
         const outputContent =
             getSelectionFromTextarea(sourceTextarea, true) // Use the selection, or...
             ?? sourceTextarea.value // ...use the whole text, if nothing is selected.
