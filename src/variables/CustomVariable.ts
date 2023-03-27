@@ -52,6 +52,13 @@ export class CustomVariable extends Variable {
         }
         return this.value;
     }
+    
+    /**
+     * Tells whether this CustomVariable has an actual value, NOT falling back to any possible default value.
+     */
+    public hasOwnValue() {
+        return null !== this.value;
+    }
 
     /**
      * A simpler way to access the value than Variable.getValue(). Both methods can return the value, but Variable.getValue()

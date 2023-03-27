@@ -22,7 +22,7 @@ import {setIcon} from "obsidian";
 export interface Tab {
     title: string;
     icon: string;
-    content_generator: (container_element: HTMLElement) => void;
+    content_generator: (container_element: HTMLElement) => Promise<void>;
 }
 
 export interface TabStructure {
@@ -34,6 +34,9 @@ export interface TabStructure {
     contentContainers: {
         [key: string]: HTMLElement,
     },
+    contentGeneratorPromises: {
+        [key: string]: Promise<void>,
+    }
 }
 
 export interface Tabs {
@@ -48,15 +51,16 @@ interface TabButtons {
     [key: string]: HTMLElement,
 }
 
-export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStructure {
+export function createTabs(container_element: HTMLElement, tabs: Tabs, activateTabId: string): TabStructure {
     const tab_header = container_element.createEl("div", {attr: {class: "SC-tab-header"}});
     const tab_content_containers: TabContentContainers = {};
     const tab_buttons: TabButtons = {};
-    const tab_structure = {
+    const tab_structure: TabStructure = {
         header: tab_header,
         active_tab_id: Object.keys(tabs)[0] as string, // Indicate that the first tab is active. This does not affect what tab is active in practise, it just reports the active tab.
         buttons: tab_buttons,
         contentContainers: tab_content_containers,
+        contentGeneratorPromises: {},
     };
     let first_button: HTMLElement | undefined;
     for (const tab_id in tabs) {
@@ -148,7 +152,7 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
         tab_content_containers[tab_id] = container_element.createEl("div", {attr: {class: "SC-tab-content", id: "SC-tab-" + tab_id}});
 
         // Generate content
-        tab.content_generator(tab_content_containers[tab_id]);
+        tab_structure.contentGeneratorPromises[tab_id] = tab.content_generator(tab_content_containers[tab_id]);
 
         // Memorize the first tab's button
         if (undefined === first_button) {
@@ -156,10 +160,8 @@ export function createTabs(container_element: HTMLElement, tabs: Tabs): TabStruc
         }
     }
 
-    // Activate the first tab
-    if (undefined !== first_button) {
-        first_button.click();
-    }
+    // Open a tab.
+    tab_buttons[activateTabId].click();
 
     // Return the TabStructure
     return tab_structure;

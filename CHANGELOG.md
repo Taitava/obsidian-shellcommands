@@ -18,7 +18,33 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-- Nothing at the moment.
+## [0.20.0] - Unreleased
+
+### To be Added
+- [Font styling for output (ANSI code) (#329)](https://github.com/Taitava/obsidian-shellcommands/issues/329).
+  - Some shell programs style their text output with colors, emphasis, boldings, links etc. by inserting [ANSI code](https://en.wikipedia.org/wiki/ANSI_escape_code) to output. Previously, the plugin didn't do anything for ANSI code, and it ended up cluttering output. Now it's possible to convert ANSI code to HTML or turn the conversion off (on by default).
+  - Also, [Notification/error balloon](https://publish.obsidian.md/shellcommands/Output+handling/Output+channel+-+Notification+balloon) now displays monospaced output (can be turned off in settings). Improves error messages' readability (and code-like output's readability, too).
+  
+### To be Changed
+- [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
+  - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
+
+## [0.19.0] - Unreleased
+
+### To be Added
+- [Support for custom shells(#297)](https://github.com/Taitava/obsidian-shellcommands/issues/297).
+  - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells).
+
+### To be Changed
+- [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
+
+## [0.18.2] - 2023-03-26
+
+### Fixed
+- [Global default values for variables not working when previewing a Prompt (#327)](https://github.com/Taitava/obsidian-shellcommands/issues/327).
+- [Settings panel opening does not always scroll precisely back to previous position (#336)](https://github.com/Taitava/obsidian-shellcommands/issues/336).
+- [Settings: Clicking 'New xxx' button does not always open a modal for editing the new item's settings (#332)](https://github.com/Taitava/obsidian-shellcommands/issues/332).
+- [Output channel Ask after execution: Hotkeys only work for stdout if both stdout and stderr outputs are present (#335)](https://github.com/Taitava/obsidian-shellcommands/issues/335).
 
 ## [0.18.1] - 2023-01-22
 
@@ -368,7 +394,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...HEAD
+[0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2
 [0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
 [0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
 [0.17.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.16.0...0.17.0

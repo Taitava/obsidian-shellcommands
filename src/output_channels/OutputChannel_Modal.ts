@@ -17,14 +17,19 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {OutputChannel} from "./OutputChannel";
+import {
+    OutputChannel,
+} from "./OutputChannel";
 import {
     getOutputChannelClasses,
     initializeOutputChannel,
     OutputStreams,
 } from "./OutputChannelFunctions";
 import {Setting, TextAreaComponent} from "obsidian";
-import {OutputChannelCode, OutputStream} from "./OutputChannelCode";
+import {
+    OutputChannelCode,
+    OutputStream,
+} from "./OutputChannelCode";
 import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {SC_Modal} from "../SC_Modal";
@@ -90,7 +95,7 @@ class OutputModal extends SC_Modal {
 
     // Fields and HTML elements
     private outputFieldsContainer: HTMLElement;
-    private readonly outputFields: {[key: string]: Setting} = {};
+    private outputFields: {[key in OutputStream]: Setting};
     private exitCodeElement: HTMLElement;
     private processTerminatorButtonContainer: HTMLElement;
 
@@ -207,8 +212,39 @@ class OutputModal extends SC_Modal {
         }
 
         // Create fields
-        this.outputFields.stdout = this.createOutputField("stdout", stdoutFieldContainer);
-        this.outputFields.stderr = this.createOutputField("stderr", stderrFieldContainer);
+        this.outputFields = {
+            stdout: this.createOutputField("stdout", stdoutFieldContainer),
+            stderr: this.createOutputField("stderr", stderrFieldContainer),
+        };
+        
+        // Define hotkeys.
+        const outputChannelClasses: {[p: string]: typeof OutputChannel} = getOutputChannelClasses();
+        for (const outputChannelName of Object.getOwnPropertyNames(outputChannelClasses) as OutputChannelCode[]) {
+            const outputChannelClass = outputChannelClasses[outputChannelName];
+            // Ensure this channel is not excluded by checking that is has a hotkey defined.
+            if (outputChannelClass.hotkey_letter) {
+                const hotkeyHandler = () => {
+                    const activeTextarea = this.getActiveTextarea();
+                    if (activeTextarea) {
+                        this.redirectOutput(
+                            outputChannelName,
+                            activeTextarea.outputStreamName,
+                            activeTextarea.textarea,
+                        );
+                    }
+                };
+    
+                // 1. hotkey: Ctrl/Cmd + number: handle output.
+                this.scope.register(["Ctrl"], outputChannelClass.hotkey_letter, hotkeyHandler);
+            
+                // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
+                this.scope.register(["Ctrl", "Shift"], outputChannelClass.hotkey_letter, () => {
+                    hotkeyHandler();
+                    this.close();
+                });
+            }
+        }
+        
 
         // Hide the fields' containers at the beginning. They will be shown when content is added.
         stdoutFieldContainer.addClass("SC-hide");
@@ -216,7 +252,6 @@ class OutputModal extends SC_Modal {
     }
 
     private createOutputField(output_stream: OutputStream, containerElement: HTMLElement) {
-        let output_textarea: TextAreaComponent;
 
         containerElement.createEl("hr", {attr: {class: "SC-no-margin"}});
 
@@ -229,7 +264,7 @@ class OutputModal extends SC_Modal {
 
         // Textarea
         const textarea_setting = new Setting(containerElement)
-            .addTextArea(textarea => output_textarea = textarea)
+            .addTextArea(() => {}) // No need to do anything, but the method requires a callback.
         ;
         textarea_setting.infoEl.addClass("SC-hide"); // Make room for the textarea by hiding the left column.
         textarea_setting.settingEl.addClass("SC-output-channel-modal-textarea-container", "SC-no-top-border");
@@ -251,30 +286,15 @@ class OutputModal extends SC_Modal {
 
                     const textarea_element = textarea_setting.settingEl.find("textarea") as HTMLTextAreaElement;
 
-                    // Define an output handler
-                    const handle_output = async () => {
-                        // Redirect output to the selected channel
-                        const output_streams: OutputStreams = {};
-                        output_streams[output_stream] =
-                            getSelectionFromTextarea(textarea_element, true) // Use the selection, or...
-                            ?? output_textarea.getValue() // ...use the whole text, if nothing is selected.
-                        ;
-                        const outputChannel = initializeOutputChannel(
-                            output_channel_name,
-                            this.plugin,
-                            this.t_shell_command,
-                            this.shell_command_parsing_result,
-                            "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
-                            this.processTerminator,
-                        );
-                        await outputChannel.handleBuffered(output_streams, this.exit_code, false); // false: Disable output wrapping as it's already wrapped before the output content was passed to this modal.
-                    };
-
                     // Create the button
                     redirect_setting.addButton((button) => {
                             button.onClick(async (event: MouseEvent) => {
                                 // Handle output
-                                await handle_output();
+                                await this.redirectOutput(
+                                    output_channel_name,
+                                    output_stream,
+                                    textarea_element,
+                                );
 
                                 // Finish
                                 if (event.ctrlKey) {
@@ -302,20 +322,78 @@ class OutputModal extends SC_Modal {
                             );
                         },
                     );
-
-                    // 1. hotkey: Ctrl/Cmd + number: handle output
-                    this.scope.register(["Ctrl"], outputChannelClass.hotkey_letter, handle_output);
-
-                    // 2. hotkey: Ctrl/Cmd + Shift + number: handle output and close the modal.
-                    this.scope.register(["Ctrl", "Shift"], outputChannelClass.hotkey_letter, () => {
-                        handle_output().then(); // then(): No need to wait for output handling to finish before closing the modal.
-                        this.close();
-                    });
                 }
             }
         });
 
         return textarea_setting;
+    }
+    
+    private async redirectOutput(outputChannelName: OutputChannelCode, outputStreamName: OutputStream, sourceTextarea: HTMLTextAreaElement): Promise<void> {
+        const outputContent =
+            getSelectionFromTextarea(sourceTextarea, true) // Use the selection, or...
+            ?? sourceTextarea.value // ...use the whole text, if nothing is selected.
+        ;
+        const output_streams: OutputStreams = {
+            [outputStreamName]: outputContent,
+        };
+        const outputChannel = initializeOutputChannel(
+            outputChannelName,
+            this.plugin,
+            this.t_shell_command,
+            this.shell_command_parsing_result,
+            "buffered", // Use "buffered" mode even if this modal was opened in "realtime" mode, because at this point the output redirection is a single-time job, not recurring.
+            this.processTerminator,
+        );
+        await outputChannel.handleBuffered(output_streams, this.exit_code, false); // false: Disable output wrapping as it's already wrapped before the output content was passed to this modal.
+    }
+    
+    /**
+     * Looks up for a <textarea> which meets the following criteria:
+     *  1) The <textarea> is visible, AND
+     *  2) The <textarea> is either:
+     *      a) the only <textarea> in this modal, OR
+     *      b) having focus.
+     * If no <textarea> is found that meets the requirements, the method shows an error message to user and returns null.
+     * @private
+     */
+    private getActiveTextarea(): {textarea: HTMLTextAreaElement; outputStreamName: OutputStream} | null {
+        // Pick a <textarea> and output stream name (i.e. `stdout` or `stderr`)
+        const activeTextareaCandidates: {textarea: HTMLTextAreaElement, outputStreamName: OutputStream}[] = [];
+        for (const outputStreamName of Object.getOwnPropertyNames(this.outputFields) as OutputStream[]) {
+            const outputSetting = this.outputFields[outputStreamName];
+            const component = outputSetting.components.first();
+            if (component instanceof TextAreaComponent) {
+                if (component.inputEl.isShown()) {
+                    // The textarea is visible. I.e. it doesn't have "SC-hide" CSS class.
+                    activeTextareaCandidates.push({
+                        textarea: component.inputEl,
+                        outputStreamName: outputStreamName,
+                    });
+                }
+            }
+        }
+        switch (activeTextareaCandidates.length) {
+            case 0:
+                // No textarea is visible. I'm not sure if this can ever happen? Maybe in "realtime" output mode, but in that mode output modal should only appear after there is some output received.
+                this.plugin.newError("No output fields are present, so cannot redirect output.");
+                return null;
+            case 1:
+                // Just one visible textarea exists. Easy pick!
+                return activeTextareaCandidates[0];
+            default:
+                // Multiple visible textareas exist.
+                // Try to find one with focus.
+                for (const activeTextareaCandidate of activeTextareaCandidates) {
+                    if (activeTextareaCandidate.textarea.matches(":focus")) {
+                        // Found a focused textarea.
+                        return activeTextareaCandidate;
+                    }
+                }
+                // None of the multiple textareas has focus.
+                this.plugin.newError("Multiple output fields are present, please put focus on the one you'd like to use.");
+                return null;
+        }
     }
 
     public removeProcessTerminatorButton() {

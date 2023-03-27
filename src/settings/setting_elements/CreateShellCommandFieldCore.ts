@@ -56,6 +56,7 @@ export function CreateShellCommandFieldCore(
     t_shell_command: TShellCommand | null,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
+    onAfterPreviewGenerated?: () => void,
     shell_command_placeholder = "Enter your command",
     extraAutocompleteItems?: IAutocompleteItem[],
     ): SettingFieldGroup {
@@ -103,6 +104,7 @@ export function CreateShellCommandFieldCore(
                         await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
                         setting.descEl,
                     );
+                    onAfterPreviewGenerated?.();
                 })
         ,
     };

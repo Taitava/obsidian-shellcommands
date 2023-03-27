@@ -61,7 +61,7 @@ export class CustomVariableView extends ItemView {
         for (const customVariableInstance of this.plugin.getCustomVariableInstances().values()) {
             let customVariableValue: string | null = customVariableInstance.getCustomVariable().getCustomVariableValue();
             let customVariableState: string | null = null;
-            if (null === customVariableValue) {
+            if (!customVariableInstance.getCustomVariable().hasOwnValue()) {
                 // The variable has no value yet.
                 if ("value" === customVariableInstance.configuration.default_value?.type) {
                     // Indicate that the variable has a default value defined, which will practically be used as long as no overriding value is set.
