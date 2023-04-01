@@ -71,6 +71,8 @@ export abstract class Model {
                         "Are you sure you want to delete this " + this.getSingularName().toLocaleLowerCase() + "?",
                         "Yes, delete",
                     );
+                    // Let subclasses add additional information to the deletion modal.
+                    this.augmentDeletionConfirmationModal?.(confirmation_modal, instance);
                     confirmation_modal.open();
                     confirmation_modal.promise.then(async (deletion_confirmed: boolean) => {
                         if (deletion_confirmed) {
@@ -100,6 +102,17 @@ export abstract class Model {
      * @protected
      */
     protected abstract _createSettingFields(instance: Instance, container_element: HTMLElement): Setting;
+
+    /**
+     * Called when a user is about to delete an instance and is shown a ConfirmationModal. This is called before
+     * ConfirmationModal.open() is called. The method should call ConfirmationModal.setExtraContent() to add information
+     * or other content to the modal.
+     *
+     * @param confirmationModal
+     * @param instance
+     * @protected
+     */
+    protected augmentDeletionConfirmationModal?(confirmationModal: ConfirmationModal, instance: Instance): void;
 
     /**
      * Deletes the instance from configuration, and calls _deleteChild() which will delete the instance from custom collections.
@@ -150,6 +163,9 @@ export abstract class Model {
         throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method. Maybe the class is not supposed to have children?");
     }
 
+    /**
+     * TODO: Refactor this method not to rely on rejecting, as that can be mixed up with program logic errors. Or at least consider if it would be a better approach.
+     */
     public abstract validateValue(instance: Instance, field: string, value: unknown): Promise<void>;
 
 }

@@ -20,7 +20,6 @@
 import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
-import {escapeValue} from "./escapers/EscapeValue";
 import {VariableSet} from "./loadVariables";
 import {
     IRawArguments,
@@ -29,11 +28,13 @@ import {
 } from "./Variable";
 import {TShellCommand} from "../TShellCommand";
 import {removeFromSet} from "../Common";
+import {Shell} from "../shells/Shell";
 
 /**
  * @param plugin
  * @param content
- * @param shell Used to determine how to escape special characters in variable values. Can be null, if no escaping is wanted.
+ * @param shell Used 1) to determine how to escape special characters in variable values (if escapeVariables is true), and 2) do correct path normalization (for variables that return file system paths).
+ * @param escapeVariables If true, special characters in variable values are quoted (but this might be prevented if a variable starts with {{! instead of {{ ). If false, dno escaping is ever done.
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param sc_event Use undefined, if parsing is not happening during an event.
  * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
@@ -44,7 +45,8 @@ import {removeFromSet} from "../Common";
 export async function parseVariables(
         plugin: SC_Plugin,
         content: string,
-        shell: string | null,
+        shell: Shell,
+        escapeVariables: boolean,
         t_shell_command: TShellCommand | null,
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
@@ -65,7 +67,7 @@ export async function parseVariables(
 
     for (const variable of variables)
     {
-        const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+        const pattern = getVariableRegExp(variable);
         const parameter_names = variable.getParameterNames();
         let argument_matches: RegExpExecArray | null;
         while ((argument_matches = pattern.exec(content)) !== null) {
@@ -99,19 +101,16 @@ export async function parseVariables(
             }
 
             // Should the variable's value be escaped? (Usually yes).
-            let escape = true;
-            if ("{{!" === substitute.slice(0, 3)) { // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
+            let escapeCurrentVariable = escapeVariables;
+            if (doesOccurrenceDenyEscaping(substitute)) {
                 // The variable usage begins with {{! instead of {{
                 // This means the variable's value should NOT be escaped.
-                escape = false;
-            }
-            if (!shell) {
-                // Escaping is forced OFF.
-                escape = false;
+                escapeCurrentVariable = false;
             }
 
             // Render the variable
             const variable_value_result = await variable.getValue(
+                shell,
                 t_shell_command,
                 sc_event,
                 presentArguments,
@@ -125,7 +124,8 @@ export async function parseVariables(
                     return parseVariables(
                         plugin,
                         raw_default_value,
-                        null, // Disable escaping special characters at this phase to avoid double escaping, as escaping will be done later.
+                        shell,
+                        false, // Disable escaping special characters at this phase to avoid double escaping, as escaping will be done later.
                         t_shell_command,
                         sc_event,
                         reduced_variables,
@@ -148,10 +148,9 @@ export async function parseVariables(
 
                 // Escape the value if needed.
                 let use_variable_value: string;
-                if (escape) {
+                if (escapeCurrentVariable) {
                     // Use an escaped value.
-                    use_variable_value = escapeValue(
-                        shell as string, // shell is always a string when escape is true.
+                    use_variable_value = (shell as Shell).escapeValue( // shell is always a Shell object when escapeCurrentVariable is true.
                         raw_variable_value as string, // raw_variable_value is always a string when variable_value_result.succeeded is true.
                     );
                 } else {
@@ -186,6 +185,64 @@ export async function parseVariables(
 }
 
 /**
+ * Parses just a single Variable in content, and does it synchronously. An alternative to parseVariables() in situations
+ * where asynchronous functions should be avoided, e.g. in Obsidian Command palette, or file/folder/editor menus (although
+ * this is not used in those menus atm).
+ *
+ * @param content
+ * @param variable Can only be a Variable that implements the method generateValueSynchronously(). Otherwise an Error is thrown. Also, does not support variables that have parameters, at least at the moment.
+ * @param shell
+ * @return A ParsingResult similar to what parseVariables() returns, but directly, not in a Promise.
+ */
+export function parseVariableSynchronously(
+        content: string,
+        variable: Variable,
+        shell: Shell,
+    ): ParsingResult {
+    if (variable.getParameterNames().length > 0) {
+        throw new Error("parseVariableSynchronously() does not support variables with parameters at the moment. Variable: " + variable.constructor.name);
+    }
+
+    const parsingResult: ParsingResult = {
+        // Initial values, will be overridden.
+        succeeded: false,
+        original_content: content,
+        parsed_content: null,
+        error_messages: [],
+        count_parsed_variables: 0,
+    };
+
+    // Get the Variable's value.
+    const variableValueResult: VariableValueResult = variable.getValueSynchronously(); // Shell could be passed here as a parameter, if there will ever be a need to use this method to access any variables that need the Shell (e.g. file path related variables that do path translation). It's not done now, as there's no need for now.
+
+    if (variableValueResult.succeeded) {
+        // Parsing succeeded.
+        parsingResult.succeeded = true;
+        parsingResult.parsed_content = content.replaceAll(
+            getVariableRegExp(variable), // Even thought this regexp actually supports arguments, supplying arguments to variables is not implemented in variable.getValueSynchronously(), so variables expecting parameters cannot be supported at the moment.
+            (occurrence: string) => {
+                parsingResult.count_parsed_variables++; // The count is not used (at least at the moment of writing this), but might be used in the future.
+
+                // Check if special characters should be escaped or not.
+                const escape = !doesOccurrenceDenyEscaping(occurrence);
+                if (escape) {
+                    // Do escape.
+                    return shell.escapeValue(variableValueResult.value as string);
+                } else {
+                    // No escaping.
+                    return variableValueResult.value as string; // Replace {{variable}} with a value.
+                }
+            },
+        );
+    } else {
+        // Parsing failed.
+        parsingResult.error_messages = variableValueResult.error_messages;
+    }
+
+    return parsingResult;
+}
+
+/**
  * Reads all variables from the content string, and returns a VariableSet containing all the found variables.
  *
  * This is needed in situations where variables will not be parsed (= variable values are not needed), but where it's just
@@ -193,17 +250,23 @@ export async function parseVariables(
  *
  * @param plugin
  * @param content
+ * @param searchForVariables If not defined, will use all variables.
  */
 export function getUsedVariables(
         plugin: SC_Plugin,
         content: string,
+        searchForVariables: VariableSet | Variable = plugin.getVariables(),
     ): VariableSet {
-    const search_for_variables: VariableSet = plugin.getVariables();
+    if (searchForVariables instanceof Variable) {
+        // searchForVariables is a single Variable.
+        // Convert it to a VariableSet.
+        searchForVariables = new VariableSet([searchForVariables]);
+    }
     const found_variables = new VariableSet();
-    
-    for (const variable of search_for_variables)
+
+    for (const variable of searchForVariables)
     {
-        const pattern = new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+        const pattern = getVariableRegExp(variable);
         if (pattern.exec(content) !== null) {
             // This variable was found.
             found_variables.add(variable);
@@ -211,6 +274,14 @@ export function getUsedVariables(
     }
 
     return found_variables;
+}
+
+function getVariableRegExp(variable: Variable) {
+    return new RegExp(variable.getPattern(), "igu"); // i: case-insensitive; g: match all occurrences instead of just the first one. u: support 4-byte unicode characters too.
+}
+
+function doesOccurrenceDenyEscaping(occurrence: string): boolean {
+    return "{{!" === occurrence.slice(0, 3); // .slice(0, 3) = get characters 0...2, so stop before 3. The 'end' parameter is confusing.
 }
 
 export interface ParsingResult {
@@ -225,3 +296,27 @@ export interface ParsingResult {
     error_messages: string[];
     count_parsed_variables: number;
 }
+
+/*
+// TODO: Rewrite ParsingResult to the following format that better defines the 'succeeded' property's relationship to 'parsed_content' and 'error_messages'.
+// Then find all "parsed_content as string" expressions in the whole project and remove the "as string" parts, they should be redundant after this change.
+
+export type ParsingResult = ParsingResultSucceeded | ParsingResultFailed;
+
+interface ParsingResultSucceeded extends ParsingResultBase {
+    succeeded: true;
+    parsed_content: string;
+    error_messages: []; // An always empty array.
+}
+
+interface ParsingResultFailed extends ParsingResultBase {
+    succeeded: false;
+    parsed_content: null;
+    error_messages: [string, ...string[]]; // A non-empty array of strings.
+}
+
+interface ParsingResultBase {
+    original_content: string;
+    count_parsed_variables: number;
+}
+ */

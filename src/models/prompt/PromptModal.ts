@@ -33,6 +33,7 @@ import {
     parseVariables,
     ParsingResult,
 } from "../../variables/parseVariables";
+import {Shell} from "../../shells/Shell";
 
 export class PromptModal extends SC_Modal {
 
@@ -62,7 +63,14 @@ export class PromptModal extends SC_Modal {
         super.onOpen();
 
         // Parse and display title
-        const title_parsing_result = await parseVariables(this.plugin, this.prompt.getTitle(), null, this.t_shell_command, this.sc_event);
+        const title_parsing_result = await parseVariables(
+            this.plugin,
+            this.prompt.getTitle(),
+            this.getShell(),
+            false,
+            this.t_shell_command,
+            this.sc_event
+        );
         this.setTitle(
             title_parsing_result.succeeded
             ? title_parsing_result.parsed_content as string
@@ -71,7 +79,14 @@ export class PromptModal extends SC_Modal {
 
         // Parse and display description
         if (this.prompt.configuration.description) {
-            const description_parsing_result: ParsingResult = await parseVariables(this.plugin, this.prompt.configuration.description, null, this.t_shell_command, this.sc_event);
+            const description_parsing_result: ParsingResult = await parseVariables(
+                this.plugin,
+                this.prompt.configuration.description,
+                this.getShell(),
+                false,
+                this.t_shell_command,
+                this.sc_event
+            );
             const description: string =
                 description_parsing_result.succeeded
                 ? description_parsing_result.parsed_content as string
@@ -115,13 +130,13 @@ export class PromptModal extends SC_Modal {
             ;
 
             // Decide what text to use in the preview
-            const shellCommandParsingResult: ParsingResult | undefined = this.parsing_process?.getParsingResults().shell_command;
+            const shellCommandParsingResult: ParsingResult | undefined = this.parsing_process?.getParsingResults().shellCommandContent; // Use unwrapped shell command content, as that's shorter to display, and wrappers probably don't contain so interesting content.
             if (shellCommandParsingResult?.succeeded) {
                 // Show a real shell command. Use preparsed content (= content that might have some variables already parsed).
                 shell_command_preview_text = shellCommandParsingResult.parsed_content as string; // as string = if shellCommandParsingResult?.succeeded is true, then .parsed_content is always string.
             } else if (this.t_shell_command) {
                 // Show a real shell command. No preparsed content is available. This content does not have any variables parsed yet.
-                shell_command_preview_text = this.t_shell_command.getShellCommand();
+                shell_command_preview_text = this.t_shell_command.getShellCommandContent(); // ForPreview() is good, no need to show Shell augmentations as they would just clutter up the preview.
             } else {
                 // Make up a fake "shell command" for previewing.
                 shell_command_preview_text = this.prompt.getExampleShellCommand();
@@ -149,6 +164,7 @@ export class PromptModal extends SC_Modal {
                             this.plugin,
                             shell_command_preview_text,
                             this.getShell(),
+                            true,
                             this.t_shell_command,
                             this.sc_event,
                             undefined, // Use all variables.
@@ -230,7 +246,14 @@ export class PromptModal extends SC_Modal {
         }
 
         // Execute button
-        const execute_button_text_parsing_result = await parseVariables(this.plugin, this.prompt.configuration.execute_button_text, null, this.t_shell_command, this.sc_event);
+        const execute_button_text_parsing_result = await parseVariables(
+            this.plugin,
+            this.prompt.configuration.execute_button_text,
+            this.getShell(),
+            false,
+            this.t_shell_command,
+            this.sc_event
+        );
         const execute_button_text =
             execute_button_text_parsing_result.succeeded
             ? execute_button_text_parsing_result.parsed_content as string
@@ -307,7 +330,7 @@ export class PromptModal extends SC_Modal {
         return parsing_errors;
     }
 
-    private getShell() {
+    private getShell(): Shell {
         if (this.t_shell_command) {
             // This is a real usage of the PromptModal, so a TShellCommand is available. Look up the shell from that.
             return this.t_shell_command.getShell();

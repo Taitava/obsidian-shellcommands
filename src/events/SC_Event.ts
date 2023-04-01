@@ -27,7 +27,7 @@ import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";
 import {EventVariable} from "../variables/event_variables/EventVariable";
-import {DocumentationEventsFolderLink} from "../Documentation";
+import {Documentation} from "../Documentation";
 import {
     ShellCommandExecutor,
 } from "../imports";
@@ -223,6 +223,6 @@ export abstract class SC_Event {
     }
 
     public static getDocumentationLink(): string {
-        return DocumentationEventsFolderLink + encodeURIComponent(this.event_title);
+        return Documentation.events.folder + encodeURIComponent(this.event_title);
     }
 }

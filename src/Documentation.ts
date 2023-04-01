@@ -17,16 +17,39 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-export const DocumentationMainLink = "https://publish.obsidian.md/shellcommands";
-export const DocumentationBuiltInVariablesBaseLink = "https://publish.obsidian.md/shellcommands/Variables/"; // When used, a variable's name will be appended to the end. Keep the trailing slash!
-export const DocumentationBuiltInVariablesIndexLink = "https://publish.obsidian.md/shellcommands/Variables/Variables+-+general+principles#All+variables";
-export const DocumentationCustomVariablesLink = "https://publish.obsidian.md/shellcommands/Variables/Custom+variables";
-export const DocumentationAutocompleteLink = "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete";
-export const DocumentationEventsFolderLink = "https://publish.obsidian.md/shellcommands/Events/";
-export const DocumentationPATHAugmentationsLink = "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable";
-export const DocumentationOutputWrappersLink = "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers";
-export const DocumentationOutputHandlingModeLink = "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling";
-export const DocumentationStdinContentLink = "https://publish.obsidian.md/shellcommands/Variables/Pass+variables+to+stdin";
-export const GitHubLink = "https://github.com/Taitava/obsidian-shellcommands";
-export const ChangelogLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/CHANGELOG.md";
-export const LicenseLink = "https://github.com/Taitava/obsidian-shellcommands/blob/main/LICENSE";
+export const Documentation = {
+    // Keep the nested structure in this order:
+    // 1. 'folder' (if exists)
+    // 2. 'index' (if exists)
+    // 3. Page links in alphabetical order.
+    // 4. Sub-folder objects in alphabetical order.
+    index: "https://publish.obsidian.md/shellcommands",
+    environments: {
+        additionsToPathEnvironmentVariable: "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable",
+        customShells: {
+            index: "https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells",
+        },
+    },
+    events: {
+        folder: "https://publish.obsidian.md/shellcommands/Events/", // Keep the trailing slash!
+    },
+    outputHandling: {
+        outputHandlingMode: "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling",
+        outputWrappers: "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers",
+    },
+    variables: {
+        folder: "https://publish.obsidian.md/shellcommands/Variables/", // Keep the trailing slash!
+        allVariables: "https://publish.obsidian.md/shellcommands/Variables/All+variables",
+        autocomplete: {
+            index: "https://publish.obsidian.md/shellcommands/Variables/Autocomplete/Autocomplete",
+        },
+        customVariables: "https://publish.obsidian.md/shellcommands/Variables/Custom+variables",
+        passVariablesToStdin: "https://publish.obsidian.md/shellcommands/Variables/Pass+variables+to+stdin",
+    },
+};
+
+export const GitHub = {
+    repository: "https://github.com/Taitava/obsidian-shellcommands",
+    changelog: "https://github.com/Taitava/obsidian-shellcommands/blob/main/CHANGELOG.md",
+    license: "https://github.com/Taitava/obsidian-shellcommands/blob/main/LICENSE",
+};

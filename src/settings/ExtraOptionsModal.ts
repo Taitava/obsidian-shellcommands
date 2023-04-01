@@ -33,7 +33,7 @@ import {
 } from "../output_channels/OutputHandlerCode";
 import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {
     generateIgnoredErrorCodesIconTitle,
     generateShellCommandFieldIconAndName,
@@ -64,10 +64,7 @@ import {
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapperSettingsModal";
-import {
-    DocumentationOutputHandlingModeLink,
-    DocumentationStdinContentLink,
-} from "../Documentation";
+import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
@@ -174,7 +171,7 @@ export class ExtraOptionsModal extends SC_Modal {
             this.t_shell_command.getConfiguration().alias = value;
 
             // Update Obsidian command palette
-            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommand(), this.t_shell_command.getAlias());
+            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommandContent(), this.t_shell_command.getAlias());
 
             // UpdateShell commands settings panel
             this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);
@@ -265,7 +262,7 @@ export class ExtraOptionsModal extends SC_Modal {
             .addExtraButton(extraButtonComponent => extraButtonComponent
                 .setIcon("help")
                 .setTooltip("Documentation: Pass variables to stdin")
-                .onClick(() => gotoURL(DocumentationStdinContentLink))
+                .onClick(() => gotoURL(Documentation.variables.passVariablesToStdin))
             )
         ;
         const stdinSettingContainer = container_element.createDiv({attr: {class: "SC-setting-group"}});
@@ -444,7 +441,7 @@ export class ExtraOptionsModal extends SC_Modal {
             // Documentation link
             .addExtraButton(icon => icon
                 .setIcon("help")
-                .onClick(() => gotoURL(DocumentationOutputHandlingModeLink))
+                .onClick(() => gotoURL(Documentation.outputHandling.outputHandlingMode))
                 .setTooltip("Documentation: Output handling mode"),
             )
         ;
@@ -522,7 +519,7 @@ export class ExtraOptionsModal extends SC_Modal {
         }
 
         // Platform specific shell selection
-        createShellSelectionField(this.plugin, container_element, this.t_shell_command.getShells(), false);
+        createShellSelectionFields(this.plugin, container_element, this.t_shell_command.getShells(), false);
     }
 
     private async tabEvents(container_element: HTMLElement): Promise<void> {

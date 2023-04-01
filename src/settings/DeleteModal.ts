@@ -44,7 +44,7 @@ export class DeleteModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.modalEl.createEl("h2", {text: "Delete: " + this.t_shell_command.getShellCommand()}); // TODO: Use this.setTitle() instead.
+        this.setTitle("Delete: " + this.t_shell_command.getShellCommandContent());
         if (this.t_shell_command.getAlias()) {
             this.modalEl.createEl("p", {text: "Alias: " + this.t_shell_command.getAlias()});
         }

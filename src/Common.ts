@@ -27,7 +27,10 @@ import {
     normalizePath,
     TFile,
 } from "obsidian";
-import {PlatformId} from "./settings/SC_MainSettings";
+import {
+    PlatformId,
+    PlatformNames,
+} from "./settings/SC_MainSettings";
 import {platform} from "os";
 import * as path from "path";
 import {debugLog} from "./Debug";
@@ -36,6 +39,8 @@ import SC_Plugin from "./main";
 import {shell} from "electron";
 // @ts-ignore Electron is installed.
 import {clipboard} from "electron";
+import * as fs from "fs";
+import * as process from "process";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -47,12 +52,16 @@ export function getVaultAbsolutePath(app: App) {
     throw new Error("Could not retrieve vault path. No DataAdapter was found from app.vault.adapter.");
 }
 
-export function getPluginAbsolutePath(plugin: SC_Plugin) {
-    return normalizePath2(path.join(
-        getVaultAbsolutePath(plugin.app),
-        plugin.app.vault.configDir,
-        "plugins",
-        plugin.getPluginId()));
+export function getPluginAbsolutePath(plugin: SC_Plugin, convertSlashToBackslash: boolean) {
+    return normalizePath2(
+        path.join(
+            getVaultAbsolutePath(plugin.app),
+            plugin.app.vault.configDir,
+            "plugins",
+            plugin.getPluginId()
+        ),
+        convertSlashToBackslash
+    );
 }
 
 /**
@@ -64,7 +73,7 @@ export function isWindows() {
 
 /**
  * This is just a wrapper around platform() in order to cast the type to PlatformId.
- * TODO: Consider renaming this to getPlatformId().
+ * TODO: Consider renaming this to getCurrentPlatformId().
  */
 export function getOperatingSystem(): PlatformId  {
     // @ts-ignore In theory, platform() can return an OS name not included in OperatingSystemName. But as Obsidian
@@ -72,6 +81,18 @@ export function getOperatingSystem(): PlatformId  {
     // ruled out by the manifest of this plugin), it should be safe to assume that the current OS is one of those
     // three.
     return platform();
+}
+
+export function getCurrentPlatformName(): string {
+    return getPlatformName(getOperatingSystem());
+}
+
+export function getPlatformName(platformId: PlatformId) {
+    const platformName: string | undefined = PlatformNames[platformId];
+    if (undefined === platformName) {
+        throw new Error("Cannot find a platform name for: " + platformId);
+    }
+    return platformName;
 }
 
 export function getView(app: App) {
@@ -114,8 +135,27 @@ export function cloneObject<ObjectType extends Object>(object: ObjectType): Obje
  * @param objects
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
-export function combineObjects(...objects: Object[]) {
+export function combineObjects(...objects: Object[]) { // TODO: Change Object to object (lower-case) and remove eslint-disable-next-line . Do the same for other Objects in this file, too.
     return Object.assign({}, ...objects);
+}
+
+/**
+ * Assigns properties from defaultObject to targetObject, if they don't exist yet in the target. Existing properties are
+ * NOT overridden.
+ *
+ * This can be thought of as merging two objects together, but inline, as opposed to combineObjects(), which creates a
+ * new object.
+ *
+ * @param targetObject
+ * @param defaultObject
+ */
+export function ensureObjectHasProperties(targetObject: object, defaultObject: object) {
+    for (const defaultPropertyName of Object.getOwnPropertyNames(defaultObject) as (keyof typeof defaultObject)[]) {
+        if (undefined === targetObject[defaultPropertyName]) {
+            // A property does not exist on targetObject. Create it, and use a value from defaultObject.
+            targetObject[defaultPropertyName] = defaultObject[defaultPropertyName];
+        }
+    }
 }
 
 export function mergeSets<SetType>(set1: Set<SetType>, set2: Set<SetType>): Set<SetType> {
@@ -147,7 +187,7 @@ export function removeFromSet<SetType>(from_set: Set<SetType>, remove: Set<SetTy
  *
  * TODO: I've opened a discussion about this on Obsidian's forums. If anything new comes up in the discussion, make changes accordingly. https://forum.obsidian.md/t/normalizepath-removes-a-leading/24713
  */
-export function normalizePath2(path: string) {
+export function normalizePath2(path: string, convertSlashToBackslash: boolean) {
     // 1. Preparations
     path = path.trim();
     const leading_slashes_regexp = /^[/\\]*/gu; // Get as many / or \ slashes as there are in the very beginning of path. Can also be "" (an empty string).
@@ -163,9 +203,8 @@ export function normalizePath2(path: string) {
 
     // 3. Fixes
     // Check that correct slashes are used.
-    if (isWindows()) {
-        // The platform is Windows.
-        // Convert / to \
+    if (convertSlashToBackslash) {
+        // Convert / to \ (usually done when running on Windows, but might in theory happen on other platforms, too, if using a shell that uses Windows directory separators).
         path = path.replace(/\//gu, "\\"); // Need to use a regexp instead of a normal "/" -> "\\" replace because the normal replace would only replace first occurrence of /.
         leading_slashes = leading_slashes.replace(/\//gu, "\\"); // Same here.
     }
@@ -193,6 +232,26 @@ export function extractFileParentPath(file_path: string) {
     return path.parse(file_path).dir;
 }
 
+/**
+ * On Windows: Checks if the given filePath exists WHEN ADDING any extension from the PATHEXT environment variable to the
+ * end of the file path. This can notice that e.g. "CMD" exists as a file name, when it's checked as "CMD.EXE".
+ * On other platforms than Windows: Returns always false.
+ * Note: This DOES NOT CHECK existence of the original filePath without any additions. The caller should check it themselves.
+ */
+export function lookUpFileWithBinaryExtensionsOnWindows(filePath: string): boolean {
+    if (isWindows()) {
+        // Windows: Binary path may be missing a file extension, but it's still a valid and working path, so check
+        // the path with additional extensions, too.
+        const pathExt = process.env.PATHEXT ?? "";
+        for (const extension of pathExt.split(";")) {
+            if (fs.existsSync(filePath + extension)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function joinObjectProperties(object: {}, glue: string) {
     let result = "";
@@ -211,7 +270,7 @@ export function joinObjectProperties(object: {}, glue: string) {
  *
  * Idea is copied 2021-10-06 from https://stackoverflow.com/a/33121880/2754026
  */
-export function uniqueArray(array: any[]) {
+export function uniqueArray<Type>(array: Type[]): Type[] {
     return [...new Set(array)];
 }
 
@@ -225,6 +284,7 @@ export function gotoURL(url: string) {
 
 export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
     const prefix = plugin.settings.obsidian_command_palette_prefix;
+    // TODO: Replace shell_command and alias parameters with one parameter: aliasOrShellCommand.
     if (alias) {
         // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
         return prefix + alias;
@@ -381,4 +441,31 @@ export async function getFileYAML(app: App, file: TFile, withDashes: boolean): P
             }
         });
     });
+}
+
+/**
+ * Tries to provide a simple try...catch interface that rethrows unrecognised exceptions on your behalf.
+ * @param act Try to do this. If it succeeds, tryTo() returns what act() returns, and does not touch the other arguments.
+ * @param fix An exception handler that gets called if act() throws an exception that matches any one in bust. The function receives the caught exception as a parameter.
+ * @param bust An array of Error classes that can be caught. Any other exceptions will be rethrown.
+ */
+export function tryTo<returnType>(
+    act: () => returnType,
+    fix: (exception: Error) => returnType,
+    ...bust: Error["constructor"][]
+): returnType {
+    try {
+        // Try to do stuff and see if an exception occurs.
+        return act();
+    } catch (exception) {
+        // An exception has happened. Check if it's included in the list of handleable exceptions.
+        const canCatch: boolean = bust.filter(catchable => exception instanceof catchable.constructor).length > 0;
+        if (canCatch) {
+            // This exception can be handled.
+            return fix(exception);
+        } else {
+            // This exception cannot be handled. Rethrow it.
+            throw exception;
+        }
+    }
 }

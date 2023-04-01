@@ -21,25 +21,45 @@ import SC_Plugin from "../../main";
 import {SettingFieldGroup} from "../SC_MainSettingsTab";
 import {Setting} from "obsidian";
 import {parseVariables} from "../../variables/parseVariables";
-import {createAutocomplete} from "./Autocomplete";
+import {
+    createAutocomplete,
+    IAutocompleteItem,
+} from "./Autocomplete";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {createMultilineTextElement} from "../../Common";
 import {EOL} from "os";
 import {decorateMultilineField} from "./multilineField";
+import {Shell} from "../../shells/Shell";
 
+/**
+ * Creates a multiline text field for inputting a shell command, and an automatic preview text for it, that shows parsed {{variables}}.
+ *
+ * @param plugin
+ * @param container_element
+ * @param setting_icon_and_name
+ * @param shell_command Textual shell command content.
+ * @param shell
+ * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
+ * @param show_autocomplete_menu TODO: Remove this parameter and always read it from plugin settings.
+ * @param extra_on_change
+ * @param shell_command_placeholder
+ * @param extraAutocompleteItems
+ * @constructor
+ */
 export function CreateShellCommandFieldCore(
     plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_icon_and_name: string,
     shell_command: string,
-    shell: string,
-    t_shell_command: TShellCommand,
+    shell: Shell,
+    t_shell_command: TShellCommand | null,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
     onAfterPreviewGenerated?: () => void,
     shell_command_placeholder = "Enter your command",
-    ) {
+    extraAutocompleteItems?: IAutocompleteItem[],
+    ): SettingFieldGroup {
 
     async function on_change(shell_command: string) {
         // Update preview
@@ -91,7 +111,12 @@ export function CreateShellCommandFieldCore(
 
     // Autocomplete menu
     if (show_autocomplete_menu) {
-        createAutocomplete(plugin, setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement, on_change);
+        createAutocomplete(
+            plugin,
+            setting_group.shell_command_setting.settingEl.find("textarea") as HTMLTextAreaElement,
+            on_change,
+            extraAutocompleteItems,
+        );
     }
 
     return setting_group;
@@ -100,14 +125,14 @@ export function CreateShellCommandFieldCore(
 /**
  *
  * @param plugin
- * @param shell_command
+ * @param shell_command Textual shell command content.
  * @param shell
- * @param t_shell_command
+ * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: string, t_shell_command: TShellCommand, sc_event: SC_Event | null): Promise<string> {
-    const parsing_result = await parseVariables(plugin, shell_command, shell, t_shell_command, sc_event);
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<string> {
+    const parsing_result = await parseVariables(plugin, shell_command, shell, true, t_shell_command, sc_event);
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {

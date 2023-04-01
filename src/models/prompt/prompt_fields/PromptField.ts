@@ -29,6 +29,7 @@ import {
     PromptConfiguration,
     PromptFieldModel,
 } from "../../../imports";
+import {Shell} from "../../../shells/Shell";
 
 export abstract class PromptField extends Instance {
 
@@ -94,7 +95,14 @@ export abstract class PromptField extends Instance {
      */
     private async applyDefaultValue(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         const default_value = this.configuration.default_value;
-        const parsing_result = await parseVariables(this.prompt.model.plugin, default_value, null, t_shell_command, sc_event);
+        const parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            default_value,
+            this.getShell(t_shell_command),
+            false,
+            t_shell_command,
+            sc_event
+        );
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
@@ -132,7 +140,14 @@ export abstract class PromptField extends Instance {
         let preview: string;
 
         // Parse variables in the value.
-        const parsing_result = await parseVariables(this.prompt.model.plugin, this.getValue(), null, t_shell_command, sc_event);
+        const parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            this.getValue(),
+            this.getShell(t_shell_command),
+            false,
+            t_shell_command,
+            sc_event
+        );
         if (!parsing_result.succeeded) {
             // Parsing failed.
             this.parsed_value = null;
@@ -223,6 +238,14 @@ export abstract class PromptField extends Instance {
     public getTargetVariable(): CustomVariable {
         const custom_variable_instance = this.getTargetVariableInstance();
         return custom_variable_instance.getCustomVariable();
+    }
+
+    protected getShell(tShellCommand: TShellCommand | null): Shell {
+        if (tShellCommand) {
+            return tShellCommand.getShell();
+        }
+        // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
+        return this.prompt.model.plugin.getDefaultShell();
     }
 }
 

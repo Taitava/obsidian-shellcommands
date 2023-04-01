@@ -18,6 +18,7 @@
  */
 
 import {IParameters, Variable} from "./Variable";
+import {Shell} from "../shells/Shell";
 
 export class Variable_Newline extends Variable {
     public variable_name = "newline";
@@ -30,7 +31,10 @@ export class Variable_Newline extends Variable {
         },
     };
 
-    protected async generateValue(castedArguments: {count?: number}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {count?: number},
+    ): Promise<string> {
         // Return \n, possibly repeating it
         return "\n".repeat(castedArguments.count ?? 1);
     }

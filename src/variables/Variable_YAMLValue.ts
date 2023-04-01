@@ -20,6 +20,7 @@
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {getFileYAMLValue} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_YAMLValue extends FileVariable {
     public variable_name = "yaml_value";
@@ -32,7 +33,10 @@ export class Variable_YAMLValue extends FileVariable {
         },
     };
 
-    protected async generateValue(castedArguments: {property_name: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {property_name: string},
+    ): Promise<string> {
         // We do have an active file
         const result = getFileYAMLValue(this.app, this.getFileOrThrow(), castedArguments.property_name);
         if (Array.isArray(result)) {

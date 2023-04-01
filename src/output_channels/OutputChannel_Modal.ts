@@ -158,7 +158,10 @@ class OutputModal extends SC_Modal {
         this.titleEl.innerText = heading ? heading : "Shell command output";  // TODO: Use this.setTitle() instead.
 
         // Shell command preview
-        this.modalEl.createEl("pre", {text: this.shell_command_parsing_result.shell_command, attr: {class: "SC-no-margin SC-wrappable"}}); // no margin so that exit code will be close.
+        this.modalEl.createEl("pre", {
+            text: this.shell_command_parsing_result.unwrappedShellCommandContent, // Use unwrapped shell command content, as that's shorter to display, and wrappers probably don't contain so interesting content.
+            attr: {class: "SC-no-margin SC-wrappable"}} // No margin so that exit code will be near.
+        );
 
         // Container for terminating button and exit code
         const processResultContainer = this.modalEl.createDiv();

@@ -20,6 +20,7 @@
 import {EventVariable} from "./EventVariable";
 import {extractFileName} from "../../Common";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventOldTitle extends EventVariable {
     public variable_name = "event_old_title";
@@ -30,6 +31,7 @@ export class Variable_EventOldTitle extends EventVariable {
     ];
 
     protected async generateValue(
+        shell: Shell,
         argumentsAreNotUsed: never,
         sc_event: SC_Event_FileRenamed,
     ): Promise<string> {

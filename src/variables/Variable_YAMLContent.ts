@@ -22,6 +22,7 @@ import {getFileYAML} from "../Common";
 import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {TFile} from "obsidian";
+import {Shell} from "../shells/Shell";
 
 export class Variable_YAMLContent extends FileVariable {
     public variable_name = "yaml_content";
@@ -34,7 +35,10 @@ export class Variable_YAMLContent extends FileVariable {
         },
     };
 
-    protected generateValue(castedArguments: {withDashes: "with-dashes" | "no-dashes"}): Promise<string> {
+    protected generateValue(
+        shell: Shell,
+        castedArguments: {withDashes: "with-dashes" | "no-dashes"},
+    ): Promise<string> {
         return new Promise((resolve, reject) => {
             let file: TFile;
             try {

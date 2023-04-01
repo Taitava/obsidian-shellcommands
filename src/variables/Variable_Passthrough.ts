@@ -21,6 +21,7 @@ import {
     IParameters,
     Variable,
 } from "./Variable";
+import {Shell} from "../shells/Shell";
 
 export class Variable_Passthrough extends Variable {
     public variable_name = "passthrough";
@@ -33,7 +34,10 @@ export class Variable_Passthrough extends Variable {
         },
     };
 
-    protected async generateValue(castedArguments: {value: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {value: string},
+    ): Promise<string> {
         // Simply return the argument that was received.
         return castedArguments.value;
     }

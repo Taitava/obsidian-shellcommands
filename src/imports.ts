@@ -40,6 +40,9 @@ export * from "./models/Instance";
 export * from "./models/Model";
 export * from "./models/models";
 
+// Custom shells
+export * from "./models/custom_shell/CustomShellModel";
+
 // Custom variables
 export * from "./variables/CustomVariable";
 export * from "./models/custom_variable/CustomVariableInstance";
@@ -62,6 +65,11 @@ export * from "./models/prompt/PromptSettingsModal";
 
 // Settings
 export * from "./settings/setting_elements/PathEnvironmentVariableFunctions";
+
+// Shells
+export * from "./shells/CustomShell";
+export * from "./shells/Shell";
+export * from "./shells/ShellFunctions";
 
 // Variables
 export * from "./variables/ParsingProcess";

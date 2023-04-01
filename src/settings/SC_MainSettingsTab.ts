@@ -19,26 +19,26 @@
 
 import {
     App,
+    BaseComponent,
+    DropdownComponent,
     PluginSettingTab,
     sanitizeHTMLToDom,
     SearchComponent,
     Setting,
 } from "obsidian";
 import SC_Plugin from "../main";
-import {getVaultAbsolutePath, gotoURL} from "../Common";
-import {createShellSelectionField} from "./setting_elements/CreateShellSelectionField";
+import {
+    getCurrentPlatformName,
+    getVaultAbsolutePath,
+    gotoURL,
+} from "../Common";
+import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
 import {debugLog} from "../Debug";
 import {
-    DocumentationAutocompleteLink,
-    DocumentationMainLink,
-    DocumentationBuiltInVariablesIndexLink,
-    GitHubLink,
-    ChangelogLink,
-    DocumentationCustomVariablesLink,
-    LicenseLink,
-    DocumentationOutputWrappersLink,
+    Documentation,
+    GitHub,
 } from "../Documentation";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
@@ -53,10 +53,15 @@ import {
     PromptModel,
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
-import {ExecutionNotificationMode} from "./SC_MainSettings";
+import {
+    ExecutionNotificationMode,
+    PlatformId,
+} from "./SC_MainSettings";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {createVariableDefaultValueField} from "./setting_elements/createVariableDefaultValueFields";
+import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
+import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
@@ -114,16 +119,16 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
         // Documentation link & GitHub links
         containerEl.createEl("p").insertAdjacentHTML("beforeend",
-            "<a href=\"" + DocumentationMainLink + "\">Documentation</a> - " +
-            "<a href=\"" + GitHubLink + "\">SC on GitHub</a> - " +
-            "<a href=\"" + ChangelogLink + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
+            "<a href=\"" + Documentation.index + "\">Documentation</a> - " +
+            "<a href=\"" + GitHub.repository + "\">SC on GitHub</a> - " +
+            "<a href=\"" + GitHub.changelog + "\">SC version: " + this.plugin.getPluginVersion() + "</a>",
         );
 
         // Copyright notice
         const copyright_paragraph = containerEl.createEl("p");
         copyright_paragraph.addClass("SC-small-font");
         copyright_paragraph.insertAdjacentHTML("beforeend", `
-            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2023 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${LicenseLink}">GNU GPL-3.0</a>.
+            <em>Shell commands</em> plugin Copyright &copy; 2021 - 2023 Jarkko Linnanvirta. This program comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under certain conditions. See more information in the license: <a href="${GitHub.license}">GNU GPL-3.0</a>.
         `);
 
         // KEEP THIS AFTER CREATING ALL ELEMENTS:
@@ -345,7 +350,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Autocomplete")
                 .onClick(() => {
-                    gotoURL(DocumentationAutocompleteLink);
+                    gotoURL(Documentation.variables.autocomplete.index);
                 }),
             )
         ;
@@ -365,7 +370,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Custom variables")
                 .onClick(() => {
-                    gotoURL(DocumentationCustomVariablesLink);
+                    gotoURL(Documentation.variables.customVariables);
                 }),
             )
         ;
@@ -387,7 +392,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 .setIcon("help")
                 .setTooltip("Documentation: Built-in variables")
                 .onClick(() => {
-                    gotoURL(DocumentationBuiltInVariablesIndexLink);
+                    gotoURL(Documentation.variables.allVariables);
                 }),
             )
         ;
@@ -444,9 +449,10 @@ export class SC_MainSettingsTab extends PluginSettingTab {
 
     private async tabEnvironments(container_element: HTMLElement): Promise<void>  {
         // "Working directory" field
+        const platformName: string | undefined = getCurrentPlatformName();
         new Setting(container_element)
             .setName("Working directory")
-            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from filesystem root).")
+            .setDesc("A directory where your commands will be run. If empty, defaults to your vault's location. Can be relative (= a folder in the vault) or absolute (= complete from " + platformName + " filesystem root). If you are using a shell that virtualizes another operating system than " + platformName + " (e.g. 'Windows Subsystem for Linux'), you should still enter a " + platformName + " formatted path. Your shell will do a conversion if needed.")
             .addText(text => text
                 .setPlaceholder(getVaultAbsolutePath(this.app))
                 .setValue(this.plugin.settings.working_directory)
@@ -459,7 +465,50 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         ;
 
         // Platforms' default shells
-        createShellSelectionField(this.plugin, container_element, this.plugin.settings.default_shells, true);
+        const shellSelectionSettings = createShellSelectionFields(this.plugin, container_element, this.plugin.settings.default_shells, true);
+
+        // CustomShells
+        new Setting(container_element)
+        .setName("Custom shells")
+        .setDesc("Define e.g. WSL (Windows Subsystem for Linux), MinGW-w64 (Git Bash), or Wine here.")
+        .setHeading() // Make the "Custom shells" text bold.
+        .addExtraButton(extra_button => extra_button
+            .setIcon("help")
+            .setTooltip("Documentation: Custom shells")
+            .onClick(() => {
+                gotoURL(Documentation.environments.customShells.index);
+            }),
+        )
+        ;
+
+        // Settings for each CustomShell
+        const customShellModel = getModel<CustomShellModel>(CustomShellModel.name);
+        const customShellContainer = container_element.createDiv();
+        this.plugin.getCustomShellInstances().forEach((customShellInstance: CustomShellInstance) => {
+            customShellModel.createSettingFields(customShellInstance, customShellContainer);
+        });
+        createNewModelInstanceButton<CustomShellModel, CustomShellInstance>(
+            this.plugin,
+            CustomShellModel.name,
+            container_element,
+            customShellContainer,
+            this.plugin.settings,
+            (customShellInstance: CustomShellInstance, main_setting: Setting) => {
+                // A new CustomShell is created.
+                // Open settings modal.
+                customShellModel.openSettingsModal(customShellInstance, main_setting).then(() => {
+                    // CustomShellModal is closed. Can get a shell name now.
+                    // Add the new shell to shell selection dropdown.
+                    const customShellHostPlatformId: PlatformId = customShellInstance.configuration.host_platform;
+                    shellSelectionSettings[customShellHostPlatformId].components.forEach((component: BaseComponent) => {
+                        if (component instanceof DropdownComponent) {
+                            // Add the new shell to the dropdown.
+                            component.addOption(customShellInstance.getId(), customShellInstance.getTitle());
+                        }
+                    });
+                });
+            }
+        );
 
         // PATH environment variable fields
         createPATHAugmentationFields(this.plugin, container_element, this.plugin.settings.environment_variable_path_augmentations);
@@ -501,7 +550,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             .addExtraButton(extra_button => extra_button
                 .setIcon("help")
                 .setTooltip("Documentation: Output wrappers")
-                .onClick(() => gotoURL(DocumentationOutputWrappersLink))
+                .onClick(() => gotoURL(Documentation.outputHandling.outputWrappers))
             )
         ;
         const output_wrappers_container_element = container_element.createDiv();

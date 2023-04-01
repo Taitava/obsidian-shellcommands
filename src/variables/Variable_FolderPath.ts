@@ -21,6 +21,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {FolderVariable} from "./FolderVariable";
 import {getFolderPath} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_FolderPath extends FolderVariable {
     public variable_name = "folder_path";
@@ -33,8 +34,11 @@ export class Variable_FolderPath extends FolderVariable {
         },
     };
 
-    protected async generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string> {
-        return getFolderPath(this.app, this.getFolderOrThrow(), castedArguments.mode);
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {mode: "absolute" | "relative"},
+        ): Promise<string> {
+        return getFolderPath(this.app, shell, this.getFolderOrThrow(), castedArguments.mode);
     }
 
     public getAutocompleteItems() {

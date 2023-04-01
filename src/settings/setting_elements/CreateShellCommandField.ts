@@ -36,11 +36,14 @@ import {
 import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
 
 /**
+ * Creates a shell command textarea (by calling createShellCommandFieldCore()) and related control buttons.
+ *
+ * TODO: Rename this function to createShellCommandSettings() and createShellCommandFieldCore() to createShellCommandTextarea().
  *
  * @param plugin
  * @param container_element
  * @param setting_tab
- * @param shell_command_id Either a string formatted integer ("0", "1" etc) or "new" if it's a field for a command that does not exist yet.
+ * @param shell_command_id Either an alphanumeric string or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
  * @param onAfterPreviewGenerated
  */
@@ -98,7 +101,7 @@ export function createShellCommandField(
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
+                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContent(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();

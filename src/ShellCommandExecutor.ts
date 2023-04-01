@@ -19,12 +19,11 @@
 
 import {
     ChildProcess,
-    spawn,
-    SpawnOptions,
 } from "child_process";
 import {
     cloneObject,
-    getOperatingSystem,
+    getCurrentPlatformName,
+    getPlatformName,
     getVaultAbsolutePath,
 } from "./Common";
 import * as path from "path";
@@ -34,20 +33,15 @@ import {
     startRealtimeOutputHandling,
 } from "./output_channels/OutputChannelFunctions";
 import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
-import {isShellSupported} from "./Shell";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {
     ConfirmationModal,
-    convertNewlinesToPATHSeparators,
-    getPATHEnvironmentVariableName,
-    getPATHSeparator,
     Preaction,
 } from "./imports";
 import SC_Plugin from "./main";
 import {
     ExecutionNotificationMode,
-    PlatformNames,
 } from "./settings/SC_MainSettings";
 import {
     OutputHandlerCode,
@@ -58,6 +52,9 @@ import {Readable} from "stream";
 import {Notice} from "obsidian";
 import {OutputChannel} from "./output_channels/OutputChannel";
 import {ParsingResult} from "./variables/parseVariables";
+import {
+    Shell,
+} from "./shells/Shell";
 
 export class ShellCommandExecutor {
 
@@ -156,9 +153,20 @@ export class ShellCommandExecutor {
                 if (await parsing_process.processRest()) {
                     // Parsing the rest of the variables succeeded
                     // Execute the shell command.
+                    // TODO: Create a new class ShellCommandParsingProcess (extends ParsingProcess) whose .getParsingResults() returns the shell_command_parsing_result below. I.e. extract the parsing result conversion logic to a separate class. Note that the class should only accept shell_command_parsing_map (defined in TShellCommand.ts) as it's original_contents parameter/property.
                     const parsing_results = parsing_process.getParsingResults();
+                    const unwrappedShellCommandContent: string = (parsing_results.shellCommandContent as ParsingResult).parsed_content as string;
                     const shell_command_parsing_result: ShellCommandParsingResult = {
-                        shell_command: (parsing_results["shell_command"] as ParsingResult).parsed_content as string,
+                        unwrappedShellCommandContent: unwrappedShellCommandContent,
+                        wrappedShellCommandContent: parsing_results.shellCommandWrapper?.parsed_content
+                            ? TShellCommand.wrapShellCommandContent(
+                                this.plugin,
+                                unwrappedShellCommandContent,
+                                parsing_results.shellCommandWrapper.parsed_content as string,
+                                this.t_shell_command.getShell(),
+                            )
+                            : unwrappedShellCommandContent // No wrapper, use unwrapped shell command content as wrapped.
+                        ,
                         alias: (parsing_results["alias"] as ParsingResult).parsed_content as string,
                         environment_variable_path_augmentation: (parsing_results.environment_variable_path_augmentation as ParsingResult).parsed_content as string,
                         stdinContent: parsing_results.stdinContent?.parsed_content as string,
@@ -168,7 +176,7 @@ export class ShellCommandExecutor {
                         error_messages: [],
                     };
                     debugLog("Will call ShellCommandExecutor.executeShellCommand().");
-                    this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
+                    await this.executeShellCommand(shell_command_parsing_result, overriding_output_channel);
                 } else {
                     // Parsing has failed.
                     debugLog("Parsing the rest of the variables failed.");
@@ -190,8 +198,10 @@ export class ShellCommandExecutor {
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
-    private executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputHandlerCode) {
-        const working_directory = this.getWorkingDirectory();
+    private async executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputHandlerCode): Promise<void> {
+
+        const shell: Shell = this.t_shell_command.getShell();
+        const working_directory = ShellCommandExecutor.getWorkingDirectory(this.plugin);
 
         // Define output channels
         let outputHandlers = this.t_shell_command.getOutputHandlers();
@@ -206,32 +216,12 @@ export class ShellCommandExecutor {
         }
 
         // Check that the shell command is not empty
-        const shell_command = shell_command_parsing_result.shell_command.trim();
-        if (!shell_command.length) {
+        if (!shell_command_parsing_result.unwrappedShellCommandContent.trim().length) { // Check unwrapped instead of wrapped so that can detect if the _actual_ shell command is empty. I.e. don't allow a Shell's wrapper to make an empty shell command non-empty.
             // It is empty
             const error_message = this.getErrorMessageForEmptyShellCommand();
             debugLog(error_message);
             this.plugin.newError(error_message);
             return;
-        }
-
-        // Check that the currently defined shell is supported by this plugin. If using system default shell, it's possible
-        // that the shell is something that is not supported. Also, the settings file can be edited manually, and incorrect
-        // shell can be written there.
-        const shell = this.t_shell_command.getShell();
-        if (!isShellSupported(shell)) {
-            debugLog("Shell is not supported: " + shell);
-            this.plugin.newError("This plugin does not support the following shell: " + shell);
-            return;
-        }
-
-        // Define an object for environment variables.
-        const environment_variables = cloneObject<typeof process.env>(process.env); // Need to clone process.env, otherwise the modifications below will be stored permanently until Obsidian is hard-restarted (= closed and launched again).
-
-        // Augment the PATH environment variable (if wanted)
-        const augmented_path = this.augmentPATHEnvironmentVariable(shell_command_parsing_result.environment_variable_path_augmentation);
-        if (augmented_path.length > 0) {
-            environment_variables[getPATHEnvironmentVariableName()] = augmented_path;
         }
 
         // Check that the working directory exists and is a folder
@@ -248,17 +238,24 @@ export class ShellCommandExecutor {
             this.plugin.newError("Working directory exists but is not a folder: " + working_directory);
         } else {
             // Working directory is OK
-            // Prepare execution options
-            const options: SpawnOptions = {
-                "cwd": working_directory,
-                "shell": shell,
-                "env": environment_variables,
-            };
+
+            // Pass possible PATH augmentations to the Shell - if the Shell supports them.
+            if (shell_command_parsing_result.environment_variable_path_augmentation.length > 0) {
+                shell.setEnvironmentVariablePathAugmentation?.(shell_command_parsing_result.environment_variable_path_augmentation);
+                // If setEnvironmentVariablePathAugmentation() does not exist, the Shell does not support PATH augmentation. Then just ignore the PATH augmentation.
+                // - Only BuiltinShells support the PATH augmentation setting.
+                // - CustomShells have so much better flexibility in their settings that there's no real need for them to support augmenting PATH via this setting.
+                // - The PATH augmentation setting might be removed some day.
+            }
 
             // Execute the shell command
-            debugLog("Executing command " + shell_command + " in " + working_directory + "...");
+            const wrappedShellCommandContent = shell_command_parsing_result.wrappedShellCommandContent;
             try {
-                const child_process = spawn(shell_command, options);
+                const child_process = await shell.spawnChildProcess(wrappedShellCommandContent, working_directory, this.t_shell_command, this.sc_event);
+                if (null === child_process) {
+                    // No spawn() call was made due to some shell configuration error. Just cancel everything.
+                    return;
+                }
 
                 // Pass stdin content (if defined)
                 if (undefined !== shell_command_parsing_result.stdinContent) {
@@ -317,14 +314,14 @@ export class ShellCommandExecutor {
 
                 // Display a notification of the execution (if wanted).
                 if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                    this.showExecutionNotification(child_process, shell_command, this.plugin.settings.execution_notification_mode, processTerminator);
+                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, this.plugin.settings.execution_notification_mode, processTerminator);
                 }
             } catch (exception) {
                 // An exception has happened.
                 // Check if the shell command was too long.
                 if (exception.message.match(/spawn\s+ENAMETOOLONG/i)) {
                     // It was too long. Show an error message.
-                    this.plugin.newError("Shell command execution failed because it's too long: " + shell_command.length + " characters. (Unfortunately the max limit is unknown).");
+                    this.plugin.newError("Shell command execution failed because it's too long: " + wrappedShellCommandContent.length + " characters. (Unfortunately the max limit is unknown).");
                 } else {
                     // The shell command was not too long, this exception is about something else.
                     // Rethrow the exception.
@@ -463,50 +460,18 @@ export class ShellCommandExecutor {
         });
     }
 
-    private getWorkingDirectory() {
+    public static getWorkingDirectory(plugin: SC_Plugin) {
         // Returns either a user defined working directory, or an automatically detected one.
-        const working_directory = this.plugin.settings.working_directory;
-        if (working_directory.length == 0) {
+        const working_directory = plugin.settings.working_directory;
+        if (working_directory.length === 0) {
             // No working directory specified, so use the vault directory.
-            return getVaultAbsolutePath(this.plugin.app);
+            return getVaultAbsolutePath(plugin.app);
         } else if (!path.isAbsolute(working_directory)) {
             // The working directory is relative.
             // Help to make it refer to the vault's directory. Without this, the relative path would refer to Obsidian's installation directory (at least on Windows).
-            return path.join(getVaultAbsolutePath(this.plugin.app), working_directory);
+            return path.join(getVaultAbsolutePath(plugin.app), working_directory);
         }
         return working_directory;
-    }
-
-    private augmentPATHEnvironmentVariable(path_augmentation: string): string {
-        path_augmentation = convertNewlinesToPATHSeparators(path_augmentation, getOperatingSystem());
-        // Check if there's anything to augment.
-        if (path_augmentation.length > 0) {
-            // Augment.
-            const original_path: string | undefined = process.env[getPATHEnvironmentVariableName()];
-            if (undefined === original_path) {
-                throw new Error("process.env does not contain '" + getPATHEnvironmentVariableName() + "'.");
-            }
-            let augmented_path: string;
-            if (path_augmentation.contains(original_path)) {
-                // The augmentation contains the original PATH.
-                // Simply replace the whole original PATH with the augmented one, as there's no need to care about including
-                // the original content.
-                debugLog("Augmenting environment variable PATH so it will become " + path_augmentation);
-                augmented_path = path_augmentation;
-            } else {
-                // The augmentation does not contain the original PATH.
-                // Instead of simply replacing the original PATH, append the augmentation after it.
-                const separator = getPATHSeparator(getOperatingSystem());
-                debugLog("Augmenting environment variable PATH by adding " + separator + path_augmentation + " after it.");
-                augmented_path = original_path + separator + path_augmentation;
-            }
-            debugLog("PATH augmentation result: " + augmented_path);
-            return augmented_path;
-        } else {
-            // No augmenting is needed.
-            debugLog("No augmentation is defined for environment variable PATH. This is completely ok.");
-            return "";
-        }
     }
 
     /**
@@ -517,9 +482,9 @@ export class ShellCommandExecutor {
     private getErrorMessageForEmptyShellCommand(): string {
         if (this.t_shell_command.getNonEmptyPlatformIds().length > 0) {
             // The shell command contains versions for other platforms, but not for the current one.
-            const current_platform_name = PlatformNames[getOperatingSystem()];
+            const current_platform_name = getCurrentPlatformName();
             const version_word = this.t_shell_command.getNonEmptyPlatformIds().length > 1 ? "versions" : "a version";
-            const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => PlatformNames[platform_id]).join(" and ");
+            const other_platform_names = this.t_shell_command.getNonEmptyPlatformIds().map(platform_id => getPlatformName(platform_id)).join(" and ");
             return `The shell command does not have a version for ${current_platform_name}, it only has ${version_word} for ${other_platform_names}.`;
         } else {
             // The shell command doesn't contain a version for any platforms, it's completely empty.

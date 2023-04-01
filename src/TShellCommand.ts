@@ -30,7 +30,10 @@ import {getSC_Events} from "./events/SC_EventList";
 import {debugLog} from "./Debug";
 import {Command} from "obsidian";
 import {VariableSet} from "./variables/loadVariables";
-import {getUsedVariables} from "./variables/parseVariables";
+import {
+    getUsedVariables,
+    parseVariableSynchronously,
+} from "./variables/parseVariables";
 import {
     createPreaction,
     CustomVariable,
@@ -51,6 +54,9 @@ import {
 import {getIconHTML} from "./Icons";
 import {OutputStream} from "./output_channels/OutputHandlerCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
+import {Shell} from "./shells/Shell";
+import {getShell} from "./shells/ShellFunctions";
+import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -88,28 +94,41 @@ export class TShellCommand {
         return this.configuration.id;
     }
 
-    public getShell(): string {
+    public getShellIdentifier(): string {
         // Check if the shell command has defined a specific shell.
-        const shell: string | undefined = this.configuration.shells[getOperatingSystem()];
-        if (undefined === shell) {
+        const shellIdentifier: string | undefined = this.configuration.shells[getOperatingSystem()];
+        if (undefined === shellIdentifier) {
             // The shell command does not define an explicit shell.
             // Use a default shell from the plugin's settings.
-            return this.plugin.getDefaultShell();
+            return this.plugin.getDefaultShellIdentifier();
         } else {
             // The shell command has an explicit shell defined.
-            return shell;
+            return shellIdentifier;
         }
     }
 
+    public getShell(): Shell {
+        return getShell(this.plugin, this.getShellIdentifier());
+    }
+
+    /**
+     * TODO: Rename to getShellIdentifiers().
+     */
     public getShells() {
         return this.configuration.shells;
+    }
+
+    public getShellIdentifiersAsSet(): Set<string> {
+        return new Set(Object.values(this.configuration.shells));
     }
 
     /**
      * Returns a shell command string specific for the current operating system, or a generic shell command if this shell
      * command does not have an explicit version for the current OS.
+     *
+     * Does not include any possible Shell provided augmentations to the shell command content.
      */
-    public getShellCommand(): string {
+    public getShellCommandContent(): string {
         // Check if the shell command has defined a specific command for this operating system.
         const platformSpecificShellCommand: string | undefined = this.configuration.platform_specific_commands[getOperatingSystem()];
         if (undefined === platformSpecificShellCommand) {
@@ -172,10 +191,10 @@ export class TShellCommand {
     }
 
     /**
-     * TODO: Use this method in all places where similar logic is needed.
+     * TODO: Use this method in all places where similar logic is needed. I guess generateObsidianCommandName() is the only place left.
      */
     public getAliasOrShellCommand(): string {
-        return this.configuration.alias || this.getShellCommand();
+        return this.configuration.alias || this.getShellCommandContent(); // TODO: Use this.getAlias().
     }
 
     public getConfirmExecution() {
@@ -415,7 +434,8 @@ export class TShellCommand {
         return new ParsingProcess<shell_command_parsing_map>(
             this.plugin,
             {
-                shell_command: this.getShellCommand(),
+                shellCommandContent: this.getShellCommandContent(),
+                shellCommandWrapper: this.getShell().getShellCommandWrapper(),
                 alias: this.getAlias(),
                 environment_variable_path_augmentation: getPATHAugmentation(this.plugin) ?? "",
                 stdinContent: this.configuration.input_contents.stdin ?? undefined,
@@ -529,9 +549,20 @@ export class TShellCommand {
 
         // Get a list CustomVariables that the shell command uses.
         const custom_variables = new VariableSet();
-        for (const custom_variable of getUsedVariables(this.plugin, this.getShellCommand())) {
+        const shellCommandWrapper: string | undefined = this.getShell().getShellCommandWrapper();
+        const readVariablesFrom = shellCommandWrapper
+            ? TShellCommand.wrapShellCommandContent(
+                this.plugin,
+                this.getShellCommandContent(),
+                shellCommandWrapper,
+                this.getShell(),
+            )
+            : this.getShellCommandContent() // Use unwrapped content.
+        ;
+        // FIXME: readVariablesFrom should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
+        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom)) {
             // Check that the variable IS a CustomVariable.
-            if (custom_variable instanceof CustomVariable) {
+            if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
                 custom_variables.add(custom_variable);
             }
         }
@@ -574,7 +605,41 @@ export class TShellCommand {
         }
         return t_shell_commands[this_index - 1];
     }
+
+    /**
+     * Replaces all occurrences of {{shell_command_content}} in shellCommandWrapper with shellCommandContent.
+     *
+     * @param plugin
+     * @param shellCommandContent
+     * @param shellCommandWrapper
+     * @param shell
+     */
+    public static wrapShellCommandContent(
+        plugin: SC_Plugin,
+        shellCommandContent: string,
+        shellCommandWrapper: string,
+        shell: Shell,
+    ) {
+        const debugMessageBase = `${this.constructor.name}.wrapShellCommandContent(): `;
+        debugLog(`${debugMessageBase}Using wrapper: ${shellCommandWrapper} for shell command: ${shellCommandContent}`);
+
+        // Wrap the shell command.
+        const wrapperParsingResult = parseVariableSynchronously(
+            shellCommandWrapper,
+            new Variable_ShellCommandContent(plugin, shellCommandContent),
+            shell,
+        );
+        if (!wrapperParsingResult.succeeded) {
+            // {{shell_command_content}} is so simple that there should be no way for its parsing to fail.
+            throw new Error("{{shell_command_content}} parsing failed, although it should not fail.");
+        }
+
+        debugLog(`${debugMessageBase}Wrapped shell command: ${wrapperParsingResult.parsed_content}`);
+        return wrapperParsingResult.parsed_content as string; // It's always string at this point, as .succeeded is checked above.
+    }
 }
+
+export class TShellCommandMap extends Map<string, TShellCommand> {}
 
 /**
  * TODO: The name ShellCommandParsingResult sounds like this would be a sub-interface of ParsingResult, although the interfaces are very different. Rename this to something better. Candidate names:
@@ -582,7 +647,8 @@ export class TShellCommand {
  *  - ParsedShellCommandStrings
  */
 export interface ShellCommandParsingResult {
-    shell_command: string,
+    unwrappedShellCommandContent: string,
+    wrappedShellCommandContent: string,
     alias: string,
     environment_variable_path_augmentation: string,
     stdinContent?: string,
@@ -595,7 +661,8 @@ export interface ShellCommandParsingResult {
 export type ShellCommandParsingProcess = ParsingProcess<shell_command_parsing_map>;
 
 type shell_command_parsing_map = {
-    shell_command: string,
+    shellCommandContent: string,
+    shellCommandWrapper?: string,
     alias: string,
     environment_variable_path_augmentation: string,
     stdinContent?: string,
