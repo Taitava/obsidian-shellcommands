@@ -143,6 +143,11 @@ export class CustomVariableModel extends Model {
             "Default value",
             instance.getCustomVariable(),
         );
+        
+        // Usage listing.
+        const usageListContainerElement: HTMLElement = document.createElement("small");
+        usageListContainerElement.appendChild(instance.getUsages().toHTMLElement("short"));
+        container_element.appendChild(usageListContainerElement);
 
         return heading_setting;
     }

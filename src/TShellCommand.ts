@@ -35,6 +35,7 @@ import {
     parseVariableSynchronously,
 } from "./variables/parseVariables";
 import {
+    Cacheable,
     createPreaction,
     CustomVariable,
     getIDGenerator,
@@ -65,13 +66,14 @@ export interface TShellCommandContainer {
 /**
  * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Maybe ShellCommandInstance? It's not the best name, but I can't come up with a better one now.
  */
-export class TShellCommand {
+export class TShellCommand extends Cacheable {
 
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
+        super();
         this.plugin = plugin;
         this.configuration = configuration;
 
@@ -560,7 +562,7 @@ export class TShellCommand {
             : this.getShellCommandContent() // Use unwrapped content.
         ;
         // FIXME: readVariablesFrom should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
-        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom)) {
+        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom).values()) { // Does not use this.getUsedCustomVariables(), because it doesn't include variables present in a possible wrapper, that a CustomShell might have defined.
             // Check that the variable IS a CustomVariable.
             if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
                 custom_variables.add(custom_variable);
@@ -578,6 +580,28 @@ export class TShellCommand {
 
         // Finished.
         return execution_uri_with_variables;
+    }
+    
+    /**
+     * Returns a VariableMap containing Variables used in any of this TShellCommand's shell commands contents. Note that
+     * variables used in Shell wrappers, preactions or output wrappers are not included.
+     */
+    public getUsedCustomVariables() {
+        return this.cache("getUsedCustomVariables", () => {
+            // Gather parseable content.
+            const readVariablesFrom: string[] = [
+                ...Object.values(this.configuration.platform_specific_commands),
+                this.getAlias() ?? "",
+                this.configuration.input_contents.stdin ?? "",
+                    ...Object.values(this.configuration.variable_default_values).map((defaultValueConfiguration: InheritableVariableDefaultValueConfiguration) => defaultValueConfiguration.value),
+            ];
+    
+            return getUsedVariables(
+                this.plugin,
+                readVariablesFrom,
+                this.plugin.getCustomVariables(),
+            );
+        });
     }
 
     /**

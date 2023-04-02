@@ -127,6 +127,10 @@ export class CustomVariable extends Variable {
     public getGlobalDefaultValueConfiguration(): GlobalVariableDefaultValueConfiguration | null {
         return this.custom_variable_instance.configuration.default_value;
     }
+    
+    public getCustomVariableInstance(): CustomVariableInstance {
+        return this.custom_variable_instance;
+    }
 }
 
 type TCustomVariableOnChangeCallback = (variable: CustomVariable, new_value: string, old_value: string) => Promise<void>;
