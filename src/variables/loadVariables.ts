@@ -62,6 +62,7 @@ import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
 import {Variable_Newline} from "./Variable_Newline";
 import {Variable_YAMLContent} from "./Variable_YAMLContent";
 import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLContent";
+import {Variable_OperatingSystem} from "./Variable_OperatingSystem";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -124,6 +125,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         // Variables that are only designed for 'Shell commands test suite'.
         built_in_variables.push(
             new Variable_Newline(plugin),
+            new Variable_OperatingSystem(plugin),
             new Variable_Passthrough(plugin),
         );
     }
