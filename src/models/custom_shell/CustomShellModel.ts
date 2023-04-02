@@ -47,7 +47,7 @@ export class CustomShellModel extends Model {
 
     private customShellInstances: CustomShellInstanceMap;
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Custom shell";
     }
 

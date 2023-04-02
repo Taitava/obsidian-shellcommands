@@ -32,7 +32,13 @@ export abstract class Model {
         public readonly plugin: SC_Plugin,
     ) {}
 
-    public abstract getSingularName(): string;
+    public static getSingularName(): string {
+        throw new Error(this.name + " must define getSingularName().");
+    }
+    
+    public static getPluralName(): string {
+        return this.getSingularName() + "s";
+    }
 
     /**
      *TODO: Change this to public and call it from Instance.constructor() and store the result in a new property Instance.parent_relation. Make other callers use the new property instead of calling this method.
@@ -61,14 +67,14 @@ export abstract class Model {
         if (with_deletion) {
             main_setting_field.addExtraButton(button => button
                 .setIcon("trash")
-                .setTooltip("Delete this " + this.getSingularName().toLocaleLowerCase())
+                .setTooltip("Delete this " + this.static().getSingularName().toLocaleLowerCase())
                 .onClick(() => {
                     // The trash icon has been clicked
                     // Open up a modal asking for confirmation if the instance can be deleted from this.parent_configuration.
                     const confirmation_modal = new ConfirmationModal(
                         this.plugin,
-                        "Delete " + this.getSingularName().toLocaleLowerCase() + ": " + instance.getTitle(),
-                        "Are you sure you want to delete this " + this.getSingularName().toLocaleLowerCase() + "?",
+                        "Delete " + this.static().getSingularName().toLocaleLowerCase() + ": " + instance.getTitle(),
+                        "Are you sure you want to delete this " + this.static().getSingularName().toLocaleLowerCase() + "?",
                         "Yes, delete",
                     );
                     // Let subclasses add additional information to the deletion modal.
@@ -168,6 +174,9 @@ export abstract class Model {
      */
     public abstract validateValue(instance: Instance, field: string, value: unknown): Promise<void>;
 
+    public static(): typeof Model {
+        return this.constructor as typeof Model;
+    }
 }
 
 /**

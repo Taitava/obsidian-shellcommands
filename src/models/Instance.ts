@@ -19,10 +19,12 @@
 
 import {debugLog} from "../Debug";
 import {
+    Cacheable,
     Model,
+    UsageContainer,
 } from "../imports";
 
-export abstract class Instance {
+export abstract class Instance extends Cacheable {
 
     /**
      * Configuration of the parent instance. E.g. if the current instance is a PromptField, then parent_configurations is a Prompt's configuration.
@@ -41,6 +43,7 @@ export abstract class Instance {
         public readonly configuration: InstanceConfiguration,
         parent_instance_or_configuration: Instance | InstanceConfiguration,
     ) {
+        super();
         debugLog(this.constructor.name + ": Creating a new instance.");
 
         // Determine parent type
@@ -63,6 +66,30 @@ export abstract class Instance {
             this.configuration[field] = value;
         });
     }
+    
+    /**
+     * Returns a UsageContainer containing a list of places where this Instance is used. The result is cached, and only
+     * regenerated if configuration changes.
+     */
+    public getUsages(): UsageContainer {
+        return this.cache("getUsages", () => {
+            // Check that a usage getter is defined by the subclass.
+            if (this._getUsages) {
+                return this._getUsages();
+            } else {
+                // No usage getter is defined. E.g. PromptField does not need usage tracking.
+                // Return an empty UsageContainer.
+                return new UsageContainer(this.getTitle()); // subjectName will not be used in practise when the UsageContainer is empty.
+            }
+        });
+    }
+    
+    /**
+     * @see getUsages()
+     *
+     * @protected
+     */
+    protected _getUsages?(): UsageContainer;
 
 }
 

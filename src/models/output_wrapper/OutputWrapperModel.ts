@@ -60,7 +60,7 @@ export class OutputWrapperModel extends Model {
         };
     }
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Output wrapper";
     }
 

@@ -31,6 +31,8 @@ import {
     PromptModal,
     PromptModel,
     getIDGenerator,
+    Preaction_Prompt_Configuration,
+    UsageContainer,
 } from "../../imports";
 import {debugLog} from "../../Debug";
 
@@ -182,6 +184,24 @@ export class Prompt extends Instance {
             variable_names.push(prompt_field.getTargetVariableInstance().getFullName());
         }
         return "echo "+variable_names.join(" ");
+    }
+    
+    protected _getUsages(): UsageContainer {
+        const usages: UsageContainer = new UsageContainer(this.getTitle());
+        
+        for (const tShellCommand of this.plugin.getTShellCommandsAsMap().values()) {
+            const promptIdsUsedByShellCommand: (string | undefined)[] = Object.values(tShellCommand.getConfiguration().preactions).map((preactionConfiguration: Preaction_Prompt_Configuration) => preactionConfiguration?.prompt_id);
+            if (promptIdsUsedByShellCommand.contains(this.getID())) {
+                usages.addUsage(
+                    {
+                        title: tShellCommand.getAliasOrShellCommand(),
+                    },
+                    "shellCommands",
+                );
+            }
+        }
+        
+        return usages;
     }
 }
 

@@ -35,7 +35,7 @@ export class CustomVariableModel extends Model {
 
     private custom_variable_instances: CustomVariableInstanceMap = new CustomVariableInstanceMap;
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Custom variable";
     }
 

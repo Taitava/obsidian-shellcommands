@@ -634,6 +634,9 @@ export default class SC_Plugin extends Plugin {
 
 		// Write settings
 		await this.saveData(this.settings);
+        
+        // Trigger an event so that any program parts relying on cached configuration will know to flush their caches.
+        document.dispatchEvent(new Event("SC-configuration-change"));
 	}
 
 	private loadCustomAutocompleteList() {
