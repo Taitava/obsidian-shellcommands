@@ -19,6 +19,7 @@
 
 import {
 	CustomVariable,
+    CustomVariableInstance,
 	CustomVariableInstanceMap,
 	CustomVariableModel,
 	CustomVariableView,
@@ -230,6 +231,14 @@ export default class SC_Plugin extends Plugin {
 	public getVariables() {
 		return this.variables;
 	}
+    
+    public getCustomVariables() {
+        return new VariableSet([
+            ...Array.from(this.custom_variable_instances.values()).map(
+                (customVariableInstance: CustomVariableInstance) => customVariableInstance.getCustomVariable()
+            ),
+        ]);
+    }
 
 	public getPrompts() {
 		return this.prompts;

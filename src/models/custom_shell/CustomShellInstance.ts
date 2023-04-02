@@ -42,6 +42,8 @@ import {
     Usage,
     UsageContainer,
 } from "../../imports";
+import {getUsedVariables} from "../../variables/parseVariables";
+import {VariableMap} from "../../variables/loadVariables";
 
 export class CustomShellInstance extends Instance {
     public readonly parent_configuration: SC_MainSettings;
@@ -189,5 +191,20 @@ export class CustomShellInstance extends Instance {
         }
 
         return usages;
+    }
+    
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            ...this.configuration.shell_arguments,
+            this.configuration.shell_command_wrapper ?? "",
+            this.configuration.shell_command_test ?? "",
+        ];
+        
+        return getUsedVariables(
+            this.model.plugin,
+            readVariablesFrom,
+            this.model.plugin.getCustomVariables(),
+        );
     }
 }

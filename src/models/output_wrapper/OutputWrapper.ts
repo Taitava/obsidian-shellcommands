@@ -24,6 +24,8 @@ import {getIDGenerator} from "../../IDGenerator";
 import {OutputWrapperModel} from "./OutputWrapperModel";
 import {UsageContainer} from "../../imports";
 import {OutputStream} from "../../output_channels/OutputHandlerCode";
+import {VariableMap} from "../../variables/loadVariables";
+import {getUsedVariables} from "../../variables/parseVariables";
 
 export class OutputWrapper extends Instance {
 
@@ -73,6 +75,24 @@ export class OutputWrapper extends Instance {
         }
         
         return usages;
+    }
+    
+    /**
+     * Returns {{variables}} used in the OutputWrapper's content.
+     *
+     * @protected
+     */
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            this.configuration.content,
+        ];
+        
+        return getUsedVariables(
+            this.plugin,
+            readVariablesFrom,
+            this.plugin.getCustomVariables(),
+        );
     }
 }
 

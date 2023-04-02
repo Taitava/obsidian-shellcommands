@@ -135,4 +135,9 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
     return variables;
 }
 
+/**
+ * TODO: Check if VariableSet usages could be refactored to VariableMaps?
+ */
 export class VariableSet extends Set<Variable> {}
+
+export class VariableMap extends Map<string, Variable> {}

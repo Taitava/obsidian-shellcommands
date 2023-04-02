@@ -26,6 +26,8 @@ import {
     Instance,
 } from "../../imports";
 import {debugLog} from "../../Debug";
+import {VariableMap} from "../../variables/loadVariables";
+import {getUsedVariables} from "../../variables/parseVariables";
 
 /**
  * This class serves as an accessor to CustomVariable configurations. It's paired with the CustomVariable class, which acts
@@ -83,5 +85,23 @@ export class CustomVariableInstance extends Instance {
         this.custom_variable = new CustomVariable(this.model.plugin, this);
         this.custom_variable.onChange(async () => await this.model.plugin.updateCustomVariableViews());
         return this.custom_variable;
+    }
+    
+    /**
+     * Returns {{variables}} used in this {{variable}}'s default value configuration.
+     *
+     * @protected
+     */
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            this.configuration.default_value?.value ?? "",
+        ];
+        
+        return getUsedVariables(
+            this.model.plugin,
+            readVariablesFrom,
+            this.model.plugin.getCustomVariables(),
+        );
     }
 }

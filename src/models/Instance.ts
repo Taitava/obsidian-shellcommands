@@ -23,6 +23,7 @@ import {
     Model,
     UsageContainer,
 } from "../imports";
+import {VariableMap} from "../variables/loadVariables";
 
 export abstract class Instance extends Cacheable {
 
@@ -60,6 +61,22 @@ export abstract class Instance extends Cacheable {
     }
 
     public abstract getTitle(): string;
+    
+    /**
+     * Returns a `VariableMap` containing all CustomVariables used by this Instance. The result is cached, and only
+     * regenerated if configuration changes.
+     */
+    public getUsedCustomVariables(): VariableMap {
+        return this.cache("getUsedCustomVariables", () => this._getUsedCustomVariables());
+    }
+    
+    /**
+     * Each Instance should return a VariableMap containing all CustomVariables that are used in any of their configuration
+     * fields. If an Instance does not utilize {{variable}} parsing, it can return an
+     *
+     * @protected
+     */
+    protected abstract _getUsedCustomVariables(): VariableMap;
 
     public setIfValid(field: string, value: unknown): Promise<void> {
         return this.model.validateValue(this, field, value).then(() => {

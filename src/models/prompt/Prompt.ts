@@ -35,6 +35,8 @@ import {
     UsageContainer,
 } from "../../imports";
 import {debugLog} from "../../Debug";
+import {VariableMap} from "../../variables/loadVariables";
+import {getUsedVariables} from "../../variables/parseVariables";
 
 export class Prompt extends Instance {
 
@@ -202,6 +204,26 @@ export class Prompt extends Instance {
         }
         
         return usages;
+    }
+    
+    /**
+     * Returns {{variables}} used in this Prompt's title, description and execution button.
+     *
+     * @protected
+     */
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            this.configuration.title,
+            this.configuration.description,
+            this.configuration.execute_button_text,
+        ];
+        
+        return getUsedVariables(
+            this.plugin,
+            readVariablesFrom,
+            this.plugin.getCustomVariables(),
+        );
     }
 }
 
