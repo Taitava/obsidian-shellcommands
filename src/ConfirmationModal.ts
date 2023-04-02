@@ -26,8 +26,14 @@ export class ConfirmationModal extends SC_Modal {
     public promise: Promise<boolean>;
     private resolve_promise: (value: (boolean | PromiseLike<boolean>)) => void;
     private approved = false;
-
-    private extraContent?: HTMLElement;
+    
+    /**
+     * Can be used to add extra information to the modal, that will be shown between the modal's question and yes button.
+     *
+     * Note that when using this property, you SHOULD NOT overwrite existing content! Use extraContent.createEl() or
+     * similar method that ADDS new content without replacing old content.
+     */
+    public extraContent: HTMLElement = document.createElement("div");
 
     constructor(
         plugin: SC_Plugin,
@@ -48,10 +54,8 @@ export class ConfirmationModal extends SC_Modal {
         // Display the question
         this.modalEl.createEl("p", {text: this.question});
 
-        // Display extra content/information, if defined.
-        if (this.extraContent) {
-            this.modalEl.insertAdjacentElement("beforeend", this.extraContent);
-        }
+        // Display extra content/information. The element might be empty, if no extra content is added.
+        this.modalEl.appendChild(this.extraContent);
 
         // Display the yes button
         new Setting(this.modalEl)
@@ -61,15 +65,6 @@ export class ConfirmationModal extends SC_Modal {
             )
         ;
 
-    }
-
-    /**
-     * Inserts an HTMLElement to this ConfirmationModal, that will be shown between the modal's question and yes button.
-     *
-     * @param extraContent
-     */
-    public setExtraContent(extraContent: HTMLElement) {
-        this.extraContent = extraContent;
     }
 
     protected approve(): void {

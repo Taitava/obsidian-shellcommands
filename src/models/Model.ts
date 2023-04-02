@@ -24,6 +24,7 @@ import {
     ConfirmationModal,
     Instance,
     InstanceConfiguration,
+    UsageContainer,
 } from "../imports";
 
 export abstract class Model {
@@ -77,6 +78,13 @@ export abstract class Model {
                         "Are you sure you want to delete this " + this.static().getSingularName().toLocaleLowerCase() + "?",
                         "Yes, delete",
                     );
+                    
+                    // Show additional information, if the instance is used somewhere.
+                    const usages: UsageContainer = instance.getUsages();
+                    if (usages.hasUsages()) {
+                        confirmation_modal.extraContent.appendChild(usages.toHTMLElement("long"));
+                    }
+                    
                     // Let subclasses add additional information to the deletion modal.
                     this.augmentDeletionConfirmationModal?.(confirmation_modal, instance);
                     confirmation_modal.open();
