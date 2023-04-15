@@ -242,6 +242,7 @@ export function createShellCommandField(
         }),
     );
 
+    // Create Hotkey settings icon.
     if (t_shell_command.canHaveHotkeys()) {
         setting_group.preview_setting.addExtraButton(button => button
             .setIcon("any-key")
@@ -254,12 +255,23 @@ export function createShellCommandField(
 
                 // @ts-ignore
                 const hotkeys_settings_tab = plugin.app.setting.settingTabs.filter(tab => tab.id === "hotkeys").shift();
-                if (hotkeys_settings_tab && hotkeys_settings_tab.searchInputEl && hotkeys_settings_tab.updateHotkeyVisibility) {
-                    debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
-                    hotkeys_settings_tab.searchInputEl.value = t_shell_command.getObsidianCommand().name;
-                    hotkeys_settings_tab.updateHotkeyVisibility();
+                const searchErrorMessage = "Shell command hotkey search failed due to a private API change in the hotkey search. Please start a discussion in the SC plugin's GitHub repo.";
+                if (hotkeys_settings_tab) {
+                    const hotkeySearchElement =
+                        hotkeys_settings_tab.searchInputEl ??        // For Obsidian versions before 1.2.0.
+                        hotkeys_settings_tab.searchComponent.inputEl // For Obsidian version 1.2.0 and onwards.
+                    ;
+                    if (hotkeySearchElement && hotkeys_settings_tab.updateHotkeyVisibility) {
+                        debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
+                        hotkeySearchElement.value = t_shell_command.getObsidianCommand().name;
+                        hotkeys_settings_tab.updateHotkeyVisibility();
+                    } else {
+                        debugLog("Hotkeys: Cannot do filtering due to API changes. Search element has changed.");
+                        this.plugin.newNotification(searchErrorMessage);
+                    }
                 } else {
-                    debugLog("Hotkeys: Cannot do filtering due to API changes.");
+                    debugLog("Hotkeys: Cannot do filtering due to API changes. 'Hotkeys' settings tab has changed.");
+                    this.plugin.newNotification(searchErrorMessage);
                 }
             }),
         );
