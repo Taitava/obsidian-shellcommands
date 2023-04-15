@@ -39,6 +39,9 @@ Features that are in development, but are not released yet. Does not include stu
 ### To be Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
 
+### To be Fixed:
+- [Hotkey button does not work anymore (Obsidian 1.2.0) (#338)](https://github.com/Taitava/obsidian-shellcommands/issues/338).
+
 ## [0.18.2] - 2023-03-26
 
 ### Fixed
