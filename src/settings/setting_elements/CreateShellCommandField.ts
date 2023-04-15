@@ -250,7 +250,7 @@ export function createShellCommandField(
             .onClick(() => {
                 // The most important parts of this closure function are copied 2022-04-27 from https://github.com/pjeby/hotkey-helper/blob/c8a032e4c52bd9ce08cb909cec15d1ed9d0a3439/src/plugin.js#L436-L442 (also from other lines of the same file).
 
-                // @ts-ignore This is private API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
+                // @ts-ignore This is PRIVATE API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
                 plugin.app.setting?.openTabById("hotkeys");
 
                 // @ts-ignore

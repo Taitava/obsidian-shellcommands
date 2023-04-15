@@ -668,7 +668,7 @@ export default class SC_Plugin extends Plugin {
 
 	private async disablePlugin() {
 		// This unfortunately accesses a private API.
-		// @ts-ignore
+		// @ts-ignore PRIVATEAPI
 		await this.app.plugins.disablePlugin(this.manifest.id);
 	}
 
