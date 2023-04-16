@@ -28,6 +28,7 @@ export const Documentation = {
         additionsToPathEnvironmentVariable: "https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable",
         customShells: {
             index: "https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells",
+            settings: "https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Settings+for+custom+shells",
         },
     },
     events: {

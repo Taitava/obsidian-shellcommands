@@ -35,6 +35,7 @@ import {
     getCurrentPlatformName,
     getOperatingSystem,
     getPlatformName,
+    gotoURL,
 } from "../../Common";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
@@ -59,6 +60,7 @@ import * as path from "path";
 import * as fs from "fs";
 import {getPATHEnvironmentVariableName} from "../../settings/setting_elements/PathEnvironmentVariableFunctions";
 import {TShellCommand} from "../../TShellCommand";
+import {Documentation} from "../../Documentation";
 
 export class CustomShellSettingsModal extends SC_Modal {
 
@@ -151,6 +153,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 })
             )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Shell's operating system")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Shell's+operating+system"))
+            )
         ;
 
         // Special characters escaping
@@ -168,6 +175,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     this.getCustomShellConfiguration().escaper = newEscaper === "none" ? null : newEscaper;
                     await this.plugin.saveSettings();
                 })
+            )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Special characters escaping")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Special+characters+escaping"))
             )
         ;
 
@@ -193,6 +205,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                     updateBinaryPathWarning();
                 }),
+            )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Executable binary file path")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Executable+binary+file+path"))
             )
         ;
         const binaryPathWarningDescription = new Setting(containerElement)
@@ -265,6 +282,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     }
                 })
             )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Shell arguments")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Shell+arguments"))
+            )
         ;
         const shellArgumentsWarningDescription = new Setting(containerElement)
             .setClass("SC-full-description")
@@ -304,6 +326,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     // Show or hide any platform specific settings.
                     updatePlatformSpecificSettingsVisibility(newHostPlatform);
                 }),
+            )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Host operating system")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Host+operating+system"))
             )
             // TODO: Add an icon button for opening up a list of shell commands that allows assigning this shell for the particular shell command on the selected platform.
         ;
@@ -350,6 +377,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     await this.plugin.saveSettings();
                 })
             )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Windows: Quote shell arguments")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Windows%3A+Quote+shell+arguments"))
+            )
         ;
 
         // Return all created settings for visibility control.
@@ -375,6 +407,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                     }
                     await this.plugin.saveSettings();
                 })
+            )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Path translator")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Path+translator"))
             )
         ;
         const pathTranslatorTestVariables = [
@@ -424,6 +461,11 @@ export class CustomShellSettingsModal extends SC_Modal {
             .setName("Wrapper for shell command")
             .setDesc(`Define optional preparing and/or finishing shell commands before/after an actual shell command. Can be used e.g. for adding directories to the ${getPATHEnvironmentVariableName()} environment variable, or setting character encodings. {{variables}} are supported. ${shellCommandContentVariable.getFullName(true)} must be included to denote a place for the main shell command. Can be left empty if no additional commands are needed.`)
             .setClass("SC-full-description")
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Wrapper for shell command")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Wrapper+for+shell+command"))
+            )
         ;
         const settingGroup: SettingFieldGroup = CreateShellCommandFieldCore(
             this.plugin,
@@ -546,6 +588,11 @@ export class CustomShellSettingsModal extends SC_Modal {
                         this.plugin.newErrors(testShellCommandParsingResult.error_messages);
                     }
                 }),
+            )
+            .addExtraButton(button => button
+                .setIcon("help")
+                .setTooltip("Documentation: Execute a command to test the shell")
+                .onClick(() => gotoURL(Documentation.environments.customShells.settings + "#Execute+a+command+to+test+the+shell"))
             )
         ;
         CreateShellCommandFieldCore(
