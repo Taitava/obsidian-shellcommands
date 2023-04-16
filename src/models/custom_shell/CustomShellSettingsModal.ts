@@ -467,86 +467,87 @@ export class CustomShellSettingsModal extends SC_Modal {
         containerElement.createEl("hr"); // Separate non-savable form fields visually from savable settings fields.
         const testSettingsContainer: HTMLElement = containerElement.createDiv({attr: {class: "SC-setting-group"}});
         new Setting(testSettingsContainer)
-        .setName("Execute a command to test the shell")
-        .setDesc("This command is only executed from this settings modal. {{variables}} are supported. Output appears in a notification balloon. When playing around, keep in mind that the command is really executed, so avoid using possibly dangerous commands.")
-        .setClass("SC-full-description")
-        .addExtraButton(button => button
-            .setTooltip("Execute the test command using this shell.")
-            .setIcon("run-command")
-            .onClick(async () => {
-                const customShellConfiguration: CustomShellConfiguration = this.getCustomShellConfiguration();
-                if (!this.getCustomShell().getSupportedHostPlatforms().includes(getOperatingSystem())) {
-                    // Unsupported platform.
-                    this.plugin.newError("This shell is not defined to support " + getCurrentPlatformName() + ".");
-                    return;
-                }
-                if (null === customShellConfiguration.shell_command_test) {
-                    this.plugin.newError("The test shell command is empty.");
-                    return;
-                }
-                const wrappedShellCommandContent: string = customShellConfiguration.shell_command_wrapper
-                    ? TShellCommand.wrapShellCommandContent(
-                        this.plugin,
-                        customShellConfiguration.shell_command_test,
-                        customShellConfiguration.shell_command_wrapper,
-                        this.getCustomShell(),
-                    )
-                    : customShellConfiguration.shell_command_test // No wrapper, use unwrapped shell command content.
-                ;
-                const testShellCommandParsingResult: ParsingResult = await parseVariables(
-                    this.plugin,
-                    wrappedShellCommandContent,
-                    this.getCustomShell(),
-                    true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
-                    null, // No TShellCommand, so no access for default values.
-                    null, // This execution is not launched by an event.
-                );
-                if (testShellCommandParsingResult.succeeded) {
-                    // Can execute.
-                    const childProcess = await this.getCustomShell().spawnChildProcess(
-                        testShellCommandParsingResult.parsed_content as string,
-                        ShellCommandExecutor.getWorkingDirectory(this.plugin),
-                        null, // No TShellCommand is available during testing.
-                        null, // Testing is not triggered by any SC_Event.
-                    );
-                    if (null === childProcess) {
-                        // No spawn() call was made due to some shell configuration error. Just cancel everything.
+            .setName("Execute a command to test the shell")
+            .setDesc("This command is only executed from this settings modal. {{variables}} are supported. Output appears in a notification balloon. When playing around, keep in mind that the command is really executed, so avoid using possibly dangerous commands.")
+            .setClass("SC-full-description")
+            .addExtraButton(button => button
+                .setTooltip("Execute the test command using this shell.")
+                .setIcon("run-command")
+                .onClick(async () => {
+                    const customShellConfiguration: CustomShellConfiguration = this.getCustomShellConfiguration();
+                    if (!this.getCustomShell().getSupportedHostPlatforms().includes(getOperatingSystem())) {
+                        // Unsupported platform.
+                        this.plugin.newError("This shell is not defined to support " + getCurrentPlatformName() + ".");
                         return;
                     }
-                    childProcess.on("error", (error: Error) => {
-                        // Probably most errors will NOT end up here, I guess this event occurs for some rare errors.
-                        this.plugin.newError("Shell test failed to execute. Error: " + error.message);
-                    });
-                    childProcess.on("exit", (exitCode: number | null) => {
-                        // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
-
-                        // Show outputs.
-                        let notified = false;
-                        if (null === childProcess.stdout || null == childProcess.stderr) {
-                            throw new Error("Child process's stdout and/or stderr stream is null.");
+                    if (null === customShellConfiguration.shell_command_test) {
+                        this.plugin.newError("The test shell command is empty.");
+                        return;
+                    }
+                    const wrappedShellCommandContent: string = customShellConfiguration.shell_command_wrapper
+                        ? TShellCommand.wrapShellCommandContent(
+                            this.plugin,
+                            customShellConfiguration.shell_command_test,
+                            customShellConfiguration.shell_command_wrapper,
+                            this.getCustomShell(),
+                        )
+                        : customShellConfiguration.shell_command_test // No wrapper, use unwrapped shell command content.
+                    ;
+                    const testShellCommandParsingResult: ParsingResult = await parseVariables(
+                        this.plugin,
+                        wrappedShellCommandContent,
+                        this.getCustomShell(),
+                        true, // Enable escaping, but if this.customShellInstance.configuration.escaper is "none", then escaping is prevented anyway.
+                        null, // No TShellCommand, so no access for default values.
+                        null, // This execution is not launched by an event.
+                    );
+                    if (testShellCommandParsingResult.succeeded) {
+                        // Can execute.
+                        const childProcess = await this.getCustomShell().spawnChildProcess(
+                            testShellCommandParsingResult.parsed_content as string,
+                            ShellCommandExecutor.getWorkingDirectory(this.plugin),
+                            null, // No TShellCommand is available during testing.
+                            null, // Testing is not triggered by any SC_Event.
+                        );
+                        if (null === childProcess) {
+                            // No spawn() call was made due to some shell configuration error. Just cancel everything.
+                            return;
                         }
-                        childProcess.stdout.setEncoding("utf8"); // Receive stdout and ...
-                        childProcess.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
-                        const stdout: string = childProcess.stdout.read();
-                        const stderr: string = childProcess.stderr.read();
-                        if (stdout) {
-                            this.plugin.newNotification(stdout);
-                            notified = true;
-                        }
-                        if (stderr) {
-                            this.plugin.newError("[" + exitCode + "]: " + stderr);
-                            notified = true;
-                        }
-                        if (!notified) {
-                            this.plugin.newNotification("Shell test finished. No output was received.");
-                        }
-                    });
-                } else {
-                    // Some variable has failed.
-                    this.plugin.newErrors(testShellCommandParsingResult.error_messages);
-                }
-            }),
-        );
+                        childProcess.on("error", (error: Error) => {
+                            // Probably most errors will NOT end up here, I guess this event occurs for some rare errors.
+                            this.plugin.newError("Shell test failed to execute. Error: " + error.message);
+                        });
+                        childProcess.on("exit", (exitCode: number | null) => {
+                            // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
+    
+                            // Show outputs.
+                            let notified = false;
+                            if (null === childProcess.stdout || null == childProcess.stderr) {
+                                throw new Error("Child process's stdout and/or stderr stream is null.");
+                            }
+                            childProcess.stdout.setEncoding("utf8"); // Receive stdout and ...
+                            childProcess.stderr.setEncoding("utf8"); // ... stderr as strings, not as Buffer objects.
+                            const stdout: string = childProcess.stdout.read();
+                            const stderr: string = childProcess.stderr.read();
+                            if (stdout) {
+                                this.plugin.newNotification(stdout);
+                                notified = true;
+                            }
+                            if (stderr) {
+                                this.plugin.newError("[" + exitCode + "]: " + stderr);
+                                notified = true;
+                            }
+                            if (!notified) {
+                                this.plugin.newNotification("Shell test finished. No output was received.");
+                            }
+                        });
+                    } else {
+                        // Some variable has failed.
+                        this.plugin.newErrors(testShellCommandParsingResult.error_messages);
+                    }
+                }),
+            )
+        ;
         CreateShellCommandFieldCore(
             this.plugin,
             testSettingsContainer,
