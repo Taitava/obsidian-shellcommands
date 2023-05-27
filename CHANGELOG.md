@@ -30,6 +30,14 @@ Features that are in development, but are not released yet. Does not include stu
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
   - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
 
+## [0.19.1] - 2023-05-27
+
+### Fixed:
+- [Executing shell commands does not work in 0.19.0 (#350)](https://github.com/Taitava/obsidian-shellcommands/issues/350).
+  - No shell commands could be executed, unless [PATH additions](https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable#An+easier+way+to+add+directories+to+%60PATH%60) were defined.
+  - When trying to execute a shell command, nothing happened, and there were no visible error messages (that said, error console had a message).
+  - This is now fixed, and you don't need to define PATH additions to overcome the problem.
+
 ## [0.19.0] - 2023-05-27
 
 ### Added
@@ -398,7 +406,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...HEAD
+[0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
 [0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0
 [0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2
 [0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1

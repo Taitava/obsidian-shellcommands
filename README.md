@@ -66,6 +66,7 @@ Here is a list of operating systems this plugin has been tested on, along with O
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 22.04) | Mac |
 | ---------------------| ---------- | --------------------- | --- |
+| SC 0.19.1 | Obsidian 1.3.4<br>Works | Obsidian 1.3.4<br>Works | |
 | SC 0.19.0 | Obsidian 1.3.4<br>Works | Obsidian 1.3.4<br>Works | |
 
 Linux version has changed from Xubuntu 20.04 to 22.04.
