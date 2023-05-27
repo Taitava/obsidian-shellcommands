@@ -21,7 +21,11 @@ import SC_Plugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import {debugLog} from "./Debug";
 import * as fs from "fs";
-import {combineObjects, getPluginAbsolutePath} from "./Common";
+import {
+    combineObjects,
+    getPluginAbsolutePath,
+    isWindows,
+} from "./Common";
 import * as path from "path";
 import {getDefaultSettings} from "./settings/SC_MainSettings";
 import {
@@ -259,7 +263,7 @@ function backupSettingsFile(plugin: SC_Plugin) {
     // plugin.app.fileManager.
     // @ts-ignore
     const current_settings_version = (plugin.settings.settings_version === "prior-to-0.7.0") ? "0.x" : plugin.settings.settings_version;
-    const plugin_path = getPluginAbsolutePath(plugin);
+    const plugin_path = getPluginAbsolutePath(plugin, isWindows());
     const settings_file_path = path.join(plugin_path, "data.json");
     const backup_file_path_without_extension = path.join(plugin_path, "data-backup-version-" + current_settings_version + "-before-upgrading-to-" + SC_Plugin.SettingsVersion);
 

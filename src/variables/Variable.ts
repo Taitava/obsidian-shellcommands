@@ -25,8 +25,10 @@ import {escapeRegExp} from "../lib/escapeRegExp";
 import {TShellCommand} from "../TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
-import {DocumentationBuiltInVariablesBaseLink} from "../Documentation";
+import {Documentation} from "../Documentation";
 import {EOL} from "os";
+import {Shell} from "../shells/Shell";
+import {tryTo} from "../Common";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -57,6 +59,7 @@ export abstract class Variable {
     }
 
     public getValue(
+        shell: Shell,
         t_shell_command: TShellCommand | null = null,
         sc_event: SC_Event | null = null,
         variableArguments: IRawArguments = {},
@@ -73,7 +76,7 @@ export abstract class Variable {
             const castedArguments = this.castArguments(variableArguments);
 
             // Generate a value, or catch an exception if one occurs.
-            this.generateValue(castedArguments, sc_event).then((value: string | null) => {
+            this.generateValue(shell, castedArguments, sc_event).then((value: string | null) => {
                 // Value generation succeeded.
                 return resolve({
                     value: value,
@@ -153,7 +156,40 @@ export abstract class Variable {
     /**
      * TODO: Consider can the sc_event parameter be moved so that it would only exist in EventVariable and it's child classes? Same for getValue() method.
      */
-    protected abstract generateValue(variableArguments: ICastedArguments, sc_event: SC_Event | null): Promise<string>;
+    protected abstract generateValue(
+        shell: Shell,
+        variableArguments: ICastedArguments,
+        sc_event: SC_Event | null,
+    ): Promise<string>;
+
+    /**
+     * Called from parseVariableSynchronously(), only used on some special Variables that are not included in
+     * loadVariables()/SC_Plugin.getVariables().
+     *
+     * Can only support non-async Variables. Also, parameters are not supported, at least at the moment.
+     */
+    public getValueSynchronously(): VariableValueResult {
+        return tryTo((): VariableValueResult => ({
+                value: this.generateValueSynchronously(),
+                succeeded: true,
+                error_messages: [],
+            }),
+        (variableError: VariableError): VariableValueResult => ({
+                value: null,
+                succeeded: false,
+                error_messages: [variableError.message],
+            }),
+            VariableError
+        );
+    }
+
+    /**
+     * Variables that support parseVariableSynchronously() should define this. Most Variables don't need this.
+     */
+    protected generateValueSynchronously(): string {
+        throw new Error("generateValueSynchronously() is not implemented for " + this.constructor.name + ".");
+        // Use Error instead of VariableError, because this is not a problem that a user could fix. It's a program error.
+    }
 
     protected getParameters() {
         const child_class = this.constructor as typeof Variable;
@@ -309,15 +345,17 @@ export abstract class Variable {
      *
      * TODO: Change hardcoded {{ }} entries to use this method all around the code.
      */
-    public getFullName(): string {
-        return "{{" + this.variable_name + "}}";
+    public getFullName(withExclamationMark = false, variableArguments?: string[]): string {
+        const variableArgumentsString = variableArguments?.length ? ":" + variableArguments.join(":") : ""; // Check .length too: empty array should not cause a colon to appear.
+        const opening = withExclamationMark ? "{{!" : "{{";
+        return opening + this.variable_name + variableArgumentsString + "}}";
     }
 
     /**
      * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
      */
     public getDocumentationLink(): string {
-        return DocumentationBuiltInVariablesBaseLink + encodeURI(this.getFullName());
+        return Documentation.variables.folder + encodeURI(this.getFullName());
     }
 
     /**
@@ -392,6 +430,7 @@ export abstract class Variable {
 
 /**
  * Arguments that are cast to their designed data types, i.e. strings or integers at the moment.
+ * TODO: Rename to CastedVariableArguments.
  */
 export interface ICastedArguments {
     [key: string]: unknown;
@@ -399,6 +438,7 @@ export interface ICastedArguments {
 
 /**
  * Same as ICastedArguments, but not yet cast to the target data types.
+ * TODO: Rename to RawVariableArguments.
  */
 export interface IRawArguments {
     [key: string]: string;
@@ -407,6 +447,7 @@ export interface IRawArguments {
 /**
  * key = string, parameter name
  * value = boolean, is the parameter mandatory or not?
+ * TODO: Rename to VariableParameters.
  */
 export interface IParameters {
     [key: string]: {

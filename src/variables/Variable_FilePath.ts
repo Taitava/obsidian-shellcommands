@@ -21,6 +21,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {FileVariable} from "./FileVariable";
 import {getFilePath} from "./VariableHelpers";
+import {Shell} from "../shells/Shell";
 
 export class Variable_FilePath extends FileVariable{
     public variable_name = "file_path";
@@ -33,8 +34,11 @@ export class Variable_FilePath extends FileVariable{
         },
     };
 
-    protected async generateValue(castedArguments: {mode: "absolute" | "relative"}): Promise<string> {
-        return getFilePath(this.app, this.getFileOrThrow(), castedArguments.mode);
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {mode: "absolute" | "relative"},
+    ): Promise<string> {
+        return getFilePath(this.app, shell, this.getFileOrThrow(), castedArguments.mode);
     }
 
     public getAutocompleteItems() {

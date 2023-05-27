@@ -29,6 +29,7 @@ import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
 import {SC_Event_FolderMoved} from "../../events/SC_Event_FolderMoved";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFolderName extends EventVariable {
     public variable_name = "event_folder_name";
@@ -49,6 +50,7 @@ export class Variable_EventFolderName extends EventVariable {
     ];
 
     protected async generateValue(
+        shell: Shell,
         argumentsAreNotUsed: never,
         sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed,
     ): Promise<string> {

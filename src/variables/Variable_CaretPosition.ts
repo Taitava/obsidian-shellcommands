@@ -23,6 +23,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {EditorVariable} from "./EditorVariable";
 import {Editor} from "obsidian";
+import {Shell} from "../shells/Shell";
 
 export class Variable_CaretPosition extends EditorVariable {
     public variable_name = "caret_position";
@@ -35,7 +36,10 @@ export class Variable_CaretPosition extends EditorVariable {
         },
     };
 
-    protected async generateValue(castedArguments: {mode?: string}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {mode?: string},
+    ): Promise<string> {
         // Check that we are able to get an editor
         const editor: Editor = this.getEditorOrThrow();
 

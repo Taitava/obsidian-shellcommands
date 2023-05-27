@@ -123,7 +123,8 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
             const parsing_result = await parseVariables(
                 this.plugin,
                 parse_content,
-                this.avoidEscaping(content_key) ? null : this.t_shell_command.getShell(), // If no escaping is needed, pass null.
+                this.t_shell_command.getShell(),
+                !this.avoidEscaping(content_key),
                 this.t_shell_command,
                 this.sc_event,
                 current_variables,
@@ -205,6 +206,7 @@ export class ParsingProcess<ParsingMap extends {[key: string]: string}> {
     }
 
     private getContentKeys(): (keyof ParsingMap)[] {
+        // TODO: This should not return names of properties whose value is undefined. Currently, parseVariables() is called with undefined parseable content. It's been like that for a long time (as long as output wrappers have existed, as they are the first optional parseable content) and has just by chance not broken anything.
         return Object.getOwnPropertyNames(this.original_contents) as (keyof ParsingMap)[];
     }
 

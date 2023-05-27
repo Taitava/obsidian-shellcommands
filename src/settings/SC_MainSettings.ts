@@ -25,6 +25,7 @@ import {
     PromptConfiguration,
 } from "../imports";
 import {OutputWrapperConfiguration} from "../models/output_wrapper/OutputWrapper";
+import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 import {
     GlobalVariableDefaultValueConfiguration,
 } from "../variables/Variable";
@@ -88,6 +89,9 @@ export interface SC_MainSettings {
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
 
+    // Custom shells
+    custom_shells: CustomShellConfiguration[];
+
     // Output wrappers
     output_wrappers: OutputWrapperConfiguration[];
 
@@ -142,6 +146,9 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         // Custom variables
         custom_variables: [],
 
+        // Custom shells
+        custom_shells: [],
+
         // Output wrappers
         output_wrappers: [],
     };
@@ -150,19 +157,25 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 /**
  * All OSes supported by the Shell commands plugin.
  * Values are borrowed from NodeJS.Platform.
- * "darwin" = Macintosh.
+ * "darwin" is macOS.
  *
- * This type must be synchronous to IOperatingSystemSpecificString interface.
+ * This type must be synchronous to IPlatformSpecificString interface.
  *
  * @see NodeJS.Platform
  */
 export type PlatformId = "darwin" | "linux" | "win32";
 
 export const PlatformNames: IPlatformSpecificString = {
-    darwin: "Macintosh",
+    darwin: "macOS",
     linux: "Linux",
     win32: "Windows",
 };
+
+/**
+ * Same content as PlatformNames, but in a better accessible Map format.
+ * TODO: Replace PlatformNames with this map, and convert usages of the old PlatformNames.
+ */
+export const PlatformNamesMap: Map<PlatformId, string> = new Map(Object.entries(PlatformNames) as [PlatformId,string][]);
 
 /**
  * All OSes supported by the Shell commands plugin.
@@ -172,8 +185,8 @@ export const PlatformNames: IPlatformSpecificString = {
  *
  * @see NodeJS.Platform
  */
-export interface IPlatformSpecificString {
-    /** This is Macintosh */
+export interface IPlatformSpecificString { // TODO: Rename to plural form: IPlatformSpecificStrings
+    /** This is macOS */
     darwin?: string,
     linux?: string,
     win32?: string,
@@ -181,6 +194,13 @@ export interface IPlatformSpecificString {
 
 export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
     default: string,
+}
+
+/**
+ * Similar to IPlatformSpecificString, but for a custom type and without possibility to omit any property.
+ */
+export type IPlatformSpecificValues<Type>  = {
+    [key in PlatformId]: Type
 }
 
 export type ICommandPaletteOptions = {

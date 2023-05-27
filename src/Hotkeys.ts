@@ -26,7 +26,7 @@ import {debugLog} from "./Debug";
  */
 export function getHotkeysForShellCommand(plugin: SC_Plugin, shell_command_id: string): Hotkey[] {
     // Retrieve all hotkeys set by user.
-    // @ts-ignore
+    // @ts-ignore PRIVATE API
     const app_custom_hotkeys = plugin.app.hotkeyManager?.customKeys;
     if (!app_custom_hotkeys) {
         debugLog("getHotkeysForShellCommand() failed, will return an empty array.");

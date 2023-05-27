@@ -27,6 +27,8 @@ export class ConfirmationModal extends SC_Modal {
     private resolve_promise: (value: (boolean | PromiseLike<boolean>)) => void;
     private approved = false;
 
+    private extraContent?: HTMLElement;
+
     constructor(
         plugin: SC_Plugin,
         title: string,
@@ -46,6 +48,11 @@ export class ConfirmationModal extends SC_Modal {
         // Display the question
         this.modalEl.createEl("p", {text: this.question});
 
+        // Display extra content/information, if defined.
+        if (this.extraContent) {
+            this.modalEl.insertAdjacentElement("beforeend", this.extraContent);
+        }
+
         // Display the yes button
         new Setting(this.modalEl)
             .addButton(button => button
@@ -54,6 +61,15 @@ export class ConfirmationModal extends SC_Modal {
             )
         ;
 
+    }
+
+    /**
+     * Inserts an HTMLElement to this ConfirmationModal, that will be shown between the modal's question and yes button.
+     *
+     * @param extraContent
+     */
+    public setExtraContent(extraContent: HTMLElement) {
+        this.extraContent = extraContent;
     }
 
     protected approve(): void {

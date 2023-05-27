@@ -26,6 +26,7 @@ import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
 import {getFileYAMLValue} from "../VariableHelpers";
 import {IParameters} from "../Variable";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventYAMLValue extends EventVariable {
     public variable_name = "event_yaml_value";
@@ -48,6 +49,7 @@ export class Variable_EventYAMLValue extends EventVariable {
     ];
 
     protected async generateValue(
+        shell: Shell,
         castedArguments: {property_name: string},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {

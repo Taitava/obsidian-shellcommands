@@ -17,30 +17,48 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {IPlatformSpecificString, PlatformId, PlatformNames} from "../SC_MainSettings";
+import {
+    IPlatformSpecificString,
+    IPlatformSpecificValues,
+    PlatformId,
+    PlatformNames,
+} from "../SC_MainSettings";
 import {extractFileName, getOperatingSystem} from "../../Common";
-import {getUsersDefaultShell, PlatformShells} from "../../Shell";
+import {
+    getShellsForPlatform,
+    getUsersDefaultShellIdentifier,
+} from "../../shells/ShellFunctions";
 import {Setting} from "obsidian";
 import SC_Plugin from "../../main";
 
-export function createShellSelectionField(plugin: SC_Plugin, container_element: HTMLElement, shells: IPlatformSpecificString, is_global_settings: boolean) {
+export function createShellSelectionFields(
+    plugin: SC_Plugin,
+    containerElement: HTMLElement,
+    shells: IPlatformSpecificString,
+    is_global_settings: boolean,
+): IPlatformSpecificValues<Setting> {
+    const shellSelectionSettings: IPlatformSpecificValues<Setting> = {
+        darwin: new Setting(containerElement),
+        linux: new Setting(containerElement),
+        win32: new Setting(containerElement),
+    };
     let platform_id: PlatformId;
     for (platform_id in PlatformNames) {
         const platform_name = PlatformNames[platform_id];
         let options: Record<string, string>;
         if (is_global_settings) {
-            const current_system_default = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShell()) + ")" : "";
-            options = {"default": "Use system default" + current_system_default};
+            const currentSystemDefault = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShellIdentifier()) + ")" : "";
+            options = {"default": "Use system default" + currentSystemDefault};
         } else {
             options = {"default": "Use default"};
         }
-        for (const shell_path in PlatformShells[platform_id]) {
-            // @ts-ignore // TODO: Get rid of these two ts-ignores.
-            const shell_name = PlatformShells[platform_id][shell_path];
-            // @ts-ignore
-            options[shell_path] = shell_name;
+
+        // Get human-readable shell names
+        for (const shell of getShellsForPlatform(platform_id)) {
+            options[shell.getIdentifier()] = shell.getName();
         }
-        new Setting(container_element)
+        const setting: Setting = shellSelectionSettings[platform_id];
+        setting
             .setName(platform_name + (is_global_settings ? " default shell" : " shell"))
             .setDesc((is_global_settings ? "Can be overridden by each shell command. " : "") + ("win32" === platform_id ? "Powershell is recommended over cmd.exe, because this plugin does not support escaping variables in CMD." : ""))
             .addDropdown(dropdown => dropdown
@@ -61,4 +79,5 @@ export function createShellSelectionField(plugin: SC_Plugin, container_element: 
             )
         ;
     }
+    return shellSelectionSettings;
 }

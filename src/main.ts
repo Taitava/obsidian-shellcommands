@@ -42,6 +42,7 @@ import {
 	generateObsidianCommandName,
 	getOperatingSystem,
 	getPluginAbsolutePath,
+    isWindows,
 } from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
@@ -57,8 +58,17 @@ import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
-import {ShellCommandParsingProcess, TShellCommand, TShellCommandContainer} from "./TShellCommand";
-import {getUsersDefaultShell} from "./Shell";
+import {
+    ShellCommandParsingProcess,
+    TShellCommand,
+    TShellCommandContainer,
+    TShellCommandMap,
+} from "./TShellCommand";
+import {
+    getShell,
+    getUsersDefaultShellIdentifier,
+    registerBuiltinShells,
+} from "./shells/ShellFunctions";
 import {versionCompare} from "./lib/version_compare";
 import {debugLog, setDEBUG_ON} from "./Debug";
 import {addCustomAutocompleteItems} from "./settings/setting_elements/Autocomplete";
@@ -72,21 +82,29 @@ import {
     OutputWrapperMap,
     OutputWrapperModel,
 } from "./models/output_wrapper/OutputWrapperModel";
+import {Shell} from "./shells/Shell";
 import {ParsingResult} from "./variables/parseVariables";
 import {AutocompleteResult} from "autocompleter/autocomplete";
+import {
+    CustomShellInstanceMap,
+    CustomShellModel,
+} from "./models/custom_shell/CustomShellModel";
 
 export default class SC_Plugin extends Plugin {
 	/**
 	 * Defines the settings structure version. Change this when a new plugin version is released, but only if that plugin
 	 * version introduces changes to the settings structure. Do not change if the settings structure stays unchanged.
+     *
+     * This is NOT the plugin's version (although they are often coupled the same)! The plugin's version is defined in manifest.json.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.18.0";
+	public static SettingsVersion: SettingsVersionString = "0.19.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
 	private t_shell_commands: TShellCommandContainer = {};
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
+    private customShellInstances: CustomShellInstanceMap;
 	private variables: VariableSet;
     private output_wrappers: OutputWrapperMap;
 
@@ -128,6 +146,13 @@ export default class SC_Plugin extends Plugin {
 
 		// Run possible configuration migrations
 		await RunMigrations(this);
+
+        // Define builtin shells
+        registerBuiltinShells(this);
+
+        // Load CustomShells
+        const customShellModel = getModel<CustomShellModel>(CustomShellModel.name);
+        this.customShellInstances = customShellModel.loadInstances(this.settings);
 
 		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
 		this.loadTShellCommands();
@@ -191,6 +216,17 @@ export default class SC_Plugin extends Plugin {
 		return this.t_shell_commands;
 	}
 
+    /**
+     * TODO: Change this.t_shell_commands to a Map, so that getTShellCommands() returns a Map, and remove this method.
+     */
+    public getTShellCommandsAsMap(): TShellCommandMap {
+        const tShellCommandsMap = new TShellCommandMap();
+        for (const shellCommandId of Object.getOwnPropertyNames(this.t_shell_commands)) {
+            tShellCommandsMap.set(shellCommandId, this.t_shell_commands[shellCommandId]);
+        }
+        return tShellCommandsMap;
+    }
+
 	public getVariables() {
 		return this.variables;
 	}
@@ -201,6 +237,10 @@ export default class SC_Plugin extends Plugin {
 
 	public getCustomVariableInstances(): CustomVariableInstanceMap {
 		return this.custom_variable_instances;
+	}
+
+	public getCustomShellInstances(): CustomShellInstanceMap {
+		return this.customShellInstances;
 	}
 
 	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
@@ -290,7 +330,10 @@ export default class SC_Plugin extends Plugin {
 				// Try to process variables that can be processed before performing preactions.
 				await parsing_process.process();
 			}
-			if (parsing_process.getParsingResults().shell_command?.succeeded) { // .shell_command should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+            const parsingResults = parsing_process.getParsingResults();
+            const shellCommandContentParsingSucceeded = parsingResults.shellCommandContent?.succeeded; // .shellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+            const shellCommandWrapperParsingSucceeded = parsingResults.shellCommandWrapper ? parsingResults.shellCommandWrapper.succeeded : true; // If no wrapper is present, pass.
+            if (shellCommandContentParsingSucceeded && shellCommandWrapperParsingSucceeded) { // FIXME: This should not rely on just one (or two) content's parsing result, it should check all of them. Use parsing_process.getErrorMessages().length === 0 to check all parsed content.
 				// The command was parsed correctly.
 				const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
 					this,
@@ -308,7 +351,7 @@ export default class SC_Plugin extends Plugin {
 		// Register an Obsidian command
 		const obsidian_command: Command = {
 			id: this.generateObsidianCommandId(shell_command_id),
-			name: generateObsidianCommandName(this, t_shell_command.getShellCommand(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
+			name: generateObsidianCommandName(this, t_shell_command.getShellCommandContent(), t_shell_command.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
 			// Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
 			checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
 				if (is_opening_command_palette) {
@@ -333,7 +376,7 @@ export default class SC_Plugin extends Plugin {
                                 // Rename Obsidian command
                                 const parsingResults = parsing_process.getParsingResults();
                                 /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
-                                const shellCommandParsingResult: ParsingResult = parsingResults["shell_command"] as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+                                const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
                                 const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
                                 const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
                                 const parsedAlias: string = aliasParsingResult.parsed_content as string;
@@ -343,13 +386,13 @@ export default class SC_Plugin extends Plugin {
                                 this.cached_parsing_processes[t_shell_command.getId()] = parsing_process;
                             } else {
                                 // Parsing failed, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContent(), t_shell_command.getAlias());
                                 this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                             }
                         });
                     } else {
                         // Parsing is disabled, so use unparsed t_shell_command.getShellCommand() and t_shell_command.getAlias().
-                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommand(), t_shell_command.getAlias());
+                        t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContent(), t_shell_command.getAlias());
                         this.cached_parsing_processes[t_shell_command.getId()] = undefined;
                     }
 
@@ -595,7 +638,7 @@ export default class SC_Plugin extends Plugin {
 
 	private loadCustomAutocompleteList() {
 		const custom_autocomplete_file_name = "autocomplete.yaml";
-		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this), custom_autocomplete_file_name);
+		const custom_autocomplete_file_path = path.join(getPluginAbsolutePath(this, isWindows()), custom_autocomplete_file_name);
 
 		if (fs.existsSync(custom_autocomplete_file_path)) {
 			debugLog("loadCustomAutocompleteList(): " + custom_autocomplete_file_name + " exists, will load it now.");
@@ -625,7 +668,7 @@ export default class SC_Plugin extends Plugin {
 
 	private async disablePlugin() {
 		// This unfortunately accesses a private API.
-		// @ts-ignore
+		// @ts-ignore PRIVATEAPI
 		await this.app.plugins.disablePlugin(this.manifest.id);
 	}
 
@@ -670,14 +713,18 @@ export default class SC_Plugin extends Plugin {
         return this.settings.error_message_duration * 1000; // * 1000 = convert seconds to milliseconds.
     }
 
-	public getDefaultShell(): string {
-		const operating_system = getOperatingSystem();
-		let shell_name = this.settings.default_shells[operating_system]; // Can also be undefined.
-		if (undefined === shell_name) {
-			shell_name = getUsersDefaultShell();
+	public getDefaultShellIdentifier(): string {
+		const operatingSystem = getOperatingSystem();
+		let shellIdentifier = this.settings.default_shells[operatingSystem]; // Can also be undefined.
+		if (undefined === shellIdentifier) {
+			shellIdentifier = getUsersDefaultShellIdentifier();
 		}
-		return shell_name;
+        return shellIdentifier;
 	}
+
+    public getDefaultShell(): Shell {
+        return getShell(this, this.getDefaultShellIdentifier());
+    }
 
 	public createCustomVariableView(): void {
 		const leaf = this.app.workspace.getRightLeaf(false);

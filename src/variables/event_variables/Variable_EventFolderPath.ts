@@ -32,6 +32,7 @@ import {EventVariable} from "./EventVariable";
 import {getFolderPath} from "../VariableHelpers";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFolderPath extends EventVariable {
     public variable_name = "event_folder_path";
@@ -59,12 +60,13 @@ export class Variable_EventFolderPath extends EventVariable {
     ];
 
     protected async generateValue(
+        shell: Shell,
         castedArguments: {mode: "absolute" | "relative"},
         sc_event: SC_Event_FileMenu | SC_Event_FolderMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed | SC_Event_FolderCreated | SC_Event_FolderDeleted | SC_Event_FolderMoved | SC_Event_FolderRenamed,
     ): Promise<string> {
         this.requireCorrectEvent(sc_event);
 
-        return getFolderPath(this.app, sc_event.getFolder(), castedArguments.mode);
+        return getFolderPath(this.app, shell, sc_event.getFolder(), castedArguments.mode);
     }
 
     public getAutocompleteItems() {

@@ -28,6 +28,7 @@ import {
     normalizePath,
     TFile,
 } from "obsidian";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventFileURI extends EventVariable {
     public variable_name = "event_file_uri";
@@ -43,6 +44,7 @@ export class Variable_EventFileURI extends EventVariable {
     ];
 
     protected async generateValue(
+        shell: Shell,
         argumentsAreNotUsed: never,
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {

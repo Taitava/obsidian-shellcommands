@@ -27,6 +27,7 @@ import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {getFileYAML} from "../../Common";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 import {IParameters} from "../Variable";
+import {Shell} from "../../shells/Shell";
 
 export class Variable_EventYAMLContent extends EventVariable {
     public variable_name = "event_yaml_content";
@@ -49,6 +50,7 @@ export class Variable_EventYAMLContent extends EventVariable {
     ];
 
     protected generateValue(
+        shell: Shell,
         castedArguments: {withDashes: "with-dashes" | "no-dashes"},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {

@@ -21,6 +21,7 @@ import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {getFileExtension} from "./VariableHelpers";
 import {FileVariable} from "./FileVariable";
+import {Shell} from "../shells/Shell";
 
 export class Variable_FileExtension extends FileVariable {
     public variable_name = "file_extension";
@@ -33,7 +34,10 @@ export class Variable_FileExtension extends FileVariable {
         },
     };
 
-    protected async generateValue(castedArguments: {"dot": "with-dot" | "no-dot"}): Promise<string> {
+    protected async generateValue(
+        shell: Shell,
+        castedArguments: {"dot": "with-dot" | "no-dot"},
+    ): Promise<string> {
         return getFileExtension(this.getFileOrThrow(), castedArguments.dot === "with-dot");
     }
 
