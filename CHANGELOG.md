@@ -30,16 +30,16 @@ Features that are in development, but are not released yet. Does not include stu
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
   - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
 
-## [0.19.0] - Unreleased
+## [0.19.0] - 2023-05-27
 
-### To be Added
+### Added
 - [Support for custom shells(#297)](https://github.com/Taitava/obsidian-shellcommands/issues/297).
   - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells).
 
-### To be Changed
+### Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
 
-### To be Fixed:
+### Fixed:
 - [Hotkey button does not work anymore (Obsidian 1.2.0) (#338)](https://github.com/Taitava/obsidian-shellcommands/issues/338).
 
 ## [0.18.2] - 2023-03-26
@@ -398,7 +398,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...HEAD
+[0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0
 [0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2
 [0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
 [0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0
