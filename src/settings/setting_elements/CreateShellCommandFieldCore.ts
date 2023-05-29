@@ -25,7 +25,6 @@ import {
     createAutocomplete,
     IAutocompleteItem,
 } from "./Autocomplete";
-import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
 import {EOL} from "os";
 import {decorateMultilineField} from "./multilineField";
@@ -66,7 +65,6 @@ export function CreateShellCommandFieldCore(
             shell_command,
             shell,
             t_shell_command,
-            null, /* No event is available during preview. */
         ));
 
         // Let the caller extend this onChange, to preform saving the settings:
@@ -101,7 +99,6 @@ export function CreateShellCommandFieldCore(
                         shell_command,
                         shell,
                         t_shell_command,
-                        null, /* No event is available during preview. */
                     ));
                     onAfterPreviewGenerated?.();
                 })
@@ -127,11 +124,17 @@ export function CreateShellCommandFieldCore(
  * @param shell_command Textual shell command content.
  * @param shell
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
- * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<DocumentFragment> {
-    const parsing_result = await parseVariables(plugin, shell_command, shell, true, t_shell_command, sc_event);
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null): Promise<DocumentFragment> {
+    const parsing_result = await parseVariables(
+        plugin,
+        shell_command,
+        shell,
+        true,
+        t_shell_command,
+        null, /* No event is available during preview. */
+    );
     let previewContent: string;
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
