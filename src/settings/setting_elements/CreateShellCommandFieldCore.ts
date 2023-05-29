@@ -27,7 +27,6 @@ import {
 } from "./Autocomplete";
 import {SC_Event} from "../../events/SC_Event";
 import {TShellCommand} from "../../TShellCommand";
-import {createMultilineTextElement} from "../../Common";
 import {EOL} from "os";
 import {decorateMultilineField} from "./multilineField";
 import {Shell} from "../../shells/Shell";
@@ -63,12 +62,7 @@ export function CreateShellCommandFieldCore(
 
     async function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.descEl.innerHTML = ""; // Remove previous content.
-        createMultilineTextElement(
-            "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
-            await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
-            setting_group.preview_setting.descEl,
-        );
+        setting_group.preview_setting.setDesc(await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -98,12 +92,7 @@ export function CreateShellCommandFieldCore(
             new Setting(container_element)
                 .setClass("SC-preview-setting")
                 .then(async (setting: Setting) => {
-                    setting.descEl.innerHTML = ""; // Remove previous content. Not actually needed here because it's empty already, but do it just in case.
-                    createMultilineTextElement(
-                        "span", // TODO: Maybe cleaner would be not to create a <span>, but to insert the content directly into descEl.
-                        await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */),
-                        setting.descEl,
-                    );
+                    setting.setDesc(await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
                     onAfterPreviewGenerated?.();
                 })
         ,
@@ -131,19 +120,33 @@ export function CreateShellCommandFieldCore(
  * @param sc_event
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<string> {
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<DocumentFragment> {
     const parsing_result = await parseVariables(plugin, shell_command, shell, true, t_shell_command, sc_event);
+    let previewContent: string;
     if (!parsing_result.succeeded) {
         // Variable parsing failed.
         if (parsing_result.error_messages.length > 0) {
             // Return all error messages, each in its own line. (Usually there's just one message).
-            return parsing_result.error_messages.join(EOL); // Newlines are converted to <br>'s by the consumers of this function.
+            previewContent = parsing_result.error_messages.join(EOL); // Newlines are converted to <br>'s below.
         } else {
             // If there are no error messages, then errors are silently ignored by user's variable configuration.
             // The preview can then show the original, unparsed shell command.
-            return shell_command;
+            previewContent = shell_command;
         }
+    } else {
+        // Variable parsing succeeded
+        previewContent = parsing_result.parsed_content as string;
     }
-    // Variable parsing succeeded
-    return parsing_result.parsed_content as string;
+    
+    // Convert the preview text to a DocumentFragment.
+    const previewContentLines: string[] = previewContent.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
+    const documentFragment: DocumentFragment = new DocumentFragment();
+    for (const previewContentLine of previewContentLines) {
+        if (documentFragment.firstChild !== null) {
+            // If earlier content exists, add a separating <br>.
+            documentFragment.createEl("br");
+        }
+        documentFragment.appendText(previewContentLine);
+    }
+    return documentFragment;
 }
