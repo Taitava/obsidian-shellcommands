@@ -62,7 +62,12 @@ export function CreateShellCommandFieldCore(
 
     async function on_change(shell_command: string) {
         // Update preview
-        setting_group.preview_setting.setDesc(await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
+        setting_group.preview_setting.setDesc(await getShellCommandPreview(plugin,
+            shell_command,
+            shell,
+            t_shell_command,
+            null, /* No event is available during preview. */
+        ));
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -92,7 +97,12 @@ export function CreateShellCommandFieldCore(
             new Setting(container_element)
                 .setClass("SC-preview-setting")
                 .then(async (setting: Setting) => {
-                    setting.setDesc(await getShellCommandPreview(plugin, shell_command, shell, t_shell_command, null /* No event is available during preview. */));
+                    setting.setDesc(await getShellCommandPreview(plugin,
+                        shell_command,
+                        shell,
+                        t_shell_command,
+                        null, /* No event is available during preview. */
+                    ));
                     onAfterPreviewGenerated?.();
                 })
         ,
