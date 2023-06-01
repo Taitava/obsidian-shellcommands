@@ -49,8 +49,10 @@ import {
     InheritableVariableDefaultValueConfiguration,
 } from "./variables/Variable";
 import {
+    IPlatformSpecificStringWithDefault,
     PlatformId,
     PlatformNames,
+    PlatformNamesMap,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
 import {OutputStream} from "./output_channels/OutputHandlerCode";
@@ -109,8 +111,73 @@ export class TShellCommand extends Cacheable {
         }
     }
 
+    public getShellIdentifierForPlatform(platformId: PlatformId): string | undefined {
+        // Check if the shell command has defined a specific shell.
+        const shellIdentifier: string | undefined = this.configuration.shells[platformId];
+        if (undefined === shellIdentifier) {
+            // The shell command does not define an explicit shell.
+            // Use a default shell from the plugin's settings.
+            return this.plugin.getDefaultShellIdentifierForPlatform(platformId);
+        } else {
+            // The shell command has an explicit shell defined.
+            return shellIdentifier;
+        }
+    }
+
     public getShell(): Shell {
         return getShell(this.plugin, this.getShellIdentifier());
+    }
+    
+    /**
+     * Returns the Shell that would be used if the shell command is executed on the given platform.
+     *
+     * @param platformId
+     */
+    public getShellForPlatform(platformId: PlatformId): Shell | null {
+        const shellIdentifier: string | undefined = this.getShellIdentifierForPlatform(platformId);
+        if (undefined === shellIdentifier) {
+            // This shell command relies on the operating system's default shell.
+            return null;
+        } else {
+            return getShell(this.plugin, shellIdentifier);
+        }
+    }
+    
+    /**
+     * Returns null if all platform specific shell command contents are filled.
+     */
+    public getShellForDefaultCommand(): Shell | null {
+        const platformCandidates: PlatformId[] = this.getPlatformCandidatesForDefaultCommand();
+        if (platformCandidates.length === 0) {
+            return null;
+        }
+        const currentPlatformId: PlatformId = getOperatingSystem();
+        let usePlatformId: PlatformId;
+        if (platformCandidates.includes(currentPlatformId)) {
+            // Current platform is among the ones that will execute the default command.
+            usePlatformId = currentPlatformId;
+        } else {
+            // Current platform won't execute the default command, so pick whatever platform there happens to be.
+            usePlatformId = platformCandidates[0];
+        }
+        return this.plugin.getDefaultShellForPlatform(usePlatformId);
+    }
+    
+    /**
+     * Determines which operating system(s) end up executing the 'default' shell command content.
+     *
+     * @private Can be made public if needed.
+     */
+    private getPlatformCandidatesForDefaultCommand(): PlatformId[] {
+        const candidatePlatformIds: Set<PlatformId> = new Set(PlatformNamesMap.keys());
+        const shellCommandContents: IPlatformSpecificStringWithDefault = this.getPlatformSpecificShellCommands();
+        for (const platformId of PlatformNamesMap.keys()) {
+            if (shellCommandContents[platformId] !== undefined) {
+                // The default shell command content is not used on this platform.
+                candidatePlatformIds.delete(platformId);
+            }
+        }
+        return [...candidatePlatformIds];
     }
 
     /**

@@ -50,7 +50,7 @@ export function CreateShellCommandFieldCore(
     container_element: HTMLElement,
     setting_icon_and_name: string,
     shell_command: string,
-    shell: Shell,
+    shell: Shell | null,
     t_shell_command: TShellCommand | null,
     show_autocomplete_menu: boolean,
     extra_on_change: (shell_command: string) => void,
@@ -122,15 +122,15 @@ export function CreateShellCommandFieldCore(
  *
  * @param plugin
  * @param shell_command Textual shell command content.
- * @param shell
+ * @param shell Can be null if it's unknown, which shell will be used for execution. This can happen when creating shell command fields for other operating systems.
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @public Exported because createShellCommandField uses this.
  */
-export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell, t_shell_command: TShellCommand | null): Promise<DocumentFragment> {
+export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: string, shell: Shell | null, t_shell_command: TShellCommand | null): Promise<DocumentFragment> {
     const parsing_result = await parseVariables(
         plugin,
         shell_command,
-        shell,
+        shell ?? plugin.getDefaultShell(), // If no shell is provided (= previewing a shell command for another operating system that has no explicitly selected shell), use the current operating system's default shell just to get some configuration for escaping and directory separators etc.
         true,
         t_shell_command,
         null, /* No event is available during preview. */
@@ -152,14 +152,25 @@ export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: s
     }
     
     // Convert the preview text to a DocumentFragment.
-    const previewContentLines: string[] = previewContent.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
     const documentFragment: DocumentFragment = new DocumentFragment();
-    for (const previewContentLine of previewContentLines) {
-        if (documentFragment.firstChild !== null) {
-            // If earlier content exists, add a separating <br>.
-            documentFragment.createEl("br");
+    if ("" !== previewContent) {
+        const previewContentLines: string[] = previewContent.split(/\r\n|\r|\n/g); // Don't use ( ) with | because .split() would then include the newline characters in the resulting array.
+        for (const previewContentLine of previewContentLines) {
+            if (documentFragment.firstChild !== null) {
+                // If earlier content exists, add a separating <br>.
+                documentFragment.createEl("br");
+            }
+            documentFragment.appendText(previewContentLine);
         }
-        documentFragment.appendText(previewContentLine);
     }
+    
+    // Show shell name.
+    if (documentFragment.firstChild !== null) {
+        // If earlier content exists, add a separating <br>.
+        documentFragment.createEl("br");
+    }
+    documentFragment.createEl("small", {text: shell ? shell.getName() : 'Unknown shell', attr: {class: "SC-preview-shell-name"}});
+    
+    // Done.
     return documentFragment;
 }

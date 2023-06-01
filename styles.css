@@ -166,6 +166,13 @@ div.SC-hotkey-info svg {
     vertical-align: middle; /* Not middle but close enough. */
 }
 
+small.SC-preview-shell-name {
+    display: inline-block;
+    margin-top: 7px;
+    border-top: 1px solid var(--text-faint);
+    font-weight: bold;
+}
+
 /*
  * SHELL COMMAND ICONS (not button icons, just informational icons)
  */
