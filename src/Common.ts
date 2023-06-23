@@ -282,14 +282,15 @@ export function gotoURL(url: string) {
     shell.openExternal(url); // This returns a promise, but it can be ignored as there's nothing to do after opening the browser.
 }
 
-export function generateObsidianCommandName(plugin: SC_Plugin, shell_command: string, alias: string) {
+/**
+ * TODO: Move to TShellCommand.
+ *
+ * @param plugin
+ * @param aliasOrShellCommandContent
+ */
+export function generateObsidianCommandName(plugin: SC_Plugin, aliasOrShellCommandContent: string) {
     const prefix = plugin.settings.obsidian_command_palette_prefix;
-    // TODO: Replace shell_command and alias parameters with one parameter: aliasOrShellCommand.
-    if (alias) {
-        // If an alias is set for the command, Obsidian's command palette should display the alias text instead of the actual command.
-        return prefix + alias;
-    }
-    return prefix + shell_command;
+    return prefix + aliasOrShellCommandContent;
 }
 
 export function isInteger(value: string, allow_minus: boolean): boolean {
