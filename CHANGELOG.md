@@ -26,6 +26,7 @@ Features that are in development, but are not released yet. Does not include stu
   - Also, [Notification/error balloon](https://publish.obsidian.md/shellcommands/Output+handling/Output+channel+-+Notification+balloon) now displays monospaced output (can be turned off in settings). Improves error messages' readability (and code-like output's readability, too).
   - [Usage listings for custom variables and deletion confirmation prompts (#340)](https://github.com/Taitava/obsidian-shellcommands/issues/340).
   - [Settings: Make each shell command show their shell's name (#353)](https://github.com/Taitava/obsidian-shellcommands/issues/353).
+- [Command palette: Re-execute last shell command (#354)](https://github.com/Taitava/obsidian-shellcommands/issues/354).
   
 ### To be Changed
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
