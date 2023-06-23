@@ -33,6 +33,7 @@ import {VariableSet} from "./variables/loadVariables";
 import {
     getUsedVariables,
     parseVariableSynchronously,
+    ParsingResult,
 } from "./variables/parseVariables";
 import {
     Cacheable,
@@ -43,6 +44,7 @@ import {
     ParsingProcess,
     Preaction,
     PreactionConfiguration,
+    ShellCommandExecutor,
 } from "./imports";
 import {
     Variable,
@@ -383,9 +385,108 @@ export class TShellCommand extends Cacheable {
         });
     }
 
-    public registerToCommandPalette(): void {
-        // TODO: Move the logic from plugin.registerShellCommand() to here, but split to multiple methods.
-        this.plugin.registerShellCommand(this);
+    public registerToCommandPalette() {
+        const shell_command_id = this.getId();
+        debugLog("Registering shell command #" + shell_command_id + "...");
+        
+        // Define a function for executing the shell command.
+        const executor = async (parsing_process: ShellCommandParsingProcess | undefined) => {
+            if (!parsing_process) {
+                parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+                // Try to process variables that can be processed before performing preactions.
+                await parsing_process.process();
+            }
+            const parsingResults = parsing_process.getParsingResults();
+            const shellCommandContentParsingSucceeded = parsingResults.shellCommandContent?.succeeded; // .shellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+            const shellCommandWrapperParsingSucceeded = parsingResults.shellCommandWrapper ? parsingResults.shellCommandWrapper.succeeded : true; // If no wrapper is present, pass.
+            if (shellCommandContentParsingSucceeded && shellCommandWrapperParsingSucceeded) { // FIXME: This should not rely on just one (or two) content's parsing result, it should check all of them. Use parsing_process.getErrorMessages().length === 0 to check all parsed content.
+                // The command was parsed correctly.
+                const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
+                    this.plugin,
+                    this,
+                    null // No SC_Event is available when executing via command palette or hotkey.
+                );
+                await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
+            } else {
+                // The command could not be parsed correctly.
+                // Display error messages
+                parsing_process.displayErrorMessages();
+            }
+        };
+        
+        // Register an Obsidian command
+        const obsidian_command: Command = {
+            id: this.plugin.generateObsidianCommandId(shell_command_id),
+            name: generateObsidianCommandName(this.plugin, this.getShellCommandContent(), this.getAlias()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
+            // Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
+            checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
+                if (is_opening_command_palette) {
+                    // The user is currently opening the command palette.
+                    
+                    // Check can the shell command be shown in command palette
+                    if (!this.canShowInCommandPalette()) {
+                        // Cancel preview and deny showing in command palette.
+                        debugLog("Shell command #" + this.getId() + " won't be shown in command palette.");
+                        return false;
+                    }
+                    
+                    // Do not execute the command yet, but parse variables for preview, if enabled in the settings.
+                    debugLog("Getting command palette preview for shell command #" + this.getId());
+                    if (this.plugin.settings.preview_variables_in_command_palette) {
+                        // Preparse variables
+                        const parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+                        parsing_process.process().then((parsing_succeeded) => {
+                            if (parsing_succeeded) {
+                                // Parsing succeeded
+                                
+                                // Rename Obsidian command
+                                const parsingResults = parsing_process.getParsingResults();
+                                /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
+                                const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+                                const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
+                                const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
+                                const parsedAlias: string = aliasParsingResult.parsed_content as string;
+                                this.renameObsidianCommand(parsedShellCommand,parsedAlias);
+                                
+                                // Store the preparsed variables so that they will be used if this shell command gets executed.
+                                this.plugin.cached_parsing_processes[this.getId()] = parsing_process;
+                            } else {
+                                // Parsing failed, so use unparsed this.getShellCommand() and this.getAlias().
+                                this.renameObsidianCommand(this.getShellCommandContent(), this.getAlias());
+                                this.plugin.cached_parsing_processes[this.getId()] = undefined;
+                            }
+                        });
+                    } else {
+                        // Parsing is disabled, so use unparsed this.getShellCommand() and this.getAlias().
+                        this.renameObsidianCommand(this.getShellCommandContent(), this.getAlias());
+                        this.plugin.cached_parsing_processes[this.getId()] = undefined;
+                    }
+                    
+                    return true; // Tell Obsidian this command can be shown in command palette.
+                    
+                } else {
+                    // The user has instructed to execute the command.
+                    executor(
+                        this.plugin.cached_parsing_processes[this.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
+                    ).then(() => {
+                        
+                        // Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
+                        // palette might generate multiple preparsed commands in the array, but as the user selects and executes only one command, all these temporary
+                        // commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings, or executes commands via hotkeys. We do not want to
+                        // execute obsolete commands accidentally.
+                        // This deletion also needs to be done even if the executed command was not a preparsed command, because
+                        // even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
+                        // commands might be.
+                        this.plugin.cached_parsing_processes = {}; // Removes obsolete preparsed variables from all shell commands.
+                        return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
+                    });
+                }
+            },
+        };
+        this.plugin.addCommand(obsidian_command);
+        this.plugin.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.
+        this.setObsidianCommand(obsidian_command);
+        debugLog("Registered.");
     }
 
     public unregisterFromCommandPalette(): void {
