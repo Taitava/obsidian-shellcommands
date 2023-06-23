@@ -200,6 +200,16 @@ export class TShellCommand extends Cacheable {
     public getAliasOrShellCommand(): string {
         return this.configuration.alias || this.getShellCommandContent(); // TODO: Use this.getAlias().
     }
+    
+    private static getAliasOrShellCommandContentFromParsingResult(parsingProcess: ShellCommandParsingProcess) {
+        const parsingResults = parsingProcess.getParsingResults();
+        /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
+        const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+        const aliasParsingResult: ParsingResult = parsingResults.alias as ParsingResult;
+        const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
+        const parsedAlias: string = aliasParsingResult.parsed_content as string;
+        return parsedAlias ? parsedAlias : parsedShellCommand;
+    }
 
     public getConfirmExecution() {
         return this.configuration.confirm_execution;
@@ -445,13 +455,7 @@ export class TShellCommand extends Cacheable {
                                 // Parsing succeeded
                                 
                                 // Rename Obsidian command
-                                const parsingResults = parsing_process.getParsingResults();
-                                /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
-                                const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
-                                const aliasParsingResult: ParsingResult = parsingResults["alias"] as ParsingResult;
-                                const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
-                                const parsedAlias: string = aliasParsingResult.parsed_content as string;
-                                this.renameObsidianCommand(parsedAlias ? parsedAlias : parsedShellCommand);
+                                this.renameObsidianCommand(TShellCommand.getAliasOrShellCommandContentFromParsingResult(parsing_process));
                                 
                                 // Store the preparsed variables so that they will be used if this shell command gets executed.
                                 this.plugin.cached_parsing_processes[this.getId()] = parsing_process;
