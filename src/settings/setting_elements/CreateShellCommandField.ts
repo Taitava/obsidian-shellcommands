@@ -242,6 +242,7 @@ export function createShellCommandField(
         }),
     );
 
+    // Create Hotkey settings icon.
     if (t_shell_command.canHaveHotkeys()) {
         setting_group.preview_setting.addExtraButton(button => button
             .setIcon("any-key")
@@ -249,17 +250,28 @@ export function createShellCommandField(
             .onClick(() => {
                 // The most important parts of this closure function are copied 2022-04-27 from https://github.com/pjeby/hotkey-helper/blob/c8a032e4c52bd9ce08cb909cec15d1ed9d0a3439/src/plugin.js#L436-L442 (also from other lines of the same file).
 
-                // @ts-ignore This is private API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
+                // @ts-ignore This is PRIVATE API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
                 plugin.app.setting?.openTabById("hotkeys");
 
                 // @ts-ignore
                 const hotkeys_settings_tab = plugin.app.setting.settingTabs.filter(tab => tab.id === "hotkeys").shift();
-                if (hotkeys_settings_tab && hotkeys_settings_tab.searchInputEl && hotkeys_settings_tab.updateHotkeyVisibility) {
-                    debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
-                    hotkeys_settings_tab.searchInputEl.value = t_shell_command.getObsidianCommand().name;
-                    hotkeys_settings_tab.updateHotkeyVisibility();
+                const searchErrorMessage = "Shell command hotkey search failed due to a private API change in the hotkey search. Please start a discussion in the SC plugin's GitHub repo.";
+                if (hotkeys_settings_tab) {
+                    const hotkeySearchElement =
+                        hotkeys_settings_tab.searchInputEl ??        // For Obsidian versions before 1.2.0.
+                        hotkeys_settings_tab.searchComponent.inputEl // For Obsidian version 1.2.0 and onwards.
+                    ;
+                    if (hotkeySearchElement && hotkeys_settings_tab.updateHotkeyVisibility) {
+                        debugLog("Hotkeys: Filtering by shell command " + t_shell_command.getObsidianCommand().name);
+                        hotkeySearchElement.value = t_shell_command.getObsidianCommand().name;
+                        hotkeys_settings_tab.updateHotkeyVisibility();
+                    } else {
+                        debugLog("Hotkeys: Cannot do filtering due to API changes. Search element has changed.");
+                        this.plugin.newNotification(searchErrorMessage);
+                    }
                 } else {
-                    debugLog("Hotkeys: Cannot do filtering due to API changes.");
+                    debugLog("Hotkeys: Cannot do filtering due to API changes. 'Hotkeys' settings tab has changed.");
+                    this.plugin.newNotification(searchErrorMessage);
                 }
             }),
         );

@@ -21,22 +21,35 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.20.0] - Unreleased
 
 ### To be Added
-- [Font styling for output (ANSI code) (#329)](https://github.com/Taitava/obsidian-shellcommands/issues/329).
+- [Text styling for output (ANSI code) (#329)](https://github.com/Taitava/obsidian-shellcommands/issues/329).
   - Some shell programs style their text output with colors, emphasis, boldings, links etc. by inserting [ANSI code](https://en.wikipedia.org/wiki/ANSI_escape_code) to output. Previously, the plugin didn't do anything for ANSI code, and it ended up cluttering output. Now it's possible to convert ANSI code to HTML or turn the conversion off (on by default).
   - Also, [Notification/error balloon](https://publish.obsidian.md/shellcommands/Output+handling/Output+channel+-+Notification+balloon) now displays monospaced output (can be turned off in settings). Improves error messages' readability (and code-like output's readability, too).
+  - [Usage listings for custom variables and deletion confirmation prompts (#340)](https://github.com/Taitava/obsidian-shellcommands/issues/340).
+  - [Settings: Make each shell command show their shell's name (#353)](https://github.com/Taitava/obsidian-shellcommands/issues/353).
   
 ### To be Changed
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
   - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
 
-## [0.19.0] - Unreleased
+## [0.19.1] - 2023-05-27
 
-### To be Added
+### Fixed:
+- [Executing shell commands does not work in 0.19.0 (#350)](https://github.com/Taitava/obsidian-shellcommands/issues/350).
+  - No shell commands could be executed, unless [PATH additions](https://publish.obsidian.md/shellcommands/Environments/Additions+to+the+PATH+environment+variable#An+easier+way+to+add+directories+to+%60PATH%60) were defined.
+  - When trying to execute a shell command, nothing happened, and there were no visible error messages (that said, error console had a message).
+  - This is now fixed, and you don't need to define PATH additions to overcome the problem.
+
+## [0.19.0] - 2023-05-27
+
+### Added
 - [Support for custom shells(#297)](https://github.com/Taitava/obsidian-shellcommands/issues/297).
   - Define e.g. [WSL (Windows Subsystem for Linux)](https://learn.microsoft.com/en-us/windows/wsl/install) or [MinGW-w64](https://www.mingw-w64.org/) shell to execute shell commands in different environments. [Documentation](https://publish.obsidian.md/shellcommands/Environments/Custom+shells/Custom+shells).
 
-### To be Changed
+### Changed
 - [Change "Macintosh" word to "macOS" (#326)](https://github.com/Taitava/obsidian-shellcommands/issues/326).
+
+### Fixed:
+- [Hotkey button does not work anymore (Obsidian 1.2.0) (#338)](https://github.com/Taitava/obsidian-shellcommands/issues/338).
 
 ## [0.18.2] - 2023-03-26
 
@@ -394,7 +407,9 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...HEAD
+[0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
+[0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0
 [0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2
 [0.18.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.0...0.18.1
 [0.18.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.17.0...0.18.0

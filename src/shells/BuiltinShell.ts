@@ -38,8 +38,13 @@ export abstract class BuiltinShell extends Shell {
      * @protected
      */
     protected abstract ownedShellBinaries: string[];
-
-    private pathAugmentation: string;
+    
+    /**
+     * This is undefined if setEnvironmentVariablePathAugmentation() is never called. It's never called, if the current
+     * operating system's PATH augmentation string is empty.
+     * @private
+     */
+    private pathAugmentation: string | undefined;
 
     /**
      * Built-in shells use the path to the shell executable as their identifier in configuration files.
@@ -79,7 +84,7 @@ export abstract class BuiltinShell extends Shell {
     }
 
     protected augmentPATHEnvironmentVariable(): string {
-        const pathAugmentation = convertNewlinesToPATHSeparators(this.pathAugmentation, this.getPathSeparator());
+        const pathAugmentation = convertNewlinesToPATHSeparators(this.pathAugmentation ?? "", this.getPathSeparator());
         // Check if there's anything to augment.
         if (pathAugmentation.length > 0) {
             // Augment.
