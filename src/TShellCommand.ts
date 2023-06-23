@@ -384,35 +384,40 @@ export class TShellCommand extends Cacheable {
             this.unregisterSC_Event(sc_event);
         });
     }
+    
+    /**
+     * Called when executing a shell command from command palette. Could probably be called in other execution situations, too.
+     *
+     * @param parsing_process
+     * @private Can be made public, if needed.
+     */
+    private async executeOrShowErrors(parsing_process: ShellCommandParsingProcess | undefined): Promise<void> {
+        if (!parsing_process) {
+            parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+            // Try to process variables that can be processed before performing preactions.
+            await parsing_process.process();
+        }
+        const parsingResults = parsing_process.getParsingResults();
+        const shellCommandContentParsingSucceeded = parsingResults.shellCommandContent?.succeeded; // .shellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+        const shellCommandWrapperParsingSucceeded = parsingResults.shellCommandWrapper ? parsingResults.shellCommandWrapper.succeeded : true; // If no wrapper is present, pass.
+        if (shellCommandContentParsingSucceeded && shellCommandWrapperParsingSucceeded) { // FIXME: This should not rely on just one (or two) content's parsing result, it should check all of them. Use parsing_process.getErrorMessages().length === 0 to check all parsed content.
+            // The command was parsed correctly.
+            const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
+                this.plugin,
+                this,
+                null // No SC_Event is available when executing via command palette or hotkey.
+            );
+            await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
+        } else {
+            // The command could not be parsed correctly.
+            // Display error messages
+            parsing_process.displayErrorMessages();
+        }
+    }
 
     public registerToCommandPalette() {
         const shell_command_id = this.getId();
         debugLog("Registering shell command #" + shell_command_id + "...");
-        
-        // Define a function for executing the shell command.
-        const executor = async (parsing_process: ShellCommandParsingProcess | undefined) => {
-            if (!parsing_process) {
-                parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
-                // Try to process variables that can be processed before performing preactions.
-                await parsing_process.process();
-            }
-            const parsingResults = parsing_process.getParsingResults();
-            const shellCommandContentParsingSucceeded = parsingResults.shellCommandContent?.succeeded; // .shellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
-            const shellCommandWrapperParsingSucceeded = parsingResults.shellCommandWrapper ? parsingResults.shellCommandWrapper.succeeded : true; // If no wrapper is present, pass.
-            if (shellCommandContentParsingSucceeded && shellCommandWrapperParsingSucceeded) { // FIXME: This should not rely on just one (or two) content's parsing result, it should check all of them. Use parsing_process.getErrorMessages().length === 0 to check all parsed content.
-                // The command was parsed correctly.
-                const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
-                    this.plugin,
-                    this,
-                    null // No SC_Event is available when executing via command palette or hotkey.
-                );
-                await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
-            } else {
-                // The command could not be parsed correctly.
-                // Display error messages
-                parsing_process.displayErrorMessages();
-            }
-        };
         
         // Register an Obsidian command
         const obsidian_command: Command = {
@@ -466,7 +471,7 @@ export class TShellCommand extends Cacheable {
                     
                 } else {
                     // The user has instructed to execute the command.
-                    executor(
+                    this.executeOrShowErrors(
                         this.plugin.cached_parsing_processes[this.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
                     ).then(() => {
                         
