@@ -117,10 +117,18 @@ export class UsageContainer {
         let prologue: string;
         switch (prologueFormat) {
             case "long":
-                prologue = `${this.subjectName} is used in ${countUsages} ${places}:`;
+                if (countUsages === 0) {
+                    prologue = `${this.subjectName} is used nowhere.`;
+                } else {
+                    prologue = `${this.subjectName} is used in ${countUsages} ${places}:`;
+                }
                 break;
             case "short":
-                prologue = `Used in ${countUsages} ${places}:`;
+                if (countUsages === 0) {
+                    prologue = `Used nowhere.`;
+                } else {
+                    prologue = `Used in ${countUsages} ${places}:`;
+                }
                 break;
         }
         containerElement.createEl("p", {text: prologue});
