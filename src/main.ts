@@ -31,6 +31,7 @@ import {
 	ShellCommandExecutor,
 } from "./imports";
 import {
+    Command,
     Notice,
     ObsidianProtocolData,
     Plugin,
@@ -125,6 +126,16 @@ export default class SC_Plugin extends Plugin {
     private statusBarElement: HTMLElement;
 
     private autocompleteMenus: AutocompleteResult[] = [];
+    
+    /**
+     * - Executing shell commands via menus/events does not assign the command to this property.
+     * - A shell command is assigned here even if variable parsing was unsuccessful and execution cancelled.
+     *
+     * Used by the "Re-execute" command.
+     *
+     * @private
+     */
+    public lastTShellCommandExecutedFromCommandPalette: TShellCommand | null = null;
 
 	public async onload() {
 		// debugLog('loading plugin'); // Wouldn't do anything, as DEBUG_ON is not set before settings are loaded.
@@ -170,14 +181,8 @@ export default class SC_Plugin extends Plugin {
         const output_wrapper_model = getModel<OutputWrapperModel>(OutputWrapperModel.name);
         this.output_wrappers = output_wrapper_model.loadInstances(this.settings);
 
-		// Make all defined shell commands to appear in the Obsidian command palette.
-		const shell_commands = this.getTShellCommands();
-		for (const shell_command_id in shell_commands) {
-			const t_shell_command = shell_commands[shell_command_id];
-			if (t_shell_command.canAddToCommandPalette()) {
-				t_shell_command.registerToCommandPalette();
-			}
-		}
+        // Make shell commands and other commands appear in Obsidian's command palette.
+        this.registerCommandPaletteCommands();
 
 		// Perform event registrations, if enabled.
 		if (this.settings.enable_events) {
@@ -320,6 +325,89 @@ export default class SC_Plugin extends Plugin {
 		return t_shell_command;
 	}
 
+    private registerCommandPaletteCommands(): void {
+        // Shell commands.
+        const shell_commands = this.getTShellCommands();
+        for (const shell_command_id in shell_commands) {
+            const t_shell_command = shell_commands[shell_command_id];
+            if (t_shell_command.canAddToCommandPalette()) {
+                t_shell_command.registerToCommandPalette();
+            }
+        }
+        
+        // Command: Re-execute last shell command.
+        const reExecuteCommandConfiguration = this.settings.command_palette.re_execute_last_shell_command;
+        if (reExecuteCommandConfiguration.enabled) {
+            this.registerReExecuteCommand(reExecuteCommandConfiguration);
+        }
+    }
+    
+    private registerReExecuteCommand(reExecuteCommandConfiguration: typeof this.settings.command_palette.re_execute_last_shell_command) {
+        const reExecutePrefix: string = reExecuteCommandConfiguration.prefix;
+        const reExecuteCommand: Command = {
+            id: "re-execute-from-command-palette",
+            name: reExecutePrefix + this.lastTShellCommandExecutedFromCommandPalette?.getAliasOrShellCommand() ?? "Last shell command",
+            checkCallback: (isOpeningCommandPalette: boolean): boolean | void => { // If isOpeningCommandPalette is true, then the return type is boolean, otherwise void.
+                const lastTShellCommand = this.lastTShellCommandExecutedFromCommandPalette;
+                if (isOpeningCommandPalette) {
+                    // The user is currently opening the command palette.
+                    // Show the command only if a previously executed shell command can be found.
+                    if (!lastTShellCommand) {
+                        debugLog("No shell command is yet executed via command palette.");
+                        return false;
+                    }
+                    
+                    // Do not execute the command yet, but parse variables for preview, if enabled in the settings.
+                    debugLog("Getting re-execute preview for shell command #" + lastTShellCommand.getId());
+                    const pluginPrefix = this.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
+                    if (this.settings.preview_variables_in_command_palette) {
+                        
+                        // Preparse variables.
+                        const parsingProcess = lastTShellCommand.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+                        parsingProcess.process().then((parsingSucceeded: boolean) => {
+                            if (parsingSucceeded) {
+                                // Parsing succeeded.
+                                
+                                // Rename Obsidian command.
+                                reExecuteCommand.name = pluginPrefix + reExecuteCommandConfiguration.prefix + (TShellCommand.getAliasOrShellCommandContentFromParsingResult(parsingProcess));
+                                
+                                // Store the preparsed variables so that they will be used if this shell command gets executed.
+                                this.cached_parsing_processes[lastTShellCommand.getId()] = parsingProcess;
+                            } else {
+                                // Parsing failed, so use unparsed lastTShellCommand.getAliasOrShellCommand().
+                                reExecuteCommand.name = pluginPrefix + reExecuteCommandConfiguration.prefix + lastTShellCommand.getAliasOrShellCommand();
+                                this.cached_parsing_processes[lastTShellCommand.getId()] = undefined;
+                            }
+                        });
+                    } else {
+                        // Parsing is disabled, so use unparsed lastTShellCommand.getAliasOrShellCommand().
+                        reExecuteCommand.name = pluginPrefix + reExecuteCommandConfiguration.prefix + lastTShellCommand.getAliasOrShellCommand();
+                        this.cached_parsing_processes[lastTShellCommand.getId()] = undefined;
+                    }
+                    
+                    // Can show in command palette.
+                    return true;
+                } else {
+                    // Execute a shell command.
+                    if (lastTShellCommand) {
+                        // A previously executed shell command is found.
+                        lastTShellCommand.executeOrShowErrors(
+                            this.cached_parsing_processes[lastTShellCommand.getId()], // Can be undefined, if no preparsing was done. executeOrShowErrors() will handle creating the parsing process then.
+                        ).then(() => {
+                            // Remove obsolete preparsed variables from all shell commands, also from ones that were not executed.
+                            this.cached_parsing_processes = {};
+                        });
+                    } else {
+                        // No previously executed shell command exists. (We only get here when a hotkey is pressed, as the re-execute command is not visible in Command palette, if no shell command is yet executed).
+                        this.newError("No shell command has been executed yet.");
+                    }
+                }
+            },
+            repeatable: false, // TODO: Add a setting to ShellCommandConfiguration that could allow repeating shell commands via hotkeys, then add the `repeatable` property to registerShellCommand(), too. Default value for the setting would be false.
+        };
+        this.addCommand(reExecuteCommand);
+    }
+    
 	/**
 	 * Goes through all events and all shell commands, and for each shell command, registers all the events that the shell
 	 * command as enabled in its configuration. Does not modify the configurations.

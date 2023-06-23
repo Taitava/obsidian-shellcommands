@@ -201,7 +201,7 @@ export class TShellCommand extends Cacheable {
         return this.configuration.alias || this.getShellCommandContent(); // TODO: Use this.getAlias().
     }
     
-    private static getAliasOrShellCommandContentFromParsingResult(parsingProcess: ShellCommandParsingProcess) {
+    public static getAliasOrShellCommandContentFromParsingResult(parsingProcess: ShellCommandParsingProcess) {
         const parsingResults = parsingProcess.getParsingResults();
         /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
         const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
@@ -399,9 +399,8 @@ export class TShellCommand extends Cacheable {
      * Called when executing a shell command from command palette. Could probably be called in other execution situations, too.
      *
      * @param parsing_process
-     * @private Can be made public, if needed.
      */
-    private async executeOrShowErrors(parsing_process: ShellCommandParsingProcess | undefined): Promise<void> {
+    public async executeOrShowErrors(parsing_process: ShellCommandParsingProcess | undefined): Promise<void> {
         if (!parsing_process) {
             parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
             // Try to process variables that can be processed before performing preactions.
@@ -422,6 +421,12 @@ export class TShellCommand extends Cacheable {
             // The command could not be parsed correctly.
             // Display error messages
             parsing_process.displayErrorMessages();
+        }
+        
+        // Memorize that this was the last shell command executed via command palette - even if parsing failed and
+        // execution was cancelled. However, don't memorize, if this shell command should not appear in command palette.
+        if (this.canShowInCommandPalette()) {
+            this.plugin.lastTShellCommandExecutedFromCommandPalette = this;
         }
     }
 

@@ -43,9 +43,16 @@ export interface SC_MainSettings {
      * Might also enable some testing {{variables}} in the future, perhaps.
      */
     debug: boolean;
+    
+    /**
+     * TODO: Rename to execute_command_prefix. Consider moving the renamed setting to command_palette.
+     */
     obsidian_command_palette_prefix: string;
 
     // Variables:
+    /**
+     * TODO: Consider removing this setting, or moving it to command_palette.
+     */
     preview_variables_in_command_palette: boolean;
     show_autocomplete_menu: boolean;
 
@@ -66,6 +73,14 @@ export interface SC_MainSettings {
 
     // Modals:
     approve_modals_by_pressing_enter_key: boolean;
+    
+    // Obsidian's command palette:
+    command_palette: {
+        re_execute_last_shell_command: {
+            enabled: boolean,
+            prefix: string,
+        },
+    },
 
     // Shell commands:
     /** If it's a number, limit the max height of a textarea. If it's false, don't limit at all. */
@@ -134,6 +149,14 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Modals:
         approve_modals_by_pressing_enter_key: true,
+        
+        // Obsidian's command palette:
+        command_palette: {
+            re_execute_last_shell_command: {
+                enabled: true,
+                prefix: "Re-execute: ",
+            },
+        },
 
         // Shell commands:
         max_visible_lines_in_shell_command_fields: false, // No limit by default.
