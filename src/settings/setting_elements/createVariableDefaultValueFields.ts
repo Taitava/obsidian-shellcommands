@@ -178,6 +178,7 @@ export function createVariableDefaultValueField(
     }
 
     // Create the default value setting
+    let defaultValueTextareaComponent: TextAreaComponent | undefined;
     const defaultValueSetting: Setting = new Setting(containerElement)
         .setName(settingName)
         .setDesc("If not available, then:")
@@ -227,6 +228,11 @@ export function createVariableDefaultValueField(
                 // Save the settings
                 await plugin.saveSettings();
                 
+                // If "Execute with value" was selected, focus on the textarea.
+                if (newType === "value") {
+                    defaultValueTextareaComponent?.inputEl.focus();
+                }
+                
                 // Extra "on change" hook.
                 onChange?.();
             }),
@@ -251,6 +257,9 @@ export function createVariableDefaultValueField(
                 if (plugin.settings.show_autocomplete_menu) {
                     createAutocomplete(plugin, textareaComponent.inputEl, () => textareaComponent.onChanged());
                 }
+                
+                // Store the textarea so that the dropdown component's callback function can focus the textarea if needed.
+                defaultValueTextareaComponent = textareaComponent;
             }),
         )
     ;
