@@ -29,6 +29,7 @@ Features that are in development, but are not released yet. Does not include stu
 - [Command palette: Re-execute last shell command (#354)](https://github.com/Taitava/obsidian-shellcommands/issues/354).
   
 ### To be Changed
+- [Custom variables pane: Show linebreaks in variable values correctly (#355)](https://github.com/Taitava/obsidian-shellcommands/issues/355).
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
   - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
 
