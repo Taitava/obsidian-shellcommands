@@ -68,10 +68,7 @@ import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 
-/**
- * TODO: Rename to ShellCommandSettingsModal
- */
-export class ExtraOptionsModal extends SC_Modal {
+export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
@@ -138,7 +135,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Hotkeys for moving to next/previous shell command
         const switch_to_t_shell_command = (t_shell_command: TShellCommand) => {
-            const new_modal = new ExtraOptionsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
+            const new_modal = new ShellCommandSettingsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
             this.close(); // Needs to be closed before the new one is opened, otherwise the new one's tab content won't be shown.
             new_modal.open();
             new_modal.activateTab(this.tab_structure.active_tab_id);

@@ -19,7 +19,7 @@
 
 import {TShellCommand} from "../../TShellCommand";
 import {Hotkey, setIcon} from "obsidian";
-import {ExtraOptionsModal} from "../ExtraOptionsModal";
+import {ShellCommandSettingsModal} from "../ShellCommandSettingsModal";
 import {DeleteModal} from "../DeleteModal";
 import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
@@ -131,60 +131,60 @@ export function createShellCommandField(
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.PREACTIONS_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.PREACTIONS_OPTIONS_SUMMARY)
             .setIcon("note-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Preactions tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-preactions");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.OUTPUT_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.OUTPUT_OPTIONS_SUMMARY)
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Environments tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-environments");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.EVENTS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.EVENTS_SUMMARY)
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Events tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.VARIABLES_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.VARIABLES_SUMMARY)
             .setIcon("code-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Variables tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
             })

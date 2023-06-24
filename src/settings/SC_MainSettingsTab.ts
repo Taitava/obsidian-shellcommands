@@ -63,6 +63,9 @@ import {createVariableDefaultValueField} from "./setting_elements/createVariable
 import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 
+/**
+ * TODO: Rename to MainSettingsModal. Then it better in line with ShellCommandSettingsModal.
+ */
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
 
