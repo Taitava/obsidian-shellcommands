@@ -21,9 +21,13 @@
 import {
     sanitizeHTMLToDom,
     Setting,
+    TextAreaComponent,
 } from "obsidian";
 import SC_Plugin from "../main";
-import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
+import {
+    SC_MainSettingsTab,
+    SettingFieldGroup,
+} from "./SC_MainSettingsTab";
 import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
 import {
     OutputHandlerCode,
@@ -67,6 +71,7 @@ import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapper
 import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
+import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -507,16 +512,33 @@ export class ShellCommandSettingsModal extends SC_Modal {
     }
 
     private async tabEnvironments(container_element: HTMLElement): Promise<void> {
+        
+        // Default shell command for platforms that don't have a specific command.
+        this.newDefaultShellCommandContentSetting(container_element, () => {
+            // When the default shell command content changes, update placeholders of platform specific shell command fields.
+            for (const settingGroup of platformSpecificSettingGroups) {
+                const textareaComponent: TextAreaComponent | undefined = settingGroup.shell_command_setting.components.first() as TextAreaComponent | undefined;
+                if (textareaComponent) {
+                    textareaComponent.setPlaceholder(this.t_shell_command.getDefaultShellCommand());
+                    textareaComponent.onChanged(); // Update textarea dimensions.
+                }
+            }
+            
+            // Update the shell command content on the main settings modal.
+            const mainModalShellCommandTextareaComponent: TextAreaComponent | undefined = this.setting_tab.setting_groups[this.shell_command_id].shell_command_setting.components.first() as TextAreaComponent | undefined;
+            if (mainModalShellCommandTextareaComponent) {
+                mainModalShellCommandTextareaComponent.setValue(this.t_shell_command.getDefaultShellCommand());
+                mainModalShellCommandTextareaComponent.onChanged(); // Update textarea dimensions.
+            }
+        });
+        
         // Platform specific shell commands
         let platform_id: PlatformId;
-        let is_first = true;
+        const platformSpecificSettingGroups: SettingFieldGroup[] = [];
         for (platform_id in PlatformNames) {
-            const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
-            if (is_first) {
-                // Focus on the first OS specific shell command field
-                setting_group.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
-                is_first = false;
-            }
+            platformSpecificSettingGroups.push(
+                createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu)
+            );
         }
 
         // Platform specific shell selection
@@ -723,6 +745,28 @@ export class ShellCommandSettingsModal extends SC_Modal {
         };
         addAnsiCodeFieldForOutputStream("stdout");
         addAnsiCodeFieldForOutputStream("stderr");
+    }
+    
+    private newDefaultShellCommandContentSetting(containerElement: HTMLElement, onChange: () => void) {
+        const settingGroup = CreateShellCommandFieldCore(
+            this.plugin,
+            containerElement,
+            "Default shell command",
+            this.t_shell_command.getPlatformSpecificShellCommands().default,
+            this.t_shell_command.getShell(),
+            this.t_shell_command,
+            this.plugin.settings.show_autocomplete_menu,
+            async (shellCommandContent: string) => {
+                // Store the updated shell command content.
+                this.t_shell_command.getPlatformSpecificShellCommands().default = shellCommandContent; // Can be an empty string.
+                await this.plugin.saveSettings();
+                onChange();
+            },
+        );
+        settingGroup.name_setting.setDesc("Used on operating systems that do not define their own shell command.");
+        
+        // Focus on the textarea.
+        settingGroup.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
     }
 
     protected approve(): void {
