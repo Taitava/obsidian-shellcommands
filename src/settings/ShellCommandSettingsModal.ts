@@ -93,7 +93,8 @@ export class ShellCommandSettingsModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});  // TODO: Use this.setTitle() instead.
+        // Modal title.
+        this.setTitle(this.t_shell_command.getAliasOrShellCommand());
 
         // Tabs
         this.tab_structure = createTabs(
@@ -172,6 +173,9 @@ export class ShellCommandSettingsModal extends SC_Modal {
 
             // UpdateShell commands settings panel
             this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);
+            
+            // Update this modal's title.
+            this.setTitle(this.t_shell_command.getAliasOrShellCommand());
 
             // Save
             await this.plugin.saveSettings();
