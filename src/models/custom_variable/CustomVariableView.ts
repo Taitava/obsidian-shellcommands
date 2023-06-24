@@ -22,6 +22,7 @@ import {
     WorkspaceLeaf,
 } from "obsidian";
 import SC_Plugin from "../../main";
+import {createMultilineTextElement} from "../../Common";
 
 export class CustomVariableView extends ItemView {
 
@@ -87,11 +88,11 @@ export class CustomVariableView extends ItemView {
             });
             variableListItemElement.createEl("br");
             if (null !== customVariableState) {
-                variableListItemElement.createEl("em").insertAdjacentText("beforeend", customVariableState);
+                createMultilineTextElement("em", customVariableState, variableListItemElement);
             }
             if (null !== customVariableValue) {
                 // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
-                variableListItemElement.createEl("strong").insertAdjacentText("beforeend", customVariableValue);
+                createMultilineTextElement("strong", customVariableValue, variableListItemElement);
             }
         }
     }
