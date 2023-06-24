@@ -346,7 +346,7 @@ export default class SC_Plugin extends Plugin {
         const reExecutePrefix: string = reExecuteCommandConfiguration.prefix;
         const reExecuteCommand: Command = {
             id: "re-execute-from-command-palette",
-            name: reExecutePrefix + this.lastTShellCommandExecutedFromCommandPalette?.getAliasOrShellCommand() ?? "Last shell command",
+            name: reExecutePrefix + (this.lastTShellCommandExecutedFromCommandPalette?.getAliasOrShellCommand() ?? "Last shell command"),
             checkCallback: (isOpeningCommandPalette: boolean): boolean | void => { // If isOpeningCommandPalette is true, then the return type is boolean, otherwise void.
                 const lastTShellCommand = this.lastTShellCommandExecutedFromCommandPalette;
                 if (isOpeningCommandPalette) {
