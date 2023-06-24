@@ -142,6 +142,11 @@ export class CustomVariableModel extends Model {
             container_element,
             "Default value",
             instance.getCustomVariable(),
+            undefined,
+            () => {
+                // After changing the default value settings, update values in 'Custom variables' view.
+                this.plugin.updateCustomVariableViews().then();
+            },
         );
         
         // Usage listing.
