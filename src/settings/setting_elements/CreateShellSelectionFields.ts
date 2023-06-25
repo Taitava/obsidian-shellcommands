@@ -30,6 +30,7 @@ import {
 } from "../../shells/ShellFunctions";
 import {Setting} from "obsidian";
 import SC_Plugin from "../../main";
+import {Shell} from "../../shells/Shell";
 
 export function createShellSelectionFields(
     plugin: SC_Plugin,
@@ -50,7 +51,10 @@ export function createShellSelectionFields(
             const currentSystemDefault = (getOperatingSystem() === platform_id) ? " (" + extractFileName(getUsersDefaultShellIdentifier()) + ")" : "";
             options = {"default": "Use system default" + currentSystemDefault};
         } else {
-            options = {"default": "Use default"};
+            const defaultShell: Shell | null = plugin.getDefaultShellForPlatform(platform_id);
+            options = {
+                "default": "Use default (" + (defaultShell?.getName() ?? "system default") + ")",
+            };
         }
 
         // Get human-readable shell names

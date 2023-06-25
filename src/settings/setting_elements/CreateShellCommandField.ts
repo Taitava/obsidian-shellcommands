@@ -82,7 +82,7 @@ export function createShellCommandField(
         shell_command_element,
         generateShellCommandFieldIconAndName(t_shell_command),
         shell_command,
-        t_shell_command.getShell(),
+        t_shell_command.getShellForDefaultCommand() ?? plugin.getDefaultShell(), // If default shell command content is newer used, just get some shell.
         t_shell_command,
         show_autocomplete_menu,
         async (shell_command: string) => {

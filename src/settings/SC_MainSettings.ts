@@ -217,7 +217,7 @@ export interface IPlatformSpecificString { // TODO: Rename to plural form: IPlat
     win32?: string,
 }
 
-export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
+export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString {  // TODO: Rename to plural form: IPlatformSpecificStringsWithDefault
     default: string,
 }
 

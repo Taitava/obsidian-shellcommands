@@ -50,9 +50,10 @@ import {
     ShellCommandConfiguration,
 } from "./settings/ShellCommandConfiguration";
 import {
-	getDefaultSettings,
-	SettingsVersionString,
-	SC_MainSettings,
+    getDefaultSettings,
+    SettingsVersionString,
+    SC_MainSettings,
+    PlatformId,
 } from "./settings/SC_MainSettings";
 import {ObsidianCommandsContainer} from "./ObsidianCommandsContainer";
 import {SC_MainSettingsTab} from "./settings/SC_MainSettingsTab";
@@ -699,18 +700,54 @@ export default class SC_Plugin extends Plugin {
     public getErrorMessageDurationMs(): number {
         return this.settings.error_message_duration * 1000; // * 1000 = convert seconds to milliseconds.
     }
-
+    
+    /**
+     * Returns an explicitly selected shell identifier, if available, or a system's default shell identifier.
+     */
 	public getDefaultShellIdentifier(): string {
-		const operatingSystem = getOperatingSystem();
-		let shellIdentifier = this.settings.default_shells[operatingSystem]; // Can also be undefined.
+		const platformId = getOperatingSystem();
+		let shellIdentifier = this.getDefaultShellIdentifierForPlatform(platformId); // Can also be undefined.
 		if (undefined === shellIdentifier) {
 			shellIdentifier = getUsersDefaultShellIdentifier();
 		}
         return shellIdentifier;
 	}
+    
+    /**
+     * Returns undefined, if a system's default shell is used for the given operating system.
+     *
+     * @param platformId
+     */
+    public getDefaultShellIdentifierForPlatform(platformId: PlatformId): string | undefined {
+        const shellIdentifier: string | undefined = this.settings.default_shells[platformId];
+        if (undefined === shellIdentifier && platformId === getOperatingSystem()) {
+            // Operating system's default shell should be used, and the passed operating system is the currently running
+            // operating system, so it's possible to determine the actual shell.
+            return getUsersDefaultShellIdentifier();
+        }
+        // Note that shellIdentifier can still be undefined.
+        return shellIdentifier;
+    }
 
+    /**
+     * Returns an explicitly selected shell, if available, or a system's default shell identifier.
+     */
     public getDefaultShell(): Shell {
         return getShell(this, this.getDefaultShellIdentifier());
+    }
+    
+    /**
+     * Returns null, if a system's default shell is used for the given operating system.
+     *
+     * @param platformId
+     */
+    public getDefaultShellForPlatform(platformId: PlatformId): Shell | null {
+        const shellIdentifier = this.getDefaultShellIdentifierForPlatform(platformId);
+        if (undefined === shellIdentifier) {
+            return null;
+        } else {
+            return getShell(this, shellIdentifier);
+        }
     }
 
 	public createCustomVariableView(): void {
