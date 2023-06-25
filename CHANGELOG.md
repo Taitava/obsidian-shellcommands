@@ -18,17 +18,19 @@ Mind the order!
 ## [Unreleased]
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
-## [0.20.0] - Unreleased
+- Nothing at the moment.
 
-### To be Added
+## [0.20.0] - 2023-06-25
+
+### Added
 - [Text styling for output (ANSI code) (#329)](https://github.com/Taitava/obsidian-shellcommands/issues/329).
-  - Some shell programs style their text output with colors, emphasis, boldings, links etc. by inserting [ANSI code](https://en.wikipedia.org/wiki/ANSI_escape_code) to output. Previously, the plugin didn't do anything for ANSI code, and it ended up cluttering output. Now it's possible to convert ANSI code to HTML or turn the conversion off (on by default).
+  - Some shell programs style their text output with colors, emphasis, bolds, links etc. by inserting [ANSI code](https://en.wikipedia.org/wiki/ANSI_escape_code) to output. Previously, the plugin didn't do anything for ANSI code, and it ended up cluttering output. Now it's possible to convert ANSI code to HTML or turn the conversion off (on by default).
   - Also, [Notification/error balloon](https://publish.obsidian.md/shellcommands/Output+handling/Output+channel+-+Notification+balloon) now displays monospaced output (can be turned off in settings). Improves error messages' readability (and code-like output's readability, too).
 - [Usage listings for custom variables and deletion confirmation prompts (#340)](https://github.com/Taitava/obsidian-shellcommands/issues/340).
 - [Settings: Make each shell command show their shell's name (#353)](https://github.com/Taitava/obsidian-shellcommands/issues/353).
 - [Command palette: Re-execute last shell command (#354)](https://github.com/Taitava/obsidian-shellcommands/issues/354).
   
-### To be Changed
+### Changed
 - [Custom variables pane: Show linebreaks in variable values correctly (#355)](https://github.com/Taitava/obsidian-shellcommands/issues/355).
 - [Small improvements for shell command extra settings modal (#356)](https://github.com/Taitava/obsidian-shellcommands/issues/356).
   - The title of the modal will show the alias text instead of shell command content.
@@ -413,7 +415,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...HEAD
+[0.20.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...0.20.0
 [0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
 [0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0
 [0.18.2]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.1...0.18.2

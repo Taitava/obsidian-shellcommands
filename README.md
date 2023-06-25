@@ -65,7 +65,8 @@ Not a single plugin can be great just by itself. And not a single plugin suits e
 Here is a list of operating systems this plugin has been tested on, along with Obsidian version and the plugin's version (= SC, Shell commands).
 
 | Shell commands version | Windows 10 | Linux (Xubuntu 22.04) | Mac |
-| ---------------------| ---------- | --------------------- | --- |
+| --------------------| ---------- | --------------------- | --- |
+| SC 0.20.0 | Obsidian 1.3.5<br>Works | Obsidian 1.3.5<br>Works | |
 | SC 0.19.1 | Obsidian 1.3.4<br>Works | Obsidian 1.3.4<br>Works | |
 | SC 0.19.0 | Obsidian 1.3.4<br>Works | Obsidian 1.3.4<br>Works | |
 
