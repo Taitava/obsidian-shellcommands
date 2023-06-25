@@ -140,8 +140,13 @@ export abstract class OutputChannel {
         debugLog(this.constructor.name + ".handleBuffered(): Handling output...");
 
         // Output is ok.
-        // Handle it.
-        this.convertAnsiCodeToHtmlIfEnabled(output);
+        // Apply ANSI conversion, if enabled.
+        let outputStreamName: OutputStream;
+        for (outputStreamName in output) {
+            output[outputStreamName] = this.convertAnsiCodeToHtmlIfEnabled(output[outputStreamName] as string, outputStreamName);
+        }
+        
+        // Handle output.
         await this._handleBuffered(await this.prepare_output(output, enableOutputWrapping), error_code);
         debugLog("Output handling is done.");
     }
@@ -174,8 +179,11 @@ export abstract class OutputChannel {
             // Wrap output (but only if a wrapper is defined)
             outputContent = await this.wrapOutput(outputStreamName, outputContent);
         }
+        
+        // Apply ANSI conversion, if enabled.
+        outputContent = this.convertAnsiCodeToHtmlIfEnabled(outputContent, outputStreamName);
 
-        // Handle it.
+        // Handle output.
         await this._handleRealtime(outputContent, outputStreamName);
 
         debugLog("Output handling is done.");
@@ -338,21 +346,21 @@ export abstract class OutputChannel {
      *  1) OutputHandlerConfiguration
      *  2) An OutputChannel subclass. At least "Open files" denies it.
      * @param outputContent
+     * @param outputStreamName
      * @protected
      */
-    protected convertAnsiCodeToHtmlIfEnabled(outputContent: OutputStreams): void | string {
+    private convertAnsiCodeToHtmlIfEnabled(outputContent: string, outputStreamName: OutputStream): string {
         if (!this.static().applicableConfiguration.convert_ansi_code) {
             // A subclass has disabled the conversion.
-            return;
+            return outputContent;
         }
         const outputHandlerConfigurations: OutputHandlerConfigurations = this.t_shell_command.getOutputHandlers();
-        const outputStreams = outputContent;
-        let outputStreamName: OutputStream;
-        for (outputStreamName in outputStreams) {
-            if (outputHandlerConfigurations[outputStreamName].convert_ansi_code) {
-                // Converting is allowed.
-                outputStreams[outputStreamName] = this.ansiToHtmlConverter.ansi_to_html(outputStreams[outputStreamName] as string);
-            }
+        if (outputHandlerConfigurations[outputStreamName].convert_ansi_code) {
+            // Converting is allowed.
+            return this.ansiToHtmlConverter.ansi_to_html(outputContent as string);
+        } else {
+            // user configuration has disabled the conversion.
+            return outputContent;
         }
     }
 
