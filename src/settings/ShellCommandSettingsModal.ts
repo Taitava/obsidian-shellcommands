@@ -753,7 +753,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
             containerElement,
             "Default shell command",
             this.t_shell_command.getPlatformSpecificShellCommands().default,
-            this.t_shell_command.getShell(),
+            this.t_shell_command.getShellForDefaultCommand() ?? this.plugin.getDefaultShell(), // If default shell command content is never used, just get some shell.
             this.t_shell_command,
             this.plugin.settings.show_autocomplete_menu,
             async (shellCommandContent: string) => {
