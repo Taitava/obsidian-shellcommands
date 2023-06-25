@@ -32,7 +32,8 @@ Features that are in development, but are not released yet. Does not include stu
 - [Custom variables pane: Show linebreaks in variable values correctly (#355)](https://github.com/Taitava/obsidian-shellcommands/issues/355).
 - [Small improvements for shell command extra settings modal (#356)](https://github.com/Taitava/obsidian-shellcommands/issues/356).
   - The title of the modal will show the alias text instead of shell command content.
-  - In Environments tab, a new textarea will be added for editing the default shell command (in addition to the current three operating system specific textareas). 
+  - In Environments tab, a new textarea will be added for editing the default shell command (in addition to the current three operating system specific textareas).
+  - Add _Execute now_ icon button to the bottom of the extra settings modal.
 - [Settings file: Convert shell commands' 'output_channels' from strings to configurable objects (#330)](https://github.com/Taitava/obsidian-shellcommands/issues/330).
   - Not so visible to users, but makes [#329](https://github.com/Taitava/obsidian-shellcommands/issues/329) possible. Allows adding other output handler related settings later, too.
 
