@@ -39,6 +39,7 @@ import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {
+    createExecuteNowButton,
     generateIgnoredErrorCodesIconTitle,
     generateShellCommandFieldIconAndName,
 } from "./setting_elements/CreateShellCommandField";
@@ -158,9 +159,10 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 switch_to_t_shell_command(nextTShellCommand);
             }
         });
-        new Setting(this.modalEl)
+        const bottomSetting = new Setting(this.modalEl)
             .setDesc("Tip! Hit " + CmdOrCtrl() + " + up/down to switch to previous/next shell command.")
         ;
+        createExecuteNowButton(this.plugin, bottomSetting, this.t_shell_command);
     }
 
     private async tabGeneral(container_element: HTMLElement): Promise<void> {

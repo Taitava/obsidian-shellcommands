@@ -18,7 +18,11 @@
  */
 
 import {TShellCommand} from "../../TShellCommand";
-import {Hotkey, setIcon} from "obsidian";
+import {
+    Hotkey,
+    setIcon,
+    Setting,
+} from "obsidian";
 import {ShellCommandSettingsModal} from "../ShellCommandSettingsModal";
 import {DeleteModal} from "../DeleteModal";
 import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
@@ -111,25 +115,8 @@ export function createShellCommandField(
     setting_tab.setting_groups[shell_command_id] = setting_group;
 
     // Primary icon buttons
+    createExecuteNowButton(plugin, setting_group.name_setting, t_shell_command);
     setting_group.name_setting
-        .addExtraButton(button => button
-            .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
-            .setIcon("run-command")
-            .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
-                const ctrl_clicked = event.ctrlKey;
-                // Execute the shell command now (for trying it out in the settings)
-                const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
-                if (await parsing_process.process()) {
-                    const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
-                    await executor.doPreactionsAndExecuteShellCommand(
-                        parsing_process,
-                        ctrl_clicked ? "modal" : undefined // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
-                    );
-                } else {
-                    parsing_process.displayErrorMessages();
-                }
-            })
-        )
         .addExtraButton(button => button
             .setTooltip(ShellCommandSettingsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
@@ -316,4 +303,24 @@ export function generateShellCommandFieldIconAndName(t_shell_command: TShellComm
 export function generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
     const plural = ignored_error_codes.length !== 1 ? "s" : "";
     return "Ignored error"+plural+": " + ignored_error_codes.join(",");
+}
+
+export function createExecuteNowButton(plugin: SC_Plugin, setting: Setting, t_shell_command: TShellCommand) {
+    setting.addExtraButton(button => button
+        .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
+        .setIcon("run-command")
+        .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
+            const ctrl_clicked = event.ctrlKey;
+            const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
+            if (await parsing_process.process()) {
+                const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
+                await executor.doPreactionsAndExecuteShellCommand(
+                    parsing_process,
+                    ctrl_clicked ? "modal" : undefined, // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
+                );
+            } else {
+                parsing_process.displayErrorMessages();
+            }
+        }),
+    );
 }
