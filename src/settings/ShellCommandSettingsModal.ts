@@ -18,22 +18,30 @@
  */
 
 // @ts-ignore
-import {Setting} from "obsidian";
+import {
+    sanitizeHTMLToDom,
+    Setting,
+    TextAreaComponent,
+} from "obsidian";
 import SC_Plugin from "../main";
-import {SC_MainSettingsTab} from "./SC_MainSettingsTab";
+import {
+    SC_MainSettingsTab,
+    SettingFieldGroup,
+} from "./SC_MainSettingsTab";
 import {getOutputChannelsOptionList} from "../output_channels/OutputChannelFunctions";
 import {
-    OutputChannelCode,
+    OutputHandlerCode,
     OutputChannelOrder,
     OutputHandlingMode,
     OutputStream,
-} from "../output_channels/OutputChannelCode";
+} from "../output_channels/OutputHandlerCode";
 import {TShellCommand} from "../TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {
+    createExecuteNowButton,
     generateIgnoredErrorCodesIconTitle,
-    generateShellCommandFieldIconAndName
+    generateShellCommandFieldIconAndName,
 } from "./setting_elements/CreateShellCommandField";
 import {createPlatformSpecificShellCommandField} from "./setting_elements/CreatePlatformSpecificShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";
@@ -64,11 +72,9 @@ import {OutputWrapperSettingsModal} from "../models/output_wrapper/OutputWrapper
 import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
+import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
 
-/**
- * TODO: Rename to ShellCommandSettingsModal
- */
-export class ExtraOptionsModal extends SC_Modal {
+export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
     public static PREACTIONS_OPTIONS_SUMMARY = "Preactions: Prompt for asking values from user";
     public static OUTPUT_OPTIONS_SUMMARY = "Stdout/stderr handling, Ignore errors";
@@ -93,7 +99,8 @@ export class ExtraOptionsModal extends SC_Modal {
     public onOpen() {
         super.onOpen();
 
-        this.modalEl.createEl("h2", {text: this.t_shell_command.getDefaultShellCommand()});  // TODO: Use this.setTitle() instead.
+        // Modal title.
+        this.setTitle(this.t_shell_command.getAliasOrShellCommand());
 
         // Tabs
         this.tab_structure = createTabs(
@@ -135,7 +142,7 @@ export class ExtraOptionsModal extends SC_Modal {
 
         // Hotkeys for moving to next/previous shell command
         const switch_to_t_shell_command = (t_shell_command: TShellCommand) => {
-            const new_modal = new ExtraOptionsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
+            const new_modal = new ShellCommandSettingsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
             this.close(); // Needs to be closed before the new one is opened, otherwise the new one's tab content won't be shown.
             new_modal.open();
             new_modal.activateTab(this.tab_structure.active_tab_id);
@@ -152,9 +159,10 @@ export class ExtraOptionsModal extends SC_Modal {
                 switch_to_t_shell_command(nextTShellCommand);
             }
         });
-        new Setting(this.modalEl)
+        const bottomSetting = new Setting(this.modalEl)
             .setDesc("Tip! Hit " + CmdOrCtrl() + " + up/down to switch to previous/next shell command.")
         ;
+        createExecuteNowButton(this.plugin, bottomSetting, this.t_shell_command);
     }
 
     private async tabGeneral(container_element: HTMLElement): Promise<void> {
@@ -168,10 +176,13 @@ export class ExtraOptionsModal extends SC_Modal {
             this.t_shell_command.getConfiguration().alias = value;
 
             // Update Obsidian command palette
-            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getShellCommandContent(), this.t_shell_command.getAlias());
+            this.t_shell_command.renameObsidianCommand(this.t_shell_command.getAliasOrShellCommand());
 
             // UpdateShell commands settings panel
             this.name_setting.nameEl.innerHTML = generateShellCommandFieldIconAndName(this.t_shell_command);
+            
+            // Update this modal's title.
+            this.setTitle(this.t_shell_command.getAliasOrShellCommand());
 
             // Save
             await this.plugin.saveSettings();
@@ -415,6 +426,9 @@ export class ExtraOptionsModal extends SC_Modal {
         // Output wrappers
         this.newOutputWrapperSetting(container_element, "Output wrapper for stdout", "stdout", "Output wrappers can be used to surround output with predefined text, e.g. to put output into a code block. Note: If 'Output mode' is 'Realtime', wrappers will probably appear multiple times in output!");
         this.newOutputWrapperSetting(container_element, "Output wrapper for stderr", "stderr");
+        
+        // ANSI code conversion.
+        this.newAnsiCodeConversionSetting(container_element, sanitizeHTMLToDom("Shell programs may output <a href=\"https://en.wikipedia.org/wiki/ANSI_escape_code\">ANSI code</a> to apply <span style=\"color: magenta\">colors</span>, <strong>font</strong> <em>styles</em> and other formatting (e.g. links) to the outputted text. If turned on, possible ANSI code occurrences are converted to HTML elements using <a href=\"https://github.com/drudru/ansi_up\">ansi_up.js</a> library (bundled in this plugin). Otherwise, possible ANSI code is displayed as-is, which may look ugly."));
 
         // Output handling mode
         new Setting(container_element)
@@ -500,16 +514,33 @@ export class ExtraOptionsModal extends SC_Modal {
     }
 
     private async tabEnvironments(container_element: HTMLElement): Promise<void> {
+        
+        // Default shell command for platforms that don't have a specific command.
+        this.newDefaultShellCommandContentSetting(container_element, () => {
+            // When the default shell command content changes, update placeholders of platform specific shell command fields.
+            for (const settingGroup of platformSpecificSettingGroups) {
+                const textareaComponent: TextAreaComponent | undefined = settingGroup.shell_command_setting.components.first() as TextAreaComponent | undefined;
+                if (textareaComponent) {
+                    textareaComponent.setPlaceholder(this.t_shell_command.getDefaultShellCommand());
+                    textareaComponent.onChanged(); // Update textarea dimensions.
+                }
+            }
+            
+            // Update the shell command content on the main settings modal.
+            const mainModalShellCommandTextareaComponent: TextAreaComponent | undefined = this.setting_tab.setting_groups[this.shell_command_id].shell_command_setting.components.first() as TextAreaComponent | undefined;
+            if (mainModalShellCommandTextareaComponent) {
+                mainModalShellCommandTextareaComponent.setValue(this.t_shell_command.getDefaultShellCommand());
+                mainModalShellCommandTextareaComponent.onChanged(); // Update textarea dimensions.
+            }
+        });
+        
         // Platform specific shell commands
         let platform_id: PlatformId;
-        let is_first = true;
+        const platformSpecificSettingGroups: SettingFieldGroup[] = [];
         for (platform_id in PlatformNames) {
-            const setting_group = createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu);
-            if (is_first) {
-                // Focus on the first OS specific shell command field
-                setting_group.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
-                is_first = false;
-            }
+            platformSpecificSettingGroups.push(
+                createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu)
+            );
         }
 
         // Platform specific shell selection
@@ -622,9 +653,9 @@ export class ExtraOptionsModal extends SC_Modal {
             .setDesc(description)
             .addDropdown(dropdown => dropdown
                 .addOptions(output_channel_options)
-                .setValue(this.t_shell_command.getOutputChannels()[output_stream_name])
-                .onChange(async (value: OutputChannelCode) => {
-                    this.t_shell_command.getConfiguration().output_channels[output_stream_name] = value;
+                .setValue(this.t_shell_command.getOutputHandlers()[output_stream_name].handler)
+                .onChange(async (value: OutputHandlerCode) => {
+                    this.t_shell_command.getConfiguration().output_handlers[output_stream_name].handler = value;
                     await this.plugin.saveSettings();
                 })
             )
@@ -693,6 +724,51 @@ export class ExtraOptionsModal extends SC_Modal {
                 })
             )
         ;
+    }
+    
+    private newAnsiCodeConversionSetting(containerElement: HTMLElement, description: string | DocumentFragment) {
+        const ansiCodeSetting = new Setting(containerElement)
+            .setName("Detect colors, font styles etc. in output (ANSI code)")
+            .setDesc(description)
+        ;
+    
+        const addAnsiCodeFieldForOutputStream = (outputStreamName: OutputStream) => {
+            ansiCodeSetting.addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enable: outputStreamName + ": Enable",
+                    disable: outputStreamName + ": Disable",
+                })
+                .setValue(this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code ? "enable" : "disable")
+                .onChange(async (enableString: string) => {
+                    this.t_shell_command.getConfiguration().output_handlers[outputStreamName].convert_ansi_code = (enableString === "enable");
+                    await this.plugin.saveSettings();
+                }),
+            );
+        };
+        addAnsiCodeFieldForOutputStream("stdout");
+        addAnsiCodeFieldForOutputStream("stderr");
+    }
+    
+    private newDefaultShellCommandContentSetting(containerElement: HTMLElement, onChange: () => void) {
+        const settingGroup = CreateShellCommandFieldCore(
+            this.plugin,
+            containerElement,
+            "Default shell command",
+            this.t_shell_command.getPlatformSpecificShellCommands().default,
+            this.t_shell_command.getShellForDefaultCommand() ?? this.plugin.getDefaultShell(), // If default shell command content is never used, just get some shell.
+            this.t_shell_command,
+            this.plugin.settings.show_autocomplete_menu,
+            async (shellCommandContent: string) => {
+                // Store the updated shell command content.
+                this.t_shell_command.getPlatformSpecificShellCommands().default = shellCommandContent; // Can be an empty string.
+                await this.plugin.saveSettings();
+                onChange();
+            },
+        );
+        settingGroup.name_setting.setDesc("Used on operating systems that do not define their own shell command.");
+        
+        // Focus on the textarea.
+        settingGroup.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
     }
 
     protected approve(): void {

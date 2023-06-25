@@ -38,6 +38,12 @@ import {
     TShellCommandMap,
 } from "../../TShellCommand";
 import {ensureObjectHasProperties} from "../../Common";
+import {
+    Usage,
+    UsageContainer,
+} from "../../imports";
+import {getUsedVariables} from "../../variables/parseVariables";
+import {VariableMap} from "../../variables/loadVariables";
 
 export class CustomShellInstance extends Instance {
     public readonly parent_configuration: SC_MainSettings;
@@ -134,10 +140,10 @@ export class CustomShellInstance extends Instance {
      */
     public changeHostPlatformIfCan(newPlatformId: PlatformId): true | string {
 
-        const usages: string[] = this.getUsages();
-        if (usages.length > 0) {
+        const usages: UsageContainer = this.getUsages();
+        if (usages.hasUsages()) {
             // Cannot change the host platform because there are usages.
-            return usages.join(", ");
+            return usages.toSingleLineText();
         } else {
             // Can change the host platform.
             this.configuration.host_platform = newPlatformId;
@@ -159,24 +165,46 @@ export class CustomShellInstance extends Instance {
     /**
      * Returns a human-readable list of shell commands using this Shell, and platforms where this is a default Shell.
      *
-     * @param platformId Optional, can be used to narrow the list of shell commands to only those using this Shell on a specific platform.
      */
-    public getUsages(platformId?: PlatformId): string[] {
-        const usedByTShellCommands = platformId ? this.getTShellCommandsByPlatform(platformId) : this.getTShellCommands();
-        const usedByPlatformDefaults = (undefined === platformId)
-            ? this.getPlatformIdsUsingThisShellAsDefault()
-            : this.getPlatformIdsUsingThisShellAsDefault().filter(_platformId => _platformId === platformId) // if platformId is present, the list will contain zero or one item.
-        ;
-        const usages: string[] = [];
+    protected _getUsages(): UsageContainer {
+        const usedByTShellCommands = this.getTShellCommands();
+        const usedByPlatformDefaults = this.getPlatformIdsUsingThisShellAsDefault();
+        const usages = new UsageContainer(this.getTitle());
 
         if (usedByTShellCommands.size > 0) {
-            usages.push(...Array.from(usedByTShellCommands.values()).map((tShellCommand: TShellCommand) => "by " + tShellCommand.getAliasOrShellCommand()));
+            usages.addUsages(
+                Array.from(usedByTShellCommands.values()).map(
+                (tShellCommand: TShellCommand): Usage => ({
+                    title: tShellCommand.getAliasOrShellCommand(),
+                })),
+                "shellCommands",
+            );
         }
 
         if (usedByPlatformDefaults.length > 0) {
-            usages.push(...usedByPlatformDefaults.map(platformId => "as a default shell for " + PlatformNamesMap.get(platformId)));
+            usages.addUsages(
+                usedByPlatformDefaults.map(platformId => ({
+                    title: "Default shell for " + PlatformNamesMap.get(platformId),
+                })),
+                "platforms",
+            );
         }
 
         return usages;
+    }
+    
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            ...this.configuration.shell_arguments,
+            this.configuration.shell_command_wrapper ?? "",
+            this.configuration.shell_command_test ?? "",
+        ];
+        
+        return getUsedVariables(
+            this.model.plugin,
+            readVariablesFrom,
+            this.model.plugin.getCustomVariables(),
+        );
     }
 }

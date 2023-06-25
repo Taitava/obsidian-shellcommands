@@ -17,20 +17,26 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-// TODO: Consider moving the content of this file to OutputChannel.ts.
-/**
- * Designed additional values for later: "specific-file-top" | "specific-file-bottom" | "specific-file-caret" (if possible)
- * See discussion: https://github.com/Taitava/obsidian-shellcommands/discussions/16
- */
-export type OutputChannelCode = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files";
-
-export interface OutputChannelCodes {
-    stdout: OutputChannelCode,
-    stderr: OutputChannelCode,
+export class Cacheable {
+    
+    private _caches: Map<unknown, unknown> = new Map;
+    
+    constructor() {
+        // Listen to SC_Plugin configuration changes.
+        document.addEventListener("SC-configuration-change", () => {
+            // Flush cache in order to get updated usages when needed.
+            this._caches = new Map;
+        });
+    }
+    
+    protected cache<CacheType>(
+        cacheKey: string,
+        protagonist: () => CacheType,
+    ): CacheType {
+        if (!this._caches.has(cacheKey)) {
+            // No value is generated yet (or old value has been deleted before).
+            this._caches.set(cacheKey, protagonist());
+        }
+        return this._caches.get(cacheKey) as CacheType;
+    }
 }
-
-export type OutputChannelOrder = "stdout-first" | "stderr-first";
-
-export type OutputStream = "stdout" | "stderr";
-
-export type OutputHandlingMode = "buffered" | "realtime";

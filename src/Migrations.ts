@@ -33,6 +33,8 @@ import {
     CustomVariableModel,
 } from "./models/custom_variable/CustomVariableModel";
 import {getModel} from "./models/Model";
+import {OutputStream} from "./output_channels/OutputHandlerCode";
+import {OutputChannel} from "./output_channels/OutputChannel";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
@@ -40,6 +42,7 @@ export async function RunMigrations(plugin: SC_Plugin) {
         MigrateCommandsToShellCommands(plugin),
         MigrateShellCommandsObjectToArray(plugin),
         MigrateShellCommandToPlatforms(plugin),
+        MigrateShellCommandOutputChannels(plugin),
         EnsureShellCommandsHaveAllFields(plugin),
         EnsureCustomVariablesHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
@@ -124,6 +127,30 @@ function MigrateCommandsToShellCommands(plugin: SC_Plugin) {
         }
     } else {
         debugLog("settings.commands is empty, so no need to migrate commands. Good thing! :)");
+    }
+    return save;
+}
+
+function MigrateShellCommandOutputChannels(plugin: SC_Plugin): boolean {
+    let save = false;
+    const shellCommandConfigurations = plugin.settings.shell_commands;
+    for (const shellCommandConfiguration of shellCommandConfigurations) {
+        let outputStream: OutputStream;
+        // Iterate "stdout" and "stderr".
+        // @ts-ignore
+        if (shellCommandConfiguration.output_channels) {
+            for (outputStream in shellCommandConfiguration.output_channels) {
+                const outputChannel = shellCommandConfiguration.output_channels[outputStream];
+                debugLog("Shell command #" + shellCommandConfiguration.id + ": Migrating output stream " + outputStream + " to use a configuration object.");
+                if (!shellCommandConfiguration.output_handlers) {
+                    // @ts-ignore Don't yell about the empty object, it will soon have content.
+                    shellCommandConfiguration.output_handlers = {};
+                }
+                shellCommandConfiguration.output_handlers[outputStream] = OutputChannel.getDefaultConfiguration(outputChannel);
+            }
+            delete shellCommandConfiguration.output_channels;
+            save = true;
+        }
     }
     return save;
 }

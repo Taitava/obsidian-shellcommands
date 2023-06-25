@@ -19,7 +19,10 @@
 
 import {Setting} from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
-import {parseVariables} from "../../../variables/parseVariables";
+import {
+    getUsedVariables,
+    parseVariables,
+} from "../../../variables/parseVariables";
 import {TShellCommand} from "../../../TShellCommand";
 import {
     CustomVariable,
@@ -30,6 +33,7 @@ import {
     PromptFieldModel,
 } from "../../../imports";
 import {Shell} from "../../../shells/Shell";
+import {VariableMap} from "../../../variables/loadVariables";
 
 export abstract class PromptField extends Instance {
 
@@ -246,6 +250,33 @@ export abstract class PromptField extends Instance {
         }
         // If no shell command is available (= preview mode), use just whatever global default is defined. It's just a preview, so it's enough to have at least some shell.
         return this.prompt.model.plugin.getDefaultShell();
+    }
+    
+    /**
+     * Returns {{variables}} used in this PromptField's label, description, and default value.
+     *
+     * @protected
+     */
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            this.configuration.label,
+            this.configuration.description,
+            this.configuration.default_value,
+        ];
+        
+        const usedCustomVariables = getUsedVariables(
+            this.model.plugin,
+            readVariablesFrom,
+            this.model.plugin.getCustomVariables(),
+        );
+        
+        // Add target variable, if defined.
+        if (this.configuration.target_variable_id) {
+            usedCustomVariables.set(this.configuration.target_variable_id, this.getTargetVariable());
+        }
+        
+        return usedCustomVariables;
     }
 }
 

@@ -38,8 +38,8 @@ import {
 
 export class PromptFieldModel extends Model {
 
-    public getSingularName(): string {
-        return "Field";
+    public static getSingularName(): string {
+        return "Prompt field";
     }
 
     protected defineParentConfigurationRelation(prompt_field: PromptField): ParentModelOneToManyIndexRelation {

@@ -34,7 +34,7 @@ export class PromptModel extends Model {
 
     private prompts = new PromptMap();
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Prompt";
     }
 

@@ -28,6 +28,7 @@
 // SECTIONS - Add new stuff in alphabetical order, if possible!
 
 // Miscellaneous files in the same folder as imports.ts
+export * from "./Cacheable";
 export * from "./ConfirmationModal";
 export * from "./IDGenerator";
 export * from "./ShellCommandExecutor";
@@ -50,6 +51,11 @@ export * from "./models/custom_variable/CustomVariableModel";
 export * from "./models/custom_variable/CustomVariableSettingsModal";
 export * from "./models/custom_variable/CustomVariableView";
 
+// Output wrappers.
+export * from "./models/output_wrapper/OutputWrapper";
+export * from "./models/output_wrapper/OutputWrapperModel";
+export * from "./models/output_wrapper/OutputWrapperSettingsModal";
+
 // Preactions
 export * from "./preactions/Preaction";
 export * from "./preactions/Preaction_Prompt";
@@ -70,6 +76,10 @@ export * from "./settings/setting_elements/PathEnvironmentVariableFunctions";
 export * from "./shells/CustomShell";
 export * from "./shells/Shell";
 export * from "./shells/ShellFunctions";
+
+// Usages.
+export * from "./models/Usage";
+export * from "./models/UsageContainer";
 
 // Variables
 export * from "./variables/ParsingProcess";

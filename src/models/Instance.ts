@@ -19,10 +19,13 @@
 
 import {debugLog} from "../Debug";
 import {
-    Model
+    Cacheable,
+    Model,
+    UsageContainer,
 } from "../imports";
+import {VariableMap} from "../variables/loadVariables";
 
-export abstract class Instance {
+export abstract class Instance extends Cacheable {
 
     /**
      * Configuration of the parent instance. E.g. if the current instance is a PromptField, then parent_configurations is a Prompt's configuration.
@@ -41,6 +44,7 @@ export abstract class Instance {
         public readonly configuration: InstanceConfiguration,
         parent_instance_or_configuration: Instance | InstanceConfiguration,
     ) {
+        super();
         debugLog(this.constructor.name + ": Creating a new instance.");
 
         // Determine parent type
@@ -57,12 +61,52 @@ export abstract class Instance {
     }
 
     public abstract getTitle(): string;
+    
+    /**
+     * Returns a `VariableMap` containing all CustomVariables used by this Instance. The result is cached, and only
+     * regenerated if configuration changes.
+     */
+    public getUsedCustomVariables(): VariableMap {
+        return this.cache("getUsedCustomVariables", () => this._getUsedCustomVariables());
+    }
+    
+    /**
+     * Each Instance should return a VariableMap containing all CustomVariables that are used in any of their configuration
+     * fields. If an Instance does not utilize {{variable}} parsing, it can return an
+     *
+     * @protected
+     */
+    protected abstract _getUsedCustomVariables(): VariableMap;
 
     public setIfValid(field: string, value: unknown): Promise<void> {
         return this.model.validateValue(this, field, value).then(() => {
             this.configuration[field] = value;
         });
     }
+    
+    /**
+     * Returns a UsageContainer containing a list of places where this Instance is used. The result is cached, and only
+     * regenerated if configuration changes.
+     */
+    public getUsages(): UsageContainer {
+        return this.cache("getUsages", () => {
+            // Check that a usage getter is defined by the subclass.
+            if (this._getUsages) {
+                return this._getUsages();
+            } else {
+                // No usage getter is defined. E.g. PromptField does not need usage tracking.
+                // Return an empty UsageContainer.
+                return new UsageContainer(this.getTitle()); // subjectName will not be used in practise when the UsageContainer is empty.
+            }
+        });
+    }
+    
+    /**
+     * @see getUsages()
+     *
+     * @protected
+     */
+    protected _getUsages?(): UsageContainer;
 
 }
 

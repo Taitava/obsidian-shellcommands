@@ -345,7 +345,10 @@ export abstract class Variable {
      *
      * TODO: Change hardcoded {{ }} entries to use this method all around the code.
      */
-    public getFullName(withExclamationMark = false, variableArguments?: string[]): string {
+    public getFullName(withExclamationMark = false, variableArguments?: string[] | string): string {
+        if (typeof variableArguments === "string") {
+            variableArguments = [variableArguments];
+        }
         const variableArgumentsString = variableArguments?.length ? ":" + variableArguments.join(":") : ""; // Check .length too: empty array should not cause a colon to appear.
         const opening = withExclamationMark ? "{{!" : "{{";
         return opening + this.variable_name + variableArgumentsString + "}}";
@@ -425,6 +428,28 @@ export abstract class Variable {
             return this.getGlobalDefaultValueConfiguration(); // Also this method can return null.
         }
         return defaultValueConfigurationFromShellCommand as GlobalVariableDefaultValueConfiguration; // For some reason TypeScript does not realize that defaultValueConfigurationFromShellCommand.type cannot be "inherit" in this situation, so the 'as ...' part is needed.
+    }
+    
+    /**
+     * Takes an array of IAutocompleteItems. Will add `{{!` (unescaped variable) versions for each {{variable}} it encounters.
+     * The additions are done in-place, so the method returns nothing.
+     *
+     * @protected
+     */
+    protected static supplementAutocompleteItems(autocompleteItems: IAutocompleteItem[]): void {
+        const originalLength: number = autocompleteItems.length;
+        for (let autocompleteItemIndex = 0; autocompleteItemIndex < originalLength; autocompleteItemIndex++) {
+            const autocompleteItem: IAutocompleteItem = autocompleteItems[autocompleteItemIndex];
+            if (autocompleteItem.value.match(/^\{\{[[^!].*}}$/)) {
+                // This is a {{variable}} which does not have ! as the first character after {{.
+                // Duplicate it.
+                const duplicatedAutocompleteItem: IAutocompleteItem = Object.assign({}, autocompleteItem,<IAutocompleteItem>{
+                    value: autocompleteItem.value.replace(/^\{\{/, "{{!"),
+                    type: "unescaped-variable",
+                });
+                autocompleteItems.push(duplicatedAutocompleteItem);
+            }
+        }
     }
 }
 

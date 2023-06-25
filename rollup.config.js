@@ -43,5 +43,5 @@ export default {
     typescript(),
     nodeResolve({browser: true}),
     commonjs(),
-  ]
+  ],
 };

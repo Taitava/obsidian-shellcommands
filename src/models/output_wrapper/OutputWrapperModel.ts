@@ -28,7 +28,7 @@ import {
 } from "./OutputWrapper";
 import {debugLog} from "../../Debug";
 import {getIDGenerator} from "../../IDGenerator";
-import {OutputStream} from "../../output_channels/OutputChannelCode";
+import {OutputStream} from "../../output_channels/OutputHandlerCode";
 import {OutputWrapperSettingsModal} from "./OutputWrapperSettingsModal";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 
@@ -60,7 +60,7 @@ export class OutputWrapperModel extends Model {
         };
     }
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Output wrapper";
     }
 

@@ -29,7 +29,7 @@ import {Variable} from "../variables/Variable";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 import {Documentation} from "../Documentation";
 import {
-    ShellCommandExecutor
+    ShellCommandExecutor,
 } from "../imports";
 import {debugLog} from "../Debug";
 

@@ -68,7 +68,8 @@ export function createVariableDefaultValueFields(plugin: SC_Plugin, containerEle
  * @param containerElement
  * @param settingName
  * @param variable The variable whose default value will be configured by the created setting field.
- * @param targetObject In which object's configuration the default value settings should be stored. Can be a TShellCommand or a Variable (either CustomVariable or a built-in one).
+ * @param targetObject In which object's configuration the default value settings should be stored. Can be a TShellCommand or a Variable (either CustomVariable or a built-in one). If not set, the `variable` parameter will be used as a target.
+ * @param onChange Called after the `type` or `value` of the default value configuration changes.
  */
 export function createVariableDefaultValueField(
         plugin: SC_Plugin,
@@ -76,6 +77,7 @@ export function createVariableDefaultValueField(
         settingName: string,
         variable: Variable,
         targetObject?: Variable | TShellCommand,
+        onChange?: () => void,
     ): Setting {
 
     if (undefined === targetObject) {
@@ -176,6 +178,7 @@ export function createVariableDefaultValueField(
     }
 
     // Create the default value setting
+    let defaultValueTextareaComponent: TextAreaComponent | undefined;
     const defaultValueSetting: Setting = new Setting(containerElement)
         .setName(settingName)
         .setDesc("If not available, then:")
@@ -224,6 +227,14 @@ export function createVariableDefaultValueField(
 
                 // Save the settings
                 await plugin.saveSettings();
+                
+                // If "Execute with value" was selected, focus on the textarea.
+                if (newType === "value") {
+                    defaultValueTextareaComponent?.inputEl.focus();
+                }
+                
+                // Extra "on change" hook.
+                onChange?.();
             }),
         )
         .addTextArea(textarea => textareaComponent = textarea
@@ -238,11 +249,17 @@ export function createVariableDefaultValueField(
 
                 // Save the settings
                 await plugin.saveSettings();
+                
+                // Extra "on change" hook.
+                onChange?.();
             }).then((textareaComponent) => {
                 // Autocomplete for the textarea.
                 if (plugin.settings.show_autocomplete_menu) {
                     createAutocomplete(plugin, textareaComponent.inputEl, () => textareaComponent.onChanged());
                 }
+                
+                // Store the textarea so that the dropdown component's callback function can focus the textarea if needed.
+                defaultValueTextareaComponent = textareaComponent;
             }),
         )
     ;

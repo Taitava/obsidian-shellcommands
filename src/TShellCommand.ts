@@ -33,26 +33,31 @@ import {VariableSet} from "./variables/loadVariables";
 import {
     getUsedVariables,
     parseVariableSynchronously,
+    ParsingResult,
 } from "./variables/parseVariables";
 import {
+    Cacheable,
     createPreaction,
     CustomVariable,
     getIDGenerator,
     getPATHAugmentation,
     ParsingProcess,
     Preaction,
-    PreactionConfiguration
+    PreactionConfiguration,
+    ShellCommandExecutor,
 } from "./imports";
 import {
     Variable,
     InheritableVariableDefaultValueConfiguration,
 } from "./variables/Variable";
 import {
+    IPlatformSpecificStringWithDefault,
     PlatformId,
     PlatformNames,
+    PlatformNamesMap,
 } from "./settings/SC_MainSettings";
 import {getIconHTML} from "./Icons";
-import {OutputStream} from "./output_channels/OutputChannelCode";
+import {OutputStream} from "./output_channels/OutputHandlerCode";
 import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
@@ -65,13 +70,14 @@ export interface TShellCommandContainer {
 /**
  * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Maybe ShellCommandInstance? It's not the best name, but I can't come up with a better one now.
  */
-export class TShellCommand {
+export class TShellCommand extends Cacheable {
 
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
+        super();
         this.plugin = plugin;
         this.configuration = configuration;
 
@@ -107,8 +113,73 @@ export class TShellCommand {
         }
     }
 
+    public getShellIdentifierForPlatform(platformId: PlatformId): string | undefined {
+        // Check if the shell command has defined a specific shell.
+        const shellIdentifier: string | undefined = this.configuration.shells[platformId];
+        if (undefined === shellIdentifier) {
+            // The shell command does not define an explicit shell.
+            // Use a default shell from the plugin's settings.
+            return this.plugin.getDefaultShellIdentifierForPlatform(platformId);
+        } else {
+            // The shell command has an explicit shell defined.
+            return shellIdentifier;
+        }
+    }
+
     public getShell(): Shell {
         return getShell(this.plugin, this.getShellIdentifier());
+    }
+    
+    /**
+     * Returns the Shell that would be used if the shell command is executed on the given platform.
+     *
+     * @param platformId
+     */
+    public getShellForPlatform(platformId: PlatformId): Shell | null {
+        const shellIdentifier: string | undefined = this.getShellIdentifierForPlatform(platformId);
+        if (undefined === shellIdentifier) {
+            // This shell command relies on the operating system's default shell.
+            return null;
+        } else {
+            return getShell(this.plugin, shellIdentifier);
+        }
+    }
+    
+    /**
+     * Returns null if all platform specific shell command contents are filled.
+     */
+    public getShellForDefaultCommand(): Shell | null {
+        const platformCandidates: PlatformId[] = this.getPlatformCandidatesForDefaultCommand();
+        if (platformCandidates.length === 0) {
+            return null;
+        }
+        const currentPlatformId: PlatformId = getOperatingSystem();
+        let usePlatformId: PlatformId;
+        if (platformCandidates.includes(currentPlatformId)) {
+            // Current platform is among the ones that will execute the default command.
+            usePlatformId = currentPlatformId;
+        } else {
+            // Current platform won't execute the default command, so pick whatever platform there happens to be.
+            usePlatformId = platformCandidates[0];
+        }
+        return this.plugin.getDefaultShellForPlatform(usePlatformId);
+    }
+    
+    /**
+     * Determines which operating system(s) end up executing the 'default' shell command content.
+     *
+     * @private Can be made public if needed.
+     */
+    private getPlatformCandidatesForDefaultCommand(): PlatformId[] {
+        const candidatePlatformIds: Set<PlatformId> = new Set(PlatformNamesMap.keys());
+        const shellCommandContents: IPlatformSpecificStringWithDefault = this.getPlatformSpecificShellCommands();
+        for (const platformId of PlatformNamesMap.keys()) {
+            if (shellCommandContents[platformId] !== undefined) {
+                // The default shell command content is not used on this platform.
+                candidatePlatformIds.delete(platformId);
+            }
+        }
+        return [...candidatePlatformIds];
     }
 
     /**
@@ -196,6 +267,16 @@ export class TShellCommand {
     public getAliasOrShellCommand(): string {
         return this.configuration.alias || this.getShellCommandContent(); // TODO: Use this.getAlias().
     }
+    
+    public static getAliasOrShellCommandContentFromParsingResult(parsingProcess: ShellCommandParsingProcess) {
+        const parsingResults = parsingProcess.getParsingResults();
+        /** Don't confuse this name with ShellCommandParsingResult interface! The properties are very different. TODO: Rename ShellCommandParsingResult to something else. */
+        const shellCommandParsingResult: ParsingResult = parsingResults.shellCommandContent as ParsingResult; // Use 'as' to denote that properties exist on this line and below.
+        const aliasParsingResult: ParsingResult = parsingResults.alias as ParsingResult;
+        const parsedShellCommand: string = shellCommandParsingResult.parsed_content as string;
+        const parsedAlias: string = aliasParsingResult.parsed_content as string;
+        return parsedAlias ? parsedAlias : parsedShellCommand;
+    }
 
     public getConfirmExecution() {
         return this.configuration.confirm_execution;
@@ -213,8 +294,8 @@ export class TShellCommand {
         return this.configuration.output_channel_order;
     }
 
-    public getOutputChannels() {
-        return this.configuration.output_channels;
+    public getOutputHandlers() {
+        return this.configuration.output_handlers;
     }
 
     public getOutputHandlingMode() {
@@ -380,10 +461,113 @@ export class TShellCommand {
             this.unregisterSC_Event(sc_event);
         });
     }
+    
+    /**
+     * Called when executing a shell command from command palette. Could probably be called in other execution situations, too.
+     *
+     * @param parsing_process
+     */
+    public async executeOrShowErrors(parsing_process: ShellCommandParsingProcess | undefined): Promise<void> {
+        if (!parsing_process) {
+            parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+            // Try to process variables that can be processed before performing preactions.
+            await parsing_process.process();
+        }
+        const parsingResults = parsing_process.getParsingResults();
+        const shellCommandContentParsingSucceeded = parsingResults.shellCommandContent?.succeeded; // .shellCommandContent should always be present (even if parsing did not succeed), but if it's not, show errors in the else block.
+        const shellCommandWrapperParsingSucceeded = parsingResults.shellCommandWrapper ? parsingResults.shellCommandWrapper.succeeded : true; // If no wrapper is present, pass.
+        if (shellCommandContentParsingSucceeded && shellCommandWrapperParsingSucceeded) { // FIXME: This should not rely on just one (or two) content's parsing result, it should check all of them. Use parsing_process.getErrorMessages().length === 0 to check all parsed content.
+            // The command was parsed correctly.
+            const executor_instance = new ShellCommandExecutor( // Named 'executor_instance' because 'executor' is another constant.
+                this.plugin,
+                this,
+                null // No SC_Event is available when executing via command palette or hotkey.
+            );
+            await executor_instance.doPreactionsAndExecuteShellCommand(parsing_process);
+        } else {
+            // The command could not be parsed correctly.
+            // Display error messages
+            parsing_process.displayErrorMessages();
+        }
+        
+        // Memorize that this was the last shell command executed via command palette - even if parsing failed and
+        // execution was cancelled. However, don't memorize, if this shell command should not appear in command palette.
+        if (this.canShowInCommandPalette()) {
+            this.plugin.lastTShellCommandExecutedFromCommandPalette = this;
+        }
+    }
 
-    public registerToCommandPalette(): void {
-        // TODO: Move the logic from plugin.registerShellCommand() to here, but split to multiple methods.
-        this.plugin.registerShellCommand(this);
+    public registerToCommandPalette() {
+        const shell_command_id = this.getId();
+        debugLog("Registering shell command #" + shell_command_id + "...");
+        
+        // Register an Obsidian command
+        const obsidian_command: Command = {
+            id: this.plugin.generateObsidianCommandId(shell_command_id),
+            name: generateObsidianCommandName(this.plugin, this.getAliasOrShellCommand()), // Will be overridden in command palette, but this will probably show up in hotkey settings panel - at least if command palette has not been opened yet since launching Obsidian. Also note that on some systems async variable parsing might make name generation take so long that after the name is updated in the Command object, it will not reflect in the visual menu anymore. This has happened at least on File menu on macOS, so I suspect it might concern Command palette, too. See GitHub #313 / #314 for more information. As this early name setting has been in place from the very beginning of the SC plugin, it (according to my knowledge) has protected the command palette from having similar problems that context menus have had.
+            // Use 'checkCallback' instead of normal 'callback' because we also want to get called when the command palette is opened.
+            checkCallback: (is_opening_command_palette): boolean | void => { // If is_opening_command_palette is true, then the return type is boolean, otherwise void.
+                if (is_opening_command_palette) {
+                    // The user is currently opening the command palette.
+                    
+                    // Check can the shell command be shown in command palette
+                    if (!this.canShowInCommandPalette()) {
+                        // Cancel preview and deny showing in command palette.
+                        debugLog("Shell command #" + this.getId() + " won't be shown in command palette.");
+                        return false;
+                    }
+                    
+                    // Do not execute the command yet, but parse variables for preview, if enabled in the settings.
+                    debugLog("Getting command palette preview for shell command #" + this.getId());
+                    if (this.plugin.settings.preview_variables_in_command_palette) {
+                        // Preparse variables
+                        const parsing_process = this.createParsingProcess(null); // No SC_Event is available when executing shell commands via the command palette / hotkeys.
+                        parsing_process.process().then((parsing_succeeded) => {
+                            if (parsing_succeeded) {
+                                // Parsing succeeded
+                                
+                                // Rename Obsidian command
+                                this.renameObsidianCommand(TShellCommand.getAliasOrShellCommandContentFromParsingResult(parsing_process));
+                                
+                                // Store the preparsed variables so that they will be used if this shell command gets executed.
+                                this.plugin.cached_parsing_processes[this.getId()] = parsing_process;
+                            } else {
+                                // Parsing failed, so use unparsed this.getAliasOrShellCommand().
+                                this.renameObsidianCommand(this.getAliasOrShellCommand());
+                                this.plugin.cached_parsing_processes[this.getId()] = undefined;
+                            }
+                        });
+                    } else {
+                        // Parsing is disabled, so use unparsed this.getAliasOrShellCommand().
+                        this.renameObsidianCommand(this.getAliasOrShellCommand());
+                        this.plugin.cached_parsing_processes[this.getId()] = undefined;
+                    }
+                    
+                    return true; // Tell Obsidian this command can be shown in command palette.
+                    
+                } else {
+                    // The user has instructed to execute the command.
+                    this.executeOrShowErrors(
+                        this.plugin.cached_parsing_processes[this.getId()], // Can be undefined, if no preparsing was done. executor() will handle creating the parsing process then.
+                    ).then(() => {
+                        
+                        // Delete the whole array of preparsed commands. Even though we only used just one command from it, we need to notice that opening a command
+                        // palette might generate multiple preparsed commands in the array, but as the user selects and executes only one command, all these temporary
+                        // commands are now obsolete. Delete them just in case the user toggles the variable preview feature off in the settings, or executes commands via hotkeys. We do not want to
+                        // execute obsolete commands accidentally.
+                        // This deletion also needs to be done even if the executed command was not a preparsed command, because
+                        // even when preparsing is turned on in the settings, some commands may fail to parse, and therefore they would not be in this array, but other
+                        // commands might be.
+                        this.plugin.cached_parsing_processes = {}; // Removes obsolete preparsed variables from all shell commands.
+                        return; // When we are not in the command palette check phase, there's no need to return a value. Just have this 'return' statement because all other return points have a 'return' too.
+                    });
+                }
+            },
+        };
+        this.plugin.addCommand(obsidian_command);
+        this.plugin.obsidian_commands[shell_command_id] = obsidian_command; // Store the reference so that we can edit the command later in ShellCommandsSettingsTab if needed. TODO: Use tShellCommand instead.
+        this.setObsidianCommand(obsidian_command);
+        debugLog("Registered.");
     }
 
     public unregisterFromCommandPalette(): void {
@@ -469,7 +653,7 @@ export class TShellCommand {
     /**
      * No renaming is done if the shell command is excluded from the command palette.
      */
-    public renameObsidianCommand(shell_command: string, alias: string) {
+    public renameObsidianCommand(aliasOrShellCommandContent: string) {
         // Rename the command in command palette
         const prefix = this.plugin.getPluginName() + ": "; // Normally Obsidian prefixes all commands with the plugin name automatically, but now that we are actually _editing_ a command in the palette (not creating a new one), Obsidian won't do the prefixing for us.
 
@@ -477,7 +661,7 @@ export class TShellCommand {
         if (undefined !== this.obsidian_command) {
             // Yes, the shell command is registered in Obsidian's command palette.
             // Update the command palette name.
-            this.obsidian_command.name = prefix + generateObsidianCommandName(this.plugin, shell_command, alias);
+            this.obsidian_command.name = prefix + generateObsidianCommandName(this.plugin, aliasOrShellCommandContent);
         }
         // If the shell command's "command_palette_availability" settings is set to "disabled", then the shell command is not present in this.obsidian_command and so the command palette name does not need updating.
     }
@@ -560,7 +744,7 @@ export class TShellCommand {
             : this.getShellCommandContent() // Use unwrapped content.
         ;
         // FIXME: readVariablesFrom should actually include also other stuff that uses variables when executing shell commands, e.g. output wrappers. I think the best solution would be to call TShellCommand.createParsingProcess() and then get all variables from all the parseable content. Afterwards, delete the parsing process without actually parsing it, as the result would not be needed anyway. ParsingProcess class could have a new method named .getUsedVariables() that would wrap the global getUsedVariables() function and get variables used in that particular ParsingProcess.
-        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom)) {
+        for (const custom_variable of getUsedVariables(this.plugin, readVariablesFrom).values()) { // Does not use this.getUsedCustomVariables(), because it doesn't include variables present in a possible wrapper, that a CustomShell might have defined.
             // Check that the variable IS a CustomVariable.
             if (custom_variable instanceof CustomVariable) { // TODO: Remove the check and pass only a list of CustomVariables to getUsedVariables().
                 custom_variables.add(custom_variable);
@@ -578,6 +762,28 @@ export class TShellCommand {
 
         // Finished.
         return execution_uri_with_variables;
+    }
+    
+    /**
+     * Returns a VariableMap containing Variables used in any of this TShellCommand's shell commands contents. Note that
+     * variables used in Shell wrappers, preactions or output wrappers are not included.
+     */
+    public getUsedCustomVariables() {
+        return this.cache("getUsedCustomVariables", () => {
+            // Gather parseable content.
+            const readVariablesFrom: string[] = [
+                ...Object.values(this.configuration.platform_specific_commands),
+                this.getAlias() ?? "",
+                this.configuration.input_contents.stdin ?? "",
+                    ...Object.values(this.configuration.variable_default_values).map((defaultValueConfiguration: InheritableVariableDefaultValueConfiguration) => defaultValueConfiguration.value),
+            ];
+    
+            return getUsedVariables(
+                this.plugin,
+                readVariablesFrom,
+                this.plugin.getCustomVariables(),
+            );
+        });
     }
 
     /**

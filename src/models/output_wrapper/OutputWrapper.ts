@@ -22,6 +22,10 @@ import SC_Plugin from "../../main";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
 import {OutputWrapperModel} from "./OutputWrapperModel";
+import {UsageContainer} from "../../imports";
+import {OutputStream} from "../../output_channels/OutputHandlerCode";
+import {VariableMap} from "../../variables/loadVariables";
+import {getUsedVariables} from "../../variables/parseVariables";
 
 export class OutputWrapper extends Instance {
 
@@ -51,6 +55,44 @@ export class OutputWrapper extends Instance {
 
     public getConfiguration() {
         return this.configuration;
+    }
+    
+    protected _getUsages(): UsageContainer {
+        const usages: UsageContainer = new UsageContainer(this.getTitle());
+    
+        for (const tShellCommand of this.plugin.getTShellCommandsAsMap().values()) {
+            let outputStream: OutputStream;
+            for (outputStream of ["stdout", "stderr"] as OutputStream[]) {
+                if (tShellCommand.getConfiguration().output_wrappers[outputStream] === this.getID()) {
+                    usages.addUsage(
+                        {
+                            title: tShellCommand.getAliasOrShellCommand(),
+                        },
+                        "shellCommands",
+                    );
+                }
+            }
+        }
+        
+        return usages;
+    }
+    
+    /**
+     * Returns {{variables}} used in the OutputWrapper's content.
+     *
+     * @protected
+     */
+    protected _getUsedCustomVariables(): VariableMap {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            this.configuration.content,
+        ];
+        
+        return getUsedVariables(
+            this.plugin,
+            readVariablesFrom,
+            this.plugin.getCustomVariables(),
+        );
     }
 }
 

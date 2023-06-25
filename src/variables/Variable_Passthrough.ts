@@ -31,7 +31,7 @@ export class Variable_Passthrough extends Variable {
         value: {
             type: "string",
             required: true,
-        }
+        },
     };
 
     protected async generateValue(

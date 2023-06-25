@@ -23,11 +23,11 @@ import {OutputChannel, OutputChannels} from "./OutputChannel";
 import {OutputChannel_CurrentFileCaret} from "./OutputChannel_CurrentFileCaret";
 import {OutputChannel_CurrentFileTop} from "./OutputChannel_CurrentFileTop";
 import {
-    OutputChannelCode,
-    OutputChannelCodes,
+    OutputHandlerCode,
+    OutputHandlerConfigurations,
     OutputHandlingMode,
     OutputStream,
-} from "./OutputChannelCode";
+} from "./OutputHandlerCode";
 import {OutputChannel_StatusBar} from "./OutputChannel_StatusBar";
 import {OutputChannel_CurrentFileBottom} from "./OutputChannel_CurrentFileBottom";
 import {OutputChannel_Clipboard} from "./OutputChannel_Clipboard";
@@ -63,7 +63,7 @@ registerOutputChannel("modal", OutputChannel_Modal);
  * @param stdout
  * @param stderr
  * @param error_code TODO: Rename to exitCode everywhere in the codebase.
- * @param output_channels
+ * @param outputHandlers
  */
 export function handleBufferedOutput(
         plugin: SC_Plugin,
@@ -72,7 +72,7 @@ export function handleBufferedOutput(
         stdout: string,
         stderr: string,
         error_code: number | null,
-        output_channels: OutputChannelCodes
+        outputHandlers: OutputHandlerConfigurations,
     ): void {
     // Terminology: Stream = outputs stream from a command, can be "stdout" or "stderr". Channel = a method for this application to present the output ot user, e.g. "notification".
 
@@ -116,14 +116,14 @@ export function handleBufferedOutput(
     }
 
     // Should stderr be processed same time with stdout?
-    if (output_channels.stdout === output_channels.stderr) {
+    if (outputHandlers.stdout.handler === outputHandlers.stderr.handler) {
         // Stdout and stderr use the same channel.
         // Make one handling call.
         handle_stream(
             plugin,
             t_shell_command,
             shell_command_parsing_result,
-            output_channels.stdout,
+            outputHandlers.stdout.handler,
             output,
             error_code,
         );
@@ -132,7 +132,7 @@ export function handleBufferedOutput(
         // Make two handling calls.
         let output_stream_name: OutputStream;
         for (output_stream_name in output) {
-            const output_channel_name = output_channels[output_stream_name];
+            const output_channel_name = outputHandlers[output_stream_name].handler;
             const output_message = output[output_stream_name];
             const separated_output: OutputStreams = {};
             separated_output[output_stream_name] = output_message;
@@ -153,7 +153,7 @@ async function handle_stream(
         plugin: SC_Plugin,
         t_shell_command: TShellCommand,
         shell_command_parsing_result: ShellCommandParsingResult,
-        output_channel_name: OutputChannelCode,
+        output_channel_name: OutputHandlerCode,
         output: OutputStreams,
         error_code: number|null
     ): Promise<void> {
@@ -186,16 +186,16 @@ export function startRealtimeOutputHandling(
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
-        outputChannelCodes: OutputChannelCodes,
+        outputHandlerConfigurations: OutputHandlerConfigurations,
         processTerminator: (() => void) | null,
     ): OutputChannels {
 
     const outputChannels: OutputChannels = {};
 
     // stdout
-    if ("ignore" !== outputChannelCodes.stdout) {
+    if ("ignore" !== outputHandlerConfigurations.stdout.handler) {
         outputChannels.stdout = initializeOutputChannel(
-            outputChannelCodes.stdout,
+            outputHandlerConfigurations.stdout.handler,
             plugin,
             tShellCommand,
             shellCommandParsingResult,
@@ -205,14 +205,14 @@ export function startRealtimeOutputHandling(
     }
 
     // stderr
-    if ("ignore" !== outputChannelCodes.stderr) {
-        if (outputChannelCodes.stderr === outputChannelCodes.stdout) {
+    if ("ignore" !== outputHandlerConfigurations.stderr.handler) {
+        if (outputHandlerConfigurations.stderr.handler === outputHandlerConfigurations.stdout.handler) {
             // stderr should use the same channel instance as stdout.
             outputChannels.stderr = outputChannels.stdout;
         } else {
             // stderr uses a different channel than stdout.
             outputChannels.stderr = initializeOutputChannel(
-                outputChannelCodes.stderr,
+                outputHandlerConfigurations.stderr.handler,
                 plugin,
                 tShellCommand,
                 shellCommandParsingResult,
@@ -244,7 +244,7 @@ export function getOutputChannelClasses() {
 }
 
 export function initializeOutputChannel(
-        channelCode: OutputChannelCode,
+        channelCode: OutputHandlerCode,
         plugin: SC_Plugin,
         tShellCommand: TShellCommand,
         shellCommandParsingResult: ShellCommandParsingResult,
@@ -261,7 +261,7 @@ export function initializeOutputChannel(
     );
 }
 
-function registerOutputChannel(channelCode: OutputChannelCode, channelClass: typeof OutputChannel) {
+function registerOutputChannel(channelCode: OutputHandlerCode, channelClass: typeof OutputChannel) {
     if (undefined !== outputChannelClasses[channelCode]) {
         throw new Error("OutputChannel named '" + channelCode + "' is already registered!");
     }

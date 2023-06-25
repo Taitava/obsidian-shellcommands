@@ -18,8 +18,12 @@
  */
 
 import {TShellCommand} from "../../TShellCommand";
-import {Hotkey, setIcon} from "obsidian";
-import {ExtraOptionsModal} from "../ExtraOptionsModal";
+import {
+    Hotkey,
+    setIcon,
+    Setting,
+} from "obsidian";
+import {ShellCommandSettingsModal} from "../ShellCommandSettingsModal";
 import {DeleteModal} from "../DeleteModal";
 import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
@@ -31,7 +35,7 @@ import {
     copyToClipboard,
 } from "../../Common";
 import {
-    ShellCommandExecutor
+    ShellCommandExecutor,
 } from "../../imports";
 import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
 
@@ -82,7 +86,7 @@ export function createShellCommandField(
         shell_command_element,
         generateShellCommandFieldIconAndName(t_shell_command),
         shell_command,
-        t_shell_command.getShell(),
+        t_shell_command.getShellForDefaultCommand() ?? plugin.getDefaultShell(), // If default shell command content is newer used, just get some shell.
         t_shell_command,
         show_autocomplete_menu,
         async (shell_command: string) => {
@@ -101,7 +105,7 @@ export function createShellCommandField(
                 debugLog("Command created.");
             } else {
                 // Change an old command
-                t_shell_command.renameObsidianCommand(t_shell_command.getShellCommandContent(), t_shell_command.getAlias()); // Change the command's name in Obsidian's command palette and in hotkey settings.
+                t_shell_command.renameObsidianCommand(t_shell_command.getAliasOrShellCommand()); // Change the command's name in Obsidian's command palette and in hotkey settings.
                 debugLog("Command changed.");
             }
             await plugin.saveSettings();
@@ -111,80 +115,63 @@ export function createShellCommandField(
     setting_tab.setting_groups[shell_command_id] = setting_group;
 
     // Primary icon buttons
+    createExecuteNowButton(plugin, setting_group.name_setting, t_shell_command);
     setting_group.name_setting
         .addExtraButton(button => button
-            .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
-            .setIcon("run-command")
-            .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
-                const ctrl_clicked = event.ctrlKey;
-                // Execute the shell command now (for trying it out in the settings)
-                const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
-                if (await parsing_process.process()) {
-                    const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
-                    await executor.doPreactionsAndExecuteShellCommand(
-                        parsing_process,
-                        ctrl_clicked ? "modal" : undefined // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
-                    );
-                } else {
-                    parsing_process.displayErrorMessages();
-                }
-            })
-        )
-        .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.GENERAL_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.PREACTIONS_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.PREACTIONS_OPTIONS_SUMMARY)
             .setIcon("note-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Preactions tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-preactions");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.OUTPUT_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.OUTPUT_OPTIONS_SUMMARY)
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.ENVIRONMENTS_OPTIONS_SUMMARY)
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Environments tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-environments");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.EVENTS_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.EVENTS_SUMMARY)
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Events tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
         )
         .addExtraButton(button => button
-            .setTooltip(ExtraOptionsModal.VARIABLES_SUMMARY)
+            .setTooltip(ShellCommandSettingsModal.VARIABLES_SUMMARY)
             .setIcon("code-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Variables tab
-                const modal = new ExtraOptionsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
             })
@@ -316,4 +303,24 @@ export function generateShellCommandFieldIconAndName(t_shell_command: TShellComm
 export function generateIgnoredErrorCodesIconTitle(ignored_error_codes: number[]) {
     const plural = ignored_error_codes.length !== 1 ? "s" : "";
     return "Ignored error"+plural+": " + ignored_error_codes.join(",");
+}
+
+export function createExecuteNowButton(plugin: SC_Plugin, setting: Setting, t_shell_command: TShellCommand) {
+    setting.addExtraButton(button => button
+        .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
+        .setIcon("run-command")
+        .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
+            const ctrl_clicked = event.ctrlKey;
+            const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
+            if (await parsing_process.process()) {
+                const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.
+                await executor.doPreactionsAndExecuteShellCommand(
+                    parsing_process,
+                    ctrl_clicked ? "modal" : undefined, // If ctrl/cmd is pressed, override output channels with 'Ask after execution' modal. Otherwise, use undefined to indicate that the shell command's normal output channels should be used.
+                );
+            } else {
+                parsing_process.displayErrorMessages();
+            }
+        }),
+    );
 }

@@ -21,16 +21,24 @@ import SC_Plugin from "../main";
 import {App} from "obsidian";
 import {OutputStreams} from "./OutputChannelFunctions";
 import {
+    OutputHandlerApplicableConfiguration,
+    OutputHandlerCode,
+    OutputHandlerConfiguration,
+    OutputHandlerConfigurations,
     OutputHandlingMode,
     OutputStream,
-} from "./OutputChannelCode";
+} from "./OutputHandlerCode";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {joinObjectProperties} from "../Common";
 import {Variable_Output} from "../variables/Variable_Output";
 import {parseVariables} from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
+import {default as AnsiUp} from "ansi_up";
 
+/**
+ * TODO: Rename to OutputHandler.
+ */
 export abstract class OutputChannel {
 
     // Class specific properties
@@ -54,6 +62,17 @@ export abstract class OutputChannel {
      * excluded from OutputModal.
      */
     public static readonly hotkey_letter: string | undefined = undefined;
+    
+    protected static readonly applicableConfiguration: OutputHandlerApplicableConfiguration = {
+        /**
+         * Whether to allow convertAnsiCodeToHtmlIfAllowed() to do conversion. Note that even if this is true, user
+         * configuration may disable it.
+         *
+         * @see convertAnsiCodeToHtmlIfEnabled
+         * @private
+         */
+        convert_ansi_code: true,
+    };
 
     /**
      * Can be overridden in child classes in order to vary the title depending on output_stream.
@@ -65,6 +84,8 @@ export abstract class OutputChannel {
 
     // Instance specific properties
     protected app: App;
+
+    private ansiToHtmlConverter: AnsiUp;
 
     /**
      * @param plugin
@@ -81,6 +102,7 @@ export abstract class OutputChannel {
         protected processTerminator: (() => void) | null,
     ) {
         this.app = plugin.app;
+        this.initializeAnsiToHtmlConverter();
         this.initialize();
     }
 
@@ -118,7 +140,13 @@ export abstract class OutputChannel {
         debugLog(this.constructor.name + ".handleBuffered(): Handling output...");
 
         // Output is ok.
-        // Handle it.
+        // Apply ANSI conversion, if enabled.
+        let outputStreamName: OutputStream;
+        for (outputStreamName in output) {
+            output[outputStreamName] = this.convertAnsiCodeToHtmlIfEnabled(output[outputStreamName] as string, outputStreamName);
+        }
+        
+        // Handle output.
         await this._handleBuffered(await this.prepare_output(output, enableOutputWrapping), error_code);
         debugLog("Output handling is done.");
     }
@@ -151,8 +179,11 @@ export abstract class OutputChannel {
             // Wrap output (but only if a wrapper is defined)
             outputContent = await this.wrapOutput(outputStreamName, outputContent);
         }
+        
+        // Apply ANSI conversion, if enabled.
+        outputContent = this.convertAnsiCodeToHtmlIfEnabled(outputContent, outputStreamName);
 
-        // Handle it.
+        // Handle output.
         await this._handleRealtime(outputContent, outputStreamName);
 
         debugLog("Output handling is done.");
@@ -294,8 +325,54 @@ export abstract class OutputChannel {
         return undefined === output.stdout || "" === output.stdout;
     }
 
+    /**
+     * Output can contain font styles, colors and links in ANSI code format. This method defines a converter for ANSI code.
+     *
+     * @see https://en.wikipedia.org/wiki/ANSI_escape_code
+     * @private
+     */
+    private initializeAnsiToHtmlConverter(): void {
+        this.ansiToHtmlConverter = new AnsiUp;
+        // this.ansiToHtmlConverter.use_classes = true; // Use CSS classes instead of style="" attributes. Commented out, because it doesn't substitute all style="" attributes (e.g. true-colors are still defined using style="", and so al bolds, italics etc.). TODO: If wanted, can later make a pull request to the AnsiUp library that would substitute all style="" attributes with classes (except true-colors).
+        this.ansiToHtmlConverter.escape_html = false; // Do not escape possibly outputted HTML. // TODO: Create a setting for this. Escaping html in the output might be handy. Or maybe it should escape also Markdown special characters (so would be done elsewhere)?
+        Object.assign(this.ansiToHtmlConverter.url_whitelist, {
+            "obsidian": 1, // Whitelist obsidian:// protocol in possible links. This is needed if the converted ANSI code contains hyperlinks.
+            // https:// and http:// are already whitelisted.
+        });
+    }
+    
+    /**
+     * Two thing can deny the ANSI conversion:
+     *  1) OutputHandlerConfiguration
+     *  2) An OutputChannel subclass. At least "Open files" denies it.
+     * @param outputContent
+     * @param outputStreamName
+     * @protected
+     */
+    private convertAnsiCodeToHtmlIfEnabled(outputContent: string, outputStreamName: OutputStream): string {
+        if (!this.static().applicableConfiguration.convert_ansi_code) {
+            // A subclass has disabled the conversion.
+            return outputContent;
+        }
+        const outputHandlerConfigurations: OutputHandlerConfigurations = this.t_shell_command.getOutputHandlers();
+        if (outputHandlerConfigurations[outputStreamName].convert_ansi_code) {
+            // Converting is allowed.
+            return this.ansiToHtmlConverter.ansi_to_html(outputContent as string);
+        } else {
+            // user configuration has disabled the conversion.
+            return outputContent;
+        }
+    }
+
     public static() {
         return this.constructor as typeof OutputChannel;
+    }
+
+    public static getDefaultConfiguration(outputChannelCode: OutputHandlerCode): OutputHandlerConfiguration {
+        return {
+            handler: outputChannelCode,
+            convert_ansi_code: true,
+        };
     }
 }
 

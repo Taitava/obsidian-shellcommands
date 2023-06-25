@@ -31,7 +31,7 @@ export class Variable_FolderPath extends FolderVariable {
         mode: {
             options: ["absolute", "relative"],
             required: true,
-        }
+        },
     };
 
     protected async generateValue(

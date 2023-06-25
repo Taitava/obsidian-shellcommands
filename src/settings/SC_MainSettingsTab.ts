@@ -22,6 +22,7 @@ import {
     BaseComponent,
     DropdownComponent,
     PluginSettingTab,
+    sanitizeHTMLToDom,
     SearchComponent,
     Setting,
 } from "obsidian";
@@ -49,7 +50,7 @@ import {
     getModel,
     createPATHAugmentationFields,
     Prompt,
-    PromptModel
+    PromptModel,
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
@@ -62,6 +63,9 @@ import {createVariableDefaultValueField} from "./setting_elements/createVariable
 import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
 
+/**
+ * TODO: Rename to MainSettingsModal. Then it better in line with ShellCommandSettingsModal.
+ */
 export class SC_MainSettingsTab extends PluginSettingTab {
     private readonly plugin: SC_Plugin;
 
@@ -595,14 +599,48 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             )
         ;
 
-        // "Output channel 'Clipboard' displays a notification message, too" field
+        // "Outputting to 'Clipboard' displays a notification message, too" field
         new Setting(container_element)
-            .setName("Output channel 'Clipboard' displays a notification message, too")
-            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box on the top right corner. This helps to notice what was inserted into clipboard.")
+            .setName(sanitizeHTMLToDom("Outputting to <em>Clipboard</em> displays a notification message, too"))
+            .setDesc("If a shell command's output is directed to the clipboard, also show the output in a popup box in the top right corner. This helps to notice what was inserted into clipboard.")
             .addToggle(checkbox => checkbox
                 .setValue(this.plugin.settings.output_channel_clipboard_also_outputs_to_notification)
                 .onChange(async (value: boolean) => {
                     this.plugin.settings.output_channel_clipboard_also_outputs_to_notification = value;
+                    await this.plugin.saveSettings();
+                }),
+            )
+        ;
+        
+        // "Outputting to 'Notification/error balloon' uses monospace formatting" field.
+        const initialNotificationDecoration: boolean | "stderr" = this.plugin.settings.output_channel_notification_decorates_output;
+        new Setting(container_element)
+            .setName(sanitizeHTMLToDom("Outputting to <em>Notification/error balloon</em> uses monospace formatting"))
+            .setDesc("Monospace formatting is achieved by wrapping output in a <code></code> element. It's good for error messages, but not optimal for long natural language texts. The formatting is only applied for messages originating from shell command execution, not for the plugin's own error messages or notifications.")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    all: "For stdout and stderr",
+                    stderr: "For stderr only",
+                    none: "Disable",
+                })
+                .setValue(initialNotificationDecoration === "stderr"
+                    ? "stderr"
+                    : initialNotificationDecoration ? "all" : "none"
+                )
+                .onChange(async (decorationOption: string) => {
+                    switch (decorationOption) {
+                        case "all":
+                            this.plugin.settings.output_channel_notification_decorates_output = true;
+                            break;
+                        case "stderr":
+                            this.plugin.settings.output_channel_notification_decorates_output = "stderr";
+                            break;
+                        case "none":
+                            this.plugin.settings.output_channel_notification_decorates_output = false;
+                            break;
+                        default:
+                            throw new Error("Unrecognized decorationOption: " + decorationOption);
+                    }
                     await this.plugin.saveSettings();
                 }),
             )

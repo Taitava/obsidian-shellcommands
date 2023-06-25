@@ -20,7 +20,10 @@
 import SC_Plugin from "../main";
 import {debugLog} from "../Debug";
 import {SC_Event} from "../events/SC_Event";
-import {VariableSet} from "./loadVariables";
+import {
+    VariableMap,
+    VariableSet,
+} from "./loadVariables";
 import {
     IRawArguments,
     Variable,
@@ -249,27 +252,34 @@ export function parseVariableSynchronously(
  * needed to know what variables e.g. a shell command relies on.
  *
  * @param plugin
- * @param content
+ * @param contents Can be a single string, or an array of strings, if it's needed to look for variables in multiple contents (e.g. all platform versions of a shell command).
  * @param searchForVariables If not defined, will use all variables.
  */
 export function getUsedVariables(
         plugin: SC_Plugin,
-        content: string,
+        contents: string[] | string,
         searchForVariables: VariableSet | Variable = plugin.getVariables(),
-    ): VariableSet {
+    ): VariableMap {
     if (searchForVariables instanceof Variable) {
         // searchForVariables is a single Variable.
         // Convert it to a VariableSet.
         searchForVariables = new VariableSet([searchForVariables]);
     }
-    const found_variables = new VariableSet();
+    if (typeof contents === "string") {
+        // contents is a single content. Convert it to an array.
+        contents = [contents];
+    }
+    const found_variables = new VariableMap();
 
     for (const variable of searchForVariables)
     {
         const pattern = getVariableRegExp(variable);
-        if (pattern.exec(content) !== null) {
-            // This variable was found.
-            found_variables.add(variable);
+        for (const content of contents) {
+            if (pattern.exec(content) !== null) {
+                // This variable was found.
+                found_variables.set(variable.getIdentifier(), variable);
+                break;
+            }
         }
     }
 

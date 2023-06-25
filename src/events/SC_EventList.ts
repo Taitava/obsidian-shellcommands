@@ -35,6 +35,7 @@ import {SC_Event_FolderDeleted} from "./SC_Event_FolderDeleted";
 import {SC_Event_FolderMoved} from "./SC_Event_FolderMoved";
 import {SC_Event_FolderRenamed} from "./SC_Event_FolderRenamed";
 import {SC_Event} from "./SC_Event";
+import {SC_Event_CaretMoved} from "./SC_Event_CaretMoved";
 
 export function getSC_Events(plugin: SC_Plugin) {
     if (eventList.length === 0) {
@@ -43,6 +44,7 @@ export function getSC_Events(plugin: SC_Plugin) {
             new SC_Event_onLayoutReady(plugin),
             new SC_Event_onQuit(plugin),
             new SC_Event_onActiveLeafChanged(plugin),
+            new SC_Event_CaretMoved(plugin),
             new SC_Event_EveryNSeconds(plugin),
             new SC_Event_FileMenu(plugin),
             new SC_Event_FolderMenu(plugin),

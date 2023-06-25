@@ -30,7 +30,7 @@ export function createPlatformSpecificShellCommandField(plugin: SC_Plugin, conta
         container_element,
         "Shell command on " + platform_name,
         t_shell_command.getPlatformSpecificShellCommands()[platform_id] ?? "",
-        t_shell_command.getShell(),
+        t_shell_command.getShellForPlatform(platform_id),
         t_shell_command,
         show_autocomplete_menu,
         async (shell_command: string) => {

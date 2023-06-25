@@ -21,6 +21,7 @@ import {
     ChildProcess,
 } from "child_process";
 import {
+    cloneObject,
     getCurrentPlatformName,
     getPlatformName,
     getVaultAbsolutePath,
@@ -43,10 +44,10 @@ import {
     ExecutionNotificationMode,
 } from "./settings/SC_MainSettings";
 import {
-    OutputChannelCode,
-    OutputChannelCodes,
+    OutputHandlerCode,
+    OutputHandlerConfigurations,
     OutputStream,
-} from "./output_channels/OutputChannelCode";
+} from "./output_channels/OutputHandlerCode";
 import {Readable} from "stream";
 import {Notice} from "obsidian";
 import {OutputChannel} from "./output_channels/OutputChannel";
@@ -68,7 +69,7 @@ export class ShellCommandExecutor {
     /**
      * Performs preactions, and if they all give resolved Promises, executes the shell command.
      */
-    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputChannelCode) {
+    public async doPreactionsAndExecuteShellCommand(parsing_process?: ShellCommandParsingProcess, overriding_output_channel?: OutputHandlerCode) {
         const preactions = this.t_shell_command.getPreactions();
 
         // Does an already started ParsingProcess exist?
@@ -197,19 +198,21 @@ export class ShellCommandExecutor {
      * @param shell_command_parsing_result The actual shell command that will be executed is taken from this object's '.shell_command' property.
      * @param overriding_output_channel Optional. If specified, all output streams will be directed to this output channel. Otherwise, output channels are determined from this.t_shell_command.
      */
-    private async executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputChannelCode): Promise<void> {
+    private async executeShellCommand(shell_command_parsing_result: ShellCommandParsingResult, overriding_output_channel?: OutputHandlerCode): Promise<void> {
 
         const shell: Shell = this.t_shell_command.getShell();
         const working_directory = ShellCommandExecutor.getWorkingDirectory(this.plugin);
 
         // Define output channels
-        let outputChannels = this.t_shell_command.getOutputChannels();
+        let outputHandlers = this.t_shell_command.getOutputHandlers();
         if (overriding_output_channel) {
-            // Ignore the shell command's normal channels and use temporarily something else.
-           outputChannels = {
-               'stdout': overriding_output_channel,
-               'stderr': overriding_output_channel,
+            // Ignore the shell command's normal output handlers and use temporarily something else.
+            outputHandlers = {
+               stdout: cloneObject(outputHandlers.stdout), // Clone output configurations to prevent ...
+               stderr: cloneObject(outputHandlers.stderr), // ... accidentally editing the originals.
            };
+            outputHandlers.stdout.handler = overriding_output_channel;
+            outputHandlers.stderr.handler = overriding_output_channel;
         }
 
         // Check that the shell command is not empty
@@ -299,13 +302,13 @@ export class ShellCommandExecutor {
                 switch (this.t_shell_command.getOutputHandlingMode()) {
                     case "buffered": {
                         // Output will be buffered and handled as a single batch.
-                        this.handleBufferedOutput(child_process, shell_command_parsing_result, outputChannels);
+                        this.handleBufferedOutput(child_process, shell_command_parsing_result, outputHandlers);
                         break;
                     }
 
                     case "realtime": {
                         // Output will be handled on-the-go.
-                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputChannels, processTerminator);
+                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputHandlers, processTerminator);
                     }
                 }
 
@@ -328,7 +331,7 @@ export class ShellCommandExecutor {
         }
     }
 
-    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputChannelCodes) {
+    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputHandlerConfigurations) {
         child_process.on("exit", (exitCode: number | null) => {
             // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
 
@@ -386,7 +389,7 @@ export class ShellCommandExecutor {
     private handleRealtimeOutput(
             childProcess: ChildProcess,
             shell_command_parsing_result: ShellCommandParsingResult,
-            outputChannelCodes: OutputChannelCodes,
+            outputHandlerConfigurations: OutputHandlerConfigurations,
             processTerminator: (() => void) | null,
         ) {
 
@@ -395,7 +398,7 @@ export class ShellCommandExecutor {
             this.plugin,
             this.t_shell_command,
             shell_command_parsing_result,
-            outputChannelCodes,
+            outputHandlerConfigurations,
             processTerminator,
         );
 
@@ -437,13 +440,13 @@ export class ShellCommandExecutor {
         // Hook into exit events
         childProcess.on("exit", (exitCode: number, signal: string /* TODO: Pass signal to channels so it can be shown to users in the future */) => {
             // Call all OutputChannels' endRealtime().
-            const alreadyCalledChannelCodes: OutputChannelCode[] = [];
+            const alreadyCalledChannelCodes: OutputHandlerCode[] = [];
             for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
                 const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
                 if (undefined === outputChannel) {
                     throw new Error("Output channel is undefined.");
                 }
-                const outputChannelCode: OutputChannelCode = outputChannelCodes[outputStreamName];
+                const outputChannelCode: OutputHandlerCode = outputHandlerConfigurations[outputStreamName].handler;
 
                 // Ensure this OutputChannel has not yet been called.
                 if (!alreadyCalledChannelCodes.includes(outputChannelCode)) {

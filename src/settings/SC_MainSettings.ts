@@ -43,9 +43,16 @@ export interface SC_MainSettings {
      * Might also enable some testing {{variables}} in the future, perhaps.
      */
     debug: boolean;
+    
+    /**
+     * TODO: Rename to execute_command_prefix. Consider moving the renamed setting to command_palette.
+     */
     obsidian_command_palette_prefix: string;
 
     // Variables:
+    /**
+     * TODO: Consider removing this setting, or moving it to command_palette.
+     */
     preview_variables_in_command_palette: boolean;
     show_autocomplete_menu: boolean;
 
@@ -59,12 +66,21 @@ export interface SC_MainSettings {
     notification_message_duration: number;
     execution_notification_mode: ExecutionNotificationMode;
     output_channel_clipboard_also_outputs_to_notification: boolean;
+    output_channel_notification_decorates_output: boolean | "stderr";
 
     // Events:
     enable_events: boolean;
 
     // Modals:
     approve_modals_by_pressing_enter_key: boolean;
+    
+    // Obsidian's command palette:
+    command_palette: {
+        re_execute_last_shell_command: {
+            enabled: boolean,
+            prefix: string,
+        },
+    },
 
     // Shell commands:
     /** If it's a number, limit the max height of a textarea. If it's false, don't limit at all. */
@@ -126,12 +142,21 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
         notification_message_duration: 10,
         execution_notification_mode: "disabled",
         output_channel_clipboard_also_outputs_to_notification: true,
+        output_channel_notification_decorates_output: true,
 
         // Events:
         enable_events: true,
 
         // Modals:
         approve_modals_by_pressing_enter_key: true,
+        
+        // Obsidian's command palette:
+        command_palette: {
+            re_execute_last_shell_command: {
+                enabled: true,
+                prefix: "Re-execute: ",
+            },
+        },
 
         // Shell commands:
         max_visible_lines_in_shell_command_fields: false, // No limit by default.
@@ -192,7 +217,7 @@ export interface IPlatformSpecificString { // TODO: Rename to plural form: IPlat
     win32?: string,
 }
 
-export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString{
+export interface IPlatformSpecificStringWithDefault extends IPlatformSpecificString {  // TODO: Rename to plural form: IPlatformSpecificStringsWithDefault
     default: string,
 }
 

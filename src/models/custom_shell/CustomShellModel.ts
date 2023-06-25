@@ -42,12 +42,13 @@ import {CustomShellSettingsModal} from "./CustomShellSettingsModal";
 import {getShells} from "../../shells/ShellFunctions";
 import {ConfirmationModal} from "../../ConfirmationModal";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
+import {UsageContainer} from "../../imports";
 
 export class CustomShellModel extends Model {
 
     private customShellInstances: CustomShellInstanceMap;
 
-    public getSingularName(): string {
+    public static getSingularName(): string {
         return "Custom shell";
     }
 
@@ -157,28 +158,13 @@ export class CustomShellModel extends Model {
     }
 
     protected augmentDeletionConfirmationModal(confirmationModal: ConfirmationModal, customShellInstance: CustomShellInstance) {
-        const usages: string[] = customShellInstance.getUsages();
+        const usages: UsageContainer = customShellInstance.getUsages();
 
-        // Display where this Shell is used (if anywhere).
-        if (usages.length > 0) {
-            const usageInfoElement: HTMLElement = document.createElement("div");
-            const usageParagraph = usageInfoElement.createEl("p");
-            usageParagraph.innerText = customShellInstance.configuration.name + " is used";
-            let plural = "";
-            if (usages.length === 1) {
-                // One usage.
-                usageParagraph.innerText += ` ${usages[0]}.`; // Preceding space is intentional.
-            } else {
-                // Multiple usages.
-                usageParagraph.innerText += ":";
-                const usageListElement = usageInfoElement.createEl("ul");
-                for (const usage of usages) {
-                    usageListElement.createEl("li", {text: usage});
-                }
-                plural = "s";
-            }
-            usageInfoElement.createEl("p", {text: `If you delete the shell, the mentioned item${plural} will switch to use another shell.`});
-            confirmationModal.setExtraContent(usageInfoElement);
+        if (usages.hasUsages()) {
+            confirmationModal.extraContent.insertAdjacentText(
+                "beforeend",
+                `If you delete the shell, the mentioned item${usages.countUsages() > 1 ? "s" : ""} will switch to use another shell.`,
+            );
         }
     }
 

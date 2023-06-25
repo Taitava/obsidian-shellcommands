@@ -45,7 +45,7 @@ export class Variable_EventTags extends EventVariable {
         separator: {
             type: "string",
             required: true,
-        }
+        },
     };
 
     protected async generateValue(
