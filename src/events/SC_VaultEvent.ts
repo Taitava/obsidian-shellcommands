@@ -24,7 +24,7 @@ import {
     TFile,
     TFolder,
 } from "obsidian";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 
 export abstract class SC_VaultEvent extends SC_Event {
     protected abstract readonly vault_event:

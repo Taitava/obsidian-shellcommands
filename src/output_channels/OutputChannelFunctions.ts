@@ -31,7 +31,7 @@ import {
 import {OutputChannel_StatusBar} from "./OutputChannel_StatusBar";
 import {OutputChannel_CurrentFileBottom} from "./OutputChannel_CurrentFileBottom";
 import {OutputChannel_Clipboard} from "./OutputChannel_Clipboard";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
 import {OutputChannel_Modal} from "./OutputChannel_Modal";
 import {OutputChannel_OpenFiles} from "./OutputChannel_OpenFiles";
 

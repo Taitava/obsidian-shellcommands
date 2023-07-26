@@ -26,7 +26,7 @@ import {
 } from "../settings/SC_MainSettings";
 import {Escaper} from "../variables/escapers/Escaper";
 import {SC_Event} from "../events/SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {
     Shell,
     SpawnAugmentation,

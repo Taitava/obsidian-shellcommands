@@ -29,7 +29,7 @@ import {
     Variable,
     VariableValueResult,
 } from "./Variable";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {removeFromSet} from "../Common";
 import {Shell} from "../shells/Shell";
 

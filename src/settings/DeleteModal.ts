@@ -20,7 +20,7 @@
 import {SC_Modal} from "../SC_Modal";
 import SC_Plugin from "../main";
 import {SettingFieldGroup} from "./SC_MainSettingsTab";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {debugLog} from "../Debug";
 
 /**

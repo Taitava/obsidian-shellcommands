@@ -17,24 +17,24 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
-import SC_Plugin from "./main";
+import {ShellCommandConfiguration} from "../../settings/ShellCommandConfiguration";
+import SC_Plugin from "../../main";
 import {
     generateObsidianCommandName,
     getOperatingSystem,
     mergeSets,
     removeFromSet,
-} from "./Common";
-import {SC_Event} from "./events/SC_Event";
-import {getSC_Events} from "./events/SC_EventList";
-import {debugLog} from "./Debug";
+} from "../../Common";
+import {SC_Event} from "../../events/SC_Event";
+import {getSC_Events} from "../../events/SC_EventList";
+import {debugLog} from "../../Debug";
 import {Command} from "obsidian";
-import {VariableSet} from "./variables/loadVariables";
+import {VariableSet} from "../../variables/loadVariables";
 import {
     getUsedVariables,
     parseVariableSynchronously,
     ParsingResult,
-} from "./variables/parseVariables";
+} from "../../variables/parseVariables";
 import {
     Cacheable,
     createPreaction,
@@ -45,23 +45,23 @@ import {
     Preaction,
     PreactionConfiguration,
     ShellCommandExecutor,
-} from "./imports";
+} from "../../imports";
 import {
     Variable,
     InheritableVariableDefaultValueConfiguration,
-} from "./variables/Variable";
+} from "../../variables/Variable";
 import {
     IPlatformSpecificStringWithDefault,
     PlatformId,
     PlatformNames,
     PlatformNamesMap,
-} from "./settings/SC_MainSettings";
-import {getIconHTML} from "./Icons";
-import {OutputStream} from "./output_channels/OutputHandlerCode";
-import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
-import {Shell} from "./shells/Shell";
-import {getShell} from "./shells/ShellFunctions";
-import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
+} from "../../settings/SC_MainSettings";
+import {getIconHTML} from "../../Icons";
+import {OutputStream} from "../../output_channels/OutputHandlerCode";
+import {OutputWrapper} from "../output_wrapper/OutputWrapper";
+import {Shell} from "../../shells/Shell";
+import {getShell} from "../../shells/ShellFunctions";
+import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,

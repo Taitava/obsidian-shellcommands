@@ -22,7 +22,7 @@ import SC_Plugin from "../main";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {SC_Event} from "../events/SC_Event";
 import {escapeRegExp} from "../lib/escapeRegExp";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {debugLog} from "../Debug";
 import {ParsingResult} from "./parseVariables";
 import {Documentation} from "../Documentation";

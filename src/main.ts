@@ -64,7 +64,7 @@ import {
     TShellCommand,
     TShellCommandContainer,
     TShellCommandMap,
-} from "./TShellCommand";
+} from "./models/shell_command/TShellCommand";
 import {
     getShell,
     getUsersDefaultShellIdentifier,

@@ -18,7 +18,7 @@
  */
 
 import SC_Plugin from "../../main";
-import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../shell_command/TShellCommand";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {SC_Event} from "../../events/SC_Event";
 import {

@@ -42,7 +42,7 @@ import {
 } from "../Documentation";
 import {getSC_Events} from "../events/SC_EventList";
 import {SC_Event} from "../events/SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {
     CustomVariable,
     CustomVariableInstance,

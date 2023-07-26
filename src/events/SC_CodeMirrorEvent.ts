@@ -18,7 +18,7 @@
  */
 
 import {SC_Event} from "./SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 
 export abstract class SC_CodeMirrorEvent extends SC_Event {
     protected abstract readonly codeMirrorEvent: Parameters<CodeMirror.Editor["on"]>[0];

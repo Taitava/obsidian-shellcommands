@@ -36,7 +36,7 @@ import {debugLog} from "../../Debug";
 import {
     TShellCommand,
     TShellCommandMap,
-} from "../../TShellCommand";
+} from "../shell_command/TShellCommand";
 import {ensureObjectHasProperties} from "../../Common";
 import {
     Usage,

@@ -32,7 +32,7 @@ import {
     handleBufferedOutput,
     startRealtimeOutputHandling,
 } from "./output_channels/OutputChannelFunctions";
-import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./TShellCommand";
+import {ShellCommandParsingProcess, ShellCommandParsingResult, TShellCommand} from "./models/shell_command/TShellCommand";
 import {debugLog} from "./Debug";
 import {SC_Event} from "./events/SC_Event";
 import {

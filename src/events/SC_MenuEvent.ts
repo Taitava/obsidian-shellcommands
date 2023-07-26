@@ -18,7 +18,7 @@
  */
 
 import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
-import {ShellCommandParsingProcess, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingProcess, TShellCommand} from "../models/shell_command/TShellCommand";
 import {
     Menu,
     MenuItem,

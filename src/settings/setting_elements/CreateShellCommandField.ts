@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {TShellCommand} from "../../TShellCommand";
+import {TShellCommand} from "../../models/shell_command/TShellCommand";
 import {
     Hotkey,
     setIcon,

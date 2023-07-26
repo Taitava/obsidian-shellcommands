@@ -23,7 +23,7 @@ import {
     getUsedVariables,
     parseVariables,
 } from "../../../variables/parseVariables";
-import {TShellCommand} from "../../../TShellCommand";
+import {TShellCommand} from "../../shell_command/TShellCommand";
 import {
     CustomVariable,
     CustomVariableInstance,

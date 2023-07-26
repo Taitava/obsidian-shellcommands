@@ -22,7 +22,7 @@ import {App, EventRef} from "obsidian";
 import {
     ShellCommandParsingProcess,
     TShellCommand,
-} from "../TShellCommand";
+} from "../models/shell_command/TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {cloneObject} from "../Common";
 import {Variable} from "../variables/Variable";

@@ -18,7 +18,7 @@
  */
 
 import {SC_VaultEvent} from "./SC_VaultEvent";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {TAbstractFile} from "obsidian";
 import {
     extractFileName,

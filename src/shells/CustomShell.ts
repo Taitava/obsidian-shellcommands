@@ -40,7 +40,7 @@ import {
     ParsingResult,
 } from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_Event} from "../events/SC_Event";
 import {debugLog} from "../Debug";
 

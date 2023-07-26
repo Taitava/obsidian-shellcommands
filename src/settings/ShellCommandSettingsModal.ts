@@ -35,7 +35,7 @@ import {
     OutputHandlingMode,
     OutputStream,
 } from "../output_channels/OutputHandlerCode";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
 import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {

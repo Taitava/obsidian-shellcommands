@@ -29,7 +29,7 @@ import {
     OutputStream,
 } from "./OutputHandlerCode";
 import {debugLog} from "../Debug";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
 import {joinObjectProperties} from "../Common";
 import {Variable_Output} from "../variables/Variable_Output";
 import {parseVariables} from "../variables/parseVariables";

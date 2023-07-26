@@ -59,7 +59,7 @@ import {SettingFieldGroup} from "../../settings/SC_MainSettingsTab";
 import * as path from "path";
 import * as fs from "fs";
 import {getPATHEnvironmentVariableName} from "../../settings/setting_elements/PathEnvironmentVariableFunctions";
-import {TShellCommand} from "../../TShellCommand";
+import {TShellCommand} from "../shell_command/TShellCommand";
 import {Documentation} from "../../Documentation";
 
 export class CustomShellSettingsModal extends SC_Modal {

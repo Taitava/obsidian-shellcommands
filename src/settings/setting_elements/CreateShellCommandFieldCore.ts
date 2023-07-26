@@ -25,7 +25,7 @@ import {
     createAutocomplete,
     IAutocompleteItem,
 } from "./Autocomplete";
-import {TShellCommand} from "../../TShellCommand";
+import {TShellCommand} from "../../models/shell_command/TShellCommand";
 import {EOL} from "os";
 import {decorateMultilineField} from "./multilineField";
 import {Shell} from "../../shells/Shell";

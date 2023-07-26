@@ -18,7 +18,7 @@
  */
 
 import {SC_Event} from "./SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 
 export class SC_Event_onLayoutReady extends SC_Event {
     protected static readonly event_code = "on-layout-ready";

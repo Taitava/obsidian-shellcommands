@@ -18,7 +18,7 @@
  */
 
 import {SC_Event} from "./SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {Notice, Setting} from "obsidian";
 

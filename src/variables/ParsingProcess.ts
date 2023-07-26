@@ -28,7 +28,7 @@ import {
     cloneObject,
     uniqueArray,
 } from "../Common";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {debugLog} from "../Debug";
 
 /**

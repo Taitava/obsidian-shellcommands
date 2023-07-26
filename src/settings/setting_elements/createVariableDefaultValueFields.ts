@@ -30,7 +30,7 @@ import {
     TextAreaComponent,
 } from "obsidian";
 import {createAutocomplete} from "./Autocomplete";
-import {TShellCommand} from "../../TShellCommand";
+import {TShellCommand} from "../../models/shell_command/TShellCommand";
 import {CustomVariable} from "../../variables/CustomVariable";
 import {gotoURL} from "../../Common";
 

@@ -18,7 +18,7 @@
  */
 
 import {SC_Event} from "./SC_Event";
-import {TShellCommand} from "../TShellCommand";
+import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {EventRef} from "obsidian";
 
 export abstract class SC_WorkspaceEvent extends SC_Event {

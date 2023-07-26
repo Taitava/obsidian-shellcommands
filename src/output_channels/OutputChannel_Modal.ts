@@ -31,7 +31,7 @@ import {
     OutputStream,
 } from "./OutputHandlerCode";
 import SC_Plugin from "../main";
-import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
+import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_Modal} from "../SC_Modal";
 import {getSelectionFromTextarea} from "../Common";
 import {CmdOrCtrl} from "../Hotkeys";

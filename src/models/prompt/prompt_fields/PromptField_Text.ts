@@ -25,7 +25,7 @@ import {createAutocomplete} from "../../../settings/setting_elements/Autocomplet
 import SC_Plugin from "../../../main";
 import {SC_Event} from "../../../events/SC_Event";
 import {parseVariables} from "../../../variables/parseVariables";
-import {TShellCommand} from "../../../TShellCommand";
+import {TShellCommand} from "../../shell_command/TShellCommand";
 import {
     PromptField,
 } from "../../../imports";
