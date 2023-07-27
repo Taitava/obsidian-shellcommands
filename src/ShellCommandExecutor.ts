@@ -240,7 +240,7 @@ export class ShellCommandExecutor {
             // Working directory is OK
 
             // Pass possible PATH augmentations to the Shell - if the Shell supports them.
-            if (shell_command_parsing_result.environment_variable_path_augmentation.length > 0) {
+            if (shell_command_parsing_result.environment_variable_path_augmentation.length > 0) { // FIXME: If PATH additions are cleared in settings, old additions still apply until the plugin is restarted. https://github.com/Taitava/obsidian-shellcommands/issues/362
                 shell.setEnvironmentVariablePathAugmentation?.(shell_command_parsing_result.environment_variable_path_augmentation);
                 // If setEnvironmentVariablePathAugmentation() does not exist, the Shell does not support PATH augmentation. Then just ignore the PATH augmentation.
                 // - Only BuiltinShells support the PATH augmentation setting.
