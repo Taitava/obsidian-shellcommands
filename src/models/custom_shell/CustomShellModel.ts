@@ -43,6 +43,7 @@ import {getShells} from "../../shells/ShellFunctions";
 import {ConfirmationModal} from "../../ConfirmationModal";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 import {UsageContainer} from "../../imports";
+import {TShellCommandMap} from "../shell_command/TShellCommand";
 
 export class CustomShellModel extends Model {
 
@@ -172,9 +173,8 @@ export class CustomShellModel extends Model {
         debugLog(`CustomVariableModel: Deleting CustomShellInstance ${customShellInstance.getId()}.`);
 
         // Remove the CustomShellInstance from all ShellCommands that use it.
-        const tShellCommands = this.plugin.getTShellCommands();
-        for (const shellCommandId in tShellCommands) {
-            const tShellCommand = tShellCommands[shellCommandId];
+        const tShellCommands: TShellCommandMap = this.plugin.getTShellCommands();
+        for (const tShellCommand of tShellCommands.values()) {
             const shellCommandShells: IPlatformSpecificString = tShellCommand.getConfiguration().shells;
             for (const platformId in shellCommandShells) {
                 const shellIdentifier = shellCommandShells[platformId as keyof IPlatformSpecificString];

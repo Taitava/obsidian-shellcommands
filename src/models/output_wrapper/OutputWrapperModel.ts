@@ -31,6 +31,7 @@ import {getIDGenerator} from "../../IDGenerator";
 import {OutputStream} from "../../output_channels/OutputHandlerCode";
 import {OutputWrapperSettingsModal} from "./OutputWrapperSettingsModal";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
+import {TShellCommandMap} from "../shell_command/TShellCommand";
 
 export class OutputWrapperModel extends Model {
 
@@ -115,9 +116,8 @@ export class OutputWrapperModel extends Model {
         debugLog("Deleting an OutputWrapper instance.");
 
         // Remove the OutputWrapper from all TShellCommands that use it.
-        const shell_commands = this.plugin.getTShellCommands();
-        for (const shell_command_id in shell_commands) {
-            const t_shell_command = shell_commands[shell_command_id];
+        const shell_commands: TShellCommandMap = this.plugin.getTShellCommands();
+        for (const t_shell_command of shell_commands.values()) {
             const output_wrappers = t_shell_command.getConfiguration().output_wrappers;
             Object.each(output_wrappers, (output_wrapper_id: string, output_stream: OutputStream) => {
                 if (output_wrapper_id === deletable_output_wrapper.getID()) {

@@ -47,7 +47,7 @@ import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
  * @param plugin
  * @param container_element
  * @param setting_tab
- * @param shell_command_id Either an alphanumeric string or "new" if it's a field for a command that does not exist yet.
+ * @param shell_command Either a TShellCommand or "new" if it's a field for a command that does not exist yet.
  * @param show_autocomplete_menu
  * @param onAfterPreviewGenerated
  */
@@ -55,26 +55,26 @@ export function createShellCommandField(
     plugin: SC_Plugin,
     container_element: HTMLElement,
     setting_tab: SC_MainSettingsTab,
-    shell_command_id: string,
+    shell_command: "new" | TShellCommand,
     show_autocomplete_menu: boolean,
     onAfterPreviewGenerated?: () => void,
 ) {
-    const is_new = "new" === shell_command_id;
+    const is_new = "new" === shell_command;
     let t_shell_command: TShellCommand;
     if (is_new) {
         // Create an empty command
         t_shell_command = plugin.newTShellCommand();
-        shell_command_id = t_shell_command.getId(); // Replace "new" with a real id.
     } else {
         // Use an old shell command
-        t_shell_command = plugin.getTShellCommands()[shell_command_id];
+        t_shell_command = shell_command;
     }
+    const shell_command_id: string = t_shell_command.getId();
     debugLog("Create command field for command #" + shell_command_id + (is_new ? " (NEW)" : ""));
-    let shell_command: string;
+    let shellCommandContent: string;
     if (is_new) {
-        shell_command = "";
+        shellCommandContent = "";
     } else {
-        shell_command = t_shell_command.getDefaultShellCommand();
+        shellCommandContent = t_shell_command.getDefaultShellCommand();
     }
 
     // Wrap all shell command setting elements in a single div.
@@ -85,7 +85,7 @@ export function createShellCommandField(
         plugin,
         shell_command_element,
         generateShellCommandFieldIconAndName(t_shell_command),
-        shell_command,
+        shellCommandContent,
         t_shell_command.getShellForDefaultCommand() ?? plugin.getDefaultShell(), // If default shell command content is newer used, just get some shell.
         t_shell_command,
         show_autocomplete_menu,
@@ -121,7 +121,7 @@ export function createShellCommandField(
             .setTooltip(ShellCommandSettingsModal.GENERAL_OPTIONS_SUMMARY)
             .onClick(async () => {
                 // Open an extra options modal: General tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-general");
             })
@@ -131,7 +131,7 @@ export function createShellCommandField(
             .setIcon("note-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Preactions tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-preactions");
             })
@@ -141,7 +141,7 @@ export function createShellCommandField(
             .setIcon("lines-of-text")
             .onClick(async () => {
                 // Open an extra options modal: Output tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-output");
             })
@@ -151,7 +151,7 @@ export function createShellCommandField(
             .setIcon("stacked-levels")
             .onClick(async () => {
                 // Open an extra options modal: Environments tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-environments");
             })
@@ -161,7 +161,7 @@ export function createShellCommandField(
             .setIcon("dice")
             .onClick(async () => {
                 // Open an extra options modal: Events tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-events");
             })
@@ -171,7 +171,7 @@ export function createShellCommandField(
             .setIcon("code-glyph")
             .onClick(async () => {
                 // Open an extra options modal: Variables tab
-                const modal = new ShellCommandSettingsModal(plugin, shell_command_id, setting_tab);
+                const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
             })
@@ -181,7 +181,7 @@ export function createShellCommandField(
             .setIcon("trash")
             .onClick(async () => {
                 // Open a delete modal
-                const modal = new DeleteModal(plugin, shell_command_id, setting_group, shell_command_element);
+                const modal = new DeleteModal(plugin, t_shell_command, setting_group, shell_command_element);
                 modal.open();
             })
         )

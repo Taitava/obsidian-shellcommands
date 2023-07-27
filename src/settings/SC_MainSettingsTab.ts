@@ -154,13 +154,13 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             // Fields for modifying existing commands
             let shell_commands_exist = false;
             const previewPromises: Promise<void>[] = [];
-            for (const command_id in this.plugin.getTShellCommands()) {
+            for (const shellCommand of this.plugin.getTShellCommandsAsMap().values()) {
                 previewPromises.push(new Promise((resolveOnePreview) => {
                     createShellCommandField(
                         this.plugin,
                         command_fields_container,
                         this,
-                        command_id,
+                        shellCommand,
                         this.plugin.settings.show_autocomplete_menu,
                         () => resolveOnePreview(),
                     );
@@ -201,7 +201,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             .addSearch(search_component => search_component
                 .onChange((search_term: string) => {
                     let count_matches = 0;
-                    for (const shell_command_id in this.plugin.getTShellCommands()) {
+                    for (const t_shell_command of this.plugin.getTShellCommands().values()) {
                         let matched = false;
                         // Check if a search term was defined.
                         if ("" == search_term) {
@@ -210,7 +210,6 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                         } else {
                             // A search term is defined.
                             // Define fields where to look for the search term
-                            const t_shell_command = this.plugin.getTShellCommands()[shell_command_id];
                             const search_targets: string[] = [
                                 t_shell_command.getId(),
                                 t_shell_command.getConfiguration().alias,
@@ -232,9 +231,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                         }
 
                         // Show or hide the shell command.
-                        const shell_command_element = document.querySelector("div.SC-id-" + shell_command_id);
+                        const shell_command_element = document.querySelector("div.SC-id-" + t_shell_command.getId());
                         if (!shell_command_element) {
-                            throw new Error("Shell command setting element does not exist with selector div.SC-id-" + shell_command_id);
+                            throw new Error("Shell command setting element does not exist with selector div.SC-id-" + t_shell_command.getId());
                         }
                         if (matched) {
                             shell_command_element.removeClass("SC-hide");

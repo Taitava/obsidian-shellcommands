@@ -62,7 +62,6 @@ import * as fs from "fs";
 import {
     ShellCommandParsingProcess,
     TShellCommand,
-    TShellCommandContainer,
     TShellCommandMap,
 } from "./models/shell_command/TShellCommand";
 import {
@@ -101,7 +100,7 @@ export default class SC_Plugin extends Plugin {
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
-	private t_shell_commands: TShellCommandContainer = {};
+	private t_shell_commands: TShellCommandMap;
 	private prompts: PromptMap;
 	private custom_variable_instances: CustomVariableInstanceMap;
     private customShellInstances: CustomShellInstanceMap;
@@ -208,27 +207,23 @@ export default class SC_Plugin extends Plugin {
 	}
 
 	private loadTShellCommands() {
-		this.t_shell_commands = {}; // TODO: Consider changing this to either an array or a Map.
+        this.t_shell_commands = new TShellCommandMap();
 		const shell_command_configurations = this.getShellCommandConfigurations();
 
 		for (const shell_command_configuration of shell_command_configurations) {
-			this.t_shell_commands[shell_command_configuration.id] = new TShellCommand(this, shell_command_configuration);
+            this.t_shell_commands.set(shell_command_configuration.id, new TShellCommand(this, shell_command_configuration));
 		}
 	}
 
-	public getTShellCommands() {
+	public getTShellCommands(): TShellCommandMap {
 		return this.t_shell_commands;
 	}
 
     /**
-     * TODO: Change this.t_shell_commands to a Map, so that getTShellCommands() returns a Map, and remove this method.
+     * TODO: Now that this.t_shell_commands is a Map, and getTShellCommands() returns a Map, remove this method. Make this method's callers call getTShellCommands() instead.
      */
     public getTShellCommandsAsMap(): TShellCommandMap {
-        const tShellCommandsMap = new TShellCommandMap();
-        for (const shellCommandId of Object.getOwnPropertyNames(this.t_shell_commands)) {
-            tShellCommandsMap.set(shellCommandId, this.t_shell_commands[shellCommandId]);
-        }
-        return tShellCommandsMap;
+        return this.getTShellCommands();
     }
 
 	public getVariables() {
@@ -319,7 +314,7 @@ export default class SC_Plugin extends Plugin {
 		const shell_command_configuration = newShellCommandConfiguration(shell_command_id);
         this.settings.shell_commands.push(shell_command_configuration);
 		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_configuration);
-		this.t_shell_commands[shell_command_id] = t_shell_command;
+        this.t_shell_commands.set(t_shell_command.getId(), t_shell_command);
 		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
 			t_shell_command.registerToCommandPalette();
 		}
@@ -328,9 +323,8 @@ export default class SC_Plugin extends Plugin {
 
     private registerCommandPaletteCommands(): void {
         // Shell commands.
-        const shell_commands = this.getTShellCommands();
-        for (const shell_command_id in shell_commands) {
-            const t_shell_command = shell_commands[shell_command_id];
+        const shell_commands: TShellCommandMap = this.getTShellCommands();
+        for (const t_shell_command of shell_commands.values()) {
             if (t_shell_command.canAddToCommandPalette()) {
                 t_shell_command.registerToCommandPalette();
             }
@@ -422,9 +416,8 @@ export default class SC_Plugin extends Plugin {
 			// At least on Obsidian 0.12.19 it's not enough to delay until onLayoutReady, need to wait a bit more in order to avoid the miss-triggering.
 			window.setTimeout(() => { // setTimeout() should not need registering to Obsidian API, I guess.
 				// Iterate all shell commands and register possible events.
-				const shell_commands = this.getTShellCommands();
-				for (const shell_command_id in shell_commands) {
-					const t_shell_command = shell_commands[shell_command_id];
+				const shell_commands: TShellCommandMap = this.getTShellCommands();
+				for (const t_shell_command of shell_commands.values()) {
 					t_shell_command.registerSC_Events(called_after_changing_settings);
 				}
 			}, 0); // 0 means to call the callback on "the next event cycle", according to window.setTimeout() documentation. It should be a long enough delay. But if SC_Event_onActiveLeafChanged still gets triggered during start-up, this value can be raised to for example 1000 (= one second).
@@ -439,9 +432,8 @@ export default class SC_Plugin extends Plugin {
 		// Iterate all events
 		getSC_Events(this).forEach((sc_event: SC_Event) => {
 			// Iterate all shell commands
-			const shell_commands = this.getTShellCommands();
-			for (const shell_command_id in shell_commands) {
-				const t_shell_command = shell_commands[shell_command_id];
+			const shell_commands: TShellCommandMap = this.getTShellCommands();
+			for (const t_shell_command of shell_commands.values()) {
 				sc_event.unregister(t_shell_command);
 			}
 		});
@@ -490,9 +482,8 @@ export default class SC_Plugin extends Plugin {
 
 					// Find the executable shell command
 					let found_t_shell_command = false;
-					const shell_commands = this.getTShellCommands();
-					for (const shell_command_id in shell_commands) {
-						const t_shell_command = shell_commands[shell_command_id];
+					const shell_commands: TShellCommandMap = this.getTShellCommands();
+					for (const t_shell_command of shell_commands.values()) {
 						if (t_shell_command.getId() === executable_shell_command_id) {
 							// This is the correct shell command.
 							found_t_shell_command = true;

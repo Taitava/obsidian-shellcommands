@@ -33,10 +33,10 @@ export class DeleteModal extends SC_Modal {
     private setting_group: SettingFieldGroup;
     private shell_command_element: HTMLElement;
 
-    constructor(plugin: SC_Plugin, shell_command_id: string, setting_group: SettingFieldGroup, shell_command_element: HTMLElement) {
+    constructor(plugin: SC_Plugin, shellCommand: TShellCommand, setting_group: SettingFieldGroup, shell_command_element: HTMLElement) {
         super(plugin);
-        this.shell_command_id = shell_command_id;
-        this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
+        this.shell_command_id = shellCommand.getId();
+        this.t_shell_command = shellCommand;
         this.setting_group = setting_group;
         this.shell_command_element = shell_command_element;
     }
@@ -60,7 +60,7 @@ export class DeleteModal extends SC_Modal {
         // Remove the command
         debugLog("Command " + this.shell_command_id + " gonna be removed.");
         this.t_shell_command.unregisterFromCommandPalette(); // Remove from the command palette.
-        delete this.plugin.getTShellCommands()[this.shell_command_id]; // Remove the TShellCommand object.
+        this.plugin.getTShellCommands().delete(this.shell_command_id); // Remove the TShellCommand object.
 
         // Remove from the plugin's settings.
         const shellCommandIndex: number | undefined = this.plugin.getShellCommandConfigurationIndex(this.shell_command_id);

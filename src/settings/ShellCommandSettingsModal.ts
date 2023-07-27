@@ -88,11 +88,11 @@ export class ShellCommandSettingsModal extends SC_Modal {
     private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
-    constructor(plugin: SC_Plugin, shell_command_id: string, setting_tab: SC_MainSettingsTab) {
+    constructor(plugin: SC_Plugin, shellCommand: TShellCommand, setting_tab: SC_MainSettingsTab) {
         super(plugin);
-        this.shell_command_id = shell_command_id;
-        this.t_shell_command = plugin.getTShellCommands()[shell_command_id];
-        this.name_setting = setting_tab.setting_groups[shell_command_id].name_setting;
+        this.shell_command_id = shellCommand.getId();
+        this.t_shell_command = shellCommand;
+        this.name_setting = setting_tab.setting_groups[this.shell_command_id].name_setting;
         this.setting_tab = setting_tab;
     }
 
@@ -142,7 +142,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
 
         // Hotkeys for moving to next/previous shell command
         const switch_to_t_shell_command = (t_shell_command: TShellCommand) => {
-            const new_modal = new ShellCommandSettingsModal(this.plugin, t_shell_command.getId(), this.setting_tab);
+            const new_modal = new ShellCommandSettingsModal(this.plugin, t_shell_command, this.setting_tab);
             this.close(); // Needs to be closed before the new one is opened, otherwise the new one's tab content won't be shown.
             new_modal.open();
             new_modal.activateTab(this.tab_structure.active_tab_id);

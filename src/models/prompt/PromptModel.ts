@@ -29,6 +29,7 @@ import {
 import {Setting} from "obsidian";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {debugLog} from "../../Debug";
+import {TShellCommandMap} from "../shell_command/TShellCommand";
 
 export class PromptModel extends Model {
 
@@ -118,9 +119,8 @@ export class PromptModel extends Model {
         debugLog("Deleting a Prompt instance.");
 
         // Remove the Prompt from all TShellCommands that use it.
-        const shell_commands = this.plugin.getTShellCommands();
-        for (const shell_command_id in shell_commands) {
-            const t_shell_command = shell_commands[shell_command_id];
+        const shell_commands: TShellCommandMap = this.plugin.getTShellCommands();
+        for (const t_shell_command of shell_commands.values()) {
             for (const preaction_configuration of t_shell_command.getConfiguration().preactions) {
                 if ("prompt" === preaction_configuration.type) {
                     const preaction_prompt_configuration = preaction_configuration as Preaction_Prompt_Configuration;
