@@ -68,7 +68,7 @@ export class OutputWrapperModel extends Model {
         debugLog("Loading OutputWrapper instances.");
         this.output_wrappers = new OutputWrapperMap();
         parent_configuration.output_wrappers.forEach((output_wrapper_configuration: OutputWrapperConfiguration) => {
-            const output_wrapper = new OutputWrapper(this, this.plugin, output_wrapper_configuration, parent_configuration);
+            const output_wrapper = new OutputWrapper(this, output_wrapper_configuration, parent_configuration);
             this.output_wrappers.set(output_wrapper_configuration.id, output_wrapper);
         });
         return this.output_wrappers;
@@ -82,7 +82,7 @@ export class OutputWrapperModel extends Model {
         const output_wrapper_configuration = this.getDefaultConfiguration();
 
         // Instantiate an OutputWrapper
-        const output_wrapper = new OutputWrapper(this, this.plugin, output_wrapper_configuration, this.plugin.settings);
+        const output_wrapper = new OutputWrapper(this, output_wrapper_configuration, this.plugin.settings);
         this.output_wrappers.set(output_wrapper.getID(), output_wrapper);
 
         // Store the configuration into plugin's settings

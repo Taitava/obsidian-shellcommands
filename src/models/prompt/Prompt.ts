@@ -17,7 +17,6 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import SC_Plugin from "../../main";
 import {ShellCommandParsingProcess, TShellCommand} from "../shell_command/TShellCommand";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {SC_Event} from "../../events/SC_Event";
@@ -44,7 +43,6 @@ export class Prompt extends Instance {
 
     constructor(
         public model: PromptModel,
-        protected plugin: SC_Plugin,
         public configuration: PromptConfiguration,
         public parent_configuration: SC_MainSettings,
     ) {

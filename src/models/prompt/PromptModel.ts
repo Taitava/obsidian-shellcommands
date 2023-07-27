@@ -50,7 +50,7 @@ export class PromptModel extends Model {
         debugLog("Loading Prompt instances.");
         this.prompts = new PromptMap();
         parent_configuration.prompts.forEach((prompt_configuration: PromptConfiguration) => {
-            const prompt: Prompt = new Prompt(this, this.plugin, prompt_configuration, parent_configuration);
+            const prompt: Prompt = new Prompt(this, prompt_configuration, parent_configuration);
             this.prompts.set(prompt_configuration.id, prompt);
         });
         return this.prompts;
@@ -64,7 +64,7 @@ export class PromptModel extends Model {
         const prompt_configuration = this.getDefaultConfiguration();
 
         // Instantiate a Prompt
-        const prompt = new Prompt(this, this.plugin, prompt_configuration, this.plugin.settings);
+        const prompt = new Prompt(this, prompt_configuration, this.plugin.settings);
         this.prompts.set(prompt.getID(), prompt);
 
         // Store the configuration into plugin's settings

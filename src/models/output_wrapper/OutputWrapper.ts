@@ -18,7 +18,6 @@
  */
 
 import {Instance} from "../Instance";
-import SC_Plugin from "../../main";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {getIDGenerator} from "../../IDGenerator";
 import {OutputWrapperModel} from "./OutputWrapperModel";
@@ -31,7 +30,6 @@ export class OutputWrapper extends Instance {
 
     constructor(
         public model: OutputWrapperModel,
-        protected plugin: SC_Plugin,
         public configuration: OutputWrapperConfiguration,
         public parent_configuration: SC_MainSettings,
     ) {

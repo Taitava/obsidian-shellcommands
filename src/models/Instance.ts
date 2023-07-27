@@ -24,6 +24,7 @@ import {
     UsageContainer,
 } from "../imports";
 import {VariableMap} from "../variables/loadVariables";
+import SC_Plugin from "../main";
 
 export abstract class Instance extends Cacheable {
 
@@ -58,6 +59,13 @@ export abstract class Instance extends Cacheable {
             this.parent_instance = null; // It's null already, but do this just to make a statement.
             this.parent_configuration = parent_instance_or_configuration;
         }
+    }
+    
+    /**
+     * A shorthand accessor for this.model.plugin.
+     */
+    public get plugin(): SC_Plugin {
+        return this.model.plugin;
     }
 
     public abstract getTitle(): string;
