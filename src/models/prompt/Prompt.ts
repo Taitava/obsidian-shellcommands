@@ -53,8 +53,11 @@ export class Prompt extends Instance {
 
         this.createFields();
     }
-
-
+    
+    
+    /**
+     * TODO: Rename to getId() (lowercase d).
+     */
     public getID() {
         return this.configuration.id;
     }

@@ -38,7 +38,10 @@ export class OutputWrapper extends Instance {
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new OutputWrappers.
         getIDGenerator().addReservedID(configuration.id);
     }
-
+    
+    /**
+     * TODO: Rename to getId() (lowercase d).
+     */
     public getID() {
         return this.configuration.id;
     }

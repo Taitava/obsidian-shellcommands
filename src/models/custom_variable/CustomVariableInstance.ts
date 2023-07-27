@@ -55,7 +55,10 @@ export class CustomVariableInstance extends Instance {
 
         debugLog(`Loaded CustomVariableInstance ${this.getID()}.`);
     }
-
+    
+    /**
+     * TODO: Rename to getId() (lowercase d).
+     */
     public getID() {
         return this.configuration.id;
     }
