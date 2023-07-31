@@ -95,6 +95,9 @@ export abstract class Instance extends Cacheable {
     /**
      * Returns a UsageContainer containing a list of places where this Instance is used. The result is cached, and only
      * regenerated if configuration changes.
+     *
+     * TODO: Consider renaming this function to getDependants(). Also, UsageContainer would be renamed to DependantsContainer.
+     *   - Then, if later needed, it's possible to create a method named getDependencies() which would work the other way around: returns other instances that are used by this instance. That will be useful when implementing ability to export configuration.
      */
     public getUsages(): UsageContainer {
         return this.cache("getUsages", () => {

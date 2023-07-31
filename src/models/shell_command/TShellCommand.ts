@@ -64,7 +64,7 @@ import {getShell} from "../../shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
 
 /**
- * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Maybe ShellCommandInstance? It's not the best name, but I can't come up with a better one now.
+ * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Rename simply to ShellCommand.
  */
 export class TShellCommand extends Cacheable {
 

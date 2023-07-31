@@ -181,10 +181,14 @@ export abstract class Model {
     }
 
     /**
-     * This should delete the instance from custom collections. It should be overridden by all Instance classes that have deletable children.
+     * This should delete the instance from custom collections. It should be overridden by all Model classes.
+     *
+     * Actual deletion from configuration is done by deleteInstance(), so this method does not need to do it.
+     *
+     * TODO: Rename to onBeforeDeletingInstance().
      */
     protected _deleteInstance(instance: Instance) {
-        throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method. Maybe the class is not supposed to have children?");
+        throw new Error(this.constructor.name + ".deleteInstance(): This class does not override _deleteInstance() method.");
     }
 
     /**
