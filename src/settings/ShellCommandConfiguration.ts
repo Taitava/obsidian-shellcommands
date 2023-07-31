@@ -31,6 +31,7 @@ import {
 import {SC_EventConfigurations} from "../events/SC_EventConfiguration";
 import {InheritableVariableDefaultValueConfiguration} from "../variables/Variable";
 import {
+    getIDGenerator,
     PreactionConfiguration,
 } from "../imports";
 import {OutputChannel} from "../output_channels/OutputChannel";
@@ -73,7 +74,10 @@ export interface ShellCommandConfiguration {
     shell_command?: string;
 }
 
-export function newShellCommandConfiguration(shell_command_id: string, shell_command = ""): ShellCommandConfiguration {
+export function newShellCommandConfiguration(
+    shell_command_id: string = getIDGenerator().generateID(),
+    shell_command = "",
+): ShellCommandConfiguration {
     return {
         id: shell_command_id,
         platform_specific_commands: {
