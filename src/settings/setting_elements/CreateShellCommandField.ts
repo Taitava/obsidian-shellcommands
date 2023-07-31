@@ -24,7 +24,6 @@ import {
     Setting,
 } from "obsidian";
 import {ShellCommandSettingsModal} from "../ShellCommandSettingsModal";
-import {DeleteModal} from "../DeleteModal";
 import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
@@ -177,15 +176,6 @@ export function createShellCommandField(
                 const modal = new ShellCommandSettingsModal(plugin, t_shell_command, setting_tab);
                 modal.open();
                 modal.activateTab("extra-options-variables");
-            })
-        )
-        .addExtraButton(button => button
-            .setTooltip("Delete this shell command")
-            .setIcon("trash")
-            .onClick(async () => {
-                // Open a delete modal
-                const modal = new DeleteModal(plugin, t_shell_command, setting_group, shell_command_element);
-                modal.open();
             })
         )
     ;
