@@ -62,6 +62,7 @@ import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {createVariableDefaultValueField} from "./setting_elements/createVariableDefaultValueFields";
 import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
+import {ShellCommandModel} from "../models/shell_command/ShellCommandModel";
 
 /**
  * TODO: Rename to MainSettingsModal. Then it better in line with ShellCommandSettingsModal.
@@ -153,16 +154,18 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     
             // Fields for modifying existing commands
             let shell_commands_exist = false;
+            const shellCommandModel = getModel<ShellCommandModel>(ShellCommandModel.name);
             const previewPromises: Promise<void>[] = [];
             for (const shellCommand of this.plugin.getTShellCommandsAsMap().values()) {
                 previewPromises.push(new Promise((resolveOnePreview) => {
-                    createShellCommandField(
-                        this.plugin,
-                        command_fields_container,
-                        this,
+                    shellCommandModel.createSettingFields(
                         shellCommand,
-                        this.plugin.settings.show_autocomplete_menu,
-                        () => resolveOnePreview(),
+                        command_fields_container,
+                        true,
+                        {
+                            settingsTab: this,
+                            onAfterPreviewGenerated: resolveOnePreview,
+                        },
                     );
                 }));
                 shell_commands_exist = true;

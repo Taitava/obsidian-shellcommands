@@ -46,7 +46,6 @@ import {
 } from "./Common";
 import {RunMigrations} from "./Migrations";
 import {
-    newShellCommandConfiguration,
     ShellCommandConfiguration,
 } from "./settings/ShellCommandConfiguration";
 import {
@@ -88,6 +87,7 @@ import {
     CustomShellInstanceMap,
     CustomShellModel,
 } from "./models/custom_shell/CustomShellModel";
+import {ShellCommandModel} from "./models/shell_command/ShellCommandModel";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -155,6 +155,7 @@ export default class SC_Plugin extends Plugin {
 
 		// Run possible configuration migrations
 		await RunMigrations(this);
+        // Proceed loading stuff after configuration migrations are done.
 
         // Define builtin shells
         registerBuiltinShells(this);
@@ -163,8 +164,9 @@ export default class SC_Plugin extends Plugin {
         const customShellModel = getModel<CustomShellModel>(CustomShellModel.name);
         this.customShellInstances = customShellModel.loadInstances(this.settings);
 
-		// Generate TShellCommand objects from configuration (only after configuration migrations are done)
-		this.loadTShellCommands();
+		// Load shell commands.
+        const shellCommandModel = getModel<ShellCommandModel>(ShellCommandModel.name);
+        this.t_shell_commands = shellCommandModel.loadInstances(this.settings);
 
 		// Load Prompts
 		const prompt_model = getModel<PromptModel>(PromptModel.name);
@@ -206,15 +208,6 @@ export default class SC_Plugin extends Plugin {
 		this.registerURIHandler();
 	}
 
-	private loadTShellCommands() {
-        this.t_shell_commands = new TShellCommandMap();
-		const shell_command_configurations = this.getShellCommandConfigurations();
-
-		for (const shell_command_configuration of shell_command_configurations) {
-            this.t_shell_commands.set(shell_command_configuration.id, new TShellCommand(this, shell_command_configuration));
-		}
-	}
-
 	public getTShellCommands(): TShellCommandMap {
 		return this.t_shell_commands;
 	}
@@ -248,10 +241,6 @@ export default class SC_Plugin extends Plugin {
 
 	public getCustomShellInstances(): CustomShellInstanceMap {
 		return this.customShellInstances;
-	}
-
-	private getShellCommandConfigurations(): ShellCommandConfiguration[] {
-		return this.settings.shell_commands;
 	}
 
 	public getOutputWrappers() {
@@ -310,11 +299,8 @@ export default class SC_Plugin extends Plugin {
 	 * configuration to disk. To save the addition, call saveSettings().
 	 */
 	public newTShellCommand() {
-		const shell_command_id = getIDGenerator().generateID();
-		const shell_command_configuration = newShellCommandConfiguration(shell_command_id);
-        this.settings.shell_commands.push(shell_command_configuration);
-		const t_shell_command: TShellCommand = new TShellCommand(this, shell_command_configuration);
-        this.t_shell_commands.set(t_shell_command.getId(), t_shell_command);
+        const shellCommandModel = getModel<ShellCommandModel>(ShellCommandModel.name);
+        const t_shell_command: TShellCommand = shellCommandModel.newInstance(this.settings);
 		if (t_shell_command.canAddToCommandPalette()) { // This is probably always true, because the default configuration enables adding to the command palette, but check just in case.
 			t_shell_command.registerToCommandPalette();
 		}

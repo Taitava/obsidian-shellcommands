@@ -36,11 +36,11 @@ import {
     ParsingResult,
 } from "../../variables/parseVariables";
 import {
-    Cacheable,
     createPreaction,
     CustomVariable,
     getIDGenerator,
     getPATHAugmentation,
+    Instance,
     ParsingProcess,
     Preaction,
     PreactionConfiguration,
@@ -55,6 +55,7 @@ import {
     PlatformId,
     PlatformNames,
     PlatformNamesMap,
+    SC_MainSettings,
 } from "../../settings/SC_MainSettings";
 import {getIconHTML} from "../../Icons";
 import {OutputStream} from "../../output_channels/OutputHandlerCode";
@@ -62,28 +63,26 @@ import {OutputWrapper} from "../output_wrapper/OutputWrapper";
 import {Shell} from "../../shells/Shell";
 import {getShell} from "../../shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "../../variables/Variable_ShellCommandContent";
+import {ShellCommandModel} from "./ShellCommandModel";
 
 /**
  * TODO: Rename this class. Replace the T prefix with something else. The T stands for Type (kind of like TFile from Obsidian), but this is not a type, this is a class. Rename simply to ShellCommand.
  */
-export class TShellCommand extends Cacheable {
+export class TShellCommand extends Instance {
 
-    private plugin: SC_Plugin;
-    private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
 
-    constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
-        super();
-        this.plugin = plugin;
-        this.configuration = configuration;
+    constructor(
+        public model: ShellCommandModel,
+        public configuration: ShellCommandConfiguration,
+        parentConfiguration: SC_MainSettings,
+    ) {
+        super(model, configuration, parentConfiguration);
 
         // Introduce the ID to an ID generator so that it won't accidentally generate the same ID again when creating new shell commands.
         getIDGenerator().addReservedID(configuration.id);
     }
 
-    public getPlugin() {
-        return this.plugin;
-    }
     /**
      * Use this when you need to alter the configuration values. if you only need to read configuration values, use get*()
      * methods instead.
@@ -257,6 +256,13 @@ export class TShellCommand extends Cacheable {
         return this.configuration.alias;
     }
 
+    /**
+     * Same as getAlias(). Used by the modelling system.
+     */
+    public getTitle(): string {
+        return this.getAlias();
+    }
+    
     /**
      * TODO: Use this method in all places where similar logic is needed. I guess generateObsidianCommandName() is the only place left.
      */
@@ -764,22 +770,20 @@ export class TShellCommand extends Cacheable {
      * Returns a VariableMap containing Variables used in any of this TShellCommand's shell commands contents. Note that
      * variables used in Shell wrappers, preactions or output wrappers are not included.
      */
-    public getUsedCustomVariables() {
-        return this.cache("getUsedCustomVariables", () => {
-            // Gather parseable content.
-            const readVariablesFrom: string[] = [
-                ...Object.values(this.configuration.platform_specific_commands),
-                this.getAlias() ?? "",
-                this.configuration.input_contents.stdin ?? "",
-                    ...Object.values(this.configuration.variable_default_values).map((defaultValueConfiguration: InheritableVariableDefaultValueConfiguration) => defaultValueConfiguration.value),
-            ];
+    protected _getUsedCustomVariables() {
+        // Gather parseable content.
+        const readVariablesFrom: string[] = [
+            ...Object.values(this.configuration.platform_specific_commands),
+            this.getAlias() ?? "",
+            this.configuration.input_contents.stdin ?? "",
+            ...Object.values(this.configuration.variable_default_values).map((defaultValueConfiguration: InheritableVariableDefaultValueConfiguration) => defaultValueConfiguration.value),
+        ];
     
-            return getUsedVariables(
-                this.plugin,
-                readVariablesFrom,
-                this.plugin.getCustomVariables(),
-            );
-        });
+        return getUsedVariables(
+            this.plugin,
+            readVariablesFrom,
+            this.plugin.getCustomVariables(),
+        );
     }
 
     /**
