@@ -37,7 +37,10 @@ import {
 import {
     ShellCommandExecutor,
 } from "../../imports";
-import {SC_MainSettingsTab} from "../SC_MainSettingsTab";
+import {
+    SC_MainSettingsTab,
+    SettingFieldGroup,
+} from "../SC_MainSettingsTab";
 
 /**
  * Creates a shell command textarea (by calling createShellCommandFieldCore()) and related control buttons.
@@ -58,7 +61,7 @@ export function createShellCommandField(
     shell_command: "new" | TShellCommand,
     show_autocomplete_menu: boolean,
     onAfterPreviewGenerated?: () => void,
-) {
+): SettingFieldGroup {
     const is_new = "new" === shell_command;
     let t_shell_command: TShellCommand;
     if (is_new) {
@@ -282,6 +285,8 @@ export function createShellCommandField(
         }
     }
     debugLog("Created.");
+    
+    return setting_group;
 }
 
 /**
