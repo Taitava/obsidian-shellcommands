@@ -58,13 +58,18 @@ export abstract class Model {
 
     public abstract getDefaultConfiguration(): InstanceConfiguration;
 
-    public createSettingFields(instance: Instance, parent_element: HTMLElement, with_deletion = true) {
+    public createSettingFields(
+        instance: Instance,
+        parent_element: HTMLElement,
+        with_deletion = true,
+        extraArguments: Record<string, unknown> | null = null,
+    ) {
         debugLog(this.constructor.name + ": Creating setting fields.");
 
         // Create a container
         const setting_fields_container = parent_element.createDiv(); // Create a nested container that can be easily deleted if the instance is deleted.
 
-        const main_setting_field = this._createSettingFields(instance, setting_fields_container);
+        const main_setting_field = this._createSettingFields(instance, setting_fields_container, extraArguments);
         if (with_deletion) {
             main_setting_field.addExtraButton(button => button
                 .setIcon("trash")
@@ -113,9 +118,14 @@ export abstract class Model {
      *
      * @param instance
      * @param container_element
+     * @param extraArguments A Model can define additional arguments that they require.
      * @protected
      */
-    protected abstract _createSettingFields(instance: Instance, container_element: HTMLElement): Setting;
+    protected abstract _createSettingFields(
+        instance: Instance,
+        container_element: HTMLElement,
+        extraArguments: Record<string, unknown> | null,
+    ): Setting;
 
     /**
      * Called when a user is about to delete an instance and is shown a ConfirmationModal. This is called before
