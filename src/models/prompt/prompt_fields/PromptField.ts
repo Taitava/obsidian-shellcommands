@@ -364,12 +364,23 @@ export class PromptField extends Instance {
     }
 }
 
-export interface PromptFieldConfiguration {
-    // type: "text"; // TODO: Uncomment when implementing more values than just "text". No need to decide the value "text" now, it can be changed to "single-line-text" or something else, too.
+export const PromptFieldTypes = {
+    "single-line-text": "Single line text",
+};
+
+export type PromptFieldType = keyof typeof PromptFieldTypes;
+
+export type PromptFieldConfiguration = {
+    type: PromptFieldType;
     label: string;
     description: string;
     default_value: string;
-    //  TODO: Add 'placeholder'.
     target_variable_id: string;
     required: boolean;
-}
+} & (
+    // Type specific properties:
+    {
+        type: "single-line-text";
+        // placeholder: string; // TODO: Implement placeholder property later.
+    }
+);

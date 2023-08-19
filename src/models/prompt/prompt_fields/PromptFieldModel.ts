@@ -33,6 +33,7 @@ import {
     Prompt,
     PromptField,
     PromptFieldConfiguration,
+    PromptFieldType,
     PromptFieldTypes,
 } from "../../../imports";
 
@@ -313,16 +314,22 @@ export class PromptFieldModel extends Model {
         }
     }
 
-    public getDefaultConfiguration(): PromptFieldConfiguration {
-        return {
-            // type: "text",
+    public getDefaultConfiguration(fieldType: PromptFieldType = "single-line-text"): PromptFieldConfiguration {
+        const commonProperties = {
             label: "",
             description: "",
             default_value: "",
-            //  TODO: Add 'placeholder'.
             target_variable_id: "",
             required: true,
         };
+        switch (fieldType) {
+            case "single-line-text":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    // TODO: Implement placeholder property later.
+                };
+        }
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {
