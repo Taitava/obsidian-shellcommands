@@ -115,15 +115,23 @@ export class PromptField extends Instance {
         const plugin: SC_Plugin = this.prompt.model.plugin;
         
         // Create the field
-        setting.addText((text_component) => {
-            this.text_component = text_component;
-            text_component.onChange(on_change);
-        });
-        
-        // Show autocomplete menu (if enabled)
-        if (plugin.settings.show_autocomplete_menu) {
-            const input_element = setting.controlEl.find("input") as HTMLInputElement;
-            createAutocomplete(plugin, input_element, on_change);
+        switch (this.configuration.type) {
+            case "single-line-text":
+                setting.addText((text_component) => {
+                    this.text_component = text_component;
+                    text_component.onChange(on_change);
+                });
+                
+                // Show autocomplete menu (if enabled)
+                if (plugin.settings.show_autocomplete_menu) {
+                    const input_element = setting.controlEl.find("input") as HTMLInputElement;
+                    createAutocomplete(plugin, input_element, on_change);
+                }
+                break;
+                
+            default:
+                // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
+                throw new Error("Unidentified PromptField type: " + this.configuration.type);
         }
     }
 
