@@ -291,6 +291,40 @@ export class PromptFieldModel extends Model {
                     )
                 ;
                 break;
+            
+            case "toggle":
+                // Toggled on result.
+                new Setting(containerElement)
+                    .setName("Result when toggled on")
+                    .setDesc("What value the target variable will have if the toggle is checked. The toggle is checked by default, if the Default value (defined above) matches this value. The match is not case-sensitive.")
+                    .addText(textComponent => textComponent
+                        .setValue(promptFieldConfiguration.on_result)
+                        .onChange(async (onResult: string) => {
+                            promptFieldConfiguration.on_result = onResult;
+                            await this.plugin.saveSettings();
+                        })
+                        .then((textComponent) =>
+                            createAutocomplete(this.plugin, textComponent.inputEl, () => textComponent.onChanged())
+                        )
+                    )
+                ;
+                
+                // Toggled off result.
+                new Setting(containerElement)
+                    .setName("Result when toggled off")
+                    .setDesc("What value the target variable will have if the toggle is not checked. {{variables}} can be used both here and above.")
+                    .addText(textComponent => textComponent
+                        .setValue(promptFieldConfiguration.off_result)
+                        .onChange(async (offResult: string) => {
+                            promptFieldConfiguration.off_result = offResult;
+                            await this.plugin.saveSettings();
+                        })
+                        .then((textComponent) =>
+                            createAutocomplete(this.plugin, textComponent.inputEl, () => textComponent.onChanged())
+                        )
+                    )
+                ;
+                break;
                 
             default:
                 // This field type does not need extra setting fields.
@@ -353,6 +387,13 @@ export class PromptFieldModel extends Model {
                     ...commonProperties,
                     // TODO: Implement placeholder property later.
                     rows: 10,
+                };
+            case "toggle":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    on_result: "ON",
+                    off_result: "OFF",
                 };
         }
     }

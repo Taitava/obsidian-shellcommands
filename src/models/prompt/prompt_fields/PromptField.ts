@@ -21,6 +21,7 @@ import {
     Setting,
     TextAreaComponent,
     TextComponent,
+    ToggleComponent,
 } from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
 import {
@@ -52,7 +53,7 @@ export class PromptField extends Instance {
     private parsed_value: string | null;
     private parsing_errors: string[] = [];
     
-    private fieldComponent: TextComponent | TextAreaComponent; // Add more types when implementing more field types.
+    private fieldComponent: TextComponent | TextAreaComponent | ToggleComponent; // Add more types when implementing more field types.
     
     constructor(
         public model: PromptFieldModel,
@@ -100,9 +101,17 @@ export class PromptField extends Instance {
         await this.createTypeSpecificField(setting,on_change);
         
         // Set up onFocus hook.
-        this.fieldComponent.inputEl.onfocus = () => {
-            this.hasGottenFocus();
-        };
+        let inputElement: HTMLElement;
+        switch (this.configuration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                inputElement = (this.fieldComponent as TextComponent | TextAreaComponent).inputEl;
+                break;
+            case "toggle":
+                inputElement = (this.fieldComponent as ToggleComponent).toggleEl;
+                break;
+        }
+        inputElement.onfocus = () => this.hasGottenFocus();
 
         // Create a preview setting element. It will not contain any actual setting elements, just text.
         this.preview_setting = new Setting(container_element);
@@ -145,6 +154,13 @@ export class PromptField extends Instance {
                 }
                 break;
             }
+            
+            case "toggle":
+                setting.addToggle((toggleComponent) => {
+                    this.fieldComponent = toggleComponent;
+                    toggleComponent.onChange(onChange);
+                });
+                break;
                 
             default:
                 // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
@@ -161,7 +177,15 @@ export class PromptField extends Instance {
      * @protected
      */
     private getValue(): string {
-        return this.fieldComponent.getValue();
+        switch (this.configuration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                return (this.fieldComponent as TextComponent | TextAreaComponent).getValue();
+            case "toggle": {
+                const toggledOn: boolean = (this.fieldComponent as ToggleComponent).getValue();
+                return toggledOn ? this.configuration.on_result : this.configuration.off_result;
+            }
+        }
     }
 
     /**
@@ -170,7 +194,21 @@ export class PromptField extends Instance {
      * @protected
      */
     private setValue(value: string): void {
-        this.fieldComponent.setValue(value);
+        switch (this.configuration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                (this.fieldComponent as TextComponent | TextAreaComponent).setValue(value);
+                break;
+            case "toggle": {
+                // Translate the value to a boolean state suitable for a toggle:
+                // - If the value equals on_result -> Toggle is ON.
+                // - If the value equals off_result -> Toggle is OFF.
+                // - If the value equals neither on_result nor off_result -> Toggle is OFF.
+                // - The comparison is NOT case-sensitive.
+                const toggledOn = value.toLocaleLowerCase() === this.configuration.on_result.toLocaleLowerCase();
+                (this.fieldComponent as ToggleComponent).setValue(toggledOn);
+            }
+        }
     }
 
     /**
@@ -294,7 +332,16 @@ export class PromptField extends Instance {
      * Forces focus on the field.
      */
     public setFocus(): void {
-        this.fieldComponent.inputEl.focus();
+        switch (this.configuration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                (this.fieldComponent as TextComponent | TextAreaComponent).inputEl.focus();
+                break;
+            case "toggle": {
+                (this.fieldComponent as ToggleComponent).toggleEl.focus();
+                break;
+            }
+        }
     }
 
     /**
@@ -313,7 +360,14 @@ export class PromptField extends Instance {
     }
 
     private isFilled(): boolean {
-        return this.getValue().length > 0;
+        switch (this.configuration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                return this.getValue().length > 0;
+            case "toggle":
+                // Consider a toggle filled when it's checked.
+                return (this.fieldComponent as ToggleComponent).getValue();
+        }
     }
 
     public getTargetVariableInstance(): CustomVariableInstance {
@@ -384,6 +438,7 @@ export class PromptField extends Instance {
 export const PromptFieldTypes = {
     "single-line-text": "Single line text",
     "multi-line-text": "Multiline text",
+    "toggle": "Toggle",
 };
 
 export type PromptFieldType = keyof typeof PromptFieldTypes;
@@ -404,5 +459,9 @@ export type PromptFieldConfiguration = {
         type: "multi-line-text";
         // placeholder: string; // TODO: Implement placeholder property later.
         rows: number;
+    } | {
+        type: "toggle";
+        on_result: string;
+        off_result: string;
     }
 );
