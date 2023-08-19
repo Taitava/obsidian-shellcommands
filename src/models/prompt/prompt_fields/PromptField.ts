@@ -111,7 +111,7 @@ export class PromptField extends Instance {
         await this.applyDefaultValue(t_shell_command, sc_event);
     }
 
-    private async createTypeSpecificField(setting: Setting, on_change: () => void): Promise<void> {
+    private async createTypeSpecificField(setting: Setting, onChange: () => void): Promise<void> {
         const plugin: SC_Plugin = this.prompt.model.plugin;
         
         // Create the field
@@ -119,13 +119,13 @@ export class PromptField extends Instance {
             case "single-line-text":
                 setting.addText((text_component) => {
                     this.fieldComponent = text_component;
-                    text_component.onChange(on_change);
+                    text_component.onChange(onChange);
                 });
                 
                 // Show autocomplete menu (if enabled)
                 if (plugin.settings.show_autocomplete_menu) {
                     const input_element = setting.controlEl.find("input") as HTMLInputElement;
-                    createAutocomplete(plugin, input_element, on_change);
+                    createAutocomplete(plugin, input_element, onChange);
                 }
                 break;
                 
