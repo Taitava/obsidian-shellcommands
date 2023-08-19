@@ -19,6 +19,7 @@
 
 import {
     Setting,
+    SliderComponent,
     TextComponent,
 } from "obsidian";
 import {randomInteger} from "../../../Common";
@@ -272,7 +273,24 @@ export class PromptFieldModel extends Model {
         
         const promptFieldConfiguration = promptField.configuration;
         switch (promptFieldConfiguration.type) {
-            // TODO
+            case "multi-line-text":
+                // Visible text rows
+                new Setting(containerElement)
+                    .setName("Rows")
+                    .setDesc("Number of visible text lines. User can still enter more lines.")
+                    .addSlider((sliderComponent: SliderComponent) => sliderComponent
+                        .setLimits(2, 50, 1)
+                        .setValue(promptFieldConfiguration.rows)
+                        .onChange(async (rows: number) => {
+                            if (promptField.configuration.type === "multi-line-text") { // Dummy type check to keep TypeScript compiler happy.
+                                promptField.configuration.rows = rows;
+                            }
+                            await this.plugin.saveSettings();
+                        })
+                        .setDynamicTooltip(), // Show the number when hovering.
+                    )
+                ;
+                break;
                 
             default:
                 // This field type does not need extra setting fields.
@@ -328,6 +346,13 @@ export class PromptFieldModel extends Model {
                     type: fieldType,
                     ...commonProperties,
                     // TODO: Implement placeholder property later.
+                };
+            case "multi-line-text":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    // TODO: Implement placeholder property later.
+                    rows: 10,
                 };
         }
     }

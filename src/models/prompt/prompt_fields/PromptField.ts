@@ -19,6 +19,7 @@
 
 import {
     Setting,
+    TextAreaComponent,
     TextComponent,
 } from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
@@ -128,6 +129,22 @@ export class PromptField extends Instance {
                     createAutocomplete(plugin, input_element, onChange);
                 }
                 break;
+            
+            case "multi-line-text": {
+                const textAreaRows: number = this.configuration.rows;
+                setting.addTextArea((textAreaComponent) => {
+                    this.fieldComponent = textAreaComponent;
+                    textAreaComponent.onChange(onChange);
+                    textAreaComponent.inputEl.rows = textAreaRows;
+                });
+                
+                // Show autocomplete menu (if enabled).
+                if (plugin.settings.show_autocomplete_menu) {
+                    const textAreaElement = setting.controlEl.find("textarea") as HTMLTextAreaElement;
+                    createAutocomplete(plugin, textAreaElement, onChange);
+                }
+                break;
+            }
                 
             default:
                 // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
@@ -366,6 +383,7 @@ export class PromptField extends Instance {
 
 export const PromptFieldTypes = {
     "single-line-text": "Single line text",
+    "multi-line-text": "Multiline text",
 };
 
 export type PromptFieldType = keyof typeof PromptFieldTypes;
@@ -382,5 +400,9 @@ export type PromptFieldConfiguration = {
     {
         type: "single-line-text";
         // placeholder: string; // TODO: Implement placeholder property later.
+    } | {
+        type: "multi-line-text";
+        // placeholder: string; // TODO: Implement placeholder property later.
+        rows: number;
     }
 );
