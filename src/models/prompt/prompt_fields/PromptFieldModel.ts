@@ -32,7 +32,6 @@ import {
     ParentModelOneToManyIndexRelation,
     Prompt,
     PromptField,
-    PromptField_Text,
     PromptFieldConfiguration,
 } from "../../../imports";
 
@@ -81,7 +80,7 @@ export class PromptFieldModel extends Model {
 
     private createInstance(prompt: Prompt, prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number): PromptField {
         // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index);
+        return new PromptField(this, prompt, prompt_field_configuration, prompt_field_index);
     }
 
     protected _createSettingFields(prompt_field: PromptField, container_element: HTMLElement): Setting {

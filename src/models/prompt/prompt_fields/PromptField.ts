@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {Setting} from "obsidian";
+import {
+    Setting,
+    TextComponent,
+} from "obsidian";
 import {SC_Event} from "../../../events/SC_Event";
 import {
     getUsedVariables,
@@ -34,18 +37,22 @@ import {
 } from "../../../imports";
 import {Shell} from "../../../shells/Shell";
 import {VariableMap} from "../../../variables/loadVariables";
+import SC_Plugin from "../../../main";
+import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 
-export abstract class PromptField extends Instance {
+export class PromptField extends Instance {
 
     /**
      * Contains a value preview element.
-     * @protected
+     * @private
      */
-    protected preview_setting: Setting;
+    private preview_setting: Setting;
 
     private parsed_value: string | null;
     private parsing_errors: string[] = [];
-
+    
+    private text_component: TextComponent;
+    
     constructor(
         public model: PromptFieldModel,
         public prompt: Prompt,
@@ -72,7 +79,48 @@ export abstract class PromptField extends Instance {
         await this.applyDefaultValue(t_shell_command, sc_event);
     }
 
-    protected abstract _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void>;
+    private async _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
+        const plugin: SC_Plugin = this.prompt.model.plugin;
+        
+        // Create the field
+        const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
+        const shell: Shell = this.getShell(t_shell_command);
+        const label_parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            this.configuration.label,
+            shell,
+            false,
+            t_shell_command,
+            sc_event,
+        );
+        const description_parsing_result = await parseVariables(
+            this.prompt.model.plugin,
+            this.configuration.description,
+            shell,
+            false,
+            t_shell_command,
+            sc_event,
+        );
+        const setting = new Setting(container_element)
+            .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content as string : label_parsing_result.original_content)
+            .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content as string : description_parsing_result.original_content)
+            .addText((text_component) => {
+                this.text_component = text_component;
+                text_component.onChange(on_change);
+            })
+        ;
+        
+        // Set up onFocus hook.
+        this.text_component.inputEl.onfocus = () => {
+            this.hasGottenFocus();
+        };
+        
+        // Show autocomplete menu (if enabled)
+        if (plugin.settings.show_autocomplete_menu) {
+            const input_element = setting.controlEl.find("input") as HTMLInputElement;
+            createAutocomplete(plugin, input_element, on_change);
+        }
+    }
 
     public getTitle(): string {
         return this.configuration.label === "" ? "Unlabelled field" : this.configuration.label;
@@ -82,14 +130,18 @@ export abstract class PromptField extends Instance {
      * Gets a value from the form field.
      * @protected
      */
-    protected abstract getValue(): string;
+    private getValue(): string {
+        return this.text_component.getValue();
+    }
 
     /**
      * Sets a value to the form field.
      * @param value
      * @protected
      */
-    protected abstract setValue(value: string): void;
+    private setValue(value: string): void {
+        this.text_component.setValue(value);
+    }
 
     /**
      * Parses the default value and sets it to the form element.
@@ -138,9 +190,9 @@ export abstract class PromptField extends Instance {
      *
      * @param t_shell_command
      * @param sc_event
-     * @protected
+     * @private
      */
-    protected async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
+    private async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         let preview: string;
 
         // Parse variables in the value.
@@ -202,7 +254,7 @@ export abstract class PromptField extends Instance {
     /**
      * Should be called by the subclass when the field has gotten focus.
      */
-    protected hasGottenFocus() {
+    private hasGottenFocus() {
         if (this.on_focus_callback) {
             this.on_focus_callback(this);
         }
@@ -211,7 +263,9 @@ export abstract class PromptField extends Instance {
     /**
      * Forces focus on the field.
      */
-    public abstract setFocus(): void;
+    public setFocus(): void {
+        this.text_component.inputEl.focus();
+    }
 
     /**
      * Ensures that the field is filled, if it's mandatory. If the field is not mandatory, it's always valid.
@@ -228,7 +282,9 @@ export abstract class PromptField extends Instance {
         return this.isFilled();
     }
 
-    protected abstract isFilled(): boolean;
+    private isFilled(): boolean {
+        return this.getValue().length > 0;
+    }
 
     public getTargetVariableInstance(): CustomVariableInstance {
         const target_variable_id = this.configuration.target_variable_id;
@@ -244,7 +300,7 @@ export abstract class PromptField extends Instance {
         return custom_variable_instance.getCustomVariable();
     }
 
-    protected getShell(tShellCommand: TShellCommand | null): Shell {
+    private getShell(tShellCommand: TShellCommand | null): Shell {
         if (tShellCommand) {
             return tShellCommand.getShell();
         }
