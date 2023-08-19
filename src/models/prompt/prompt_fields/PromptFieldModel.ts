@@ -282,9 +282,7 @@ export class PromptFieldModel extends Model {
                         .setLimits(2, 50, 1)
                         .setValue(promptFieldConfiguration.rows)
                         .onChange(async (rows: number) => {
-                            if (promptField.configuration.type === "multi-line-text") { // Dummy type check to keep TypeScript compiler happy.
-                                promptField.configuration.rows = rows;
-                            }
+                            promptFieldConfiguration.rows = rows;
                             await this.plugin.saveSettings();
                         })
                         .setDynamicTooltip(), // Show the number when hovering.
