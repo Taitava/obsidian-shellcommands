@@ -51,7 +51,7 @@ export class PromptField extends Instance {
     private parsed_value: string | null;
     private parsing_errors: string[] = [];
     
-    private text_component: TextComponent;
+    private fieldComponent: TextComponent | TextAreaComponent; // Add more types when implementing more field types.
     
     constructor(
         public model: PromptFieldModel,
@@ -99,7 +99,7 @@ export class PromptField extends Instance {
         await this.createTypeSpecificField(setting,on_change);
         
         // Set up onFocus hook.
-        this.text_component.inputEl.onfocus = () => {
+        this.fieldComponent.inputEl.onfocus = () => {
             this.hasGottenFocus();
         };
 
@@ -118,7 +118,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
                 setting.addText((text_component) => {
-                    this.text_component = text_component;
+                    this.fieldComponent = text_component;
                     text_component.onChange(on_change);
                 });
                 
@@ -144,7 +144,7 @@ export class PromptField extends Instance {
      * @protected
      */
     private getValue(): string {
-        return this.text_component.getValue();
+        return this.fieldComponent.getValue();
     }
 
     /**
@@ -153,7 +153,7 @@ export class PromptField extends Instance {
      * @protected
      */
     private setValue(value: string): void {
-        this.text_component.setValue(value);
+        this.fieldComponent.setValue(value);
     }
 
     /**
@@ -277,7 +277,7 @@ export class PromptField extends Instance {
      * Forces focus on the field.
      */
     public setFocus(): void {
-        this.text_component.inputEl.focus();
+        this.fieldComponent.inputEl.focus();
     }
 
     /**
