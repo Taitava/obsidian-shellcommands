@@ -347,6 +347,21 @@ export class PromptField extends Instance {
         
         return usedCustomVariables;
     }
+    
+    /**
+     * Iterates all PromptField configuration properties and fills in possibly missing ones. This is needed after changing
+     * field type.
+     */
+    public ensureAllConfigurationPropertiesExist(): void {
+        const defaultConfiguration: PromptFieldConfiguration = this.model.getDefaultConfiguration(this.configuration.type);
+        let propertyName: keyof PromptFieldConfiguration;
+        for (propertyName in defaultConfiguration) {
+            if (undefined === this.configuration[propertyName]) {
+                // @ts-ignore
+                this.configuration[propertyName] = defaultConfiguration[propertyName];
+            }
+        }
+    }
 }
 
 export interface PromptFieldConfiguration {

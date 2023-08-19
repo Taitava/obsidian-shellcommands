@@ -33,6 +33,7 @@ import {
     Prompt,
     PromptField,
     PromptFieldConfiguration,
+    PromptFieldTypes,
 } from "../../../imports";
 
 export class PromptFieldModel extends Model {
@@ -126,6 +127,21 @@ export class PromptFieldModel extends Model {
             heading_setting: new Setting(setting_group_element)
                 .setName("") // This will be set down below.
                 .setHeading()
+                .addDropdown(dropdownComponent => dropdownComponent
+                    .addOptions(PromptFieldTypes)
+                    .setValue(prompt_field.configuration.type)
+                    .onChange(async (newType: keyof typeof PromptFieldTypes) => {
+                        // Change the PromptField's type.
+                        prompt_field.configuration.type = newType;
+                        
+                        // Declare possibly new configuration properties.
+                        prompt_field.ensureAllConfigurationPropertiesExist();
+                        
+                        // Create possible new setting fields.
+                        this.createTypeSpecificSettingFields(prompt_field, typeSpecificSettingFieldsContainer);
+                        await this.plugin.saveSettings();
+                    })
+                )
             ,
             label_setting: new Setting(setting_group_element)
                 .setName("Field label")
@@ -242,8 +258,24 @@ export class PromptFieldModel extends Model {
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, description_input_element, () => description_setting_component.onChanged());
         }
+        
+        const typeSpecificSettingFieldsContainer = setting_group_element.createDiv();
+        this.createTypeSpecificSettingFields(prompt_field, typeSpecificSettingFieldsContainer);
 
         return setting_group.heading_setting;
+    }
+    
+    private createTypeSpecificSettingFields(promptField: PromptField, containerElement: HTMLElement) {
+        // Remove possibly existing setting fields, in case this method is recalled.
+        containerElement.innerHTML = "";
+        
+        const promptFieldConfiguration = promptField.configuration;
+        switch (promptFieldConfiguration.type) {
+            // TODO
+                
+            default:
+                // This field type does not need extra setting fields.
+        }
     }
 
     public validateValue(prompt_field: PromptField, field: keyof PromptFieldConfiguration, value: unknown): Promise<void> {
