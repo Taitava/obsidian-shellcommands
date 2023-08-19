@@ -69,21 +69,7 @@ export class PromptField extends Instance {
      * @param sc_event Used when parsing variables for default_value and the inputted value. Needed so that also {{event_*}} variables can be used in prompts.
      */
     public async createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null): Promise<void> {
-        await this._createField(container_element, t_shell_command, sc_event);
-
-        // Create a preview setting element. It will not contain any actual setting elements, just text.
-        this.preview_setting = new Setting(container_element);
-
-        // Parse variables in the default value and insert it to the field.
-        // Note that this is a different "default value" than what TShellCommand considers as variables' default values! This is about a _field's_ default value, not a variable's default value. t_shell_command is passed in order to allow any possible variables in the field's default value to access the variables' default values (which come from TShellCommand).
-        await this.applyDefaultValue(t_shell_command, sc_event);
-    }
-
-    private async _createField(container_element: HTMLElement, t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
-        const plugin: SC_Plugin = this.prompt.model.plugin;
-        
-        // Create the field
-        const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
+        // Parse variables in common properties.
         const shell: Shell = this.getShell(t_shell_command);
         const label_parsing_result = await parseVariables(
             this.prompt.model.plugin,
@@ -101,19 +87,38 @@ export class PromptField extends Instance {
             t_shell_command,
             sc_event,
         );
+        
+        // Create a base for the field.
         const setting = new Setting(container_element)
             .setName(label_parsing_result.succeeded ? label_parsing_result.parsed_content as string : label_parsing_result.original_content)
             .setDesc(description_parsing_result.succeeded ? description_parsing_result.parsed_content as string : description_parsing_result.original_content)
-            .addText((text_component) => {
-                this.text_component = text_component;
-                text_component.onChange(on_change);
-            })
         ;
+        
+        // Create a type specific input field.
+        const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
+        await this.createTypeSpecificField(setting,on_change);
         
         // Set up onFocus hook.
         this.text_component.inputEl.onfocus = () => {
             this.hasGottenFocus();
         };
+
+        // Create a preview setting element. It will not contain any actual setting elements, just text.
+        this.preview_setting = new Setting(container_element);
+
+        // Parse variables in the default value and insert it to the field.
+        // Note that this is a different "default value" than what TShellCommand considers as variables' default values! This is about a _field's_ default value, not a variable's default value. t_shell_command is passed in order to allow any possible variables in the field's default value to access the variables' default values (which come from TShellCommand).
+        await this.applyDefaultValue(t_shell_command, sc_event);
+    }
+
+    private async createTypeSpecificField(setting: Setting, on_change: () => void): Promise<void> {
+        const plugin: SC_Plugin = this.prompt.model.plugin;
+        
+        // Create the field
+        setting.addText((text_component) => {
+            this.text_component = text_component;
+            text_component.onChange(on_change);
+        });
         
         // Show autocomplete menu (if enabled)
         if (plugin.settings.show_autocomplete_menu) {
