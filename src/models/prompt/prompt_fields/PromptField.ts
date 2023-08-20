@@ -207,7 +207,11 @@ export class PromptField extends Instance {
                 // - The comparison is NOT case-sensitive.
                 const toggledOn = value.toLocaleLowerCase() === this.configuration.on_result.toLocaleLowerCase();
                 (this.fieldComponent as ToggleComponent).setValue(toggledOn);
+                break;
             }
+            default:
+                // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
+                throw new Error("Unidentified PromptField type: " + this.configuration.type);
         }
     }
 
@@ -341,6 +345,9 @@ export class PromptField extends Instance {
                 (this.fieldComponent as ToggleComponent).toggleEl.focus();
                 break;
             }
+            default:
+                // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
+                throw new Error("Unidentified PromptField type: " + this.configuration.type);
         }
     }
     
