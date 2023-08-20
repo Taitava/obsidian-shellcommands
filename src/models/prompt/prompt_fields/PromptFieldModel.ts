@@ -19,7 +19,6 @@
 
 import {
     Setting,
-    SliderComponent,
     TextComponent,
 } from "obsidian";
 import {randomInteger} from "../../../Common";
@@ -274,21 +273,9 @@ export class PromptFieldModel extends Model {
         
         const promptFieldConfiguration = promptField.configuration;
         switch (promptFieldConfiguration.type) {
+            case "single-line-text":
             case "multi-line-text":
-                // Visible text rows
-                new Setting(containerElement)
-                    .setName("Rows")
-                    .setDesc("Number of visible text lines. User can still enter more lines.")
-                    .addSlider((sliderComponent: SliderComponent) => sliderComponent
-                        .setLimits(2, 50, 1)
-                        .setValue(promptFieldConfiguration.rows)
-                        .onChange(async (rows: number) => {
-                            promptFieldConfiguration.rows = rows;
-                            await this.plugin.saveSettings();
-                        })
-                        .setDynamicTooltip(), // Show the number when hovering.
-                    )
-                ;
+                // No special settings for these types.
                 break;
             
             case "toggle":
@@ -424,7 +411,6 @@ export class PromptFieldModel extends Model {
                     type: fieldType,
                     ...commonProperties,
                     // TODO: Implement placeholder property later.
-                    rows: 10,
                 };
             case "toggle":
                 return {

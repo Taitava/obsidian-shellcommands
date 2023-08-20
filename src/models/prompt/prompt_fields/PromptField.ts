@@ -42,6 +42,7 @@ import {Shell} from "../../../shells/Shell";
 import {VariableMap} from "../../../variables/loadVariables";
 import SC_Plugin from "../../../main";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
+import {decorateMultilineField} from "../../../settings/setting_elements/multilineField";
 
 export class PromptField extends Instance {
 
@@ -154,11 +155,9 @@ export class PromptField extends Instance {
                 break;
             
             case "multi-line-text": {
-                const textAreaRows: number = this.configuration.rows;
                 setting.addTextArea((textAreaComponent) => {
                     this.fieldComponent = textAreaComponent;
-                    textAreaComponent.onChange(onChange);
-                    textAreaComponent.inputEl.rows = textAreaRows;
+                    decorateMultilineField(this.model.plugin, textAreaComponent, onChange);
                 });
                 
                 // Show autocomplete menu (if enabled).
@@ -598,7 +597,6 @@ export type PromptFieldConfiguration = {
     } | {
         type: "multi-line-text";
         // placeholder: string; // TODO: Implement placeholder property later.
-        rows: number;
     } | {
         type: "toggle";
         on_result: string;
