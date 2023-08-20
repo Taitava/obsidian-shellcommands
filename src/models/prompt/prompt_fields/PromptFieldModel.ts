@@ -319,7 +319,7 @@ export class PromptFieldModel extends Model {
                 const choices: string = promptFieldConfiguration.choices.map((choice: [string, string]): string => {
                     if (Array.isArray(choice)) {
                         // Different value and label.
-                        return choice[0] + ":" + choice[1];
+                        return choice[0] + "|" + choice[1];
                     } else {
                         // Unified value and label.
                         return choice;
