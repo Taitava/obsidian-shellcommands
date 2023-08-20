@@ -37,6 +37,7 @@ import {
     PromptFieldType,
     PromptFieldTypes,
 } from "../../../imports";
+import {decorateMultilineField} from "../../../settings/setting_elements/multilineField";
 
 export class PromptFieldModel extends Model {
 
@@ -323,6 +324,45 @@ export class PromptFieldModel extends Model {
                     )
                 ;
                 break;
+            
+            case "single-choice": {
+                const choices: string = promptFieldConfiguration.choices.map((choice: [string, string]): string => {
+                    if (Array.isArray(choice)) {
+                        // Different value and label.
+                        return choice[0] + ":" + choice[1];
+                    } else {
+                        // Unified value and label.
+                        return choice;
+                    }
+                }).join("\n");
+                new Setting(containerElement)
+                    .setName("Selectable options")
+                    .setDesc("A list of options of which one can be selected. Put each option on their own line. You can define a separate value and label for an option by separating them with a colon, e.g. MyValue:MyLabel. {{variables}} are supported in both values and labels.")
+                    .addTextArea((textAreaComponent) => {
+                        textAreaComponent.setValue(choices);
+                        textAreaComponent.inputEl.rows = 10;
+                        createAutocomplete(this.plugin, textAreaComponent.inputEl, () => textAreaComponent.onChanged());
+                        decorateMultilineField(this.plugin, textAreaComponent, async (newChoices: string) => {
+                            // Save changed choices.
+                            promptFieldConfiguration.choices = [];
+                            for (const choice of newChoices.split("\n")) {
+                                if (choice.contains(":")) {
+                                    // The option defines a separate value and label.
+                                    const choiceParts: string[] = choice.split(":");
+                                    const choiceValue = choiceParts.shift() as string;
+                                    const choiceLabel = choiceParts.join(":"); // Re-join. If the option line contained multiple colons, then only the first one splits, and the rest will be used in the label as-is.
+                                    promptFieldConfiguration.choices.push([choiceValue, choiceLabel]);
+                                } else {
+                                    // The option defines a unified value and label.
+                                    promptFieldConfiguration.choices.push(choice);
+                                }
+                            }
+                            await this.plugin.saveSettings();
+                        });
+                    })
+                ;
+                break;
+            }
                 
             default:
                 // This field type does not need extra setting fields.
@@ -392,6 +432,14 @@ export class PromptFieldModel extends Model {
                     ...commonProperties,
                     on_result: "ON",
                     off_result: "OFF",
+                };
+            case "single-choice":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    choices: [
+                        "",
+                    ],
                 };
         }
     }

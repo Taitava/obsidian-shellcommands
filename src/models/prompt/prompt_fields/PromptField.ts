@@ -18,6 +18,7 @@
  */
 
 import {
+    DropdownComponent,
     Setting,
     TextAreaComponent,
     TextComponent,
@@ -53,7 +54,7 @@ export class PromptField extends Instance {
     private parsed_value: string | null;
     private parsing_errors: string[] = [];
     
-    private fieldComponent: TextComponent | TextAreaComponent | ToggleComponent; // Add more types when implementing more field types.
+    private fieldComponent: TextComponent | TextAreaComponent | ToggleComponent | DropdownComponent; // Add more types when implementing more field types.
     
     constructor(
         public model: PromptFieldModel,
@@ -98,7 +99,12 @@ export class PromptField extends Instance {
         
         // Create a type specific input field.
         const on_change = () => this.valueHasChanged(t_shell_command, sc_event);
-        await this.createTypeSpecificField(setting,on_change);
+        await this.createTypeSpecificField(
+            setting,
+            on_change,
+            t_shell_command,
+            sc_event,
+        );
         
         // Set up onFocus hook.
         let inputElement: HTMLElement;
@@ -109,6 +115,9 @@ export class PromptField extends Instance {
                 break;
             case "toggle":
                 inputElement = (this.fieldComponent as ToggleComponent).toggleEl;
+                break;
+            case "single-choice":
+                inputElement = (this.fieldComponent as DropdownComponent).selectEl;
                 break;
         }
         inputElement.onfocus = () => this.hasGottenFocus();
@@ -121,7 +130,12 @@ export class PromptField extends Instance {
         await this.applyDefaultValue(t_shell_command, sc_event);
     }
 
-    private async createTypeSpecificField(setting: Setting, onChange: () => void): Promise<void> {
+    private async createTypeSpecificField(
+        setting: Setting,
+        onChange: () => void,
+        tShellCommand: TShellCommand | null,
+        scEvent: SC_Event | null,
+    ): Promise<void> {
         const plugin: SC_Plugin = this.prompt.model.plugin;
         
         // Create the field
@@ -162,6 +176,59 @@ export class PromptField extends Instance {
                 });
                 break;
                 
+            case "single-choice": {
+                // Scaffold a list of dropdown options
+                const dropdownOptions: Record<string, string> = {};
+                for (const choice of this.configuration.choices) {
+                    let choiceValue: string;
+                    let choiceLabel: string;
+                    if (Array.isArray(choice)) {
+                        // Different value and label.
+                        [choiceValue, choiceLabel] = choice;
+                    } else {
+                        // Unified value and label.
+                        choiceValue = choiceLabel = choice;
+                    }
+                    
+                    // Parse variables in choiceValue.
+                    const choiceValueParsingResult = await parseVariables(
+                        this.prompt.model.plugin,
+                        choiceValue,
+                        this.getShell(tShellCommand),
+                        false,
+                        tShellCommand,
+                        scEvent,
+                    );
+                    if (choiceValueParsingResult.succeeded) {
+                        choiceValue = choiceValueParsingResult.parsed_content as string;
+                    }
+                    
+                    // Parse variables in choiceLabel.
+                    const choiceLabelParsingResult = await parseVariables(
+                        this.prompt.model.plugin,
+                        choiceLabel,
+                        this.getShell(tShellCommand),
+                        false,
+                        tShellCommand,
+                        scEvent,
+                    );
+                    if (choiceLabelParsingResult.succeeded) {
+                        choiceLabel = choiceLabelParsingResult.parsed_content as string;
+                    }
+                    
+                    // Add to dropdown options.
+                    dropdownOptions[choiceValue] = choiceLabel;
+                }
+                
+                // Create the dropdown.
+                setting.addDropdown((dropdownComponent) => {
+                    this.fieldComponent = dropdownComponent;
+                    dropdownComponent.addOptions(dropdownOptions);
+                    dropdownComponent.onChange(onChange);
+                });
+                break;
+            }
+                
             default:
                 // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
                 throw new Error("Unidentified PromptField type: " + this.configuration.type);
@@ -180,7 +247,8 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
-                return (this.fieldComponent as TextComponent | TextAreaComponent).getValue();
+            case "single-choice":
+                return (this.fieldComponent as TextComponent | TextAreaComponent | DropdownComponent).getValue();
             case "toggle": {
                 const toggledOn: boolean = (this.fieldComponent as ToggleComponent).getValue();
                 return toggledOn ? this.configuration.on_result : this.configuration.off_result;
@@ -207,6 +275,26 @@ export class PromptField extends Instance {
                 // - The comparison is NOT case-sensitive.
                 const toggledOn = value.toLocaleLowerCase() === this.configuration.on_result.toLocaleLowerCase();
                 (this.fieldComponent as ToggleComponent).setValue(toggledOn);
+                break;
+            }
+            case "single-choice": {
+                const dropdownComponent = (this.fieldComponent as DropdownComponent);
+                let valueExistsInChoices: boolean = false;
+                for (const optionElement of Array.from(dropdownComponent.selectEl.options)) {
+                    const choiceValue: string = optionElement.value;
+                    if (choiceValue.toLocaleLowerCase() === value.toLocaleLowerCase()) {
+                        // The given value exists as an option. Select it.
+                        dropdownComponent.setValue(choiceValue);
+                        valueExistsInChoices = true;
+                    }
+                }
+                if (!valueExistsInChoices) {
+                    // The given value does not exist. Select the first option.
+                    const firstOptionElement = dropdownComponent.selectEl.options.item(0);
+                    if (null !== firstOptionElement) {
+                        dropdownComponent.setValue(firstOptionElement.value);
+                    }
+                }
                 break;
             }
             default:
@@ -265,40 +353,48 @@ export class PromptField extends Instance {
      * @private
      */
     private async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
-        let preview: string;
-
-        // Parse variables in the value.
-        const parsing_result = await parseVariables(
-            this.prompt.model.plugin,
-            this.getValue(),
-            this.getShell(t_shell_command),
-            false,
-            t_shell_command,
-            sc_event
-        );
-        if (!parsing_result.succeeded) {
-            // Parsing failed.
-            this.parsed_value = null;
-            if (parsing_result.error_messages.length > 0) {
-                // Display the first error message. If there are more, others can be omitted.
-                preview = parsing_result.error_messages[0];
+        let preview: string = "";
+        
+        const doParseVariables = this.configuration.type !== "single-choice"; // If type is "single-choice", variables are already parsed in the field's options.
+        if (doParseVariables) {
+            // Parse variables in the value.
+            const parsing_result = await parseVariables(
+                this.prompt.model.plugin,
+                this.getValue(),
+                this.getShell(t_shell_command),
+                false,
+                t_shell_command,
+                sc_event,
+            );
+            if (!parsing_result.succeeded) {
+                // Parsing failed.
+                this.parsed_value = null;
+                if (parsing_result.error_messages.length > 0) {
+                    // Display the first error message. If there are more, others can be omitted.
+                    preview = parsing_result.error_messages[0];
+                } else {
+                    // If there are no error messages, then errors are silently ignored by user's variable configuration, in which case just show the original content.
+                    preview = parsing_result.original_content;
+                }
+                this.parsing_errors = parsing_result.error_messages;
             } else {
-                // If there are no error messages, then errors are silently ignored by user's variable configuration, in which case just show the original content.
-                preview = parsing_result.original_content;
+                // Parsing succeeded
+                this.parsed_value = parsing_result.parsed_content;
+                preview = parsing_result.parsed_content as string;
+                this.parsing_errors = []; // No errors.
             }
-            this.parsing_errors = parsing_result.error_messages;
+            
+            if (0 === parsing_result.count_parsed_variables) {
+                // If no variables were used, hide the description as it's not needed to repeat the value that already shows up in the form field.
+                preview = "";
+            }
         } else {
-            // Parsing succeeded
-            this.parsed_value = parsing_result.parsed_content;
-            preview = parsing_result.parsed_content as string;
-            this.parsing_errors = []; // No errors.
+            // No need to parse variables, as they are already parsed before.
+            this.parsed_value = this.getValue();
+            this.parsing_errors = []; // This probably is already an empty array, but just make sure.
         }
-
+        
         // Update the preview element.
-        if (0 === parsing_result.count_parsed_variables) {
-             // If no variables were used, hide the description as it's not needed to repeat the value that already shows up in the form field.
-            preview = "";
-        }
         this.preview_setting.setDesc(preview);
 
         // Call a possible external callback
@@ -345,6 +441,9 @@ export class PromptField extends Instance {
                 (this.fieldComponent as ToggleComponent).toggleEl.focus();
                 break;
             }
+            case "single-choice":
+                (this.fieldComponent as DropdownComponent).selectEl.focus();
+                break;
             default:
                 // @ts-ignore Do not yell when the switch covers all type cases. Ignores this error: TS2339: Property 'type' does not exist on type 'never'.
                 throw new Error("Unidentified PromptField type: " + this.configuration.type);
@@ -355,6 +454,7 @@ export class PromptField extends Instance {
      * Ensures the field is correctly set up. If it's not, a Prompt cannot be opened.
      * Performed checks:
      *  - The field must have a target variable defined.
+     *  - A dropdown field has less than two choices.
      *
      * @return True when valid, a string error message when not valid.
      */
@@ -368,6 +468,14 @@ export class PromptField extends Instance {
             } catch (error) {
                 return `Field '${this.getTitle()}' uses a target variable which does not exist anymore.`;
             }
+        }
+        
+        // Type specific checks.
+        switch (this.configuration.type) {
+            case "single-choice":
+                if (Object.getOwnPropertyNames(this.configuration.choices).length < 2) {
+                    return `Dropdown field '${this.getTitle()}' must have at least two options.`;
+                }
         }
         
         // All ok.
@@ -393,6 +501,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "single-choice": // Dropdown can also use the length logic - nothing is selected if the selected option's value is an empty string.
                 return this.getValue().length > 0;
             case "toggle":
                 // Consider a toggle filled when it's checked.
@@ -469,6 +578,7 @@ export const PromptFieldTypes = {
     "single-line-text": "Single line text",
     "multi-line-text": "Multiline text",
     "toggle": "Toggle",
+    "single-choice": "Dropdown menu",
 };
 
 export type PromptFieldType = keyof typeof PromptFieldTypes;
@@ -493,5 +603,8 @@ export type PromptFieldConfiguration = {
         type: "toggle";
         on_result: string;
         off_result: string;
+    } | {
+        type: "single-choice";
+        choices: (string | [string, string])[],
     }
 );
