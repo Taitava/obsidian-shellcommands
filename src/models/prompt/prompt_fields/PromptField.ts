@@ -343,6 +343,29 @@ export class PromptField extends Instance {
             }
         }
     }
+    
+    /**
+     * Ensures the field is correctly set up. If it's not, a Prompt cannot be opened.
+     * Performed checks:
+     *  - The field must have a target variable defined.
+     *
+     * @return True when valid, a string error message when not valid.
+     */
+    public isConfigurationValid(): true | string {
+        // Check that target variable is defined.
+        if (!this.configuration.target_variable_id) {
+            return `Field '${this.getTitle()}' does not have a target variable.`;
+        } else {
+            try {
+                this.getTargetVariableInstance(); // Just try to get a CustomVariableInstance. No need to use it here, but if this fails, we know the variable is removed.
+            } catch (error) {
+                return `Field '${this.getTitle()}' uses a target variable which does not exist anymore.`;
+            }
+        }
+        
+        // All ok.
+        return true;
+    }
 
     /**
      * Ensures that the field is filled, if it's mandatory. If the field is not mandatory, it's always valid.

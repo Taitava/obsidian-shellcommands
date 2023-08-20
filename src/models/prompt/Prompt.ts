@@ -117,16 +117,12 @@ export class Prompt extends Instance {
 
     private canOpenPrompt(): true | string {
 
-        // Check that all PromptFields have a target variable defined.
+        // Check that all PromptFields have no configuration errors.
         for (const prompt_field of this.prompt_fields) {
-            if (!prompt_field.configuration.target_variable_id) {
-                return `Cannot open prompt '${this.getTitle()}': Field '${prompt_field.getTitle()}' does not have a target variable.`;
-            } else {
-                try {
-                    prompt_field.getTargetVariableInstance(); // Just try to get a CustomVariableInstance. No need to use it here, but if this fails, we know the variable is removed.
-                } catch (error) {
-                    return `Cannot open prompt '${this.getTitle()}': Field '${prompt_field.getTitle()}' uses a target variable which does not exist anymore.`;
-                }
+            const validity: string | true = prompt_field.isConfigurationValid();
+            if ("string" === typeof validity) {
+                // An error is detected.
+                return `Cannot open prompt '${this.getTitle()}': ${validity}`;
             }
         }
 
