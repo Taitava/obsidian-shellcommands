@@ -327,7 +327,7 @@ export class PromptFieldModel extends Model {
                 }).join("\n");
                 new Setting(containerElement)
                     .setName("Choices")
-                    .setDesc("A list of options of which one can be selected. Put each option on their own line. You can define a separate value and label for an option by separating them with a colon, e.g. MyValue:MyLabel. {{variables}} are supported in both values and labels.")
+                    .setDesc("A list of options of which one can be selected. Put each option on their own line. You can define a separate value and label for an option by separating them with a pipe |, e.g. MyValue|MyLabel. {{variables}} are supported in both values and labels.")
                     .addTextArea((textAreaComponent) => {
                         textAreaComponent.setValue(choices);
                         textAreaComponent.inputEl.rows = 10;
@@ -336,11 +336,11 @@ export class PromptFieldModel extends Model {
                             // Save changed choices.
                             promptFieldConfiguration.choices = [];
                             for (const choice of newChoices.split("\n")) {
-                                if (choice.contains(":")) {
+                                if (choice.contains("|")) {
                                     // The option defines a separate value and label.
-                                    const choiceParts: string[] = choice.split(":");
+                                    const choiceParts: string[] = choice.split("|");
                                     const choiceValue = choiceParts.shift() as string;
-                                    const choiceLabel = choiceParts.join(":"); // Re-join. If the option line contained multiple colons, then only the first one splits, and the rest will be used in the label as-is.
+                                    const choiceLabel = choiceParts.join("|"); // Re-join. If the option line contained multiple colons, then only the first one splits, and the rest will be used in the label as-is.
                                     promptFieldConfiguration.choices.push([choiceValue, choiceLabel]);
                                 } else {
                                     // The option defines a unified value and label.
