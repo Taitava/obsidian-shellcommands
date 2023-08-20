@@ -28,6 +28,7 @@ import {SC_Event} from "../../../events/SC_Event";
 import {
     getUsedVariables,
     parseVariables,
+    ParsingResult,
 } from "../../../variables/parseVariables";
 import {TShellCommand} from "../../../TShellCommand";
 import {
@@ -258,21 +259,36 @@ export class PromptField extends Instance {
     /**
      * Sets a value to the form field.
      * @param value
+     * @param tShellCommand Used for variable parsing if the field is a toggle.
+     * @param scEvent Used for variable parsing if the field is a toggle.
      * @protected
      */
-    private setValue(value: string): void {
+    private async setValue(value: string, tShellCommand: TShellCommand | null, scEvent: SC_Event | null): Promise<void> {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
                 (this.fieldComponent as TextComponent | TextAreaComponent).setValue(value);
                 break;
             case "toggle": {
+                // Parse variables in onResult.
+                let onResult: string = this.configuration.on_result;
+                const onResultParsingResult: ParsingResult = await parseVariables(
+                    this.model.plugin,
+                    onResult,
+                    this.getShell(tShellCommand),
+                    false,
+                    tShellCommand,
+                    scEvent,
+                );
+                if (onResultParsingResult.succeeded) {
+                    onResult = onResultParsingResult.parsed_content as string;
+                }
                 // Translate the value to a boolean state suitable for a toggle:
                 // - If the value equals on_result -> Toggle is ON.
                 // - If the value equals off_result -> Toggle is OFF.
                 // - If the value equals neither on_result nor off_result -> Toggle is OFF.
                 // - The comparison is NOT case-sensitive.
-                const toggledOn = value.toLocaleLowerCase() === this.configuration.on_result.toLocaleLowerCase();
+                const toggledOn = value.toLocaleLowerCase() === onResult.toLocaleLowerCase();
                 (this.fieldComponent as ToggleComponent).setValue(toggledOn);
                 break;
             }
@@ -320,10 +336,10 @@ export class PromptField extends Instance {
         );
         if (!parsing_result.succeeded) {
             // Parsing failed.
-            this.setValue(default_value); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
+            await this.setValue(default_value, t_shell_command, sc_event); // Use the unparsed value. If default value contains a variable that cannot be parsed, a user can see the variable in the prompt modal and either fix it or change it to something else.
         } else {
             // Parsing succeeded.
-            this.setValue(parsing_result.parsed_content as string);
+            await this.setValue(parsing_result.parsed_content as string, t_shell_command, sc_event);
         }
         await this.valueHasChanged(t_shell_command, sc_event);
     }
