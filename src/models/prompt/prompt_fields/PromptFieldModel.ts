@@ -159,14 +159,17 @@ export class PromptFieldModel extends Model {
             ,
             default_value_setting: new Setting(setting_group_element)
                 .setName("Default value")
-                .addText(text => text
-                    .setValue(prompt_field.configuration.default_value)
-                    .setPlaceholder(
-                        prompt_field.configuration.label ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
-                            : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
-                    )
-                    .onChange(on_default_value_setting_change)
-                )
+                // Create a multiline field. Even though multiline does not make sense if the field happens to be single-line-text, but it's meant for cases where the field is multi-line-text. Maybe some kind of visibility switch could be done later: create both single line and multiline text components, and toggle their visibility based on the current PromptField's type.
+                .addTextArea(textAreaComponent => {
+                    textAreaComponent
+                        .setValue(prompt_field.configuration.default_value)
+                        .setPlaceholder(
+                            prompt_field.configuration.label ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
+                                : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)],
+                        )
+                    ;
+                    decorateMultilineField(this.plugin, textAreaComponent, on_default_value_setting_change);
+                })
             ,
             description_setting: new Setting(setting_group_element)
                 .setName("Description")
@@ -255,7 +258,7 @@ export class PromptFieldModel extends Model {
             // Show autocomplete menu (= a list of available variables).
             const label_input_element = setting_group.label_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, label_input_element, () => label_setting_component.onChanged());
-            const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
+            const default_value_input_element = setting_group.default_value_setting.controlEl.find("textarea") as HTMLInputElement;
             createAutocomplete(this.plugin, default_value_input_element, on_default_value_setting_change);
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, description_input_element, () => description_setting_component.onChanged());
