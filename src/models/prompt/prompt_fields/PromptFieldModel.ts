@@ -326,7 +326,7 @@ export class PromptFieldModel extends Model {
                     }
                 }).join("\n");
                 new Setting(containerElement)
-                    .setName("Selectable options")
+                    .setName("Choices")
                     .setDesc("A list of options of which one can be selected. Put each option on their own line. You can define a separate value and label for an option by separating them with a colon, e.g. MyValue:MyLabel. {{variables}} are supported in both values and labels.")
                     .addTextArea((textAreaComponent) => {
                         textAreaComponent.setValue(choices);
