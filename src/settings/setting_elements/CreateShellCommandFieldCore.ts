@@ -41,6 +41,7 @@ import {Shell} from "../../shells/Shell";
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param show_autocomplete_menu TODO: Remove this parameter and always read it from plugin settings.
  * @param extra_on_change
+ * @param onAfterPreviewGenerated
  * @param shell_command_placeholder
  * @param extraAutocompleteItems
  * @constructor
