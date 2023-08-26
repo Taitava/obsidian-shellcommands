@@ -51,6 +51,7 @@ import {
     createPATHAugmentationFields,
     Prompt,
     PromptModel,
+    Shell,
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
@@ -705,6 +706,7 @@ export interface SettingFieldGroup {
     name_setting: Setting;
     shell_command_setting: Setting;
     preview_setting: Setting;
+    refreshPreview: (shell: Shell | null) => Promise<void>;
 }
 
 export interface SettingFieldGroupContainer {

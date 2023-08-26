@@ -41,7 +41,7 @@ import {Shell} from "../../shells/Shell";
  * @param t_shell_command Will only be used to read default value configurations. Can be null if no TShellCommand is available, but then no default values can be accessed.
  * @param show_autocomplete_menu TODO: Remove this parameter and always read it from plugin settings.
  * @param extra_on_change
- * @param onAfterPreviewGenerated
+ * @param onAfterPreviewGenerated Will be called the first time preview has been generated. If the preview is updated, this won't be called again. If repeated calling is needed, a parameter could be added, telling whether it's a first-time call or a repeated call.
  * @param shell_command_placeholder
  * @param extraAutocompleteItems
  * @constructor
@@ -59,14 +59,18 @@ export function CreateShellCommandFieldCore(
     shell_command_placeholder = "Enter your command",
     extraAutocompleteItems?: IAutocompleteItem[],
     ): SettingFieldGroup {
-
-    async function on_change(shell_command: string) {
-        // Update preview
-        setting_group.preview_setting.setDesc(await getShellCommandPreview(plugin,
+    
+    async function generatePreview(previewSetting: Setting) {
+        previewSetting.setDesc(await getShellCommandPreview(plugin,
             shell_command,
             shell,
             t_shell_command,
         ));
+    }
+
+    async function on_change(shell_command: string) {
+        // Update preview
+        await generatePreview(setting_group.preview_setting);
 
         // Let the caller extend this onChange, to preform saving the settings:
         extra_on_change(shell_command);
@@ -96,14 +100,19 @@ export function CreateShellCommandFieldCore(
             new Setting(container_element)
                 .setClass("SC-preview-setting")
                 .then(async (setting: Setting) => {
-                    setting.setDesc(await getShellCommandPreview(plugin,
-                        shell_command,
-                        shell,
-                        t_shell_command,
-                    ));
+                    await generatePreview(setting);
                     onAfterPreviewGenerated?.();
                 })
         ,
+        
+        /**
+         * Called after a TShellCommand's shell has been changed.
+         * @param newShell
+         */
+        refreshPreview: async (newShell: Shell | null): Promise<void> => {
+            shell = newShell; // Change shell.
+            await generatePreview(setting_group.preview_setting);
+        },
     };
 
     // Autocomplete menu
