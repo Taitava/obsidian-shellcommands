@@ -542,7 +542,18 @@ export class ShellCommandSettingsModal extends SC_Modal {
         for (platform_id in PlatformNames) {
             platformSpecificSettingGroups.set(
                 platform_id,
-                createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu)
+                createPlatformSpecificShellCommandField(
+                    this.plugin,
+                    container_element,
+                    this.t_shell_command,
+                    platform_id,
+                    this.plugin.settings.show_autocomplete_menu,
+                    () => {
+                        // When whichever platform specific shell command content changes, update default shell command's preview, because its shell might change.
+                        const defaultShell = this.t_shell_command.getShellForDefaultCommand();
+                        defaultSettingGroup.refreshPreview(defaultShell);
+                    },
+                ),
             );
         }
 
