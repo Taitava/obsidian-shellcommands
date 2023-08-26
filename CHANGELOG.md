@@ -19,8 +19,9 @@ Mind the order!
 Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
 
 ### To be Fixed
-- [Cmd + click not working on macOS (#347)](https://github.com/Taitava/obsidian-shellcommands/issues/347).
-- [UI bug in settings: Wrong shell names displayed under shell command previews (#366)](https://github.com/Taitava/obsidian-shellcommands/issues/366).
+- [Fixed: Cmd + click not working on macOS (#347)](https://github.com/Taitava/obsidian-shellcommands/issues/347).
+- [Fixed: UI bug in settings: Wrong shell names displayed under shell command previews (#366)](https://github.com/Taitava/obsidian-shellcommands/issues/366).
+- [Fixed: If `PATH` additions are cleared in settings, old additions still apply until the plugin is restarted (#362)](https://github.com/Taitava/obsidian-shellcommands/issues/362).
 
 ## [0.20.0] - 2023-06-25
 
