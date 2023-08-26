@@ -80,7 +80,7 @@ export abstract class BuiltinShell extends Shell {
         return true;
     }
 
-    public setEnvironmentVariablePathAugmentation(pathAugmentation: string): void {
+    public setEnvironmentVariablePathAugmentation(pathAugmentation: string | undefined): void {
         this.pathAugmentation = pathAugmentation;
     }
 
