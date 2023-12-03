@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet are listed below. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-- Nothing at the moment.
+### To be Added
+- [Prompts: Support different field types (#365)](https://github.com/Taitava/obsidian-shellcommands/issues/365)
 
 ## [0.20.1] - 2023-11-28
 
