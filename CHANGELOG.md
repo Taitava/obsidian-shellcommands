@@ -16,9 +16,16 @@ Mind the order!
 -->
 
 ## [Unreleased]
-Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
+Features that are currently in development and not released yet are listed below. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
 - Nothing at the moment.
+
+## [0.20.1] - 2023-11-28
+
+### Fixed
+- [Fixed: Cmd + click not working on macOS (#347)](https://github.com/Taitava/obsidian-shellcommands/issues/347).
+- [Fixed: UI bug in settings: Wrong shell names displayed under shell command previews (#366)](https://github.com/Taitava/obsidian-shellcommands/issues/366).
+- [Fixed: If `PATH` additions are cleared in settings, old additions still apply until the plugin is restarted (#362)](https://github.com/Taitava/obsidian-shellcommands/issues/362).
 
 ## [0.20.0] - 2023-06-25
 
@@ -415,7 +422,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...HEAD
+[0.20.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...0.20.0
 [0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
 [0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0

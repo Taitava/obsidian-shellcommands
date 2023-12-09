@@ -23,7 +23,14 @@ import {TShellCommand} from "../../TShellCommand";
 import {PlatformId} from "../SC_MainSettings";
 import {getPlatformName} from "../../Common";
 
-export function createPlatformSpecificShellCommandField(plugin: SC_Plugin, container_element: HTMLElement, t_shell_command: TShellCommand, platform_id: PlatformId, show_autocomplete_menu: boolean) {
+export function createPlatformSpecificShellCommandField(
+    plugin: SC_Plugin,
+    container_element: HTMLElement,
+    t_shell_command: TShellCommand,
+    platform_id: PlatformId,
+    show_autocomplete_menu: boolean,
+    onChange?: () => void,
+) {
     const platform_name = getPlatformName(platform_id);
     const setting_group = CreateShellCommandFieldCore(
         plugin,
@@ -42,6 +49,7 @@ export function createPlatformSpecificShellCommandField(plugin: SC_Plugin, conta
                 delete t_shell_command.getPlatformSpecificShellCommands()[platform_id];
             }
             await plugin.saveSettings();
+            onChange?.();
         },
         undefined, // No need to know when shell command preview is rendered, at least at the moment.
         t_shell_command.getDefaultShellCommand(),
