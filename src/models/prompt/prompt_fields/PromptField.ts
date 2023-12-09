@@ -44,6 +44,8 @@ import {VariableMap} from "../../../variables/loadVariables";
 import SC_Plugin from "../../../main";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 import {decorateMultilineField} from "../../../settings/setting_elements/multilineField";
+import {DEBUG_ON} from "../../../Debug";
+import {CmdOrCtrl} from "../../../Hotkeys";
 
 export class PromptField extends Instance {
 
@@ -113,6 +115,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "password":
                 inputElement = (this.fieldComponent as TextComponent | TextAreaComponent).inputEl;
                 break;
             case "toggle":
@@ -143,17 +146,29 @@ export class PromptField extends Instance {
         // Create the field
         switch (this.configuration.type) {
             case "single-line-text":
+            case "password": {
+                const isPassword = this.configuration.type === "password";
                 setting.addText((text_component) => {
                     this.fieldComponent = text_component;
                     text_component.onChange(onChange);
+                    
+                    if (isPassword) {
+                        text_component.inputEl.type = "password";
+                        if (DEBUG_ON) {
+                            // Warn about logging passwords.
+                            setting.descEl.insertAdjacentHTML("beforebegin", "<strong>SC debug mode is on!</strong> Any passwords entered will be logged to console ("+CmdOrCtrl()+" + " + (process.platform === "darwin" ? "Option" : "Shift") + " + I) when variables are parsed. <strong>Do not enter important passwords when the debug mode is on!</strong>");
+                        }
+                        text_component.setPlaceholder("Passwords are handled without encryption.");
+                    }
                 });
                 
-                // Show autocomplete menu (if enabled)
-                if (plugin.settings.show_autocomplete_menu) {
+                // Show autocomplete menu (if enabled) - but not for password field. (An autocomplete might reveal what was typed in the field, and passwords are probably not stored in autocomplete lists.)
+                if (plugin.settings.show_autocomplete_menu && !isPassword) {
                     const input_element = setting.controlEl.find("input") as HTMLInputElement;
                     createAutocomplete(plugin, input_element, onChange);
                 }
                 break;
+            }
             
             case "multi-line-text": {
                 setting.addTextArea((textAreaComponent) => {
@@ -247,6 +262,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "password":
             case "single-choice":
                 return (this.fieldComponent as TextComponent | TextAreaComponent | DropdownComponent).getValue();
             case "toggle": {
@@ -267,6 +283,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "password":
                 (this.fieldComponent as TextComponent | TextAreaComponent).setValue(value);
                 break;
             case "toggle": {
@@ -370,7 +387,11 @@ export class PromptField extends Instance {
     private async valueHasChanged(t_shell_command: TShellCommand | null, sc_event: SC_Event | null) {
         let preview: string = "";
         
-        const doParseVariables = this.configuration.type !== "single-choice"; // If type is "single-choice", variables are already parsed in the field's options.
+        const dontParseFieldTypes: PromptFieldType[] = [
+            "single-choice",  // If type is "single-choice", variables are already parsed in the field's options.
+            "password", // Passwords are static.
+        ];
+        const doParseVariables = !dontParseFieldTypes.contains(this.configuration.type);
         if (doParseVariables) {
             // Parse variables in the value.
             const parsing_result = await parseVariables(
@@ -450,6 +471,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "password":
                 (this.fieldComponent as TextComponent | TextAreaComponent).inputEl.focus();
                 break;
             case "toggle": {
@@ -516,6 +538,7 @@ export class PromptField extends Instance {
         switch (this.configuration.type) {
             case "single-line-text":
             case "multi-line-text":
+            case "password":
             case "single-choice": // Dropdown can also use the length logic - nothing is selected if the selected option's value is an empty string.
                 return this.getValue().length > 0;
             case "toggle":
@@ -594,6 +617,7 @@ export const PromptFieldTypes = {
     "multi-line-text": "Multiline text",
     "toggle": "Toggle",
     "single-choice": "Dropdown menu",
+    "password": "Password",
 };
 
 export type PromptFieldType = keyof typeof PromptFieldTypes;
@@ -608,7 +632,7 @@ export type PromptFieldConfiguration = {
 } & (
     // Type specific properties:
     {
-        type: "single-line-text";
+        type: "single-line-text" | "password";
         // placeholder: string; // TODO: Implement placeholder property later.
     } | {
         type: "multi-line-text";

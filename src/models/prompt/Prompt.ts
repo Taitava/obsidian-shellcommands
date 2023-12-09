@@ -33,6 +33,8 @@ import {
     getIDGenerator,
     Preaction_Prompt_Configuration,
     UsageContainer,
+    CustomVariable,
+    PromptFieldType,
 } from "../../imports";
 import {debugLog} from "../../Debug";
 import {VariableMap} from "../../variables/loadVariables";
@@ -170,6 +172,24 @@ export class Prompt extends Instance {
         } else {
             return Promise.reject(error_messages);
         }
+    }
+    
+    public getFieldByVariable(variable: CustomVariable): PromptField | null {
+        for (const field of this.prompt_fields) {
+            if (field.configuration.target_variable_id === variable.getConfiguration().id) {
+                return field;
+            }
+        }
+        return null;
+    }
+    
+    public hasFieldOfType(promptFieldType: PromptFieldType): boolean {
+        for (const field of this.prompt_fields) {
+            if (field.configuration.type === promptFieldType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -392,6 +392,10 @@ export function copyToClipboard(text: string): Promise<void> {
     return clipboard.writeText(text);
 }
 
+export function cloakPassword(password: string): string {
+    return "&bull;".repeat(password.length);
+}
+
 export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<string> {
     return new Promise((resolve) => {
         // The logic is borrowed 2022-09-01 from https://forum.obsidian.md/t/how-to-get-current-file-content-without-yaml-frontmatter/26197/2
