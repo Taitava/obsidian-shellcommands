@@ -187,7 +187,7 @@ export class PromptFieldModel extends Model {
                         .setValue(prompt_field.configuration.default_value)
                         .setPlaceholder(defaultValueFieldPlaceholder)
                     ;
-                    decorateMultilineField(this.plugin, textAreaComponent, on_default_value_setting_change);
+                    decorateMultilineField(this.plugin, textAreaComponent, on_default_value_setting_change, 2);
                 })
                 .addText(textComponent => textComponent // Only visible for other field types.
                     .setValue(prompt_field.configuration.default_value)
@@ -374,7 +374,7 @@ export class PromptFieldModel extends Model {
                                 }
                             }
                             await this.plugin.saveSettings();
-                        });
+                        }, 3);
                     })
                 ;
                 break;
