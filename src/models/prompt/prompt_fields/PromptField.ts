@@ -173,7 +173,7 @@ export class PromptField extends Instance {
             case "multi-line-text": {
                 setting.addTextArea((textAreaComponent) => {
                     this.fieldComponent = textAreaComponent;
-                    decorateMultilineField(this.model.plugin, textAreaComponent, onChange);
+                    decorateMultilineField(this.model.plugin, textAreaComponent, onChange, 2);
                 });
                 
                 // Show autocomplete menu (if enabled).
