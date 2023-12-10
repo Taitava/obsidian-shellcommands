@@ -356,8 +356,13 @@ export abstract class Variable {
 
     /**
      * TODO: Create a class BuiltinVariable and move this method there. This should not be present for CustomVariables.
+     * TODO: When creating the new class, remove `undefined` from the possible return types. Built-in variables are required to provide a documentation link.
      */
-    public getDocumentationLink(): string {
+    public getDocumentationLink(): string | undefined {
+        if (this.constructor.name === "CustomVariable") { // Don't use `this instanceof CustomVariable`, because `import CustomVariable` would cause a circular dependency.
+            // Variables created by users do not have documentation pages.
+            return undefined;
+        }
         return Documentation.variables.folder + encodeURI(this.getFullName());
     }
 
@@ -366,6 +371,9 @@ export abstract class Variable {
      */
     public createDocumentationLinkElement(container: HTMLElement
     ): void {
+        if (this.constructor.name === "CustomVariable") { // Don't use `this instanceof CustomVariable`, because `import CustomVariable` would cause a circular dependency.
+            throw new Error("Variable.createDocumentationLinkElement() was called upon a CustomVariable. It can only be called upon a built-in variable.");
+        }
         const description =
             this.getFullName() + ": " + this.help_text
             + EOL + EOL +

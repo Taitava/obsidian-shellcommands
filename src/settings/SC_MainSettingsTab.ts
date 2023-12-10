@@ -412,7 +412,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     .addExtraButton(extraButton => extraButton
                         .setIcon("help")
                         .setTooltip("Documentation: " + variable.getFullName() + " variable")
-                        .onClick(() => gotoURL(variable.getDocumentationLink()))
+                        .onClick(() => gotoURL(variable.getDocumentationLink() as string)) // It's always a string, because the variable is not a CustomVariable.
                     )
                 ;
                 variableHeadingSetting.nameEl.insertAdjacentHTML("afterbegin", variable.getHelpName());
