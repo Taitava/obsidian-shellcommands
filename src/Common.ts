@@ -96,6 +96,26 @@ export function getPlatformName(platformId: PlatformId) {
     return platformName;
 }
 
+type ObsidianInstallationType = "Flatpak" | "AppImage" | "Snap" | null;
+
+/**
+ * Tries to determine how Obsidian was installed. Used for displaying a warning if the installation type is "Flatpak".
+ *
+ * The logic is copied on 2023-12-20 from https://stackoverflow.com/a/75284996/2754026 .
+ *
+ * @return "Flatpak" | "AppImage" | "Snap" or `null`, if Obsidian was not installed using any of those methods, i.e. the installation method is unidentified.
+ */
+export function getObsidianInstallationType(): ObsidianInstallationType {
+    if (process.env["container"]) {
+        return "Flatpak";
+    } else if (process.env["APPIMAGE"]) {
+        return "AppImage";
+    } else if (process.env["SNAP"]) {
+        return "Snap";
+    }
+    return null;
+}
+
 export function getView(app: App) {
     const view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
