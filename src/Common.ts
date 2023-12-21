@@ -25,6 +25,7 @@ import {
     FrontMatterCache,
     MarkdownView,
     normalizePath,
+    setIcon,
     TFile,
 } from "obsidian";
 import {
@@ -365,6 +366,61 @@ export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, con
         }
     });
     return content_element;
+}
+
+/**
+ * Callout types were checked on 2023-12-20: https://help.obsidian.md/Editing+and+formatting/Callouts#Supported%20types
+ */
+type CalloutType = "note" | "abstract" | "info" | "todo" | "tip" | "success" | "question" | "warning" | "failure" | "danger" | "bug" | "example" | "quote";
+
+const CalloutIcons = {
+    note: "lucide-pencil",
+    abstract: "lucide-clipboard-list",
+    info: "lucide-info",
+    todo: "lucide-check-circle-2",
+    tip: "lucide-flame",
+    success: "lucide-check",
+    question: "lucide-help-circle",
+    warning: "lucide-alert-triangle",
+    failure: "lucide-x",
+    danger: "lucide-zap",
+    bug: "lucide-bug",
+    example: "lucide-list",
+    quote: "lucide-quote",
+};
+
+/**
+ * Creates a <div> structure that imitates Obsidian's callouts like they appear on notes.
+ *
+ * The HTML structure is looked up on 2023-12-20 from this guide's screnshots: https://forum.obsidian.md/t/obsidian-css-quick-guide/58178#an-aside-on-classes-5
+ * @param containerElement
+ * @param calloutType
+ * @param title
+ * @param content
+ */
+export function createCallout(containerElement: HTMLElement, calloutType: CalloutType, title: DocumentFragment | string, content: DocumentFragment | string) {
+    // Root.
+    const calloutRoot: HTMLDivElement = containerElement.createDiv({cls: "callout"});
+    calloutRoot.dataset.callout = calloutType;
+    
+    // Title.
+    const calloutTitle: HTMLDivElement = calloutRoot.createDiv({cls: "callout-title"});
+    const calloutTitleIcon: HTMLDivElement = calloutTitle.createDiv({cls: "callout-icon"});
+    setIcon(calloutTitleIcon, CalloutIcons[calloutType as keyof typeof CalloutIcons]);
+    const calloutTitleInner = calloutTitle.createDiv({cls: "callout-title-inner"});
+    if (title instanceof DocumentFragment) {
+        calloutTitleInner.appendChild(title);
+    } else {
+        calloutTitleInner.appendText(title);
+    }
+    
+    // Content.
+    const calloutContent: HTMLDivElement = calloutRoot.createDiv({cls: "callout-content"});
+    if (content instanceof DocumentFragment) {
+        calloutContent.appendChild(content);
+    } else {
+        calloutContent.createEl("p").appendText(content);
+    }
 }
 
 export function randomInteger(min: number, max: number) {
