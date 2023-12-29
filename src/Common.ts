@@ -22,9 +22,9 @@ import {
     Editor,
     EditorPosition,
     FileSystemAdapter,
-    FrontMatterCache,
     MarkdownView,
     normalizePath,
+    Pos,
     TFile,
 } from "obsidian";
 import {
@@ -398,11 +398,11 @@ export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<
         // Thank you, endorama! <3
         const file_content = app.vault.read(file);
         file_content.then((file_content: string) => {
-            const frontmatter_cache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatter_cache) {
+            const frontmatterPosition: Pos | undefined = app.metadataCache.getFileCache(file)?.frontmatterPosition;
+            if (frontmatterPosition) {
                 // A YAML frontmatter is present in the file.
-                const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
-                const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatter_end_line_number).join("\n");
+                const frontmatterEndLineNumber: number = frontmatterPosition.end.line + 1; // + 1: Take the last --- line into account, too.
+                const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatterEndLineNumber).join("\n");
                 return resolve(file_content_without_frontmatter);
             } else {
                 // No YAML frontmatter is present in the file.
@@ -419,10 +419,10 @@ export async function getFileYAML(app: App, file: TFile, withDashes: boolean): P
         // Thank you, endorama! <3
         const fileContent = app.vault.read(file);
         fileContent.then((file_content: string) => {
-            const frontmatterCache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatterCache) {
+            const frontmatterPosition: Pos | undefined = app.metadataCache.getFileCache(file)?.frontmatterPosition;
+            if (frontmatterPosition) {
                 // A YAML frontmatter is present in the file.
-                const frontmatterEndLineNumber = frontmatterCache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+                const frontmatterEndLineNumber: number = frontmatterPosition.end.line + 1; // + 1: Take the last --- line into account, too.
                 let firstLine: number;
                 let lastLine: number;
                 if (withDashes) {
