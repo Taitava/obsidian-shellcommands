@@ -84,6 +84,9 @@ export abstract class SC_VaultEvent extends SC_Event {
     public getFolder(): TFolder {
         switch (this.file_or_folder) {
             case "file":
+                if (!this.file.parent) {
+                    throw new Error("The event file does not have a parent for some strange reason.");
+                }
                 return this.file.parent;
             case "folder":
                 return this.folder;
