@@ -435,7 +435,8 @@ Features that are currently in development and not released yet are listed below
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.21.0...HEAD
+[0.21.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...0.21.0
 [0.20.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...0.20.0
 [0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
