@@ -124,8 +124,7 @@ export function getEditor(app: App): Editor | null {
     return null;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function cloneObject<ObjectType extends Object>(object: ObjectType): ObjectType{
+export function cloneObject<ObjectType extends object>(object: ObjectType): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
 
@@ -134,8 +133,7 @@ export function cloneObject<ObjectType extends Object>(object: ObjectType): Obje
  *
  * @param objects
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function combineObjects(...objects: Object[]) { // TODO: Change Object to object (lower-case) and remove eslint-disable-next-line . Do the same for other Objects in this file, too.
+export function combineObjects(...objects: object[]) {
     return Object.assign({}, ...objects);
 }
 
@@ -325,8 +323,7 @@ export function lookUpFileWithBinaryExtensionsOnWindows(filePath: string): boole
     return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function joinObjectProperties(object: {}, glue: string) {
+export function joinObjectProperties(object: object, glue: string) {
     let result = "";
     for (const property_name in object) {
         if (result.length) {
