@@ -30,6 +30,9 @@ export class SC_Event_FileMenu extends SC_AbstractFileMenuEvent {
     }
 
     public getFolder(): TFolder {
+        if (!this.file.parent) {
+            throw new Error("The event file does not have a parent for some strange reason.");
+        }
         return this.file.parent;
     }
 }
