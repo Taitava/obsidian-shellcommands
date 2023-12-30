@@ -48,6 +48,7 @@ import {DEBUG_ON} from "../../../Debug";
 import {CmdOrCtrl} from "../../../Hotkeys";
 import {
     deepEqual,
+    ensureObjectHasProperties,
     getObjectSurplusProperties,
 } from "../../../Common";
 
@@ -606,13 +607,7 @@ export class PromptField extends Instance {
      */
     public ensureAllConfigurationPropertiesExist(): void {
         const defaultConfiguration: PromptFieldConfiguration = this.model.getDefaultConfiguration(this.configuration.type);
-        let propertyName: keyof PromptFieldConfiguration;
-        for (propertyName in defaultConfiguration) {
-            if (undefined === this.configuration[propertyName]) {
-                // @ts-ignore
-                this.configuration[propertyName] = defaultConfiguration[propertyName];
-            }
-        }
+        ensureObjectHasProperties(this.configuration, defaultConfiguration);
     }
     
     /**
