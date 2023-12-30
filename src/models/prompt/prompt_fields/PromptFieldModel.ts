@@ -23,6 +23,7 @@ import {
 } from "obsidian";
 import {
     combineObjects,
+    createCallout,
     randomInteger,
 } from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
@@ -386,11 +387,16 @@ export class PromptFieldModel extends Model {
                 break;
             }
             
-            case "password":
-                new Setting(containerElement)
-                    .setDesc("Warning! The password field only cloaks its value visually. Internally, the SC plugin handles passwords without any encryption or other security means. The SC plugin's developer does not have security expertise, and is uncertain if other plugins or third-party applications could theoretically read the entered values.")
-                ;
+            case "password": {
+                const warningSetting = new Setting(containerElement);
+                createCallout(
+                    warningSetting.descEl,
+                    "warning",
+                    "Passwords are handled without encryption",
+                    "The password field only cloaks its value visually. Internally, the SC plugin handles passwords without any encryption or other security means. The SC plugin's developer does not have security expertise, and is uncertain if other plugins or third-party applications could theoretically read the entered values.",
+                );
                 break;
+            }
                 
             default:
                 // This field type does not need extra setting fields.
