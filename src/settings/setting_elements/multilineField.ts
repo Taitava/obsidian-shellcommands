@@ -23,7 +23,12 @@ import {TextAreaComponent} from "obsidian";
 /**
  * Makes a textarea grow and shrink based on the content height, and applies CSS styles on it to make it look more like an <input> element (not so much padding).
  */
-export function decorateMultilineField(plugin: SC_Plugin, textareaComponent: TextAreaComponent, extraOnChange?: (content: string) => void) {
+export function decorateMultilineField(
+    plugin: SC_Plugin,
+    textareaComponent: TextAreaComponent,
+    extraOnChange?: (content: string) => void,
+    minimumLines: number = 1,
+) {
 
     const textareaElement = textareaComponent.inputEl;
 
@@ -39,6 +44,7 @@ export function decorateMultilineField(plugin: SC_Plugin, textareaComponent: Tex
         let count_lines_final = Math.max(
             count_lines_in_shell_command,
             count_lines_in_shell_command_placeholder,
+            minimumLines,
         );
         if (plugin.settings.max_visible_lines_in_shell_command_fields) {
             // Limit the height so that the field will not take up too much space.

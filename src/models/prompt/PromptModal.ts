@@ -22,9 +22,13 @@ import {ShellCommandParsingProcess, TShellCommand} from "../../TShellCommand";
 import SC_Plugin from "../../main";
 import {Setting} from "obsidian";
 import {SC_Event} from "../../events/SC_Event";
-import {createMultilineTextElement} from "../../Common";
+import {
+    cloakPassword,
+    createMultilineTextElement,
+} from "../../Common";
 import {Variable, VariableValueResult} from "../../variables/Variable";
 import {
+    CustomVariable,
     Prompt,
     PromptField,
     PromptFieldSet,
@@ -128,6 +132,11 @@ export class PromptModal extends SC_Modal {
                     }),
                 )
             ;
+            
+            // Notify about passwords.
+            if (this.prompt.hasFieldOfType("password")) {
+                this.modalEl.createEl("p", {text: "(Passwords are cloaked in the preview.)", attr: {class: "SC-no-margin SC-small-font"}});
+            }
 
             // Decide what text to use in the preview
             const shellCommandParsingResult: ParsingResult | undefined = this.parsing_process?.getParsingResults().shellCommandContent; // Use unwrapped shell command content, as that's shorter to display, and wrappers probably don't contain so interesting content.
@@ -177,16 +186,30 @@ export class PromptModal extends SC_Modal {
                                 }
                                 // No modifications.
                             },
-                            (variable: Variable, escaped_value: string): string => {
+                            (variable: Variable, escapedValue: string, originalValue: string): string => {
+                                
+                                // Is the value a password?
+                                let useValue: string;
+                                const isPassword: boolean = (variable instanceof CustomVariable)
+                                    ? this.prompt.getFieldByVariable(variable)?.configuration.type === "password" ?? false
+                                    : false
+                                ;
+                                if (isPassword) {
+                                    // Cloak a password.
+                                    useValue = cloakPassword(originalValue);
+                                } else {
+                                    useValue = escapedValue;
+                                }
+                                
                                 // Emphasize the value that came from the currently focused field.
                                 if (focused_prompt_field) {
                                     if (variable.variable_name.toLocaleLowerCase() === focused_prompt_field.getTargetVariableInstance().getPrefixedName().toLocaleLowerCase()) {
                                         // Make the value bold.
-                                        return `<strong>${escaped_value}</strong>`;
+                                        return `<strong>${useValue}</strong>`;
                                     }
                                 }
                                 // No modifications.
-                                return escaped_value;
+                                return useValue;
                             },
                         );
                         if (parsing_result.succeeded) {
@@ -305,7 +328,8 @@ export class PromptModal extends SC_Modal {
     private async assignValuesToVariables() {
         let promptField: PromptField;
         for (promptField of this.prompt_fields) {
-            await promptField.getTargetVariable().setValue(promptField.getParsedOrRawValue());
+            const cloak: boolean = "password" === promptField.configuration.type;
+            await promptField.getTargetVariable().setValue(promptField.getParsedOrRawValue(), cloak);
         }
     }
 

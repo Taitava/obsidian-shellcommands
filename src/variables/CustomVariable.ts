@@ -35,6 +35,15 @@ export class CustomVariable extends Variable {
     private value: string | null = null; // TODO: When implementing variable types, make this class abstract and let subclasses define the type of this property.
 
     protected always_available = false;
+    
+    /**
+     * If the variable's value comes from a password field, it is marked to be cloaked in CustomVariableView.
+     *
+     * Even though passwords are also cloaked in Prompt previews, it's not triggered by this property.
+     *
+     * @private
+     */
+    private cloak: boolean = false;
 
     constructor(
         plugin: SC_Plugin,
@@ -70,6 +79,10 @@ export class CustomVariable extends Variable {
     public getCustomVariableValue(): string | null  {
         return this.value;
     }
+    
+    public shouldCloak(): boolean {
+        return this.cloak;
+    }
 
     /**
      * TODO: Make it possible to prevent calling onChange callbacks:
@@ -79,11 +92,13 @@ export class CustomVariable extends Variable {
      *  - When calling the callbacks, the current CustomVariable should be passed as a parameter instead of the 'value' and 'old_value' parameters (which can be accessed via the CustomVariable object).
      *
      * @param value
+     * @param cloak This should be true, if the value is a password.
      */
-    public async setValue(value: string) {
+    public async setValue(value: string, cloak: boolean = false) {
         const old_value = this.value;
         debugLog(`CustomVariable ${this.variable_name}: Setting value to: ${value} (old was: ${old_value}).`);
         this.value = value;
+        this.cloak = cloak;
 
         // Call the onChange hook.
         await this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.

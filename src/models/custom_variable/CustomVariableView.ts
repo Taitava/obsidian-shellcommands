@@ -22,7 +22,10 @@ import {
     WorkspaceLeaf,
 } from "obsidian";
 import SC_Plugin from "../../main";
-import {createMultilineTextElement} from "../../Common";
+import {
+    cloakPassword,
+    createMultilineTextElement,
+} from "../../Common";
 
 export class CustomVariableView extends ItemView {
 
@@ -91,8 +94,13 @@ export class CustomVariableView extends ItemView {
                 createMultilineTextElement("em", customVariableState, variableListItemElement);
             }
             if (null !== customVariableValue) {
-                // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
-                createMultilineTextElement("strong", customVariableValue, variableListItemElement);
+                if (customVariableInstance.getCustomVariable().shouldCloak()) {
+                    // Display a cloaked password.
+                    variableListItemElement.insertAdjacentHTML("beforeend", cloakPassword(customVariableValue));
+                } else {
+                    // Bold normal values to make them more prominent in contrast to variable names and "No value yet."/"An empty text." texts.
+                    createMultilineTextElement("strong", customVariableValue, variableListItemElement);
+                }
             }
         }
     }

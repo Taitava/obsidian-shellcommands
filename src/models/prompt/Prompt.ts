@@ -33,6 +33,8 @@ import {
     getIDGenerator,
     Preaction_Prompt_Configuration,
     UsageContainer,
+    CustomVariable,
+    PromptFieldType,
 } from "../../imports";
 import {debugLog} from "../../Debug";
 import {VariableMap} from "../../variables/loadVariables";
@@ -117,16 +119,12 @@ export class Prompt extends Instance {
 
     private canOpenPrompt(): true | string {
 
-        // Check that all PromptFields have a target variable defined.
+        // Check that all PromptFields have no configuration errors.
         for (const prompt_field of this.prompt_fields) {
-            if (!prompt_field.configuration.target_variable_id) {
-                return `Cannot open prompt '${this.getTitle()}': Field '${prompt_field.getTitle()}' does not have a target variable.`;
-            } else {
-                try {
-                    prompt_field.getTargetVariableInstance(); // Just try to get a CustomVariableInstance. No need to use it here, but if this fails, we know the variable is removed.
-                } catch (error) {
-                    return `Cannot open prompt '${this.getTitle()}': Field '${prompt_field.getTitle()}' uses a target variable which does not exist anymore.`;
-                }
+            const validity: string | true = prompt_field.isConfigurationValid();
+            if ("string" === typeof validity) {
+                // An error is detected.
+                return `Cannot open prompt '${this.getTitle()}': ${validity}`;
             }
         }
 
@@ -174,6 +172,24 @@ export class Prompt extends Instance {
         } else {
             return Promise.reject(error_messages);
         }
+    }
+    
+    public getFieldByVariable(variable: CustomVariable): PromptField | null {
+        for (const field of this.prompt_fields) {
+            if (field.configuration.target_variable_id === variable.getConfiguration().id) {
+                return field;
+            }
+        }
+        return null;
+    }
+    
+    public hasFieldOfType(promptFieldType: PromptFieldType): boolean {
+        for (const field of this.prompt_fields) {
+            if (field.configuration.type === promptFieldType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

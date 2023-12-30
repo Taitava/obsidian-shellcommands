@@ -145,8 +145,7 @@ export function getEditor(app: App): Editor | null {
     return null;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function cloneObject<ObjectType extends Object>(object: ObjectType): ObjectType{
+export function cloneObject<ObjectType extends object>(object: ObjectType): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
 
@@ -155,9 +154,81 @@ export function cloneObject<ObjectType extends Object>(object: ObjectType): Obje
  *
  * @param objects
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function combineObjects(...objects: Object[]) { // TODO: Change Object to object (lower-case) and remove eslint-disable-next-line . Do the same for other Objects in this file, too.
+export function combineObjects(...objects: object[]) {
     return Object.assign({}, ...objects);
+}
+
+/**
+ * Compares two objects deeply for equality.
+ *
+ * Copied 2023-12-30 from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
+ * Modifications:
+ *  - Added types to the function parameters and return value.
+ *  - Changed `const val1 = object1[key];` to `const val1 = (object1 as {[key: string]: unknown})[key];`, and the same for val2.
+ *  - Added a possibility to compare other values than objects, too.
+ *
+ * @param {unknown} object1 - The first object to compare.
+ * @param {unknown} object2 - The second object to compare.
+ * @return {boolean} - Returns `true` if the objects are deeply equal, `false` otherwise.
+ * @author Original author: Dmitri Pavlutin
+ */
+
+export function deepEqual(object1: unknown, object2: unknown): boolean {
+    if (!isObject(object1) || !isObject(object2)) {
+        // If any of the parameters are not objects, do a simple comparison.
+        return object1 === object2;
+    }
+    
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+    
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+    
+    for (const key of keys1) {
+        const val1 = (object1 as {[key: string]: unknown})[key];
+        const val2 = (object2 as {[key: string]: unknown})[key];
+        const areObjects = isObject(val1) && isObject(val2);
+        if (
+            areObjects && !deepEqual(val1, val2) ||
+            !areObjects && val1 !== val2
+        ) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Copied 2023-12-30 from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
+ * Modifications:
+ *  - Added types to the function parameter and return value.
+ *
+ * Can be exported later, if needed elsewhere.
+ *
+ * @param object
+ * @author Original author: Dmitri Pavlutin
+ */
+function isObject(object: unknown): object is object {
+    return object != null && typeof object === 'object';
+}
+
+/**
+ * Gets the surplus properties from an object that are not present in another object.
+ * @param {object} surplusObject - The object to check for surplus properties.
+ * @param {object} comparisonObject - The object to compare against.
+ * @return {object} - An object containing the surplus properties found in surplusObject that are not present in comparisonObject.
+ */
+export function getObjectSurplusProperties(surplusObject: object, comparisonObject: object): Partial<typeof surplusObject> {
+    const surplusProperties: {[key: string]: unknown} = {};
+    for (const key of Object.getOwnPropertyNames(surplusObject)) {
+        if (!comparisonObject.hasOwnProperty(key)) {
+            surplusProperties[key] = (surplusObject as {[key: string]: unknown})[key];
+        }
+    }
+    return surplusProperties;
 }
 
 /**
@@ -273,8 +344,7 @@ export function lookUpFileWithBinaryExtensionsOnWindows(filePath: string): boole
     return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function joinObjectProperties(object: {}, glue: string) {
+export function joinObjectProperties(object: object, glue: string) {
     let result = "";
     for (const property_name in object) {
         if (result.length) {
@@ -466,6 +536,10 @@ export function escapeMarkdownLinkCharacters(content: string) {
 
 export function copyToClipboard(text: string): Promise<void> {
     return clipboard.writeText(text);
+}
+
+export function cloakPassword(password: string): string {
+    return "&bull;".repeat(password.length);
 }
 
 export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<string> {

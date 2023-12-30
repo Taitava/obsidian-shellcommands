@@ -63,7 +63,6 @@ export * from "./preactions/Preaction_Prompt";
 // Prompts
 export * from "./models/prompt/prompt_fields/PromptField";
 export * from "./models/prompt/prompt_fields/PromptFieldModel";
-export * from "./models/prompt/prompt_fields/PromptField_Text";
 export * from "./models/prompt/Prompt";
 export * from "./models/prompt/PromptModal";
 export * from "./models/prompt/PromptModel";
