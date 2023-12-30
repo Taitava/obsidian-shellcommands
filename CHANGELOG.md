@@ -18,9 +18,16 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet are listed below. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
+**SC VERSION `0.21.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `1.4.0`. Older versions of Obsidian cannot upgrade SC to `0.21.0`.**
+
 ### To be Added
 - [Prompts: Support different field types (#365)](https://github.com/Taitava/obsidian-shellcommands/issues/365).
 - [Linux: Display a warning if Obsidian is installed using Flatpak (#368)](https://github.com/Taitava/obsidian-shellcommands/issues/368).
+
+### To be Changed
+- [Make variables `{{note_content}}` and `{{yaml_content}}` compatible with Obsidian `>= 1.4.0` (#372)](https://github.com/Taitava/obsidian-shellcommands/issues/372).
+  - No practical changes to the variables' behavior.
+  - This change increases the SC plugin's minimum Obsidian version requirement to `1.4.0`.
 
 ## [0.20.1] - 2023-11-28
 
