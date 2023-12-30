@@ -21,7 +21,10 @@ import {
     Setting,
     TextComponent,
 } from "obsidian";
-import {randomInteger} from "../../../Common";
+import {
+    combineObjects,
+    randomInteger,
+} from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 import {
     CustomVariableInstance,
@@ -161,6 +164,9 @@ export class PromptFieldModel extends Model {
                         
                         // Declare possibly new configuration properties.
                         prompt_field.ensureAllConfigurationPropertiesExist();
+                        
+                        // Remove unneeded configuration properties defined by other field types.
+                        prompt_field.removeSurplusConfigurationProperties();
                         
                         // Create possible new setting fields.
                         this.createTypeSpecificSettingFields(prompt_field, typeSpecificSettingFieldsContainer, showCorrectDefaultValueField);
@@ -467,6 +473,19 @@ export class PromptFieldModel extends Model {
                     ],
                 };
         }
+    }
+    
+    /**
+     * Combines all prompt field types' default configurations into a single object.
+     *
+     * @return {Object} The combined default configurations.
+     */
+    public combineAllDefaultConfigurations(): PromptFieldConfiguration {
+        const defaultConfigurations = [];
+        for (const promptFieldType of Object.getOwnPropertyNames(PromptFieldTypes) as PromptFieldType[]) {
+            defaultConfigurations.push(this.getDefaultConfiguration(promptFieldType));
+        }
+        return combineObjects(...defaultConfigurations);
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {

@@ -46,6 +46,10 @@ import {createAutocomplete} from "../../../settings/setting_elements/Autocomplet
 import {decorateMultilineField} from "../../../settings/setting_elements/multilineField";
 import {DEBUG_ON} from "../../../Debug";
 import {CmdOrCtrl} from "../../../Hotkeys";
+import {
+    deepEqual,
+    getObjectSurplusProperties,
+} from "../../../Common";
 
 export class PromptField extends Instance {
 
@@ -608,6 +612,25 @@ export class PromptField extends Instance {
                 // @ts-ignore
                 this.configuration[propertyName] = defaultConfiguration[propertyName];
             }
+        }
+    }
+    
+    /**
+     * Removes configuration properties that are not used by the current field type. Exception: a surplus property is
+     * not removed, if its value differs from the property's default value.
+     */
+    public removeSurplusConfigurationProperties(): void {
+        const defaultConfiguration: PromptFieldConfiguration = this.model.getDefaultConfiguration(this.configuration.type);
+        const surplusProperties: Partial<PromptFieldConfiguration> = getObjectSurplusProperties(this.configuration, defaultConfiguration);
+        const combinedDefaultConfigurations: PromptFieldConfiguration = this.model.combineAllDefaultConfigurations();
+        
+        let propertyName: keyof PromptFieldConfiguration;
+        for (propertyName in surplusProperties) {
+            if (deepEqual(this.configuration[propertyName], combinedDefaultConfigurations[propertyName])) {
+                // This property's value is the same as the default value, and it does not belong to the current field type's configuration, so it can be removed.
+                delete this.configuration[propertyName];
+            }
+            // If the value is different from the default value, then it's wise to keep the surplus property, so that if user changes back to a field type that uses the property, they will not lose the value.
         }
     }
 }
