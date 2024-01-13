@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-- Nothing at the moment.
+### To be Added
+- [Event throttling for avoiding executing shell commands too often (#380)](https://github.com/Taitava/obsidian-shellcommands/issues/380).
 
 ## [0.21.0] - 2023-12-30
 
