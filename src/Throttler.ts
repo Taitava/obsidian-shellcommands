@@ -41,51 +41,118 @@ export class Throttler {
     }
     
     public async executeWithThrottling(scEvent: SC_Event): Promise<void> {
-        if (this.state === "idle") {
-            // Execute immediately.
-            debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " will be executed now.");
-            // Change state.
-            this.state = "executing";
-            
-            // Execute this shell command.
-            const executor = new ShellCommandExecutor(this.plugin, this.tShellCommand, scEvent);
-            await executor.doPreactionsAndExecuteShellCommand();
-            await this.handleThrottlingAfterExecution();
-        } else {
-            // Wait until previous execution is over and a cooldown phase is passed, too.
-            debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is postponed.");
-            this.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
-                scEvent: scEvent,
-            };
+        switch (this.state) {
+            case "idle":
+                // IDLE PHASE.
+                switch (this.configuration.mode) {
+                    case "early-execution":
+                    case "early-and-late-execution":{
+                        // Execute immediately.
+                        await this.execute(scEvent);
+                        break;
+                    }
+                    case "late-execution":{
+                        // Begin a cooldown phase and execute after it.
+                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " is delayed.");
+                        this.subsequent = {
+                            scEvent: scEvent,
+                        };
+                        await this.cooldown();
+                        break;
+                    }
+                }
+                break;
+            default:
+                // EXECUTING OR COOLDOWN PHASE.
+                switch (this.configuration.mode) {
+                    case "early-execution":
+                    case "late-execution": {
+                        // Nothing to do - just discard this execution.
+                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is discarded.");
+                        break;
+                    }
+                    case "early-and-late-execution": {
+                        // Wait until previous execution is over and a cooldown phase is passed, too.
+                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
+                        this.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
+                            scEvent: scEvent,
+                        };
+                        break;
+                    }
+                }
+                break;
         }
     }
     
-    private async handleThrottlingAfterExecution(): Promise<void> {
-        if (this.state !== "executing") {
-            throw new Error("Cannot call Throttler.handleThrottlingAfterExecution() if throttling state is different from \"executing\". Now it's: " + this.state);
-        }
-        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is finished, throttling enters \"cooldown\" phase.");
-        this.state = "cooldown";
-        window.setTimeout(() => {
-            const debugMessageBase = "Throttling control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
-            if (this.subsequent) {
-                // There is a next execution waiting to be started.
-                debugLog(debugMessageBase + "will start a previously postponed execution.");
-                
-                const executeWithEvent: SC_Event = this.subsequent.scEvent;
-                
-                // Indicate to this.executeWithThrottling() that execution can be done immediately.
-                this.state = "idle";
-                this.subsequent = null;
-                this.executeWithThrottling(executeWithEvent);
-                
-            } else {
-                // No need to start another execution process.
-                debugLog(debugMessageBase + "no postponed execution is waiting, so will not re-execute.");
-                this.state = "idle";
-                this.subsequent = null;
+    private async execute(scEvent: SC_Event): Promise<void> {
+        this.state = "executing";
+        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " will be executed now.");
+        const executor = new ShellCommandExecutor(this.plugin, this.tShellCommand, scEvent);
+        await executor.doPreactionsAndExecuteShellCommand();
+        await this.afterExecuting();
+    }
+    
+    private async afterExecuting(): Promise<void> {
+        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution ended.");
+        switch (this.configuration.mode) {
+            case "early-execution": {
+                // Not much to do anymore, go to cooldown and clear state after it.
+                await this.cooldown();
+                break;
             }
-        }, this.getCoolDownMilliseconds());
+            case "late-execution": {
+                // Clear state.
+                this.state = "idle";
+                break;
+            }
+            case "early-and-late-execution": {
+                // Go to cooldown and see after that if there's anything more to execute.
+                await this.cooldown();
+                break;
+            }
+        }
+    }
+    
+    private cooldown(): Promise<void> {
+        return new Promise((resolve) => {
+            this.state = "cooldown";
+            debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " is in cooldown phase now.");
+            window.setTimeout(
+                () => {
+                    this.afterCooldown().then(resolve);
+                },
+                this.getCoolDownMilliseconds()
+            );
+        });
+    }
+    
+    private async afterCooldown(): Promise<void> {
+        const debugMessageBase = "Throttling control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
+        switch (this.configuration.mode) {
+            case "early-execution": {
+                // Not much to do after cooldown.
+                debugLog(debugMessageBase + "throttling ended.");
+                this.state = "idle";
+                break;
+            }
+            case "late-execution":
+            case "early-and-late-execution": {
+                if (this.subsequent) {
+                    // There is a next execution waiting to be started.
+                    debugLog(debugMessageBase + "will start a previously postponed execution.");
+                    const executeWithEvent: SC_Event = this.subsequent.scEvent;
+                    this.subsequent = null;
+                    await this.execute(executeWithEvent);
+                    
+                } else {
+                    // No need to start another execution process. (We should only end up here in mode "early-and-late-execution", not in mode "late-execution").
+                    debugLog(debugMessageBase + "no postponed execution is waiting, so will not re-execute.");
+                    this.state = "idle";
+                    this.subsequent = null;
+                }
+                break;
+            }
+        }
     }
     
     private getCoolDownMilliseconds(): number {
