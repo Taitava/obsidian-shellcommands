@@ -34,6 +34,7 @@ import {
     PreactionConfiguration,
 } from "../imports";
 import {OutputChannel} from "../output_channels/OutputChannel";
+import {ThrottleConfiguration} from "../Throttler";
 
 export interface ShellCommandConfiguration {
     id: string,
@@ -60,7 +61,7 @@ export interface ShellCommandConfiguration {
     output_channel_order: OutputChannelOrder;
     output_handling_mode: OutputHandlingMode;
     events: SC_EventConfigurations;
-    throttle: number | null;
+    throttle: null | ThrottleConfiguration;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
     variable_default_values: {
