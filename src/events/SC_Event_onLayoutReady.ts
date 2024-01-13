@@ -24,6 +24,7 @@ export class SC_Event_onLayoutReady extends SC_Event {
     protected static readonly event_code = "on-layout-ready";
     protected static readonly event_title = "Obsidian starts";
     protected register_after_changing_settings = false;
+    protected static readonly throttle = false;
 
     protected _register(t_shell_command: TShellCommand) {
         this.app.workspace.onLayoutReady(async () => await this.trigger(t_shell_command));

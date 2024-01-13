@@ -67,6 +67,16 @@ export abstract class SC_Event {
     protected default_configuration: SC_EventConfiguration = {
         enabled: false,
     };
+    
+    /**
+     * If true, this event's execution can be postponed or prevented completely by throttling limitation (only if it's
+     * enabled in the executable shell command's configuration). Rapidly repeating events should have this set to true,
+     * rarely triggering events can have this set to false.
+     *
+     * @protected
+     * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
+     */
+    protected static readonly throttle: boolean;
 
     public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;
@@ -118,14 +128,22 @@ export abstract class SC_Event {
 
     /**
      * Executes a shell command.
-     * @param t_shell_command
-     * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
+     * @param tShellCommand
+     * @param parsingProcess SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
-    protected async trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
-        debugLog(this.constructor.name + ": Event triggers executing shell command id " + t_shell_command.getId());
-        // Execute the shell command.
-        const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
-        await executor.doPreactionsAndExecuteShellCommand(parsing_process);
+    protected async trigger(tShellCommand: TShellCommand, parsingProcess?: ShellCommandParsingProcess) {
+        const throttle: boolean = this.static().throttle && !!tShellCommand.getConfiguration().throttle;
+        debugLog(this.constructor.name + ": Event triggers executing shell command id " + tShellCommand.getId() + " " + (throttle ? "with" : "without") + " throttling control.");
+        if (throttle) {
+            if (parsingProcess) {
+                throw new Error("SC_Event.trigger() cannot be passed a ShellCommandParsingProcess object if SC_Event.throttle is true. This is just because passing ShellCommandParsingProcess to TShellCommand.executeWithThrottling() is not implemented. It can be implemented later.");
+            }
+            await tShellCommand.executeWithThrottling(this);
+        } else {
+            // Execute the shell command immediately.
+            const executor = new ShellCommandExecutor(this.plugin, tShellCommand, this);
+            await executor.doPreactionsAndExecuteShellCommand(parsingProcess);
+        }
     }
 
     public static getCode() {

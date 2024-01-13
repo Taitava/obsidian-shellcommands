@@ -60,6 +60,7 @@ export interface ShellCommandConfiguration {
     output_channel_order: OutputChannelOrder;
     output_handling_mode: OutputHandlingMode;
     events: SC_EventConfigurations;
+    throttle: number | null;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
     variable_default_values: {
@@ -98,6 +99,7 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         output_channel_order: "stdout-first",
         output_handling_mode: "buffered",
         events: {},
+        throttle: null,
         command_palette_availability: "enabled",
         preactions: [],
         variable_default_values: {},

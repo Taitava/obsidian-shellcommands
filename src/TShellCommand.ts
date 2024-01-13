@@ -75,6 +75,11 @@ export class TShellCommand extends Cacheable {
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
+    
+    private throttle: Throttle = {
+        state: "idle",
+        subsequent: null,
+    };
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
         super();
@@ -460,6 +465,69 @@ export class TShellCommand extends Cacheable {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
             this.unregisterSC_Event(sc_event);
         });
+    }
+    
+    public async executeWithThrottling(scEvent: SC_Event): Promise<void> {
+        if (this.throttle.state === "idle") {
+            // Execute immediately.
+            debugLog("Throttling control: Shell command id " + this.getId() + " will be executed now.");
+            // Change state to "executing".
+            // Need to replace the whole object, TypeScript does not allow doing only this.throttle.state = "executing".
+            this.throttle = {
+                state: "executing",
+                subsequent: null,
+            };
+            
+            // Execute this shell command.
+            const executor = new ShellCommandExecutor(this.plugin, this, scEvent);
+            await executor.doPreactionsAndExecuteShellCommand();
+            await this.handleThrottlingAfterExecution();
+        } else {
+            // Wait until previous execution is over and a cool-down phase is passed, too.
+            debugLog("Throttling control: Shell command id " + this.getId() + " execution is postponed.");
+            this.throttle.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cool-down is over, always execute the newest thing.
+                scEvent: scEvent,
+            };
+        }
+    }
+    
+    private async handleThrottlingAfterExecution(): Promise<void> {
+        if (this.throttle.state !== "executing") {
+            throw new Error("Cannot call TShellCommand.handleThrottlingAfterExecution() if throttling state is different from \"executing\". Now it's: " + this.throttle.state);
+        }
+        debugLog("Throttling control: Shell command id " + this.getId() + " execution is finished, throttling enters \"cool-down\" phase.");
+        this.throttle.state = "cool-down";
+        window.setTimeout(() => {
+            const debugMessageBase = "Throttling control: Shell command id " + this.getId() + " \"cool-down\" phase ended, ";
+            if (this.throttle.subsequent) {
+                // There is a next execution waiting to be started.
+                debugLog(debugMessageBase + "will start a previously postponed execution.");
+        
+                const executeWithEvent: SC_Event = this.throttle.subsequent.scEvent;
+                
+                // Indicate to this.executeWithThrottling() that execution can be done immediately.
+                this.throttle = {
+                    state: "idle",
+                    subsequent: null,
+                };
+                this.executeWithThrottling(executeWithEvent);
+                
+            } else {
+                // No need to start another execution process.
+                debugLog(debugMessageBase + "no postponed execution is waiting, so will not re-execute.");
+                this.throttle = {
+                    state: "idle",
+                    subsequent: null,
+                };
+            }
+        }, this.getThrottlingCoolDownMilliseconds());
+    }
+    
+    private getThrottlingCoolDownMilliseconds(): number {
+        if (!this.configuration.throttle) {
+            throw new Error("Threshold is not set");
+        }
+        return this.configuration.throttle * 1000;
     }
     
     /**
@@ -875,3 +943,14 @@ type shell_command_parsing_map = {
     output_wrapper_stdout?: string,
     output_wrapper_stderr?: string,
 };
+
+type Throttle = {
+    state: "idle";
+    subsequent: null;
+} | {
+    state: "executing" | "cool-down";
+    subsequent: null | {
+        scEvent: SC_Event;
+        // Just a single property, but use still an object structure, so it's easy to add more properties later, if needed. E.g. a ParsingProcess.
+    };
+}

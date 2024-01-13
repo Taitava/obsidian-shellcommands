@@ -22,6 +22,7 @@ import {TShellCommand} from "../TShellCommand";
 import {EventRef} from "obsidian";
 
 export abstract class SC_WorkspaceEvent extends SC_Event {
+    protected static readonly throttle: boolean = true; // Include : boolean to allow SC_MenuEvent and SC_Event_onQuit to set this to false.
     protected abstract readonly workspace_event:
         // TODO: Find a way to make this list dynamic.
         // This list reflects Obsidian API version 0.12.11.
