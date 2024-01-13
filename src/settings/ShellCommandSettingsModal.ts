@@ -76,6 +76,7 @@ import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
+import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -598,22 +599,43 @@ export class ShellCommandSettingsModal extends SC_Modal {
         ;
         
         // Throttling
+        // TODO: Extract to a separate method.
+        const shellCommandConfiguration: ShellCommandConfiguration = this.t_shell_command.getConfiguration();
         const throttleIcon: IconName = "construction";
+        const throttleModeOptions = {
+            "none": "Disable throttling",
+            "early-execution": "Execute immediately, then cooldown",
+            "late-execution": "Cooldown first, then execute",
+            "early-and-late-execution": "Execute, cooldown, execute again if needed",
+        };
         new Setting(container_element)
             .setName("Throttling (experimental)")
-            .setDesc("If set, this many seconds needs to pass after previous execution finishes, before another execution can start. Throttling only affects events marked with ")
-            .addText(thresholdTextComponent => thresholdTextComponent
-                .setPlaceholder("No limit")
-                .setValue(this.t_shell_command.getConfiguration().throttle?.toString() ?? "")
-                .onChange((newThresholdString: string) => {
-                    const newThreshold: number = inputToFloat(newThresholdString, 1);
-                    if (newThreshold > 0) {
-                        // Enable threshold.
-                        this.t_shell_command.getConfiguration().throttle = newThreshold;
-                    } else {
-                        // Disable threshold.
-                        this.t_shell_command.getConfiguration().throttle = null;
+            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Throttling only affects events marked with ")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions(throttleModeOptions)
+                .setValue(shellCommandConfiguration.throttle?.mode ?? "none")
+                .onChange((newMode: string) => {
+                    switch (newMode) {
+                        case "none": {
+                            // Disable throttle.
+                            shellCommandConfiguration.throttle = null;
+                            break;
+                        }
+                        case "early-execution":
+                        case "late-execution":
+                        case "early-and-late-execution": {
+                            // Enable throttle.
+                            if (null === shellCommandConfiguration.throttle) {
+                                shellCommandConfiguration.throttle = {
+                                    mode: newMode,
+                                    cooldown: 0,
+                                };
+                            } else {
+                                shellCommandConfiguration.throttle.mode = newMode;
+                            }
+                        }
                     }
+                    defineThrottleAdditionalSettings();
                     this.plugin.saveSettings();
                 })
             )
@@ -625,6 +647,46 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 setIcon(setting.descEl.createSpan(), throttleIcon);
             })
         ;
+        const throttleAdditionalSettingsContainer = container_element.createDiv();
+        const defineThrottleAdditionalSettings = () => {
+            throttleAdditionalSettingsContainer.innerHTML = ""; // Remove possible earlier settings.
+            if (shellCommandConfiguration.throttle) {
+                // Throttling is enabled.
+                
+                // Description for Cooldown duration.
+                const cooldownDescriptions = {
+                    "early-execution": "the shell command is executed right-away, and <strong>subsequent executions are prevented</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution.",
+                    "late-execution": "the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase and while the execution is in progress.",
+                    "early-and-late-execution": "the shell command is executed right-away, and <strong>subsequent executions are postponed</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution. After the cooldown period ends, the shell command is possibly re-executed, if any subsequent executions were postponed.",
+                };
+                const cooldownDescription = new DocumentFragment();
+                cooldownDescription.createEl("p").innerHTML = "In <em>\"" + throttleModeOptions[shellCommandConfiguration.throttle.mode] + "\"</em> mode, " + cooldownDescriptions[shellCommandConfiguration.throttle.mode];
+                cooldownDescription.createEl("p").innerHTML = "If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set <em>Cooldown duration</em> to <code>0</code> seconds. Then the mode does not matter, all will achieve the same result.";
+                
+                // Cooldown duration setting.
+                new Setting(throttleAdditionalSettingsContainer)
+                    .setName("Cooldown duration (seconds)")
+                    .setDesc(cooldownDescription)
+                    .addText(thresholdTextComponent => thresholdTextComponent
+                        .setValue((shellCommandConfiguration.throttle?.cooldown ?? 0).toString())
+                        .onChange((newThresholdString: string) => {
+                            const newThreshold: number = inputToFloat(newThresholdString, 1);
+                            if (!shellCommandConfiguration.throttle) {
+                                throw new Error("shellCommandConfiguration.throttle is falsy.");
+                            }
+                            if (newThreshold >= 0) {
+                                shellCommandConfiguration.throttle.cooldown = newThreshold;
+                            } else {
+                                shellCommandConfiguration.throttle.cooldown = 0;
+                            }
+                            this.plugin.saveSettings();
+                        })
+                    )
+                ;
+            }
+            // If throttling is disabled, no additional settings are neeeded.
+        };
+        defineThrottleAdditionalSettings();
 
         // Focus on the command palette availability field
         command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
