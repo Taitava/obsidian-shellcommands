@@ -156,7 +156,7 @@ export class Throttler {
     }
     
     private getCoolDownMilliseconds(): number {
-        return this.configuration.coolDown * 1000;
+        return this.configuration.cooldown * 1000;
     }
 }
 
@@ -166,5 +166,5 @@ type ThrottleState = "idle" | "executing" | "cooldown";
 
 export interface ThrottleConfiguration {
     mode: ThrottleMode,
-    coolDown: number,
+    cooldown: number,
 }
