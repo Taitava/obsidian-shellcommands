@@ -483,9 +483,9 @@ export class TShellCommand extends Cacheable {
             await executor.doPreactionsAndExecuteShellCommand();
             await this.handleThrottlingAfterExecution();
         } else {
-            // Wait until previous execution is over and a cool-down phase is passed, too.
+            // Wait until previous execution is over and a cooldown phase is passed, too.
             debugLog("Throttling control: Shell command id " + this.getId() + " execution is postponed.");
-            this.throttle.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cool-down is over, always execute the newest thing.
+            this.throttle.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
                 scEvent: scEvent,
             };
         }
@@ -495,10 +495,10 @@ export class TShellCommand extends Cacheable {
         if (this.throttle.state !== "executing") {
             throw new Error("Cannot call TShellCommand.handleThrottlingAfterExecution() if throttling state is different from \"executing\". Now it's: " + this.throttle.state);
         }
-        debugLog("Throttling control: Shell command id " + this.getId() + " execution is finished, throttling enters \"cool-down\" phase.");
-        this.throttle.state = "cool-down";
+        debugLog("Throttling control: Shell command id " + this.getId() + " execution is finished, throttling enters \"cooldown\" phase.");
+        this.throttle.state = "cooldown";
         window.setTimeout(() => {
-            const debugMessageBase = "Throttling control: Shell command id " + this.getId() + " \"cool-down\" phase ended, ";
+            const debugMessageBase = "Throttling control: Shell command id " + this.getId() + " \"cooldown\" phase ended, ";
             if (this.throttle.subsequent) {
                 // There is a next execution waiting to be started.
                 debugLog(debugMessageBase + "will start a previously postponed execution.");
@@ -948,7 +948,7 @@ type Throttle = {
     state: "idle";
     subsequent: null;
 } | {
-    state: "executing" | "cool-down";
+    state: "executing" | "cooldown";
     subsequent: null | {
         scEvent: SC_Event;
         // Just a single property, but use still an object structure, so it's easy to add more properties later, if needed. E.g. a ParsingProcess.
