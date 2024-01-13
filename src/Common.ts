@@ -393,6 +393,20 @@ export function isInteger(value: string, allow_minus: boolean): boolean {
 }
 
 /**
+ * Converts a string input to a floating-point number with limited decimal places. Replaces a possible comma with a dot.
+ *
+ * @param {string} input - The input string to be converted.
+ * @param {number} countDecimals - The number of decimal places to limit the converted number to.
+ * @return {number} - The converted floating-point number with limited decimal places.
+ */
+export function inputToFloat(input: string, countDecimals: number): number {
+    const inputCommaReplaced = input.replace(",", ".");
+    const number: number = parseFloat(inputCommaReplaced);
+    const limitedDecimals: string = number.toFixed(countDecimals);
+    return parseFloat(limitedDecimals); // Use parseFloat() again to remove a possible .0 and to convert it back to a number.
+}
+
+/**
  * Translates 1-indexed caret line and column to a 0-indexed EditorPosition object. Also translates a possibly negative line
  * to a positive line from the end of the file, and a possibly negative column to a positive column from the end of the line.
  * @param editor

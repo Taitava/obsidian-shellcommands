@@ -171,6 +171,10 @@ export abstract class SC_Event {
         });
         return hasCreatedElements;
     }
+    
+    public static canThrottle() {
+        return this.throttle;
+    }
 
     private getEventVariables() {
         const event_variables: EventVariable[] = [];

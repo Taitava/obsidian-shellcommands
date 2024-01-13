@@ -19,7 +19,9 @@
 
 // @ts-ignore
 import {
+    IconName,
     sanitizeHTMLToDom,
+    setIcon,
     Setting,
     TextAreaComponent,
 } from "obsidian";
@@ -51,6 +53,7 @@ import {SC_Event} from "../events/SC_Event";
 import {
     copyToClipboard,
     gotoURL,
+    inputToFloat,
 } from "../Common";
 import {SC_Modal} from "../SC_Modal";
 import {
@@ -593,6 +596,35 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 }),
             )
         ;
+        
+        // Throttling
+        const throttleIcon: IconName = "construction";
+        new Setting(container_element)
+            .setName("Throttling (experimental)")
+            .setDesc("If set, this many seconds needs to pass after previous execution finishes, before another execution can start. Throttling only affects events marked with ")
+            .addText(thresholdTextComponent => thresholdTextComponent
+                .setPlaceholder("No limit")
+                .setValue(this.t_shell_command.getConfiguration().throttle?.toString() ?? "")
+                .onChange((newThresholdString: string) => {
+                    const newThreshold: number = inputToFloat(newThresholdString, 1);
+                    if (newThreshold > 0) {
+                        // Enable threshold.
+                        this.t_shell_command.getConfiguration().throttle = newThreshold;
+                    } else {
+                        // Disable threshold.
+                        this.t_shell_command.getConfiguration().throttle = null;
+                    }
+                    this.plugin.saveSettings();
+                })
+            )
+            .addExtraButton(helpButton => helpButton
+                .setIcon("help")
+                .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Throttling"))
+            )
+            .then((setting) => {
+                setIcon(setting.descEl.createSpan(), throttleIcon);
+            })
+        ;
 
         // Focus on the command palette availability field
         command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
@@ -634,6 +666,13 @@ export class ShellCommandSettingsModal extends SC_Modal {
             // Mention additional variables (if any)
             if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
                 setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
+            }
+            // Create a throttling icon, if applicable.
+            if (sc_event.static().canThrottle()) {
+                setting.nameEl.insertAdjacentText("beforeend", " ");
+                const iconSpan: HTMLElement = setting.nameEl.createSpan();
+                setIcon(iconSpan, throttleIcon);
+                iconSpan.setAttr("aria-label", "This event can be limited by throttling.");
             }
 
             // Extra settings
