@@ -69,13 +69,13 @@ export abstract class SC_Event {
     };
     
     /**
-     * If true, this event's execution can be postponed or prevented completely by throttling limitation (only if it's
+     * If true, this event's execution can be postponed or prevented completely by debouncing (only if it's
      * enabled in the executable shell command's configuration). Automatic events should have this set to true,
      * user-interaction events (i.e. menus) should have this set to false.
      *
      * @protected
      */
-    protected static readonly throttle: boolean = true;
+    protected static readonly debounce: boolean = true;
 
     public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;
@@ -131,13 +131,13 @@ export abstract class SC_Event {
      * @param parsingProcess SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
     protected async trigger(tShellCommand: TShellCommand, parsingProcess?: ShellCommandParsingProcess) {
-        const throttle: boolean = this.static().throttle && !!tShellCommand.getConfiguration().throttle;
-        debugLog(this.constructor.name + ": Event triggers executing shell command id " + tShellCommand.getId() + " " + (throttle ? "with" : "without") + " throttling control.");
-        if (throttle) {
+        const debounce: boolean = this.static().debounce && !!tShellCommand.getConfiguration().debounce;
+        debugLog(this.constructor.name + ": Event triggers executing shell command id " + tShellCommand.getId() + " " + (debounce ? "with" : "without") + " debouncing control.");
+        if (debounce) {
             if (parsingProcess) {
-                throw new Error("SC_Event.trigger() cannot be passed a ShellCommandParsingProcess object if SC_Event.throttle is true. This is just because passing ShellCommandParsingProcess to TShellCommand.executeWithThrottling() is not implemented. It can be implemented later.");
+                throw new Error("SC_Event.trigger() cannot be passed a ShellCommandParsingProcess object if SC_Event.debounce is true. This is just because passing ShellCommandParsingProcess to TShellCommand.executeWithDebouncing() is not implemented. It can be implemented later.");
             }
-            await tShellCommand.executeWithThrottling(this);
+            await tShellCommand.executeWithDebouncing(this);
         } else {
             // Execute the shell command immediately.
             const executor = new ShellCommandExecutor(this.plugin, tShellCommand, this);
@@ -171,8 +171,8 @@ export abstract class SC_Event {
         return hasCreatedElements;
     }
     
-    public static canThrottle() {
-        return this.throttle;
+    public static canDebounce() {
+        return this.debounce;
     }
 
     private getEventVariables() {

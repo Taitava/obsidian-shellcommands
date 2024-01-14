@@ -598,60 +598,60 @@ export class ShellCommandSettingsModal extends SC_Modal {
             )
         ;
         
-        // Throttling
+        // Debouncing
         // TODO: Extract to a separate method. Actually, consider creating subclasses for each tab, e.g. ShellCommandSettingsModal_TabEvents. Then it's more meaningful to create new tab specific methods.
         const shellCommandConfiguration: ShellCommandConfiguration = this.t_shell_command.getConfiguration();
-        const noThrottleIcon: IconName = "shield-ban";
-        const throttleModeOptions = {
-            "none": "Disable throttling",
+        const noDebounceIcon: IconName = "shield-ban";
+        const debounceModeOptions = {
+            "none": "Disable debouncing",
             "early-execution": "Execute immediately, then cooldown",
             "late-execution": "Cooldown first, then execute",
             "early-and-late-execution": "Execute, cooldown, execute again if needed",
         };
         new Setting(container_element)
-            .setName("Throttling (experimental)")
-            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Throttling does not affect events marked with ")
+            .setName("Debouncing (experimental)")
+            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
             .addDropdown(dropdownComponent => dropdownComponent
-                .addOptions(throttleModeOptions)
-                .setValue(shellCommandConfiguration.throttle?.mode ?? "none")
+                .addOptions(debounceModeOptions)
+                .setValue(shellCommandConfiguration.debounce?.mode ?? "none")
                 .onChange((newMode: string) => {
                     switch (newMode) {
                         case "none": {
-                            // Disable throttle.
-                            shellCommandConfiguration.throttle = null;
+                            // Disable debounce.
+                            shellCommandConfiguration.debounce = null;
                             break;
                         }
                         case "early-execution":
                         case "late-execution":
                         case "early-and-late-execution": {
-                            // Enable throttle.
-                            if (null === shellCommandConfiguration.throttle) {
-                                shellCommandConfiguration.throttle = {
+                            // Enable debounce.
+                            if (null === shellCommandConfiguration.debounce) {
+                                shellCommandConfiguration.debounce = {
                                     mode: newMode,
                                     cooldown: 0,
                                 };
                             } else {
-                                shellCommandConfiguration.throttle.mode = newMode;
+                                shellCommandConfiguration.debounce.mode = newMode;
                             }
                         }
                     }
-                    defineThrottleAdditionalSettings();
+                    defineDebounceAdditionalSettings();
                     this.plugin.saveSettings();
                 })
             )
             .addExtraButton(helpButton => helpButton
                 .setIcon("help")
-                .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Throttling"))
+                .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Events+-+debouncing")) // TODO: Move the url to Documentation.ts
             )
             .then((setting) => {
-                setIcon(setting.descEl.createSpan(), noThrottleIcon);
+                setIcon(setting.descEl.createSpan(), noDebounceIcon);
             })
         ;
-        const throttleAdditionalSettingsContainer = container_element.createDiv();
-        const defineThrottleAdditionalSettings = () => {
-            throttleAdditionalSettingsContainer.innerHTML = ""; // Remove possible earlier settings.
-            if (shellCommandConfiguration.throttle) {
-                // Throttling is enabled.
+        const debounceAdditionalSettingsContainer = container_element.createDiv();
+        const defineDebounceAdditionalSettings = () => {
+            debounceAdditionalSettingsContainer.innerHTML = ""; // Remove possible earlier settings.
+            if (shellCommandConfiguration.debounce) {
+                // Debouncing is enabled.
                 
                 // Description for Cooldown duration.
                 const cooldownDescriptions = {
@@ -660,33 +660,33 @@ export class ShellCommandSettingsModal extends SC_Modal {
                     "early-and-late-execution": "the shell command is executed right-away, and <strong>subsequent executions are postponed</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution. After the cooldown period ends, the shell command is possibly re-executed, if any subsequent executions were postponed.",
                 };
                 const cooldownDescription = new DocumentFragment();
-                cooldownDescription.createEl("p").innerHTML = "In <em>\"" + throttleModeOptions[shellCommandConfiguration.throttle.mode] + "\"</em> mode, " + cooldownDescriptions[shellCommandConfiguration.throttle.mode];
+                cooldownDescription.createEl("p").innerHTML = "In <em>\"" + debounceModeOptions[shellCommandConfiguration.debounce.mode] + "\"</em> mode, " + cooldownDescriptions[shellCommandConfiguration.debounce.mode];
                 cooldownDescription.createEl("p").innerHTML = "If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set <em>Cooldown duration</em> to <code>0</code> seconds. Then the mode does not matter, all will achieve the same result.";
                 
                 // Cooldown duration setting.
-                new Setting(throttleAdditionalSettingsContainer)
+                new Setting(debounceAdditionalSettingsContainer)
                     .setName("Cooldown duration (seconds)")
                     .setDesc(cooldownDescription)
                     .addText(thresholdTextComponent => thresholdTextComponent
-                        .setValue((shellCommandConfiguration.throttle?.cooldown ?? 0).toString())
+                        .setValue((shellCommandConfiguration.debounce?.cooldown ?? 0).toString())
                         .onChange((newThresholdString: string) => {
                             const newThreshold: number = inputToFloat(newThresholdString, 1);
-                            if (!shellCommandConfiguration.throttle) {
-                                throw new Error("shellCommandConfiguration.throttle is falsy.");
+                            if (!shellCommandConfiguration.debounce) {
+                                throw new Error("shellCommandConfiguration.debounce is falsy.");
                             }
                             if (newThreshold >= 0) {
-                                shellCommandConfiguration.throttle.cooldown = newThreshold;
+                                shellCommandConfiguration.debounce.cooldown = newThreshold;
                             } else {
-                                shellCommandConfiguration.throttle.cooldown = 0;
+                                shellCommandConfiguration.debounce.cooldown = 0;
                             }
                             this.plugin.saveSettings();
                         })
                     )
                 ;
             }
-            // If throttling is disabled, no additional settings are neeeded.
+            // If debouncing is disabled, no additional settings are needed.
         };
-        defineThrottleAdditionalSettings();
+        defineDebounceAdditionalSettings();
 
         // Focus on the command palette availability field
         command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
@@ -729,12 +729,12 @@ export class ShellCommandSettingsModal extends SC_Modal {
             if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
                 setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
             }
-            // Create a no throttling icon, if applicable.
-            if (!sc_event.static().canThrottle()) {
+            // Create a no debouncing icon, if applicable.
+            if (!sc_event.static().canDebounce()) {
                 setting.nameEl.insertAdjacentText("beforeend", " ");
                 const iconSpan: HTMLElement = setting.nameEl.createSpan();
-                setIcon(iconSpan, noThrottleIcon);
-                iconSpan.setAttr("aria-label", "This event cannot be limited by throttling.");
+                setIcon(iconSpan, noDebounceIcon);
+                iconSpan.setAttr("aria-label", "This event cannot be limited by debouncing.");
             }
 
             // Extra settings

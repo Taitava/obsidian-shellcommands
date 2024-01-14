@@ -62,7 +62,7 @@ import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
-import {Throttler} from "./Throttler";
+import {Debouncer} from "./Debouncer";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -76,7 +76,7 @@ export class TShellCommand extends Cacheable {
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
-    private throttler: Throttler | null = null;
+    private debouncer: Debouncer | null = null;
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
         super();
@@ -464,14 +464,14 @@ export class TShellCommand extends Cacheable {
         });
     }
     
-    public async executeWithThrottling(scEvent: SC_Event): Promise<void> {
-        if (!this.configuration.throttle) {
-            throw new Error("Cannot call TShellCommand.executeWithThrottling() if throttling is not enabled.");
+    public async executeWithDebouncing(scEvent: SC_Event): Promise<void> {
+        if (!this.configuration.debounce) {
+            throw new Error("Cannot call TShellCommand.executeWithDebouncing() if debouncing is not enabled.");
         }
-        if (!this.throttler) {
-            this.throttler = new Throttler(this.plugin, this.configuration.throttle, this);
+        if (!this.debouncer) {
+            this.debouncer = new Debouncer(this.plugin, this.configuration.debounce, this);
         }
-        await this.throttler.executeWithThrottling(scEvent);
+        await this.debouncer.executeWithDebouncing(scEvent);
     }
     
     /**

@@ -22,9 +22,9 @@ import {debugLog} from "./Debug";
 import {ShellCommandExecutor} from "./ShellCommandExecutor";
 import SC_Plugin from "./main";
 
-export class Throttler {
+export class Debouncer {
     
-    private state: ThrottleState = "idle";
+    private state: DebounceState = "idle";
     private subsequent: null | {
         scEvent: SC_Event,
         // Just a single property, but use still an object structure, so it's easy to add more properties later, if needed. E.g. a ParsingProcess.
@@ -32,15 +32,15 @@ export class Throttler {
     
     constructor(
         private plugin: SC_Plugin,
-        private configuration: ThrottleConfiguration,
+        private configuration: DebounceConfiguration,
         private tShellCommand: TShellCommand,
     ) {
         if (!configuration) {
-            throw new Error("Throttler can only be instantiated with a shell command that has throttle enabled.");
+            throw new Error("Debouncer can only be instantiated with a shell command that has `debounce` enabled.");
         }
     }
     
-    public async executeWithThrottling(scEvent: SC_Event): Promise<void> {
+    public async executeWithDebouncing(scEvent: SC_Event): Promise<void> {
         switch (this.state) {
             case "idle":
                 // IDLE PHASE.
@@ -53,7 +53,7 @@ export class Throttler {
                     }
                     case "late-execution":{
                         // Begin a cooldown phase and execute after it.
-                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " is delayed.");
+                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " is delayed.");
                         this.subsequent = {
                             scEvent: scEvent,
                         };
@@ -68,13 +68,13 @@ export class Throttler {
                     case "early-execution":
                     case "late-execution": {
                         // Nothing to do - just discard this execution.
-                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is discarded.");
+                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is discarded.");
                         break;
                     }
                     case "early-and-late-execution": {
                         // Wait until previous execution is over and a cooldown phase is passed, too.
-                        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
-                        this.subsequent = { // Override throttle.subsequent if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
+                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
+                        this.subsequent = { // Override `subsequent` if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
                             scEvent: scEvent,
                         };
                         break;
@@ -86,14 +86,14 @@ export class Throttler {
     
     private async execute(scEvent: SC_Event): Promise<void> {
         this.state = "executing";
-        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " will be executed now.");
+        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " will be executed now.");
         const executor = new ShellCommandExecutor(this.plugin, this.tShellCommand, scEvent);
         await executor.doPreactionsAndExecuteShellCommand();
         await this.afterExecuting();
     }
     
     private async afterExecuting(): Promise<void> {
-        debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " execution ended.");
+        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution ended.");
         switch (this.configuration.mode) {
             case "early-execution": {
                 // Not much to do anymore, go to cooldown and clear state after it.
@@ -116,7 +116,7 @@ export class Throttler {
     private cooldown(): Promise<void> {
         return new Promise((resolve) => {
             this.state = "cooldown";
-            debugLog("Throttling control: Shell command id " + this.tShellCommand.getId() + " is in cooldown phase now.");
+            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " is in cooldown phase now.");
             window.setTimeout(
                 () => {
                     this.afterCooldown().then(resolve);
@@ -127,11 +127,11 @@ export class Throttler {
     }
     
     private async afterCooldown(): Promise<void> {
-        const debugMessageBase = "Throttling control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
+        const debugMessageBase = "Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
         switch (this.configuration.mode) {
             case "early-execution": {
                 // Not much to do after cooldown.
-                debugLog(debugMessageBase + "throttling ended.");
+                debugLog(debugMessageBase + "debouncing ended.");
                 this.state = "idle";
                 break;
             }
@@ -160,11 +160,11 @@ export class Throttler {
     }
 }
 
-type ThrottleMode = "early-execution" | "late-execution" | "early-and-late-execution";
+type DebounceMode = "early-execution" | "late-execution" | "early-and-late-execution";
 
-type ThrottleState = "idle" | "executing" | "cooldown";
+type DebounceState = "idle" | "executing" | "cooldown";
 
-export interface ThrottleConfiguration {
-    mode: ThrottleMode,
+export interface DebounceConfiguration {
+    mode: DebounceMode,
     cooldown: number,
 }

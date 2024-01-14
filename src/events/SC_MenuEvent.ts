@@ -28,7 +28,7 @@ import {debugLog} from "../Debug";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
     
-    protected static readonly throttle = false;
+    protected static readonly debounce = false;
     
     protected async addTShellCommandToMenu(t_shell_command: TShellCommand, menu: Menu) {
         const debugLogBaseMessage: string = this.constructor.name + ".addTShellCommandToMenu(): ";
