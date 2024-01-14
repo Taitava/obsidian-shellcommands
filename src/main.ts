@@ -97,7 +97,7 @@ export default class SC_Plugin extends Plugin {
      *
      * This is NOT the plugin's version (although they are often coupled the same)! The plugin's version is defined in manifest.json.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.21.0";
+	public static SettingsVersion: SettingsVersionString = "0.22.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
