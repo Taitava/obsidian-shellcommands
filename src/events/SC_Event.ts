@@ -70,13 +70,12 @@ export abstract class SC_Event {
     
     /**
      * If true, this event's execution can be postponed or prevented completely by throttling limitation (only if it's
-     * enabled in the executable shell command's configuration). Rapidly repeating events should have this set to true,
-     * rarely triggering events can have this set to false.
+     * enabled in the executable shell command's configuration). Automatic events should have this set to true,
+     * user-interaction events (i.e. menus) should have this set to false.
      *
      * @protected
-     * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
      */
-    protected static readonly throttle: boolean;
+    protected static readonly throttle: boolean = true;
 
     public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;

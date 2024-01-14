@@ -599,9 +599,9 @@ export class ShellCommandSettingsModal extends SC_Modal {
         ;
         
         // Throttling
-        // TODO: Extract to a separate method.
+        // TODO: Extract to a separate method. Actually, consider creating subclasses for each tab, e.g. ShellCommandSettingsModal_TabEvents. Then it's more meaningful to create new tab specific methods.
         const shellCommandConfiguration: ShellCommandConfiguration = this.t_shell_command.getConfiguration();
-        const throttleIcon: IconName = "construction";
+        const noThrottleIcon: IconName = "shield-ban";
         const throttleModeOptions = {
             "none": "Disable throttling",
             "early-execution": "Execute immediately, then cooldown",
@@ -610,7 +610,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
         };
         new Setting(container_element)
             .setName("Throttling (experimental)")
-            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Throttling only affects events marked with ")
+            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Throttling does not affect events marked with ")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions(throttleModeOptions)
                 .setValue(shellCommandConfiguration.throttle?.mode ?? "none")
@@ -644,7 +644,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Throttling"))
             )
             .then((setting) => {
-                setIcon(setting.descEl.createSpan(), throttleIcon);
+                setIcon(setting.descEl.createSpan(), noThrottleIcon);
             })
         ;
         const throttleAdditionalSettingsContainer = container_element.createDiv();
@@ -729,12 +729,12 @@ export class ShellCommandSettingsModal extends SC_Modal {
             if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
                 setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
             }
-            // Create a throttling icon, if applicable.
-            if (sc_event.static().canThrottle()) {
+            // Create a no throttling icon, if applicable.
+            if (!sc_event.static().canThrottle()) {
                 setting.nameEl.insertAdjacentText("beforeend", " ");
                 const iconSpan: HTMLElement = setting.nameEl.createSpan();
-                setIcon(iconSpan, throttleIcon);
-                iconSpan.setAttr("aria-label", "This event can be limited by throttling.");
+                setIcon(iconSpan, noThrottleIcon);
+                iconSpan.setAttr("aria-label", "This event cannot be limited by throttling.");
             }
 
             // Extra settings

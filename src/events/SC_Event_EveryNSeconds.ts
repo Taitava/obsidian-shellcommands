@@ -30,7 +30,6 @@ export class SC_Event_EveryNSeconds extends SC_Event {
         enabled: false,
         seconds: 60,
     };
-    protected static readonly throttle = false;
     
     private intervals_ids: {
         [key: string]: number; // key: TShellCommand id, value: setInterval() id.
