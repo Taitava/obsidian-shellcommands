@@ -23,7 +23,6 @@ import {TShellCommand} from "../TShellCommand";
 export abstract class SC_CodeMirrorEvent extends SC_Event {
     protected abstract readonly codeMirrorEvent: Parameters<CodeMirror.Editor["on"]>[0];
     
-    protected static readonly throttle = true;
     /**
      * Contains a trigger callback for each TShellCommand that has this event enabled.
      *

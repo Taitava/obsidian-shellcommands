@@ -27,7 +27,6 @@ import {
 import {TShellCommand} from "../TShellCommand";
 
 export abstract class SC_VaultEvent extends SC_Event {
-    protected static readonly throttle = true;
     protected abstract readonly vault_event:
         // TODO: Find a way to make this list dynamic.
         // This list reflects Obsidian API version 0.12.11.
