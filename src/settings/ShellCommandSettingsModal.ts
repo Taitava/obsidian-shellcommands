@@ -77,6 +77,7 @@ import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
+import {DebounceConfiguration} from "../Debouncer";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -608,6 +609,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
             "late-execution": "Cooldown first, then execute",
             "early-and-late-execution": "Execute, cooldown, execute again if needed",
         };
+        let removedDebounceConfiguration: DebounceConfiguration | null = null;
         new Setting(container_element)
             .setName("Debouncing (experimental)")
             .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
@@ -618,6 +620,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                     switch (newMode) {
                         case "none": {
                             // Disable debounce.
+                            removedDebounceConfiguration = shellCommandConfiguration.debounce; // Keep this just in case user re-enables debouncing before closing the modal.
                             shellCommandConfiguration.debounce = null;
                             break;
                         }
@@ -626,7 +629,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                         case "early-and-late-execution": {
                             // Enable debounce.
                             if (null === shellCommandConfiguration.debounce) {
-                                shellCommandConfiguration.debounce = {
+                                shellCommandConfiguration.debounce = removedDebounceConfiguration ?? { // Reuse the old configuration, if present.
                                     mode: newMode,
                                     cooldown: 0,
                                 };
