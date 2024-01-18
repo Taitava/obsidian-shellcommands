@@ -20,6 +20,9 @@ Features that are currently in development and not released yet. This does not i
 
 ### To be Added
 - [Event debouncing for avoiding executing shell commands too often (#380)](https://github.com/Taitava/obsidian-shellcommands/issues/380).
+- [New output channel: Assign custom variables (#382)](https://github.com/Taitava/obsidian-shellcommands/issues/382).
+    - Allows storing output from shell commands and reusing them as input for other shell commands later.
+    - Also added a setting for enabling notifications when custom variables' values change.
 
 ## [0.21.0] - 2023-12-30
 
