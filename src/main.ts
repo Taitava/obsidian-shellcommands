@@ -471,7 +471,7 @@ export default class SC_Plugin extends Plugin {
 							found_custom_variable = true;
 
 							// Assign the given value to the custom variable.
-							await variable.setValue(parameters[parameter_name]);
+							await variable.setValue(parameters[parameter_name], "uri");
 						}
 					}
 					if (!found_custom_variable) {

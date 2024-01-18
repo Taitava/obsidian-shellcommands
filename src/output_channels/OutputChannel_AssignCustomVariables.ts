@@ -116,7 +116,7 @@ export class OutputChannel_AssignCustomVariables extends OutputChannel {
                     const assignableVariableValue: unknown = assignableVariables[assignableVariableName];
                     if (typeof assignableVariableValue === "string") {
                         // The value can be assigned to the variable.
-                        await customVariable.setValue(assignableVariableValue);
+                        await customVariable.setValue(assignableVariableValue, "output");
                     } else {
                         // The value has a wrong data type.
                         this.newError(`Currently, only string values are supported for custom variables. ${assignableVariableName} was tried to be given this: ${JSON.stringify(assignableVariableValue)}`);

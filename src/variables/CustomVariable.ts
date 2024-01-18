@@ -25,6 +25,8 @@ import SC_Plugin from "../main";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {resetVariableAutocompleteItems} from "./getVariableAutocompleteItems";
 import {debugLog} from "../Debug";
+import {cloakPassword} from "../Common";
+import {EOL} from "os";
 
 /**
  * This class serves as the actual operational variable class for custom variables. It's paired with the CustomVariableInstance class, which acts
@@ -92,16 +94,52 @@ export class CustomVariable extends Variable {
      *  - When calling the callbacks, the current CustomVariable should be passed as a parameter instead of the 'value' and 'old_value' parameters (which can be accessed via the CustomVariable object).
      *
      * @param value
+     * @param source
      * @param cloak This should be true, if the value is a password.
      */
-    public async setValue(value: string, cloak: boolean = false) {
+    public async setValue(value: string, source: "manual" | "uri" | "output", cloak: boolean = false) {
         const old_value = this.value;
         debugLog(`CustomVariable ${this.variable_name}: Setting value to: ${value} (old was: ${old_value}).`);
         this.value = value;
         this.cloak = cloak;
+        
+        // Display notifications, if applicable.
+        this.notifyChange(source);
 
         // Call the onChange hook.
         await this.callOnChangeCallbacks(value, old_value ?? ""); // Use "" if old_value is null.
+    }
+    
+    /**
+     * Shows a notification balloon after the CustomVariable's value has changed, but only if enabled by settings.
+     *
+     * @param {string} source - The source of the change: "manual", "uri", or "output".
+     * @return {void}
+     * @throws {Error} If the CustomVariable value is null after a change.
+     */
+    private notifyChange(source: "manual" | "uri" | "output"): void {
+        let doNotify: boolean;
+        switch (source) {
+            case "manual":
+                // Never notify about changes that user has made manually, e.g. changes from Prompts.
+                doNotify = false;
+                break;
+            case "uri":
+                // Obsidian URI / Shell commands URI.
+                doNotify = this.plugin.settings.custom_variables_notify_changes_via.obsidian_uri;
+                break;
+            case "output":
+                // OutputChannel_AssignCustomVariables.
+                doNotify = this.plugin.settings.custom_variables_notify_changes_via.output_assignment;
+                break;
+        }
+        if (doNotify) {
+            if (this.value === null) {
+                throw new Error("CustomVariable value is null after a change.");
+            }
+            const displayValue: string = this.cloak ? cloakPassword(this.value) : this.value;
+            this.plugin.newNotification(this.getFullName() + " =" + EOL + displayValue);
+        }
     }
 
     /**
