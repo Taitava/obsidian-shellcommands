@@ -247,8 +247,8 @@ export abstract class OutputChannel {
         };
 
         // Check if outputs should be combined.
-        const combineOutputStreams = this.static().combine_output_streams;
-        if (combineOutputStreams) {
+        const combineOutputStreams = this.static().combine_output_streams; // Can be an empty string "", and outputs should still be joined.
+        if (typeof combineOutputStreams === "string") {
             // Combine output strings into a single string.
 
             // Can output wrapping be combined?
