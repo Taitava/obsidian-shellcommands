@@ -22,7 +22,7 @@
  * Designed additional values for later: "specific-file-top" | "specific-file-bottom" | "specific-file-caret" (if possible)
  * See discussion: https://github.com/Taitava/obsidian-shellcommands/discussions/16
  */
-export type OutputHandlerCode = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files";
+export type OutputHandlerCode = "ignore" | "notification" | "current-file-caret" | "current-file-top" | "current-file-bottom" | "status-bar" | "clipboard" | "modal" | "open-files" | "custom-variables";
 
 export interface OutputHandlerConfigurations {
     stdout: OutputHandlerConfiguration,

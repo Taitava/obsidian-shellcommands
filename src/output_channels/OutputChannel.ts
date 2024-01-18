@@ -374,6 +374,10 @@ export abstract class OutputChannel {
             convert_ansi_code: true,
         };
     }
+    
+    protected newError(errorMessage: string): void {
+        this.plugin.newError(this.static().title + ": " + errorMessage);
+    }
 }
 
 export interface OutputChannels {
