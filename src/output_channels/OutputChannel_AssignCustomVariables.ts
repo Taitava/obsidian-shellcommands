@@ -47,8 +47,6 @@ export class OutputChannel_AssignCustomVariables extends OutputChannel {
     // I guess this output handler is so rarely used it's not needed in the 'Ask after execution' modal. If this decision is changed, "U" could be a candidate.
     // public static readonly hotkey_letter = "U";
     
-    private static customVariableNameRegex: RegExp = /^_[\w\d]+$/u;
-    
     /**
      * When assigning values to variables, the output is not supposed to have any ANSI codes, as it's just JSON.
      *
@@ -97,7 +95,7 @@ export class OutputChannel_AssignCustomVariables extends OutputChannel {
         let showReceivedJSON = false; // Becomes true if any errors occur. In case of errors with multiple variables/JSON properties, avoid showing the whole JSON repeatedly.
         for (const assignableVariableName of Object.getOwnPropertyNames(assignableVariables)) {
             // 1. Check the variable name's format generally.
-            if (!assignableVariableName.match(OutputChannel_AssignCustomVariables.customVariableNameRegex)) {
+            if (!assignableVariableName.match(CustomVariable.getCustomVariableValidNameRegex(true))) {
                 // Malformed CustomVariable name.
                 this.newError(`Property names should be like _myCustomVariable, received instead: ${assignableVariableName}`);
                 showReceivedJSON = true;

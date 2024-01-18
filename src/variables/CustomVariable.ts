@@ -146,6 +146,14 @@ export class CustomVariable extends Variable {
     public getCustomVariableInstance(): CustomVariableInstance {
         return this.custom_variable_instance;
     }
+    
+    public static getCustomVariableValidNameRegex(precedingUnderscore: boolean): RegExp {
+        if (precedingUnderscore) {
+            return /^_[\w\d]+$/u;
+        } else {
+            return /^[\w\d]+$/u;
+        }
+    }
 }
 
 type TCustomVariableOnChangeCallback = (variable: CustomVariable, new_value: string, old_value: string) => Promise<void>;
