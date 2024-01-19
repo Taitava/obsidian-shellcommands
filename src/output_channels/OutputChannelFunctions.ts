@@ -53,7 +53,7 @@ registerOutputChannel("current-file-bottom", OutputChannel_CurrentFileBottom);
 registerOutputChannel("open-files", OutputChannel_OpenFiles);
 registerOutputChannel("status-bar", OutputChannel_StatusBar);
 registerOutputChannel("clipboard", OutputChannel_Clipboard);
-registerOutputChannel("custom-variables", OutputChannel_AssignCustomVariables);
+registerOutputChannel("assign-custom-variables", OutputChannel_AssignCustomVariables);
 registerOutputChannel("modal", OutputChannel_Modal);
 
 /**
