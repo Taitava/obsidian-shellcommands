@@ -21,6 +21,7 @@ import {SC_Event} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {Notice, Setting} from "obsidian";
+import {inputToFloat} from "../Common";
 
 
 export class SC_Event_EveryNSeconds extends SC_Event {
@@ -64,11 +65,11 @@ export class SC_Event_EveryNSeconds extends SC_Event {
         let apply_seconds: number;
         new Setting(extra_settings_container)
             .setName("Seconds")
-            .setDesc("Needs to be at least 1. Currently supports only integers.")
+            .setDesc("Needs to be over 0. One decimal is supported.")
             .addText(text => text
                 .setValue(configuration.seconds.toString())
-                .onChange((raw_value: string) => {
-                    apply_seconds = parseInt(raw_value);
+                .onChange((rawSeconds: string) => {
+                    apply_seconds = inputToFloat(rawSeconds, 1);
                     // Don't save here, because the user might still be editing the number.
                 }),
             )
@@ -77,10 +78,8 @@ export class SC_Event_EveryNSeconds extends SC_Event {
                 .onClick(async () => {
                     if (undefined == apply_seconds || apply_seconds === this.getConfiguration(t_shell_command).seconds) {
                         new Notice("You didn't change the seconds!");
-                    } else if (isNaN(apply_seconds)) {
-                        new Notice("The seconds need to be an integer!");
                     } else if (apply_seconds <= 0) {
-                        new Notice("The seconds need to be at least 1!");
+                        new Notice("The seconds need to be over 0!");
                     } else {
                         // All ok, save.
                         this.getConfiguration(t_shell_command).seconds = apply_seconds;
