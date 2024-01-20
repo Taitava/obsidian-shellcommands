@@ -198,6 +198,7 @@ export default class SC_Plugin extends Plugin {
 
 		// Make it possible to create CustomVariableViews.
 		this.registerView(CustomVariableView.ViewType, (leaf: WorkspaceLeaf) => new CustomVariableView(this, leaf));
+        this.addRibbonIcon(CustomVariableView.getIconStatic(), CustomVariableView.getDisplayTextStatic(), () => this.createCustomVariableView());
 
 		// Debug reserved IDs
 		debugLog("IDGenerator's reserved IDs:");
