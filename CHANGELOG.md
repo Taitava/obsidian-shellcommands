@@ -56,6 +56,7 @@ Features that are currently in development and not released yet. This does not i
 - [Usage listings for custom variables and deletion confirmation prompts (#340)](https://github.com/Taitava/obsidian-shellcommands/issues/340).
 - [Settings: Make each shell command show their shell's name (#353)](https://github.com/Taitava/obsidian-shellcommands/issues/353).
 - [Command palette: Re-execute last shell command (#354)](https://github.com/Taitava/obsidian-shellcommands/issues/354).
+- [Incomplete code of an event named "Cared moved in editor" was accidentally released. The event does not work yet. (#345)](https://github.com/Taitava/obsidian-shellcommands/issues/345).
   
 ### Changed
 - [Custom variables pane: Show linebreaks in variable values correctly (#355)](https://github.com/Taitava/obsidian-shellcommands/issues/355).
