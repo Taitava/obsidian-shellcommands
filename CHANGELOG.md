@@ -24,6 +24,9 @@ Features that are currently in development and not released yet. This does not i
     - Allows storing output from shell commands and reusing them as input for other shell commands later.
     - Also added a setting for enabling notifications when custom variables' values change.
 
+### To be Changed
+- [Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
+
 ## [0.21.0] - 2023-12-30
 
 **SC VERSION `0.21.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `1.4.0`. Older versions of Obsidian cannot upgrade SC to `0.21.0`.**
