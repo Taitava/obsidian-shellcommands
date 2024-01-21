@@ -64,7 +64,7 @@ import {Variable_YAMLContent} from "./Variable_YAMLContent";
 import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLContent";
 import {Variable_OperatingSystem} from "./Variable_OperatingSystem";
 import {Variable_ObsidianAPIVersion} from "./Variable_ObsidianAPIVersion";
-import {Variable_ShellCommandsPlugin} from "./Variable_ShellCommandsPlugin";
+import {Variable_ShellCommandsPluginVersion} from "./Variable_ShellCommandsPluginVersion";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -98,6 +98,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_ObsidianAPIVersion(plugin),
         // Variable_Output is not loaded here, because it's only used in OutputWrappers.
         new Variable_Selection(plugin),
+        new Variable_ShellCommandsPluginVersion(plugin),
         new Variable_Tags(plugin),
         new Variable_Title(plugin),
         new Variable_VaultPath(plugin),
@@ -130,7 +131,6 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
             new Variable_Newline(plugin),
             new Variable_OperatingSystem(plugin),
             new Variable_Passthrough(plugin),
-            new Variable_ShellCommandsPlugin(plugin),
         );
     }
     for (const built_in_variable of built_in_variables) {
