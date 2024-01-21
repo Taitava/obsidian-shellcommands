@@ -24,6 +24,7 @@ Features that are currently in development and not released yet. This does not i
     - Allows storing output from shell commands and reusing them as input for other shell commands later.
     - Also added a setting for enabling notifications when custom variables' values change.
 - [Ribbon icon for Custom variables view (#386)](https://github.com/Taitava/obsidian-shellcommands/issues/386).
+- [New variables `{{obsidian_api_version}}` and `{{shell_commands_plugin_version}}` (#387)](https://github.com/Taitava/obsidian-shellcommands/issues/387).
 
 ### To be Changed
 - [Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
