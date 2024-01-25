@@ -24,6 +24,7 @@ import {
     OutputHandlingMode,
 } from "../output_channels/OutputHandlerCode";
 import {
+    ExecutionNotificationMode,
     ICommandPaletteOptions,
     IPlatformSpecificString,
     IPlatformSpecificStringWithDefault,
@@ -59,6 +60,7 @@ export interface ShellCommandConfiguration {
     };
     output_channel_order: OutputChannelOrder;
     output_handling_mode: OutputHandlingMode;
+    execution_notification_mode: null | ExecutionNotificationMode;
     events: SC_EventConfigurations;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
@@ -97,6 +99,7 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         },
         output_channel_order: "stdout-first",
         output_handling_mode: "buffered",
+        execution_notification_mode: null,
         events: {},
         command_palette_availability: "enabled",
         preactions: [],

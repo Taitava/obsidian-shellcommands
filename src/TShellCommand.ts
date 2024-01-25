@@ -51,6 +51,7 @@ import {
     InheritableVariableDefaultValueConfiguration,
 } from "./variables/Variable";
 import {
+    ExecutionNotificationMode,
     IPlatformSpecificStringWithDefault,
     PlatformId,
     PlatformNames,
@@ -330,6 +331,16 @@ export class TShellCommand extends Cacheable {
      */
     public isOutputWrapperStdoutSameAsStderr() {
         return this.configuration.output_wrappers["stdout"] === this.configuration.output_wrappers["stderr"];
+    }
+    
+    public getExecutionNotificationMode(): ExecutionNotificationMode {
+        if (null === this.configuration.execution_notification_mode) {
+            // Get the mode from the main configuration.
+            return this.plugin.settings.execution_notification_mode;
+        } else {
+            // This shell command defines its own mode.
+            return this.configuration.execution_notification_mode;
+        }
     }
 
     public getEventsConfiguration() {
