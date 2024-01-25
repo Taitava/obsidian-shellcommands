@@ -31,7 +31,7 @@ import {Setting} from "obsidian";
  */
 export function createExecutionNotificationField( // Shell command specific settings.
     containerElement: HTMLElement,
-    currentValue: ExecutionNotificationMode,
+    currentValue: ExecutionNotificationMode | null,
     defaultValue: ExecutionNotificationMode,
     notificationMessageDuration: number,
     onChange: (newExecutionNotificationMode: ExecutionNotificationMode | null) => void,
@@ -45,7 +45,7 @@ export function createExecutionNotificationField(  // Main settings.
 ): void
 export function createExecutionNotificationField(
     containerElement: HTMLElement,
-    currentValue: ExecutionNotificationMode,
+    currentValue: ExecutionNotificationMode | null,
     defaultValue: false | ExecutionNotificationMode,
     notificationMessageDuration: number,
     onChange: ((newExecutionNotificationMode: ExecutionNotificationMode | null) => void) | // Shell command specific settings.
@@ -72,7 +72,7 @@ export function createExecutionNotificationField(
         .setName(title)
         .addDropdown(dropdown_component => dropdown_component
             .addOptions(executionNotificationOptions)
-            .setValue(currentValue)
+            .setValue((currentValue === null) ? "default" : currentValue)
             .onChange((newExecutionNotificationMode: string) => {
                 if ("default" === newExecutionNotificationMode && defaultValue !== false) {
                     // Change 'default' to null.
