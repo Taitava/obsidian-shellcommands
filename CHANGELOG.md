@@ -27,7 +27,8 @@ Features that are currently in development and not released yet. This does not i
 - [New variables `{{obsidian_api_version}}` and `{{shell_commands_plugin_version}}` (#387)](https://github.com/Taitava/obsidian-shellcommands/issues/387).
 
 ### To be Changed
-- [Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
+- [Settings: Make _"Show a notification when executing shell commands"_ decidable on a per shell command basis (388)](https://github.com/Taitava/obsidian-shellcommands/issues/388).
+- [Settings: Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
 
 ## [0.21.0] - 2023-12-30
 
