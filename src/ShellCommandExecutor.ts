@@ -299,10 +299,11 @@ export class ShellCommandExecutor {
                 const processTerminator = () => {
                     child_process.kill("SIGTERM");
                 };
-
+                
                 // Display a notification of the execution (if wanted).
-                if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, this.plugin.settings.execution_notification_mode, processTerminator);
+                const executionNotificationMode: ExecutionNotificationMode = this.t_shell_command.getExecutionNotificationMode();
+                if ("disabled" !== executionNotificationMode) {
+                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, executionNotificationMode, processTerminator);
                 }
 
                 // Hook into child_process for output handling

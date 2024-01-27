@@ -38,7 +38,13 @@ import {
     OutputStream,
 } from "../output_channels/OutputHandlerCode";
 import {TShellCommand} from "../TShellCommand";
-import {CommandPaletteOptions, ICommandPaletteOptions, PlatformId, PlatformNames} from "./SC_MainSettings";
+import {
+    CommandPaletteOptions,
+    ExecutionNotificationMode,
+    ICommandPaletteOptions,
+    PlatformId,
+    PlatformNames,
+} from "./SC_MainSettings";
 import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {
     createExecuteNowButton,
@@ -76,6 +82,7 @@ import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
+import {createExecutionNotificationField} from "./setting_elements/createExecutionNotificationField";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
 import {DebounceConfiguration} from "../Debouncer";
 
@@ -518,6 +525,19 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 })
             )
         ;
+        
+        // "Show a notification when executing shell commands" field
+        createExecutionNotificationField(
+            container_element,
+            this.t_shell_command.getConfiguration().execution_notification_mode,
+            this.plugin.settings.execution_notification_mode,
+            this.plugin.settings.notification_message_duration,
+            async (newExecutionNotificationMode: ExecutionNotificationMode | null) => {
+                // Save the change.
+                this.t_shell_command.getConfiguration().execution_notification_mode = newExecutionNotificationMode;
+                await this.plugin.saveSettings();
+            }
+        );
     }
 
     private async tabEnvironments(container_element: HTMLElement): Promise<void> {
