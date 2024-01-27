@@ -21,6 +21,7 @@ import {Setting} from "obsidian";
 import {SC_MainSettings} from "../../settings/SC_MainSettings";
 import {CustomVariableInstance} from "./CustomVariableInstance";
 import {
+    CustomVariable,
     getIDGenerator,
     Model,
     ParentModelOneToManyIdRelation,
@@ -163,7 +164,7 @@ export class CustomVariableModel extends Model {
             switch (field) {
                 case "name":
                     // Check that the name contains only characters a-z, 0-9 and/or underline _
-                    if (!custom_variable_name.match(/^[\w\d]+$/u)) {
+                    if (!custom_variable_name.match(CustomVariable.getCustomVariableValidNameRegex(false))) {
                         // Incorrect format.
                         reject(`The name {{_${custom_variable_name}}} does not meet the naming requirements.`);
                         return;

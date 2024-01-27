@@ -401,10 +401,38 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 }),
             )
         ;
+        
+        // General settings for CustomVariables.
+        const custom_variable_container = container_element.createDiv();
+        new Setting(custom_variable_container)
+            .setName("Show notifications when values of custom variables change")
+            .setDesc("Exception: no notifications will be shown for changing values manually via prompts.")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enabled: "Via URI: Notify",
+                    disabled: "Via URI: Don't notify",
+                })
+                .setValue(this.plugin.settings.custom_variables_notify_changes_via.obsidian_uri ? "enabled" : "disabled")
+                .onChange(async (selection: string) => {
+                    this.plugin.settings.custom_variables_notify_changes_via.obsidian_uri = selection === "enabled";
+                    await this.plugin.saveSettings();
+                })
+            )
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enabled: "Via output assignment: Notify",
+                    disabled: "Via output assignment: Don't notify",
+                })
+                .setValue(this.plugin.settings.custom_variables_notify_changes_via.output_assignment ? "enabled" : "disabled")
+                .onChange(async (selection: string) => {
+                    this.plugin.settings.custom_variables_notify_changes_via.output_assignment = selection === "enabled";
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
 
         // Settings for each CustomVariable
         const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
-        const custom_variable_container = container_element.createDiv();
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });

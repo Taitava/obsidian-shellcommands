@@ -34,6 +34,7 @@ import {OutputChannel_Clipboard} from "./OutputChannel_Clipboard";
 import {ShellCommandParsingResult, TShellCommand} from "../TShellCommand";
 import {OutputChannel_Modal} from "./OutputChannel_Modal";
 import {OutputChannel_OpenFiles} from "./OutputChannel_OpenFiles";
+import {OutputChannel_AssignCustomVariables} from "./OutputChannel_AssignCustomVariables";
 
 export interface OutputStreams {
     stdout?: string;
@@ -52,6 +53,7 @@ registerOutputChannel("current-file-bottom", OutputChannel_CurrentFileBottom);
 registerOutputChannel("open-files", OutputChannel_OpenFiles);
 registerOutputChannel("status-bar", OutputChannel_StatusBar);
 registerOutputChannel("clipboard", OutputChannel_Clipboard);
+registerOutputChannel("assign-custom-variables", OutputChannel_AssignCustomVariables);
 registerOutputChannel("modal", OutputChannel_Modal);
 
 /**
