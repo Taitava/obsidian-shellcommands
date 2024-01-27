@@ -39,7 +39,11 @@ export class CustomVariableView extends ItemView {
     }
 
     public getDisplayText(): string {
-        return "Custom variables";
+        return "Shell commands: Custom variables"; // Same as getDisplayTextStatic().
+    }
+    
+    public static getDisplayTextStatic(): string {
+        return "Shell commands: Custom variables"; // Same as getDisplayText().
     }
 
     public getViewType(): string {
@@ -47,7 +51,11 @@ export class CustomVariableView extends ItemView {
     }
 
     public getIcon() {
-        return "code-glyph";
+        return "code-glyph"; // Same as getIconStatic().
+    }
+    
+    public static getIconStatic(): string {
+        return "code-glyph"; // Same as getIcon().
     }
 
     private container_element: HTMLDivElement;

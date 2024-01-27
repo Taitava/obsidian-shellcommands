@@ -19,7 +19,9 @@
 
 // @ts-ignore
 import {
+    IconName,
     sanitizeHTMLToDom,
+    setIcon,
     Setting,
     TextAreaComponent,
 } from "obsidian";
@@ -51,6 +53,7 @@ import {SC_Event} from "../events/SC_Event";
 import {
     copyToClipboard,
     gotoURL,
+    inputToFloat,
 } from "../Common";
 import {SC_Modal} from "../SC_Modal";
 import {
@@ -73,6 +76,8 @@ import {Documentation} from "../Documentation";
 import {decorateMultilineField} from "./setting_elements/multilineField";
 import {createVariableDefaultValueFields} from "./setting_elements/createVariableDefaultValueFields";
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
+import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
+import {DebounceConfiguration} from "../Debouncer";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -593,6 +598,98 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 }),
             )
         ;
+        
+        // Debouncing
+        // TODO: Extract to a separate method. Actually, consider creating subclasses for each tab, e.g. ShellCommandSettingsModal_TabEvents. Then it's more meaningful to create new tab specific methods.
+        const shellCommandConfiguration: ShellCommandConfiguration = this.t_shell_command.getConfiguration();
+        const noDebounceIcon: IconName = "shield-ban";
+        const debounceModeOptions = {
+            "none": "Disable debouncing",
+            "early-execution": "Execute immediately, then cooldown",
+            "late-execution": "Cooldown first, then execute",
+            "early-and-late-execution": "Execute, cooldown, execute again if needed",
+        };
+        let removedDebounceConfiguration: DebounceConfiguration | null = null;
+        new Setting(container_element)
+            .setName("Debouncing (experimental)")
+            .setDesc("If enabled, events cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions(debounceModeOptions)
+                .setValue(shellCommandConfiguration.debounce?.mode ?? "none")
+                .onChange((newMode: string) => {
+                    switch (newMode) {
+                        case "none": {
+                            // Disable debounce.
+                            removedDebounceConfiguration = shellCommandConfiguration.debounce; // Keep this just in case user re-enables debouncing before closing the modal.
+                            shellCommandConfiguration.debounce = null;
+                            break;
+                        }
+                        case "early-execution":
+                        case "late-execution":
+                        case "early-and-late-execution": {
+                            // Enable debounce.
+                            if (null === shellCommandConfiguration.debounce) {
+                                shellCommandConfiguration.debounce = removedDebounceConfiguration ?? { // Reuse the old configuration, if present.
+                                    mode: newMode,
+                                    cooldown: 0,
+                                };
+                            } else {
+                                shellCommandConfiguration.debounce.mode = newMode;
+                            }
+                        }
+                    }
+                    defineDebounceAdditionalSettings();
+                    this.plugin.saveSettings();
+                })
+            )
+            .addExtraButton(helpButton => helpButton
+                .setIcon("help")
+                .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Events+-+debouncing")) // TODO: Move the url to Documentation.ts
+            )
+            .then((setting) => {
+                setIcon(setting.descEl.createSpan(), noDebounceIcon);
+            })
+        ;
+        const debounceAdditionalSettingsContainer = container_element.createDiv();
+        const defineDebounceAdditionalSettings = () => {
+            debounceAdditionalSettingsContainer.innerHTML = ""; // Remove possible earlier settings.
+            if (shellCommandConfiguration.debounce) {
+                // Debouncing is enabled.
+                
+                // Description for Cooldown duration.
+                const cooldownDescriptions = {
+                    "early-execution": "the shell command is executed right-away, and <strong>subsequent executions are prevented</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution.",
+                    "late-execution": "the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase and while the execution is in progress.",
+                    "early-and-late-execution": "the shell command is executed right-away, and <strong>subsequent executions are postponed</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution. After the cooldown period ends, the shell command is possibly re-executed, if any subsequent executions were postponed.",
+                };
+                const cooldownDescription = new DocumentFragment();
+                cooldownDescription.createEl("p").innerHTML = "In <em>\"" + debounceModeOptions[shellCommandConfiguration.debounce.mode] + "\"</em> mode, " + cooldownDescriptions[shellCommandConfiguration.debounce.mode];
+                cooldownDescription.createEl("p").innerHTML = "If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set <em>Cooldown duration</em> to <code>0</code> seconds. Then the mode does not matter, all will achieve the same result.";
+                
+                // Cooldown duration setting.
+                new Setting(debounceAdditionalSettingsContainer)
+                    .setName("Cooldown duration (seconds)")
+                    .setDesc(cooldownDescription)
+                    .addText(thresholdTextComponent => thresholdTextComponent
+                        .setValue((shellCommandConfiguration.debounce?.cooldown ?? 0).toString())
+                        .onChange((newThresholdString: string) => {
+                            const newThreshold: number = inputToFloat(newThresholdString, 1);
+                            if (!shellCommandConfiguration.debounce) {
+                                throw new Error("shellCommandConfiguration.debounce is falsy.");
+                            }
+                            if (newThreshold >= 0) {
+                                shellCommandConfiguration.debounce.cooldown = newThreshold;
+                            } else {
+                                shellCommandConfiguration.debounce.cooldown = 0;
+                            }
+                            this.plugin.saveSettings();
+                        })
+                    )
+                ;
+            }
+            // If debouncing is disabled, no additional settings are needed.
+        };
+        defineDebounceAdditionalSettings();
 
         // Focus on the command palette availability field
         command_palette_availability_setting.controlEl.find("select").addClass("SC-focus-element-on-tab-opening");
@@ -634,6 +731,13 @@ export class ShellCommandSettingsModal extends SC_Modal {
             // Mention additional variables (if any)
             if (sc_event.createSummaryOfEventVariables(setting.descEl)) {
                 setting.descEl.insertAdjacentText("afterbegin", "Additional variables: ");
+            }
+            // Create a no debouncing icon, if applicable.
+            if (!sc_event.static().canDebounce()) {
+                setting.nameEl.insertAdjacentText("beforeend", " ");
+                const iconSpan: HTMLElement = setting.nameEl.createSpan();
+                setIcon(iconSpan, noDebounceIcon);
+                iconSpan.setAttr("aria-label", "This event cannot be limited by debouncing.");
             }
 
             // Extra settings

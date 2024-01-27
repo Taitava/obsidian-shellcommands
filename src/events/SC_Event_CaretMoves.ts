@@ -18,10 +18,18 @@
  */
 
 import {SC_CodeMirrorEvent} from "./SC_CodeMirrorEvent";
+import {Setting} from "obsidian";
 
-export class SC_Event_CaretMoved extends SC_CodeMirrorEvent {
-    protected static readonly event_code = "caret-moved";
-    protected static readonly event_title = "Caret moved in editor";
+export class SC_Event_CaretMoves extends SC_CodeMirrorEvent {
+    protected static readonly event_code = "caret-moves";
+    protected static readonly event_title = "Caret moves in editor";
     // @ts-ignore This event does not work anyway. FIXME
     protected readonly codeMirrorEvent = "cursorActivity";
+    
+    public createExtraSettingsFields(extraSettingsContainer: HTMLDivElement) {
+        new Setting(extraSettingsContainer)
+            .setName("This event does not work yet!")
+            .setDesc("Incomplete code for this event was accidentally released in SC 0.20.0. Enabling the event does not do anything. The event will be finished in some future version.")
+        ;
+    }
 }

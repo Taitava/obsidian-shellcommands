@@ -62,6 +62,7 @@ import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
+import {Debouncer} from "./Debouncer";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -75,6 +76,7 @@ export class TShellCommand extends Cacheable {
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
+    private debouncer: Debouncer | null = null;
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
         super();
@@ -460,6 +462,16 @@ export class TShellCommand extends Cacheable {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
             this.unregisterSC_Event(sc_event);
         });
+    }
+    
+    public async executeWithDebouncing(scEvent: SC_Event): Promise<void> {
+        if (!this.configuration.debounce) {
+            throw new Error("Cannot call TShellCommand.executeWithDebouncing() if debouncing is not enabled.");
+        }
+        if (!this.debouncer) {
+            this.debouncer = new Debouncer(this.plugin, this.configuration.debounce, this);
+        }
+        await this.debouncer.executeWithDebouncing(scEvent);
     }
     
     /**
