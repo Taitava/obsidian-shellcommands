@@ -612,7 +612,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
         let removedDebounceConfiguration: DebounceConfiguration | null = null;
         new Setting(container_element)
             .setName("Debouncing (experimental)")
-            .setDesc("If enabled, an event cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
+            .setDesc("If enabled, events cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
             .addDropdown(dropdownComponent => dropdownComponent
                 .addOptions(debounceModeOptions)
                 .setValue(shellCommandConfiguration.debounce?.mode ?? "none")
