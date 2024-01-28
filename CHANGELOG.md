@@ -30,6 +30,9 @@ Features that are currently in development and not released yet. This does not i
 - [Settings: Make _"Show a notification when executing shell commands"_ decidable on a per shell command basis (388)](https://github.com/Taitava/obsidian-shellcommands/issues/388).
 - [Settings: Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
 
+### To be Fixed
+- [Bug: Shell command preview text is not updated when modifying the command (#383)](https://github.com/Taitava/obsidian-shellcommands/issues/383).
+
 ## [0.21.0] - 2023-12-30
 
 **SC VERSION `0.21.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `1.4.0`. Older versions of Obsidian cannot upgrade SC to `0.21.0`.**
