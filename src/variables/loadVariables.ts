@@ -129,7 +129,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         // Variables that are only designed for 'Shell commands test suite'.
         built_in_variables.push(
             new Variable_Newline(plugin),
-            new Variable_OperatingSystem(plugin),
+            new Variable_OperatingSystem(plugin), // TODO: Add to hidden settings documentation.
             new Variable_Passthrough(plugin),
         );
     }
