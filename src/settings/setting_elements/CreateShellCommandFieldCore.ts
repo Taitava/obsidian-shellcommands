@@ -68,7 +68,9 @@ export function CreateShellCommandFieldCore(
         ));
     }
 
-    async function on_change(shell_command: string) {
+    async function on_change(newShellCommandContent: string) {
+        shell_command = newShellCommandContent; // Make generatePreview() use the new shell command content.
+        
         // Update preview
         await generatePreview(setting_group.preview_setting);
 
