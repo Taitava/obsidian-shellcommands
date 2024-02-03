@@ -33,6 +33,7 @@ export const Documentation = {
     },
     events: {
         folder: "https://publish.obsidian.md/shellcommands/Events/", // Keep the trailing slash!
+        debouncing: "https://publish.obsidian.md/shellcommands/Events/Events+-+debouncing",
     },
     outputHandling: {
         outputHandlingMode: "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling",

@@ -665,7 +665,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
             .addExtraButton(helpButton => helpButton
                 .setIcon("help")
                 .setTooltip("Documentation: Events - Debouncing")
-                .onClick(() => gotoURL("https://publish.obsidian.md/shellcommands/Events/Events+-+debouncing")) // TODO: Move the url to Documentation.ts
+                .onClick(() => gotoURL(Documentation.events.debouncing))
             )
             .then((setting) => {
                 setIcon(setting.descEl.createSpan(), noDebounceIcon);
