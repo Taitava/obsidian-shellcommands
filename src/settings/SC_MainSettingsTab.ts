@@ -205,7 +205,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             switch (getObsidianInstallationType()) {
                 case "Flatpak": {
                     const calloutContent: DocumentFragment = new DocumentFragment();
-                    calloutContent.createEl("p").innerHTML = "When Obsidian is installed using Flatpak, shell commands are executed in an isolated environment, which may cause some commands not to work. <a href=\"https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation\">Read more</a>.";
+                    calloutContent.createEl("p").innerHTML = "When Obsidian is installed using Flatpak, shell commands are executed in an isolated environment, which may cause some commands not to work. <a href=\"" + Documentation.problems.flatpakInstallation + "\">Read more</a>.";
                     createCallout(
                         containerElement,
                         "warning",

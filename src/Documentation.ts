@@ -39,6 +39,9 @@ export const Documentation = {
         outputHandlingMode: "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling",
         outputWrappers: "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers",
     },
+    problems: {
+        flatpakInstallation: "https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation",
+    },
     variables: {
         folder: "https://publish.obsidian.md/shellcommands/Variables/", // Keep the trailing slash!
         allVariables: "https://publish.obsidian.md/shellcommands/Variables/All+variables",
