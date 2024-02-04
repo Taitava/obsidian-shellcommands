@@ -63,7 +63,10 @@ import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
-import {Debouncer} from "./Debouncer";
+import {
+    DebounceConfiguration,
+    Debouncer,
+} from "./Debouncer";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -476,13 +479,17 @@ export class TShellCommand extends Cacheable {
     }
     
     public async executeWithDebouncing(scEvent: SC_Event): Promise<void> {
-        if (!this.configuration.debounce) {
+        if (!this.isDebouncingEnabled()) {
             throw new Error("Cannot call TShellCommand.executeWithDebouncing() if debouncing is not enabled.");
         }
         if (!this.debouncer) {
-            this.debouncer = new Debouncer(this.plugin, this.configuration.debounce, this);
+            this.debouncer = new Debouncer(this.plugin, this.configuration.debounce as DebounceConfiguration, this);
         }
         await this.debouncer.executeWithDebouncing(scEvent);
+    }
+    
+    public isDebouncingEnabled(): boolean {
+        return (!!this.configuration.debounce) && (this.configuration.debounce.executeEarly || this.configuration.debounce.executeLate);
     }
     
     /**

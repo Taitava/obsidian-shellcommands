@@ -44,7 +44,7 @@ export class Debouncer {
         switch (this.state) {
             case "idle":
                 // IDLE PHASE.
-                switch (this.configuration.mode) {
+                switch (this.getMode()) {
                     case "early-execution":
                     case "early-and-late-execution":{
                         // Execute immediately.
@@ -64,7 +64,7 @@ export class Debouncer {
                 break;
             default:
                 // EXECUTING OR COOLDOWN PHASE.
-                switch (this.configuration.mode) {
+                switch (this.getMode()) {
                     case "early-execution":
                     case "late-execution": {
                         // Nothing to do - just discard this execution.
@@ -94,7 +94,7 @@ export class Debouncer {
     
     private async afterExecuting(): Promise<void> {
         debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution ended.");
-        switch (this.configuration.mode) {
+        switch (this.getMode()) {
             case "early-execution": {
                 // Not much to do anymore, go to cooldown and clear state after it.
                 await this.cooldown();
@@ -128,7 +128,7 @@ export class Debouncer {
     
     private async afterCooldown(): Promise<void> {
         const debugMessageBase = "Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
-        switch (this.configuration.mode) {
+        switch (this.getMode()) {
             case "early-execution": {
                 // Not much to do after cooldown.
                 debugLog(debugMessageBase + "debouncing ended.");
@@ -155,16 +155,33 @@ export class Debouncer {
         }
     }
     
+    /**
+     * Translates this.configuration.executeEarly and this.configuration.executeLate to an earlier mode format that this
+     * class still uses.
+     * @private
+     */
+    private getMode(): "early-and-late-execution" | "early-execution" | "late-execution" {
+        if (this.configuration.executeEarly && this.configuration.executeLate) {
+            return "early-and-late-execution";
+        } else if (this.configuration.executeEarly) {
+            return "early-execution";
+        } else if (this.configuration.executeLate) {
+            return "late-execution";
+        } else {
+            // Debouncing is disabled.
+            throw new Error("Debouncer.getMode(): Debouncing is disabled, but it was tried to be ued.");
+        }
+    }
+    
     private getCoolDownMilliseconds(): number {
         return this.configuration.cooldown * 1000;
     }
 }
 
-type DebounceMode = "early-execution" | "late-execution" | "early-and-late-execution";
-
 type DebounceState = "idle" | "executing" | "cooldown";
 
 export interface DebounceConfiguration {
-    mode: DebounceMode,
+    executeEarly: boolean,
+    executeLate: boolean,
     cooldown: number,
 }

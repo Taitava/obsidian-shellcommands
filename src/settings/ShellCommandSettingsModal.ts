@@ -84,7 +84,6 @@ import {createVariableDefaultValueFields} from "./setting_elements/createVariabl
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
 import {createExecutionNotificationField} from "./setting_elements/createExecutionNotificationField";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
-import {DebounceConfiguration} from "../Debouncer";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -623,74 +622,97 @@ export class ShellCommandSettingsModal extends SC_Modal {
         // TODO: Extract to a separate method. Actually, consider creating subclasses for each tab, e.g. ShellCommandSettingsModal_TabEvents. Then it's more meaningful to create new tab specific methods.
         const shellCommandConfiguration: ShellCommandConfiguration = this.t_shell_command.getConfiguration();
         const noDebounceIcon: IconName = "shield-ban";
-        const debounceModeOptions = {
-            "none": "Disable debouncing",
-            "early-execution": "Execute immediately, then cooldown",
-            "late-execution": "Cooldown first, then execute",
-            "early-and-late-execution": "Execute, cooldown, execute again if needed",
-        };
-        let removedDebounceConfiguration: DebounceConfiguration | null = null;
-        new Setting(container_element)
+        const debouncingSettingsContainer = container_element.createDiv({cls: "SC-setting-group"});
+        new Setting(debouncingSettingsContainer)
             .setName("Debouncing (experimental)")
+            .setHeading()
             .setDesc("If enabled, events cannot perform multiple concurrent (or too adjacent) executions of this shell command. Debouncing does not affect events marked with ")
-            .addDropdown(dropdownComponent => dropdownComponent
-                .addOptions(debounceModeOptions)
-                .setValue(shellCommandConfiguration.debounce?.mode ?? "none")
-                .onChange((newMode: string) => {
-                    switch (newMode) {
-                        case "none": {
-                            // Disable debounce.
-                            removedDebounceConfiguration = shellCommandConfiguration.debounce; // Keep this just in case user re-enables debouncing before closing the modal.
-                            shellCommandConfiguration.debounce = null;
-                            break;
-                        }
-                        case "early-execution":
-                        case "late-execution":
-                        case "early-and-late-execution": {
-                            // Enable debounce.
-                            if (null === shellCommandConfiguration.debounce) {
-                                shellCommandConfiguration.debounce = removedDebounceConfiguration ?? { // Reuse the old configuration, if present.
-                                    mode: newMode,
-                                    cooldown: 0,
-                                };
-                            } else {
-                                shellCommandConfiguration.debounce.mode = newMode;
-                            }
-                        }
-                    }
-                    defineDebounceAdditionalSettings();
-                    this.plugin.saveSettings();
-                })
-            )
             .addExtraButton(helpButton => helpButton
                 .setIcon("help")
                 .setTooltip("Documentation: Events - Debouncing")
                 .onClick(() => gotoURL(Documentation.events.debouncing))
             )
             .then((setting) => {
+                // Append no debouncing icon and a dot to description.
                 setIcon(setting.descEl.createSpan(), noDebounceIcon);
+                setting.descEl.innerHTML += ".";
             })
         ;
-        const debounceAdditionalSettingsContainer = container_element.createDiv();
+        new Setting(debouncingSettingsContainer)
+            .setName("Execute before cooldown")
+            .addToggle(executeEarlyToggle => executeEarlyToggle
+                .setValue(shellCommandConfiguration.debounce?.executeEarly ?? false)
+                .onChange((executeEarly: boolean) => {
+                    if (null === shellCommandConfiguration.debounce) {
+                        shellCommandConfiguration.debounce = {
+                            executeEarly: executeEarly,
+                            executeLate: false,
+                            cooldown: 0,
+                        };
+                    } else {
+                        shellCommandConfiguration.debounce.executeEarly = executeEarly;
+                    }
+                    possiblyCleanupDebounceConfiguration();
+                    defineDebounceAdditionalSettings();
+                    this.plugin.saveSettings();
+                })
+            )
+        ;
+        new Setting(debouncingSettingsContainer)
+            .setName("Execute after cooldown")
+            .addToggle(executeLateToggle => executeLateToggle
+                .setValue(shellCommandConfiguration.debounce?.executeLate ?? false)
+                .onChange((executeLate: boolean) => {
+                    if (null === shellCommandConfiguration.debounce) {
+                        shellCommandConfiguration.debounce = {
+                            executeEarly: false,
+                            executeLate: executeLate,
+                            cooldown: 0,
+                        };
+                    } else {
+                        shellCommandConfiguration.debounce.executeLate = executeLate;
+                    }
+                    possiblyCleanupDebounceConfiguration();
+                    defineDebounceAdditionalSettings();
+                    this.plugin.saveSettings();
+                })
+            )
+        ;
+        const debounceAdditionalSettingsContainer = debouncingSettingsContainer.createDiv();
         const defineDebounceAdditionalSettings = () => {
             debounceAdditionalSettingsContainer.innerHTML = ""; // Remove possible earlier settings.
-            if (shellCommandConfiguration.debounce) {
+            if (this.t_shell_command.isDebouncingEnabled()) {
                 // Debouncing is enabled.
                 
-                // Description for Cooldown duration.
-                const cooldownDescriptions = {
-                    "early-execution": "the shell command is executed right-away, and <strong>subsequent executions are prevented</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution.",
-                    "late-execution": "the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase and while the execution is in progress.",
-                    "early-and-late-execution": "the shell command is executed right-away, and <strong>subsequent executions are postponed</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution. After the cooldown period ends, the shell command is possibly re-executed, if any subsequent executions were postponed.",
-                };
-                const cooldownDescription = new DocumentFragment();
-                cooldownDescription.createEl("p").innerHTML = "In <em>\"" + debounceModeOptions[shellCommandConfiguration.debounce.mode] + "\"</em> mode, " + cooldownDescriptions[shellCommandConfiguration.debounce.mode];
-                cooldownDescription.createEl("p").innerHTML = "If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set <em>Cooldown duration</em> to <code>0</code> seconds. Then the mode does not matter, all will achieve the same result.";
+                // Description for debouncing.
+                let debouncingDescription: string;
+                switch ((shellCommandConfiguration.debounce?.executeEarly ? "early" : "") + "-" + (shellCommandConfiguration.debounce?.executeLate ? "late" : "")) {
+                    case "early-late":
+                        // Both early and late execution.
+                        debouncingDescription = "When executing both <em>Before and After cooldown</em>, the shell command is executed right-away, and <strong>subsequent executions are postponed</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution. After the cooldown period ends, the shell command is possibly re-executed, if any subsequent executions were postponed.";
+                        break;
+                    case "early-":
+                        // Early execution.
+                        debouncingDescription = "When executing <em>Before cooldown</em>, the shell command is executed right-away, and <strong>subsequent executions are prevented</strong> for as long as the execution is in progress, <strong>plus</strong> the <em>Cooldown duration</em> after the execution.";
+                        break;
+                    case "-late":
+                        // Late execution.
+                        debouncingDescription = "When executing <em>After cooldown</em>, the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase and while the execution is in progress.";
+                        break;
+                    default:
+                        throw new Error("Unidentified debouncing state: " + JSON.stringify(shellCommandConfiguration.debounce));
+                }
+                const debouncingDescriptionFragment = new DocumentFragment();
+                debouncingDescriptionFragment.createDiv().innerHTML = debouncingDescription;
+                new Setting(debounceAdditionalSettingsContainer)
+                    .setClass("SC-full-description")
+                    .setDesc(debouncingDescriptionFragment)
+                ;
                 
                 // Cooldown duration setting.
                 new Setting(debounceAdditionalSettingsContainer)
                     .setName("Cooldown duration (seconds)")
-                    .setDesc(cooldownDescription)
+                    .setDesc("If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set this to 0.")
                     .addText(thresholdTextComponent => thresholdTextComponent
                         .setValue((shellCommandConfiguration.debounce?.cooldown ?? 0).toString())
                         .onChange((newThresholdString: string) => {
@@ -707,8 +729,23 @@ export class ShellCommandSettingsModal extends SC_Modal {
                         })
                     )
                 ;
+            } else {
+                // Debouncing is disabled.
+                new Setting(debounceAdditionalSettingsContainer)
+                    .setDesc("Debouncing is disabled, so executions can happen simultaneously and without delays.")
+                ;
             }
-            // If debouncing is disabled, no additional settings are needed.
+        };
+        const possiblyCleanupDebounceConfiguration = () => {
+            if (shellCommandConfiguration.debounce) {
+                if (!shellCommandConfiguration.debounce.executeEarly && !shellCommandConfiguration.debounce.executeLate) {
+                    // Debouncing is disabled, but the configuration object exists.
+                    if (shellCommandConfiguration.debounce.cooldown === 0) {
+                        // The DebounceConfiguration object can be removed. No need to remember the cooldown, because user probably did not type 0 themselves.
+                        shellCommandConfiguration.debounce = null;
+                    }
+                }
+            }
         };
         defineDebounceAdditionalSettings();
 

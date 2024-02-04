@@ -131,7 +131,7 @@ export abstract class SC_Event {
      * @param parsingProcess SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
     protected async trigger(tShellCommand: TShellCommand, parsingProcess?: ShellCommandParsingProcess) {
-        const debounce: boolean = this.static().debounce && !!tShellCommand.getConfiguration().debounce;
+        const debounce: boolean = this.static().debounce && tShellCommand.isDebouncingEnabled();
         debugLog(this.constructor.name + ": Event triggers executing shell command id " + tShellCommand.getId() + " " + (debounce ? "with" : "without") + " debouncing control.");
         if (debounce) {
             if (parsingProcess) {

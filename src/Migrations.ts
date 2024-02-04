@@ -50,6 +50,7 @@ export async function RunMigrations(plugin: SC_Plugin) {
         EnsureCustomVariablesHaveAllFields(plugin),
         EnsurePromptFieldsHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
+        MigrateDebouncingModes(plugin), // Temporary.
     ];
     if (should_save.includes(true)) {
         // Only save if there were changes to configuration.
@@ -58,6 +59,45 @@ export async function RunMigrations(plugin: SC_Plugin) {
         await plugin.saveSettings();
         debugLog("Migrations saved...");
     }
+}
+
+/**
+ * Temporary, only needed for migrating a debouncing `mode` property which was present in SC 0.22.0-beta.1, so not in any
+ * actual release. The property is removed in 0.22.0-beta.2. Keep this function a few months, then it's not needed anymore.
+ * @param plugin
+ * @constructor
+ */
+function MigrateDebouncingModes(plugin: SC_Plugin): boolean {
+    let save: boolean = false;
+    for (const shellCommandConfiguration of plugin.settings.shell_commands) {
+        if (shellCommandConfiguration.debounce) {
+            // @ts-ignore
+            if (undefined !== shellCommandConfiguration.debounce.mode) {
+                // Found a `mode` property that was present in SC 0.22.0-beta.1 .
+                // @ts-ignore
+                switch (shellCommandConfiguration.debounce.mode) {
+                    case "early-and-late-execution":
+                        shellCommandConfiguration.debounce.executeEarly = true;
+                        shellCommandConfiguration.debounce.executeLate = true;
+                        break;
+                    case "early-execution":
+                        shellCommandConfiguration.debounce.executeEarly = true;
+                        shellCommandConfiguration.debounce.executeLate = false;
+                        break;
+                    case "late-execution":
+                        shellCommandConfiguration.debounce.executeEarly = false;
+                        shellCommandConfiguration.debounce.executeLate = true;
+                        break;
+                }
+                // @ts-ignore
+                debugLog("Migration: Shell command #" + shellCommandConfiguration.id + " had a deprecated debounce.mode property (" + shellCommandConfiguration.debounce.mode + "). It was migrated to debounce.executeEarly (" + (shellCommandConfiguration.debounce.executeEarly ? "true" : "false") + ") and debounce.executeLate (" + (shellCommandConfiguration.debounce.executeLate ? "true" : "false") + ").");
+                // @ts-ignore
+                delete shellCommandConfiguration.debounce.mode;
+                save = true;
+            }
+        }
+    }
+    return save;
 }
 
 /**
