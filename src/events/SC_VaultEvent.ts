@@ -37,7 +37,7 @@ export abstract class SC_VaultEvent extends SC_Event {
         | "closed" // Not implement by any SC_Event_* class, because I'm not sure if this event is needed. But can be implemented if need be.
     ;
     protected abstract file_or_folder: "file" | "folder";
-    protected file: TFile;
+    protected file: TFile; // TODO: Create a new class EventOccurrence and move `file` and `folder` properties there, to avoid simultaneous event occurrences affecting each others' properties. (`file_or_folder` should be kept here as it's not occurrence related).
     protected folder: TFolder;
 
     protected _register(t_shell_command: TShellCommand): false | EventRef {
