@@ -25,6 +25,7 @@ Features that are currently in development and not released yet. This does not i
     - Also added a setting for enabling notifications when custom variables' values change.
 - [Ribbon icon for Custom variables view (#386)](https://github.com/Taitava/obsidian-shellcommands/issues/386).
 - [New variables `{{obsidian_api_version}}` and `{{shell_commands_plugin_version}}` (#387)](https://github.com/Taitava/obsidian-shellcommands/issues/387).
+- [`{{event_type}}` variable (#394)](https://github.com/Taitava/obsidian-shellcommands/issues/394).
 
 ### To be Changed
 - [Settings: Make _"Show a notification when executing shell commands"_ decidable on a per shell command basis (388)](https://github.com/Taitava/obsidian-shellcommands/issues/388).
