@@ -40,7 +40,7 @@ export class SC_Event_onLayoutReady extends SC_Event {
     
     public getType(): EventType {
         // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
-        return "application-starts";
+        return "application-started";
     }
     
     public getCategory(): EventCategory {

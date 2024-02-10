@@ -27,6 +27,6 @@ export class SC_Event_onActiveLeafChanged extends SC_WorkspaceEvent {
     
     public getType(): EventType {
         // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
-        return "switching-active-leaf";
+        return "active-leaf-switched";
     }
 }

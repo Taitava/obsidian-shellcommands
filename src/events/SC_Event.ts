@@ -259,8 +259,9 @@ export abstract class SC_Event {
 }
 
 export type EventType = // TODO: Find out a way to derive this from EventTypes.
-    "application-quits"     |     // Keep in alphabetic order.
-    "application-starts"    |
+    "active-leaf-switched"  |     // Keep in alphabetic order.
+    "application-quit"      |
+    "application-started"   |
     "caret-moved"           |
     "editor-menu-item"      |
     "every-n-seconds"       |
@@ -274,12 +275,12 @@ export type EventType = // TODO: Find out a way to derive this from EventTypes.
     "folder-deleted"        |
     "folder-menu-item"      |
     "folder-moved"          |
-    "folder-renamed"        |
-    "switching-active-leaf"
+    "folder-renamed"
 ;                                 // Keep in alphabetic order.
 export const EventTypes = [
-    "application-quits",          // Keep in alphabetic order.
-    "application-starts",
+    "active-leaf-switched",       // Keep in alphabetic order.
+    "application-quit",
+    "application-started",
     "caret-moved",
     "editor-menu-item",
     "every-n-seconds",
@@ -294,7 +295,6 @@ export const EventTypes = [
     "folder-menu-item",
     "folder-moved",
     "folder-renamed",
-    "switching-active-leaf",
 ];                                // Keep in alphabetic order.
 
 export type EventCategory =       // TODO: Find out a way to derive this from EventCategories.
