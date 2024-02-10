@@ -152,6 +152,16 @@ export abstract class SC_Event {
     public static getTitle() {
         return this.event_title;
     }
+    
+    /**
+     * Used by the {{event_type}} variable.
+     */
+    public abstract getType(): EventType;
+    
+    /**
+     * Used by the {{event_type:category}} variable.
+     */
+    public abstract getCategory(): EventCategory;
 
     /**
      * Creates a list of variables to the given container element. Each variable is a link to its documentation.
@@ -247,3 +257,62 @@ export abstract class SC_Event {
         return Documentation.events.folder + encodeURIComponent(this.event_title);
     }
 }
+
+export type EventType = // TODO: Find out a way to derive this from EventTypes.
+    "application-quits"     |     // Keep in alphabetic order.
+    "application-starts"    |
+    "caret-moved"           |
+    "editor-menu-item"      |
+    "every-n-seconds"       |
+    "file-content-modified" |
+    "file-created"          |
+    "file-deleted"          |
+    "file-menu-item"        |
+    "file-moved"            |
+    "file-renamed"          |
+    "folder-created"        |
+    "folder-deleted"        |
+    "folder-menu-item"      |
+    "folder-moved"          |
+    "folder-renamed"        |
+    "switching-active-leaf"
+;                                 // Keep in alphabetic order.
+export const EventTypes = [
+    "application-quits",          // Keep in alphabetic order.
+    "application-starts",
+    "caret-moved",
+    "editor-menu-item",
+    "every-n-seconds",
+    "file-content-modified",
+    "file-created",
+    "file-deleted",
+    "file-menu-item",
+    "file-moved",
+    "file-renamed",
+    "folder-created",
+    "folder-deleted",
+    "folder-menu-item",
+    "folder-moved",
+    "folder-renamed",
+    "switching-active-leaf",
+];                                // Keep in alphabetic order.
+
+export type EventCategory =       // TODO: Find out a way to derive this from EventCategories.
+    "application"   |             // Keep in alphabetic order.
+    "editor"        |
+    "file"          |
+    "folder"        |
+    "menu"          |
+    "time"          |
+    "workspace"
+;
+
+export const EventCategories = [
+    "application",                // Keep in alphabetic order.
+    "editor",
+    "file",
+    "folder",
+    "menu",
+    "time",
+    "workspace",
+];

@@ -20,6 +20,7 @@
 import {TShellCommand} from "../TShellCommand";
 import {Editor, MarkdownView, Menu} from "obsidian";
 import {SC_MenuEvent} from "./SC_MenuEvent";
+import {EventType} from "./SC_Event";
 
 export class SC_Event_EditorMenu extends SC_MenuEvent {
     protected static readonly event_code = "editor-menu";
@@ -32,4 +33,8 @@ export class SC_Event_EditorMenu extends SC_MenuEvent {
         };
     }
 
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "editor-menu-item";
+    }
 }

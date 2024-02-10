@@ -18,9 +18,22 @@
  */
 
 import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
+import {
+    EventCategory,
+    EventType,
+} from "./SC_Event";
 
 export class SC_Event_onQuit extends SC_WorkspaceEvent {
     protected static readonly event_code = "on-quit";
     protected static readonly event_title = "Obsidian quits";
     protected readonly workspace_event = "quit";
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "application-quits";
+    }
+    
+    public getCategory(): EventCategory {
+        return "application";
+    }
 }

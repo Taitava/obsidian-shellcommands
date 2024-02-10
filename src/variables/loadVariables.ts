@@ -65,6 +65,7 @@ import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLCon
 import {Variable_OperatingSystem} from "./Variable_OperatingSystem";
 import {Variable_ObsidianAPIVersion} from "./Variable_ObsidianAPIVersion";
 import {Variable_ShellCommandsPluginVersion} from "./Variable_ShellCommandsPluginVersion";
+import {Variable_EventType} from "./event_variables/Variable_EventType";
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
@@ -122,6 +123,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_EventOldTitle(plugin),
         new Variable_EventTags(plugin),
         new Variable_EventTitle(plugin),
+        new Variable_EventType(plugin),
         new Variable_EventYAMLContent(plugin),
         new Variable_EventYAMLValue(plugin),
     ];

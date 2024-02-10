@@ -27,10 +27,12 @@ export abstract class EventVariable extends Variable {
     protected always_available = false;
 
     /**
+     * If true, the variable is available during all events.
+     *
      * @protected
      * @abstract Should be abstract, but cannot mark is as abstract because it's also static.
      */
-    protected supported_sc_events: typeof SC_Event[];
+    protected supported_sc_events: typeof SC_Event[] | true;
 
     /**
      * Every subclass should call this method in their generateValue() before generating a value. This method will throw
@@ -52,10 +54,18 @@ export abstract class EventVariable extends Variable {
     }
 
     public supportsSC_Event(sc_event_class: typeof SC_Event): boolean {
+        if (this.supported_sc_events === true) {
+            // The variable supports all events.
+            return true;
+        }
         return this.supported_sc_events.contains(sc_event_class);
     }
 
     private getSummaryOfSupportedEvents(): string {
+        if (this.supported_sc_events === true) {
+            // The variable supports all events.
+            return "All events";
+        }
         const sc_event_titles: string[] = [];
         this.supported_sc_events.forEach((sc_event_class: typeof SC_Event) => {
             sc_event_titles.push(sc_event_class.getTitle());

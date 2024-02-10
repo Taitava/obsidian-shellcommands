@@ -17,7 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_Event} from "./SC_Event";
+import {
+    EventCategory,
+    EventType,
+    SC_Event,
+} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
 import {Notice, Setting} from "obsidian";
@@ -104,6 +108,15 @@ export class SC_Event_EveryNSeconds extends SC_Event {
 
     private noticeAboutEnabling(t_shell_command: TShellCommand) {
         new Notice("The shell command will run every " + this.getConfiguration(t_shell_command).seconds + " seconds");
+    }
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "every-n-seconds";
+    }
+    
+    public getCategory(): EventCategory {
+        return "time";
     }
 }
 

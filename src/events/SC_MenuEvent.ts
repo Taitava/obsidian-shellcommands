@@ -25,6 +25,7 @@ import {
 } from "obsidian";
 import {ParsingResult} from "../variables/parseVariables";
 import {debugLog} from "../Debug";
+import {EventCategory} from "./SC_Event";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
     
@@ -83,5 +84,9 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
                 debugLog(debugLogBaseMessage + "Alias parsing is disabled in settings.");
             }
         });
+    }
+    
+    public getCategory(): EventCategory {
+        return "menu";
     }
 }

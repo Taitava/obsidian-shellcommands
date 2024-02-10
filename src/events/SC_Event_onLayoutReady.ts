@@ -17,7 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_Event} from "./SC_Event";
+import {
+    EventCategory,
+    EventType,
+    SC_Event,
+} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
 export class SC_Event_onLayoutReady extends SC_Event {
@@ -33,5 +37,13 @@ export class SC_Event_onLayoutReady extends SC_Event {
     protected _unregister(t_shell_command: TShellCommand): void {
         // No need to unregister, because this event happens only once when Obsidian starts. If the event is not enabled for a shell command, next time Obsidian starts, this event won't get registered.
     }
-
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "application-starts";
+    }
+    
+    public getCategory(): EventCategory {
+        return "application";
+    }
 }
