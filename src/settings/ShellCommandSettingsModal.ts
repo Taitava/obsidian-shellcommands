@@ -51,7 +51,7 @@ import {SC_Event} from "../events/SC_Event";
 import {
     copyToClipboard,
     gotoURL,
-} from "../Common";
+} from "../common/commonOthers";
 import {SC_Modal} from "../SC_Modal";
 import {
     getDefaultPreaction_Prompt_Configuration,

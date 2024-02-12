@@ -38,12 +38,12 @@ import {
     setIcon,
     WorkspaceLeaf,
 } from 'obsidian';
+import {combineObjects} from "./common/commonIndependent";
+import {getPluginAbsolutePath} from "./common/commonFileSystem";
 import {
-	combineObjects,
 	getOperatingSystem,
-	getPluginAbsolutePath,
     isWindows,
-} from "./Common";
+} from "./common/commonPlatform";
 import {RunMigrations} from "./Migrations";
 import {
     ShellCommandConfiguration,

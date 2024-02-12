@@ -30,7 +30,7 @@ import {
 } from "./OutputHandlerCode";
 import {debugLog} from "../Debug";
 import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
-import {joinObjectProperties} from "../Common";
+import {joinObjectProperties} from "../common/commonIndependent";
 import {Variable_Output} from "../variables/Variable_Output";
 import {parseVariables} from "../variables/parseVariables";
 import {VariableSet} from "../variables/loadVariables";

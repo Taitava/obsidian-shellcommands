@@ -34,10 +34,8 @@ import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
 import {EOL} from "os";
-import {
-    escapeMarkdownLinkCharacters,
-    copyToClipboard,
-} from "../../Common";
+import {copyToClipboard} from "../../common/commonOthers";
+import {escapeMarkdownLinkCharacters} from "src/common/commonIndependent";
 import {
     ShellCommandExecutor,
 } from "../../imports";

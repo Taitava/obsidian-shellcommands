@@ -23,7 +23,8 @@ import {
     PlatformId,
     PlatformNames,
 } from "../SC_MainSettings";
-import {extractFileName, getOperatingSystem} from "../../Common";
+import {extractFileName} from "../../common/commonFileSystem";
+import {getOperatingSystem} from "../../common/commonPlatform";
 import {
     getShellsForPlatform,
     getUsersDefaultShellIdentifier,

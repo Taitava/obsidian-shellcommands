@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {isWindows} from "../Common";
+import {isWindows} from "../common/commonPlatform";
 import {PlatformId} from "../settings/SC_MainSettings";
 import {Shell} from "./Shell";
 import {Shell_Bash} from "./Shell_Bash";

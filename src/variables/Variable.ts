@@ -28,7 +28,7 @@ import {ParsingResult} from "./parseVariables";
 import {Documentation} from "../Documentation";
 import {EOL} from "os";
 import {Shell} from "../shells/Shell";
-import {tryTo} from "../Common";
+import {tryTo} from "../common/commonIndependent";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.

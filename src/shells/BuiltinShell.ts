@@ -23,7 +23,7 @@ import {
 } from "./Shell";
 import {
     extractFileName,
-} from "../Common";
+} from "../common/commonFileSystem";
 import {
     convertNewlinesToPATHSeparators,
     getPATHEnvironmentVariableName,

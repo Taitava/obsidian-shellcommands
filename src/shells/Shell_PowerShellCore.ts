@@ -19,10 +19,8 @@
 
 import {PowerShellEscaper} from "../variables/escapers/PowerShellEscaper";
 import {PlatformId} from "../settings/SC_MainSettings";
-import {
-    isWindows,
-    normalizePath2,
-} from "../Common";
+import {isWindows} from "../common/commonPlatform";
+import {normalizePath2} from "../common/commonObsidian";
 import {Escaper} from "../variables/escapers/Escaper";
 import {BuiltinShell} from "./BuiltinShell";
 

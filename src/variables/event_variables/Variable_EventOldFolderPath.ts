@@ -18,9 +18,7 @@
  */
 
 import {EventVariable} from "./EventVariable";
-import {
-    getVaultAbsolutePath,
-} from "../../Common";
+import {getVaultAbsolutePath} from "../../common/commonFileSystem";
 import {IParameters} from "../Variable";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";

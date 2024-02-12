@@ -18,7 +18,7 @@
  */
 
 import {FileVariable} from "./FileVariable";
-import {getFileContentWithoutYAML} from "../Common";
+import {getFileContentWithoutYAML} from "../common/commonObsidian";
 
 export class Variable_NoteContent extends FileVariable {
     public variable_name = "note_content";

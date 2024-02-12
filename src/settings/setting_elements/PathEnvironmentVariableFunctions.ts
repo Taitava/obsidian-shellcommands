@@ -27,10 +27,8 @@ import {
     PlatformId,
     PlatformNames,
 } from "../SC_MainSettings";
-import {
-    getOperatingSystem,
-    gotoURL,
-} from "../../Common";
+import {getOperatingSystem} from "../../common/commonPlatform";
+import {gotoURL} from "../../common/commonOthers";
 import {ConfirmationModal} from "../../ConfirmationModal";
 import {createAutocomplete} from "./Autocomplete";
 import {Documentation} from "../../Documentation";

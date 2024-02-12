@@ -18,7 +18,7 @@
  */
 
 import {PlatformId} from "../settings/SC_MainSettings";
-import {normalizePath2} from "../Common";
+import {normalizePath2} from "../common/commonObsidian";
 import {BuiltinShell} from "./BuiltinShell";
 
 export class Shell_CMD extends BuiltinShell {

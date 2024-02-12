@@ -23,9 +23,9 @@ import {
 } from "obsidian";
 import {
     combineObjects,
-    createCallout,
     randomInteger,
-} from "../../../Common";
+} from "../../../common/commonIndependent";
+import {createCallout} from "../../../common/commonObsidian";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 import {
     CustomVariableInstance,

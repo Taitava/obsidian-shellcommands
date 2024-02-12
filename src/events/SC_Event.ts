@@ -24,7 +24,7 @@ import {
     TShellCommand,
 } from "../models/shell_command/TShellCommand";
 import {SC_EventConfiguration} from "./SC_EventConfiguration";
-import {cloneObject} from "../Common";
+import {cloneObject} from "../common/commonIndependent";
 import {Variable} from "../variables/Variable";
 import {EventVariable} from "../variables/event_variables/EventVariable";
 import {Documentation} from "../Documentation";

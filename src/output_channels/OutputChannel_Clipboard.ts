@@ -18,7 +18,7 @@
  */
 
 import {OutputChannel} from "./OutputChannel";
-import {copyToClipboard} from "../Common";
+import {copyToClipboard} from "../common/commonOthers";
 import {EOL} from "os";
 
 export class OutputChannel_Clipboard extends OutputChannel {

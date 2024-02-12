@@ -28,13 +28,13 @@ import {
     normalizePath,
     PaneType,
 } from "obsidian";
+import {isWindows} from "../common/commonPlatform";
+import {isInteger} from "../common/commonIndependent";
+import {getVaultAbsolutePath} from "../common/commonFileSystem";
 import {
     getEditor,
-    getVaultAbsolutePath,
-    isInteger,
-    isWindows,
     prepareEditorPosition,
-} from "../Common";
+} from "../common/commonObsidian";
 import * as path from "path";
 import {EOL} from "os";
 import {debugLog} from "../Debug";

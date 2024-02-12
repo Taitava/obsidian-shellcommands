@@ -32,7 +32,7 @@ import {
 import {createAutocomplete} from "./Autocomplete";
 import {TShellCommand} from "../../models/shell_command/TShellCommand";
 import {CustomVariable} from "../../variables/CustomVariable";
-import {gotoURL} from "../../Common";
+import {gotoURL} from "../../common/commonOthers";
 
 export function createVariableDefaultValueFields(plugin: SC_Plugin, containerElement: HTMLElement, targetObject: Variable | TShellCommand) {
 

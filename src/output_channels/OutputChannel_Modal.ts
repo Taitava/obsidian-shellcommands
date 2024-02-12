@@ -33,7 +33,7 @@ import {
 import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_Modal} from "../SC_Modal";
-import {getSelectionFromTextarea} from "../Common";
+import {getSelectionFromTextarea} from "../common/commonIndependent";
 import {
     CmdOrCtrl,
     isCmdOrCtrlPressed,

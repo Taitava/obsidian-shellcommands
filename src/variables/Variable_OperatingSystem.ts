@@ -26,7 +26,7 @@ import {Shell} from "../shells/Shell";
 import {
     getCurrentPlatformName,
     getOperatingSystem,
-} from "../Common";
+} from "../common/commonPlatform";
 
 export class Variable_OperatingSystem extends Variable{
     public variable_name = "operating_system";

@@ -20,12 +20,12 @@
 import {
     ChildProcess,
 } from "child_process";
+import {cloneObject} from "./common/commonIndependent";
+import {getVaultAbsolutePath} from "./common/commonFileSystem";
 import {
-    cloneObject,
     getCurrentPlatformName,
     getPlatformName,
-    getVaultAbsolutePath,
-} from "./Common";
+} from "./common/commonPlatform";
 import * as path from "path";
 import * as fs from "fs";
 import {

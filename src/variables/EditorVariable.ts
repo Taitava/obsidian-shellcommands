@@ -21,7 +21,7 @@ import {Variable} from "./Variable";
 import {
     getEditor,
     getView,
-} from "../Common";
+} from "../common/commonObsidian";
 import {
     Editor,
     MarkdownView,

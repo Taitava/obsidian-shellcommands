@@ -27,11 +27,11 @@ import {
 import {Setting} from "obsidian";
 import {CustomShellInstance} from "./CustomShellInstance";
 import {debugLog} from "../../Debug";
+import {createMultilineTextElement} from "../../common/commonIndependent";
 import {
-    createMultilineTextElement,
     getOperatingSystem,
     isWindows,
-} from "../../Common";
+} from "../../common/commonPlatform";
 import {
     IPlatformSpecificString,
     PlatformId,

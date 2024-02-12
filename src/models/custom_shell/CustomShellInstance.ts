@@ -37,7 +37,7 @@ import {
     TShellCommand,
     TShellCommandMap,
 } from "../shell_command/TShellCommand";
-import {ensureObjectHasProperties} from "../../Common";
+import {ensureObjectHasProperties} from "../../common/commonIndependent";
 import {
     Usage,
     UsageContainer,

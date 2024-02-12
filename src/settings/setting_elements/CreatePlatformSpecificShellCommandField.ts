@@ -21,7 +21,7 @@ import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import SC_Plugin from "../../main";
 import {TShellCommand} from "../../models/shell_command/TShellCommand";
 import {PlatformId} from "../SC_MainSettings";
-import {getPlatformName} from "../../Common";
+import {getPlatformName} from "../../common/commonPlatform";
 
 export function createPlatformSpecificShellCommandField(
     plugin: SC_Plugin,

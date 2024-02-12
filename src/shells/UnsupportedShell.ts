@@ -19,8 +19,8 @@
 import {
     getCurrentPlatformName,
     isWindows,
-    normalizePath2,
-} from "../Common";
+} from "../common/commonPlatform";
+import {normalizePath2} from "../common/commonObsidian";
 import {
     PlatformId,
 } from "../settings/SC_MainSettings";

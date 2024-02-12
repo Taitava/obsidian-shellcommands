@@ -28,12 +28,12 @@ import {
 } from "obsidian";
 import SC_Plugin from "../main";
 import {
-    createCallout,
     getCurrentPlatformName,
     getObsidianInstallationType,
-    getVaultAbsolutePath,
-    gotoURL,
-} from "../Common";
+} from "../common/commonPlatform";
+import {createCallout} from "../common/commonObsidian";
+import {gotoURL} from "../common/commonOthers";
+import {getVaultAbsolutePath} from "../common/commonFileSystem";
 import {createShellSelectionFields} from "./setting_elements/CreateShellSelectionFields";
 import {createShellCommandField} from "./setting_elements/CreateShellCommandField";
 import {createTabs, TabStructure} from "./setting_elements/Tabs";

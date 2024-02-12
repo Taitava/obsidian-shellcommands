@@ -30,7 +30,7 @@ import {
     VariableValueResult,
 } from "./Variable";
 import {TShellCommand} from "../models/shell_command/TShellCommand";
-import {removeFromSet} from "../Common";
+import {removeFromSet} from "../common/commonIndependent";
 import {Shell} from "../shells/Shell";
 
 /**

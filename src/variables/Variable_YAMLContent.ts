@@ -18,7 +18,7 @@
  */
 
 import {FileVariable} from "./FileVariable";
-import {getFileYAML} from "../Common";
+import {getFileYAML} from "../common/commonObsidian";
 import {IParameters} from "./Variable";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {TFile} from "obsidian";

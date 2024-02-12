@@ -25,7 +25,7 @@ import {
 import SC_Plugin from "../../main";
 import {AutocompleteResult} from "autocompleter/autocomplete";
 import {getVariableAutocompleteItems} from "../../variables/getVariableAutocompleteItems";
-import {gotoURL} from "../../Common";
+import {gotoURL} from "../../common/commonOthers";
 
 /**
  *

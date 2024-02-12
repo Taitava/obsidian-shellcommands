@@ -18,7 +18,7 @@
  */
 
 import {EventVariable} from "./EventVariable";
-import {extractFileName} from "../../Common";
+import {extractFileName} from "../../common/commonFileSystem";
 import {SC_Event_FolderRenamed} from "../../events/SC_Event_FolderRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {Shell} from "../../shells/Shell";

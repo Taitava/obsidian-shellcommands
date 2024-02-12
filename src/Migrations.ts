@@ -21,11 +21,9 @@ import SC_Plugin from "./main";
 import {newShellCommandConfiguration, ShellCommandConfiguration} from "./settings/ShellCommandConfiguration";
 import {debugLog} from "./Debug";
 import * as fs from "fs";
-import {
-    combineObjects,
-    getPluginAbsolutePath,
-    isWindows,
-} from "./Common";
+import {combineObjects} from "./common/commonIndependent";
+import {getPluginAbsolutePath} from "./common/commonFileSystem";
+import {isWindows} from "./common/commonPlatform";
 import * as path from "path";
 import {getDefaultSettings} from "./settings/SC_MainSettings";
 import {

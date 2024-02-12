@@ -25,7 +25,7 @@ import SC_Plugin from "../../main";
 import {
     cloakPassword,
     createMultilineTextElement,
-} from "../../Common";
+} from "../../common/commonIndependent";
 
 export class CustomVariableView extends ItemView {
 

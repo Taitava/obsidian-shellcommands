@@ -26,12 +26,9 @@ import {Escaper} from "../variables/escapers/Escaper";
 import {PlatformId} from "../settings/SC_MainSettings";
 import {PowerShellEscaper} from "../variables/escapers/PowerShellEscaper";
 import {ShEscaper} from "../variables/escapers/ShEscaper";
-import {
-    getOperatingSystem,
-    isWindows,
-    mergeSets,
-    normalizePath2,
-} from "../Common";
+import { getOperatingSystem, isWindows } from "src/common/commonPlatform";
+import { normalizePath2 } from "src/common/commonObsidian";
+import { mergeSets } from "src/common/commonIndependent";
 import SC_Plugin from "../main";
 import {CustomShellConfiguration} from "../models/custom_shell/CustomShellModel";
 import {Variable_ShellCommandContent} from "../variables/Variable_ShellCommandContent";

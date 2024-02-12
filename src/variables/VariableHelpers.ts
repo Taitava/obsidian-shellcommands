@@ -17,7 +17,8 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getVaultAbsolutePath, uniqueArray} from "../Common";
+import {getVaultAbsolutePath} from "../common/commonFileSystem";
+import {uniqueArray} from "../common/commonIndependent";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
 import {Shell} from "../shells/Shell";
 

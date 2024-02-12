@@ -18,7 +18,7 @@
  */
 
 import {OutputChannel} from "./OutputChannel";
-import {getEditor, getView} from "../Common";
+import {getEditor, getView} from "../common/commonObsidian";
 import {Editor} from "obsidian";
 import {debugLog} from "../Debug";
 

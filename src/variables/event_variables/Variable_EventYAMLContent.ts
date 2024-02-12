@@ -24,7 +24,7 @@ import {SC_Event_FileContentModified} from "../../events/SC_Event_FileContentMod
 import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
-import {getFileYAML} from "../../Common";
+import {getFileYAML} from "../../common/commonObsidian";
 import {IAutocompleteItem} from "../../settings/setting_elements/Autocomplete";
 import {IParameters} from "../Variable";
 import {Shell} from "../../shells/Shell";

@@ -29,14 +29,14 @@ import {
     PlatformNames,
     PlatformNamesMap,
 } from "../../settings/SC_MainSettings";
+import {lookUpFileWithBinaryExtensionsOnWindows} from "../../common/commonFileSystem";
+import {createMultilineTextElement} from "../../common/commonIndependent";
 import {
-    lookUpFileWithBinaryExtensionsOnWindows,
-    createMultilineTextElement,
     getCurrentPlatformName,
     getOperatingSystem,
     getPlatformName,
-    gotoURL,
-} from "../../Common";
+} from "../../common/commonPlatform";
+import {gotoURL} from "../../common/commonOthers";
 import {CreateShellCommandFieldCore} from "../../settings/setting_elements/CreateShellCommandFieldCore";
 import {ShellCommandExecutor} from "../../ShellCommandExecutor";
 import {

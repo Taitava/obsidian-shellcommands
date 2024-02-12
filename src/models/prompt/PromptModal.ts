@@ -25,7 +25,7 @@ import {SC_Event} from "../../events/SC_Event";
 import {
     cloakPassword,
     createMultilineTextElement,
-} from "../../Common";
+} from "../../common/commonIndependent";
 import {Variable, VariableValueResult} from "../../variables/Variable";
 import {
     CustomVariable,

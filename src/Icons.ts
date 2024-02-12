@@ -18,7 +18,7 @@
  */
 
 import {setIcon} from "obsidian";
-import {uniqueArray} from "./Common";
+import {uniqueArray} from "./common/commonIndependent";
 
 /**
  * A wrapper for Obsidian's setIcon(), but with the difference that this one does not need a container as a parameter.

@@ -19,12 +19,12 @@
 
 import {ShellCommandConfiguration} from "../../settings/ShellCommandConfiguration";
 import SC_Plugin from "../../main";
+import {generateObsidianCommandName} from "../../common/commonOthers";
+import {getOperatingSystem} from "../../common/commonPlatform";
 import {
-    generateObsidianCommandName,
-    getOperatingSystem,
     mergeSets,
     removeFromSet,
-} from "../../Common";
+} from "../../common/commonIndependent";
 import {SC_Event} from "../../events/SC_Event";
 import {getSC_Events} from "../../events/SC_EventList";
 import {debugLog} from "../../Debug";

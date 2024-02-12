@@ -23,7 +23,7 @@ import {TAbstractFile} from "obsidian";
 import {
     extractFileName,
     extractFileParentPath,
-} from "../Common";
+} from "../common/commonFileSystem";
 
 export abstract class SC_VaultMoveOrRenameEvent extends SC_VaultEvent {
     protected readonly vault_event = "rename";

@@ -28,7 +28,7 @@ import {
 import {debugLog} from "../Debug";
 import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_Event} from "../events/SC_Event";
-import {cloneObject} from "../Common";
+import {cloneObject} from "../common/commonIndependent";
 import {getPATHEnvironmentVariableName} from "../settings/setting_elements/PathEnvironmentVariableFunctions";
 
 export abstract class Shell {

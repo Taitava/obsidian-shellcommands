@@ -27,7 +27,7 @@ import {VariableSet} from "./loadVariables";
 import {
     cloneObject,
     uniqueArray,
-} from "../Common";
+} from "../common/commonIndependent";
 import {TShellCommand} from "../models/shell_command/TShellCommand";
 import {debugLog} from "../Debug";
 

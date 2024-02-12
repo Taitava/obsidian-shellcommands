@@ -50,7 +50,7 @@ import {
     deepEqual,
     ensureObjectHasProperties,
     getObjectSurplusProperties,
-} from "../../../Common";
+} from "../../../common/commonIndependent";
 
 export class PromptField extends Instance {
 

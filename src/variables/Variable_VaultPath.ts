@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getVaultAbsolutePath} from "../Common";
+import {getVaultAbsolutePath} from "../common/commonFileSystem";
 import {Variable} from "./Variable";
 import {Shell} from "../shells/Shell";
 
