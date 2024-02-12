@@ -16,9 +16,29 @@ Mind the order!
 -->
 
 ## [Unreleased]
-Features that are in development, but are not released yet. Does not include stuff that requires longer planning - for those, see [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas).
+Features that are currently in development and not released yet are listed below. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
 - Nothing at the moment.
+
+## [0.21.0] - 2023-12-30
+
+**SC VERSION `0.21.0` INCREASES THE MINIMUM OBSIDIAN VERSION REQUIREMENT TO `1.4.0`. Older versions of Obsidian cannot upgrade SC to `0.21.0`.**
+
+### Added
+- [Prompts: Support different field types (#365)](https://github.com/Taitava/obsidian-shellcommands/issues/365).
+- [Linux: Display a warning if Obsidian is installed using Flatpak (#368)](https://github.com/Taitava/obsidian-shellcommands/issues/368).
+
+### Changed
+- [Make variables `{{note_content}}` and `{{yaml_content}}` compatible with Obsidian `>= 1.4.0` (#372)](https://github.com/Taitava/obsidian-shellcommands/issues/372).
+  - No practical changes to the variables' behavior.
+  - This change increases the SC plugin's minimum Obsidian version requirement to `1.4.0`.
+
+## [0.20.1] - 2023-11-28
+
+### Fixed
+- [Fixed: Cmd + click not working on macOS (#347)](https://github.com/Taitava/obsidian-shellcommands/issues/347).
+- [Fixed: UI bug in settings: Wrong shell names displayed under shell command previews (#366)](https://github.com/Taitava/obsidian-shellcommands/issues/366).
+- [Fixed: If `PATH` additions are cleared in settings, old additions still apply until the plugin is restarted (#362)](https://github.com/Taitava/obsidian-shellcommands/issues/362).
 
 ## [0.20.0] - 2023-06-25
 
@@ -415,7 +435,8 @@ Features that are in development, but are not released yet. Does not include stu
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...HEAD
+[0.20.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...0.20.0
 [0.19.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.0...0.19.1
 [0.19.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.18.2...0.19.0

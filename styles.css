@@ -92,9 +92,10 @@ div.SC-setting-group div.setting-item.SC-wide-description div.setting-item-contr
 }
 
 div.SC-setting-group div.setting-item input[type=text],
+div.SC-setting-group div.setting-item input[type=password],
 div.SC-setting-group div.setting-item input[type=search],
 div.SC-setting-group div.setting-item textarea,
-div.SC-setting-group div.setting-item select {
+div.SC-setting-group div.setting-item:not(.setting-item-heading) select {
     width: 100%; /* Enlarge fields. */
     max-width: 100%; /* Remove a maximum width limitation, at least <select> elements had one. */
 }

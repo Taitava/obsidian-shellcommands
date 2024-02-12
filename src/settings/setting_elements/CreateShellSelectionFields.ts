@@ -37,6 +37,7 @@ export function createShellSelectionFields(
     containerElement: HTMLElement,
     shells: IPlatformSpecificString,
     is_global_settings: boolean,
+    onChange?: (platformId: PlatformId) => void,
 ): IPlatformSpecificValues<Setting> {
     const shellSelectionSettings: IPlatformSpecificValues<Setting> = {
         darwin: new Setting(containerElement),
@@ -78,6 +79,7 @@ export function createShellSelectionFields(
                             shells[_platform_id] = value;
                         }
                         await plugin.saveSettings();
+                        onChange?.(_platform_id);
                     };
                 })(platform_id))
             )

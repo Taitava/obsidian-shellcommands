@@ -213,7 +213,7 @@ export abstract class Shell {
      *
      * @param pathAugmentation
      */
-    public setEnvironmentVariablePathAugmentation?(pathAugmentation: string): void;
+    public setEnvironmentVariablePathAugmentation?(pathAugmentation: string | undefined): void;
 
     protected augmentPATHEnvironmentVariable?(): string;
 

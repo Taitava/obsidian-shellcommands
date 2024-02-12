@@ -62,3 +62,11 @@ export function HotkeyToString(hotkey: Hotkey) {
 export function CmdOrCtrl(): "Cmd" | "Ctrl" {
     return Platform.isMacOS ? "Cmd" : "Ctrl";
 }
+
+export function isCmdOrCtrlPressed(event: MouseEvent) {
+    if (Platform.isMacOS) {
+        return event.metaKey;
+    } else {
+        return event.ctrlKey;
+    }
+}

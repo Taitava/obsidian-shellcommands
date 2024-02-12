@@ -54,7 +54,7 @@ export async function parseVariables(
         sc_event?: SC_Event | null,
         variables: VariableSet = plugin.getVariables(),
         raw_value_augmenter: ((variable: Variable, raw_value: VariableValueResult) => void) | null = null,
-        escaped_value_augmenter: ((variable: Variable, escaped_value: string) => string) | null = null,
+        escaped_value_augmenter: ((variable: Variable, escaped_value: string, originalValue: string) => string) | null = null,
     ): Promise<ParsingResult> {
 
     debugLog("parseVariables(): Starting to parse " + content + " with " + variables.size + " variables.");
@@ -163,7 +163,7 @@ export async function parseVariables(
 
                 // Augment the escaped value, if wanted.
                 if (escaped_value_augmenter) {
-                    use_variable_value = escaped_value_augmenter(variable, use_variable_value);
+                    use_variable_value = escaped_value_augmenter(variable, use_variable_value, raw_variable_value as string);
                 }
 
                 // Replace the variable name with the variable value.

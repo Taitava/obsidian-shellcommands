@@ -35,6 +35,9 @@ import {
 import {getModel} from "./models/Model";
 import {OutputStream} from "./output_channels/OutputHandlerCode";
 import {OutputChannel} from "./output_channels/OutputChannel";
+import {PromptFieldModel} from "./models/prompt/prompt_fields/PromptFieldModel";
+import {PromptConfiguration} from "./models/prompt/Prompt";
+import {PromptFieldConfiguration} from "./models/prompt/prompt_fields/PromptField";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
@@ -45,6 +48,7 @@ export async function RunMigrations(plugin: SC_Plugin) {
         MigrateShellCommandOutputChannels(plugin),
         EnsureShellCommandsHaveAllFields(plugin),
         EnsureCustomVariablesHaveAllFields(plugin),
+        EnsurePromptFieldsHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
     ];
     if (should_save.includes(true)) {
@@ -200,6 +204,33 @@ function EnsureCustomVariablesHaveAllFields(plugin: SC_Plugin) {
                 // @ts-ignore
                 customVariableConfiguration[propertyName] = propertyDefaultValue;
                 save = true;
+            }
+        }
+    }
+    return save;
+}
+
+function EnsurePromptFieldsHaveAllFields(plugin: SC_Plugin) {
+    let save = false;
+    const promptFieldModel = getModel<PromptFieldModel>(PromptFieldModel.name);
+    let promptConfiguration: PromptConfiguration;
+    for (promptConfiguration of plugin.settings.prompts) {
+        let promptFieldConfiguration: PromptFieldConfiguration;
+        for (promptFieldConfiguration of promptConfiguration.fields) {
+            const defaultPromptFieldConfiguration = promptFieldModel.getDefaultConfiguration(
+                promptFieldConfiguration.type ?? "single-line-text" // SC versions < 0.21.0 did not define 'type' property for prompt field configurations.
+            );
+            for (const propertyName in defaultPromptFieldConfiguration) {
+                // @ts-ignore propertyDefaultValue can have (almost) whatever datatype
+                const propertyDefaultValue = defaultPromptFieldConfiguration[propertyName];
+                // @ts-ignore
+                if (undefined === promptFieldConfiguration[propertyName]) {
+                    // This PromptField does not have this property.
+                    debugLog("EnsurePromptFieldsHaveAllFields(): PromptField '" + promptFieldConfiguration.label + "' does not have a property '" + propertyName + "'. Will create the property and assign a default value '" + propertyDefaultValue + "'.");
+                    // @ts-ignore
+                    promptFieldConfiguration[propertyName] = propertyDefaultValue;
+                    save = true;
+                }
             }
         }
     }

@@ -28,7 +28,9 @@ import {
 } from "obsidian";
 import SC_Plugin from "../main";
 import {
+    createCallout,
     getCurrentPlatformName,
+    getObsidianInstallationType,
     getVaultAbsolutePath,
     gotoURL,
 } from "../Common";
@@ -51,6 +53,7 @@ import {
     createPATHAugmentationFields,
     Prompt,
     PromptModel,
+    Shell,
 } from "../imports";
 import {createNewModelInstanceButton} from "../models/createNewModelInstanceButton";
 import {
@@ -146,6 +149,9 @@ export class SC_MainSettingsTab extends PluginSettingTab {
     private tabShellCommands(container_element: HTMLElement): Promise<void> {
         return new Promise((resolveWholeContent) => {
             
+            // Display possible environment related warnings.
+            this.displayGeneralWarnings(container_element);
+            
             // Show a search field
             this.createSearchField(container_element);
     
@@ -193,6 +199,24 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 )
             ;
         });
+    }
+    
+    private displayGeneralWarnings(containerElement: HTMLElement): void {
+        // Installation type warnings.
+        if (this.plugin.settings.show_installation_warnings) {
+            switch (getObsidianInstallationType()) {
+                case "Flatpak": {
+                    const calloutContent: DocumentFragment = new DocumentFragment();
+                    calloutContent.createEl("p").innerHTML = "When Obsidian is installed using Flatpak, shell commands are executed in an isolated environment, which may cause some commands not to work. <a href=\"https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation\">Read more</a>.";
+                    createCallout(
+                        containerElement,
+                        "warning",
+                        "Flatpak installation detected - may cause execution failures",
+                        calloutContent,
+                    );
+                }
+            }
+        }
     }
 
     private createSearchField(container_element: HTMLElement) {
@@ -413,7 +437,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     .addExtraButton(extraButton => extraButton
                         .setIcon("help")
                         .setTooltip("Documentation: " + variable.getFullName() + " variable")
-                        .onClick(() => gotoURL(variable.getDocumentationLink()))
+                        .onClick(() => gotoURL(variable.getDocumentationLink() as string)) // It's always a string, because the variable is not a CustomVariable.
                     )
                 ;
                 variableHeadingSetting.nameEl.insertAdjacentHTML("afterbegin", variable.getHelpName());
@@ -707,6 +731,7 @@ export interface SettingFieldGroup {
     name_setting: Setting;
     shell_command_setting: Setting;
     preview_setting: Setting;
+    refreshPreview: (shell: Shell | null) => Promise<void>;
 }
 
 export interface SettingFieldGroupContainer {

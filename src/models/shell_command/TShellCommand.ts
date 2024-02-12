@@ -157,7 +157,7 @@ export class TShellCommand extends Instance {
             // Current platform won't execute the default command, so pick whatever platform there happens to be.
             usePlatformId = platformCandidates[0];
         }
-        return this.plugin.getDefaultShellForPlatform(usePlatformId);
+        return this.getShellForPlatform(usePlatformId) ?? this.plugin.getDefaultShellForPlatform(usePlatformId);
     }
     
     /**

@@ -34,7 +34,10 @@ import SC_Plugin from "../main";
 import {ShellCommandParsingResult, TShellCommand} from "../models/shell_command/TShellCommand";
 import {SC_Modal} from "../SC_Modal";
 import {getSelectionFromTextarea} from "../Common";
-import {CmdOrCtrl} from "../Hotkeys";
+import {
+    CmdOrCtrl,
+    isCmdOrCtrlPressed,
+} from "../Hotkeys";
 import {EOL} from "os";
 
 export class OutputChannel_Modal extends OutputChannel {
@@ -297,7 +300,7 @@ class OutputModal extends SC_Modal {
                                 );
 
                                 // Finish
-                                if (event.ctrlKey) {
+                                if (isCmdOrCtrlPressed(event)) {
                                     // Special click, control/command key is pressed.
                                     // Close the modal.
                                     this.close();

@@ -21,7 +21,11 @@ import {
     Setting,
     TextComponent,
 } from "obsidian";
-import {randomInteger} from "../../../Common";
+import {
+    combineObjects,
+    createCallout,
+    randomInteger,
+} from "../../../Common";
 import {createAutocomplete} from "../../../settings/setting_elements/Autocomplete";
 import {
     CustomVariableInstance,
@@ -32,9 +36,11 @@ import {
     ParentModelOneToManyIndexRelation,
     Prompt,
     PromptField,
-    PromptField_Text,
     PromptFieldConfiguration,
+    PromptFieldType,
+    PromptFieldTypes,
 } from "../../../imports";
+import {decorateMultilineField} from "../../../settings/setting_elements/multilineField";
 
 export class PromptFieldModel extends Model {
 
@@ -81,7 +87,7 @@ export class PromptFieldModel extends Model {
 
     private createInstance(prompt: Prompt, prompt_field_configuration: PromptFieldConfiguration, prompt_field_index: number): PromptField {
         // TODO: When the 'type' field gets implemented on PromptFieldConfiguration, implement some kind of switch structure here to create different types of PromptFields.
-        return new PromptField_Text(this, prompt, prompt_field_configuration, prompt_field_index);
+        return new PromptField(this, prompt, prompt_field_configuration, prompt_field_index);
     }
 
     protected _createSettingFields(prompt_field: PromptField, container_element: HTMLElement): Setting {
@@ -116,17 +122,58 @@ export class PromptFieldModel extends Model {
 
         const on_default_value_setting_change = async (new_default_value: string) => {
             prompt_field.configuration.default_value = new_default_value;
+            
+            // There are two default value fields. One is hidden, one visible, but both need to be kept up-to-date (in case user changes prompt field type).
+            // It's not known here, which field provided the new value here, so assign the value to both fields.
+            const singleLineDefaultValueField = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
+            const multiLineDefaultValueField = setting_group.default_value_setting.controlEl.find("textarea") as HTMLTextAreaElement;
+            singleLineDefaultValueField.value = new_default_value;
+            multiLineDefaultValueField.value = new_default_value;
+            
             await this.plugin.saveSettings();
+        };
+        const showCorrectDefaultValueField = (show: "single-line" | "multi-line") => {
+            const singleLineDefaultValueField = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
+            const multiLineDefaultValueField = setting_group.default_value_setting.controlEl.find("textarea") as HTMLTextAreaElement;
+            if (show === "single-line") {
+                singleLineDefaultValueField.style.display = "block";
+                multiLineDefaultValueField.style.display = "none";
+            } else {
+                singleLineDefaultValueField.style.display = "none";
+                multiLineDefaultValueField.style.display = "block";
+            }
         };
 
         // Create the setting fields
         const setting_group_element = container_element.createDiv({attr: {class: "SC-setting-group"}});
         let label_setting_component: TextComponent;
         let description_setting_component: TextComponent;
+        const defaultValueFieldPlaceholder: string = prompt_field.configuration.label
+            ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
+            : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
+        ;
         const setting_group: PromptFieldSettingGroup = {
             heading_setting: new Setting(setting_group_element)
                 .setName("") // This will be set down below.
                 .setHeading()
+                .addDropdown(dropdownComponent => dropdownComponent
+                    .addOptions(PromptFieldTypes)
+                    .setValue(prompt_field.configuration.type)
+                    .onChange(async (newType: keyof typeof PromptFieldTypes) => {
+                        // Change the PromptField's type.
+                        prompt_field.configuration.type = newType;
+                        
+                        // Declare possibly new configuration properties.
+                        prompt_field.ensureAllConfigurationPropertiesExist();
+                        
+                        // Remove unneeded configuration properties defined by other field types.
+                        prompt_field.removeSurplusConfigurationProperties();
+                        
+                        // Create possible new setting fields.
+                        this.createTypeSpecificSettingFields(prompt_field, typeSpecificSettingFieldsContainer, showCorrectDefaultValueField);
+                        await this.plugin.saveSettings();
+                    })
+                )
             ,
             label_setting: new Setting(setting_group_element)
                 .setName("Field label")
@@ -142,12 +189,16 @@ export class PromptFieldModel extends Model {
             ,
             default_value_setting: new Setting(setting_group_element)
                 .setName("Default value")
-                .addText(text => text
+                .addTextArea(textAreaComponent => { // Only visible for multiline text field.
+                    textAreaComponent
+                        .setValue(prompt_field.configuration.default_value)
+                        .setPlaceholder(defaultValueFieldPlaceholder)
+                    ;
+                    decorateMultilineField(this.plugin, textAreaComponent, on_default_value_setting_change, 2);
+                })
+                .addText(textComponent => textComponent // Only visible for other field types.
                     .setValue(prompt_field.configuration.default_value)
-                    .setPlaceholder(
-                        prompt_field.configuration.label ? "" // If the label is defined, do not add a placeholder here, as the label's placeholder is not visible, so this placeholder would not make sense.
-                            : default_value_placeholders_subset[randomInteger(0, default_value_placeholders_subset.length - 1)]
-                    )
+                    .setPlaceholder(defaultValueFieldPlaceholder)
                     .onChange(on_default_value_setting_change)
                 )
             ,
@@ -240,11 +291,119 @@ export class PromptFieldModel extends Model {
             createAutocomplete(this.plugin, label_input_element, () => label_setting_component.onChanged());
             const default_value_input_element = setting_group.default_value_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, default_value_input_element, on_default_value_setting_change);
+            const defaultValueTextareaElement = setting_group.default_value_setting.controlEl.find("textarea") as HTMLInputElement;
+            createAutocomplete(this.plugin, defaultValueTextareaElement, on_default_value_setting_change);
             const description_input_element = setting_group.description_setting.controlEl.find("input") as HTMLInputElement;
             createAutocomplete(this.plugin, description_input_element, () => description_setting_component.onChanged());
         }
+        
+        const typeSpecificSettingFieldsContainer = setting_group_element.createDiv();
+        this.createTypeSpecificSettingFields(prompt_field, typeSpecificSettingFieldsContainer, showCorrectDefaultValueField);
 
         return setting_group.heading_setting;
+    }
+    
+    private createTypeSpecificSettingFields(promptField: PromptField, containerElement: HTMLElement, showCorrectDefaultValueField: (show: "single-line" | "multi-line") => void) {
+        // Remove possibly existing setting fields, in case this method is recalled.
+        containerElement.innerHTML = "";
+        
+        const promptFieldConfiguration = promptField.configuration;
+        switch (promptFieldConfiguration.type) {
+            case "single-line-text":
+            case "multi-line-text":
+                // No special settings for these types.
+                break;
+            
+            case "toggle":
+                // Toggled on result.
+                new Setting(containerElement)
+                    .setName("Result when toggled on")
+                    .setDesc("What value the target variable will have if the toggle is checked. The toggle is checked by default, if the Default value (defined above) matches this value. The match is not case-sensitive.")
+                    .addText(textComponent => textComponent
+                        .setValue(promptFieldConfiguration.on_result)
+                        .onChange(async (onResult: string) => {
+                            promptFieldConfiguration.on_result = onResult;
+                            await this.plugin.saveSettings();
+                        })
+                        .then((textComponent) =>
+                            createAutocomplete(this.plugin, textComponent.inputEl, () => textComponent.onChanged())
+                        )
+                    )
+                ;
+                
+                // Toggled off result.
+                new Setting(containerElement)
+                    .setName("Result when toggled off")
+                    .setDesc("What value the target variable will have if the toggle is not checked. {{variables}} can be used both here and above.")
+                    .addText(textComponent => textComponent
+                        .setValue(promptFieldConfiguration.off_result)
+                        .onChange(async (offResult: string) => {
+                            promptFieldConfiguration.off_result = offResult;
+                            await this.plugin.saveSettings();
+                        })
+                        .then((textComponent) =>
+                            createAutocomplete(this.plugin, textComponent.inputEl, () => textComponent.onChanged())
+                        )
+                    )
+                ;
+                break;
+            
+            case "single-choice": {
+                const choices: string = promptFieldConfiguration.choices.map((choice: [string, string]): string => {
+                    if (Array.isArray(choice)) {
+                        // Different value and label.
+                        return choice[0] + "|" + choice[1];
+                    } else {
+                        // Unified value and label.
+                        return choice;
+                    }
+                }).join("\n");
+                new Setting(containerElement)
+                    .setName("Choices")
+                    .setDesc("A list of options of which one can be selected. Put each option on their own line. You can define a separate value and label for an option by separating them with a pipe |, e.g. MyValue|MyLabel. {{variables}} are supported in both values and labels.")
+                    .addTextArea((textAreaComponent) => {
+                        textAreaComponent.setValue(choices);
+                        textAreaComponent.inputEl.rows = 10;
+                        createAutocomplete(this.plugin, textAreaComponent.inputEl, () => textAreaComponent.onChanged());
+                        decorateMultilineField(this.plugin, textAreaComponent, async (newChoices: string) => {
+                            // Save changed choices.
+                            promptFieldConfiguration.choices = [];
+                            for (const choice of newChoices.split("\n")) {
+                                if (choice.contains("|")) {
+                                    // The option defines a separate value and label.
+                                    const choiceParts: string[] = choice.split("|");
+                                    const choiceValue = choiceParts.shift() as string;
+                                    const choiceLabel = choiceParts.join("|"); // Re-join. If the option line contained multiple colons, then only the first one splits, and the rest will be used in the label as-is.
+                                    promptFieldConfiguration.choices.push([choiceValue, choiceLabel]);
+                                } else {
+                                    // The option defines a unified value and label.
+                                    promptFieldConfiguration.choices.push(choice);
+                                }
+                            }
+                            await this.plugin.saveSettings();
+                        }, 3);
+                    })
+                ;
+                break;
+            }
+            
+            case "password": {
+                const warningSetting = new Setting(containerElement);
+                createCallout(
+                    warningSetting.descEl,
+                    "warning",
+                    "Passwords are handled without encryption",
+                    "The password field only cloaks its value visually. Internally, the SC plugin handles passwords without any encryption or other security means. The SC plugin's developer does not have security expertise, and is uncertain if other plugins or third-party applications could theoretically read the entered values.",
+                );
+                break;
+            }
+                
+            default:
+                // This field type does not need extra setting fields.
+        }
+        
+        // Single line or multiline default value field?
+        showCorrectDefaultValueField(promptFieldConfiguration.type === "multi-line-text" ? "multi-line" : "single-line");
     }
 
     public validateValue(prompt_field: PromptField, field: keyof PromptFieldConfiguration, value: unknown): Promise<void> {
@@ -282,16 +441,57 @@ export class PromptFieldModel extends Model {
         }
     }
 
-    public getDefaultConfiguration(): PromptFieldConfiguration {
-        return {
-            // type: "text",
+    public getDefaultConfiguration(fieldType: PromptFieldType = "single-line-text"): PromptFieldConfiguration {
+        const commonProperties = {
             label: "",
             description: "",
             default_value: "",
-            //  TODO: Add 'placeholder'.
             target_variable_id: "",
             required: true,
         };
+        switch (fieldType) {
+            case "single-line-text":
+            case "password":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    // TODO: Implement placeholder property later.
+                };
+            case "multi-line-text":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    // TODO: Implement placeholder property later.
+                };
+            case "toggle":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    on_result: "ON",
+                    off_result: "OFF",
+                };
+            case "single-choice":
+                return {
+                    type: fieldType,
+                    ...commonProperties,
+                    choices: [
+                        "",
+                    ],
+                };
+        }
+    }
+    
+    /**
+     * Combines all prompt field types' default configurations into a single object.
+     *
+     * @return {Object} The combined default configurations.
+     */
+    public combineAllDefaultConfigurations(): PromptFieldConfiguration {
+        const defaultConfigurations = [];
+        for (const promptFieldType of Object.getOwnPropertyNames(PromptFieldTypes) as PromptFieldType[]) {
+            defaultConfigurations.push(this.getDefaultConfiguration(promptFieldType));
+        }
+        return combineObjects(...defaultConfigurations);
     }
 
     protected _deleteInstance(prompt_field: PromptField): void {

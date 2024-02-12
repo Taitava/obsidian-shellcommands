@@ -84,7 +84,8 @@ export class ShellCommandSettingsModal extends SC_Modal {
 
     private readonly shell_command_id: string;
     private readonly t_shell_command: TShellCommand;
-    private name_setting: Setting;
+    private settingGroupInMainTab: SettingFieldGroup;
+    private name_setting: Setting; // TODO: Remove name_setting and use settingGroupInMainTab.name_setting instead.
     private setting_tab: SC_MainSettingsTab;
     private tab_structure: TabStructure;
 
@@ -93,6 +94,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
         this.shell_command_id = shellCommand.getId();
         this.t_shell_command = shellCommand;
         this.name_setting = setting_tab.setting_groups[this.shell_command_id].name_setting;
+        this.settingGroupInMainTab = setting_tab.setting_groups[this.shell_command_id];
         this.setting_tab = setting_tab;
     }
 
@@ -516,9 +518,9 @@ export class ShellCommandSettingsModal extends SC_Modal {
     private async tabEnvironments(container_element: HTMLElement): Promise<void> {
         
         // Default shell command for platforms that don't have a specific command.
-        this.newDefaultShellCommandContentSetting(container_element, () => {
+        const defaultSettingGroup: SettingFieldGroup = this.newDefaultShellCommandContentSetting(container_element, () => {
             // When the default shell command content changes, update placeholders of platform specific shell command fields.
-            for (const settingGroup of platformSpecificSettingGroups) {
+            for (const settingGroup of platformSpecificSettingGroups.values()) {
                 const textareaComponent: TextAreaComponent | undefined = settingGroup.shell_command_setting.components.first() as TextAreaComponent | undefined;
                 if (textareaComponent) {
                     textareaComponent.setPlaceholder(this.t_shell_command.getDefaultShellCommand());
@@ -536,15 +538,33 @@ export class ShellCommandSettingsModal extends SC_Modal {
         
         // Platform specific shell commands
         let platform_id: PlatformId;
-        const platformSpecificSettingGroups: SettingFieldGroup[] = [];
+        const platformSpecificSettingGroups: Map<PlatformId, SettingFieldGroup> = new Map;
         for (platform_id in PlatformNames) {
-            platformSpecificSettingGroups.push(
-                createPlatformSpecificShellCommandField(this.plugin, container_element, this.t_shell_command, platform_id, this.plugin.settings.show_autocomplete_menu)
+            platformSpecificSettingGroups.set(
+                platform_id,
+                createPlatformSpecificShellCommandField(
+                    this.plugin,
+                    container_element,
+                    this.t_shell_command,
+                    platform_id,
+                    this.plugin.settings.show_autocomplete_menu,
+                    () => {
+                        // When whichever platform specific shell command content changes, update default shell command's preview, because its shell might change.
+                        const defaultShell = this.t_shell_command.getShellForDefaultCommand();
+                        defaultSettingGroup.refreshPreview(defaultShell);
+                    },
+                ),
             );
         }
 
         // Platform specific shell selection
-        createShellSelectionFields(this.plugin, container_element, this.t_shell_command.getShells(), false);
+        createShellSelectionFields(this.plugin, container_element, this.t_shell_command.getShells(), false, (platformId: PlatformId) => {
+            // When a shell is changed, update previews of default and platform specific shell command fields.
+            const shellForDefaultCommand = this.t_shell_command.getShellForDefaultCommand();
+            defaultSettingGroup.refreshPreview(shellForDefaultCommand);
+            this.settingGroupInMainTab.refreshPreview(shellForDefaultCommand);
+            platformSpecificSettingGroups.get(platformId)?.refreshPreview(this.t_shell_command.getShellForPlatform(platformId));
+        });
     }
 
     private async tabEvents(container_element: HTMLElement): Promise<void> {
@@ -749,7 +769,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
         addAnsiCodeFieldForOutputStream("stderr");
     }
     
-    private newDefaultShellCommandContentSetting(containerElement: HTMLElement, onChange: () => void) {
+    private newDefaultShellCommandContentSetting(containerElement: HTMLElement, onChange: () => void): SettingFieldGroup {
         const settingGroup = CreateShellCommandFieldCore(
             this.plugin,
             containerElement,
@@ -769,6 +789,8 @@ export class ShellCommandSettingsModal extends SC_Modal {
         
         // Focus on the textarea.
         settingGroup.shell_command_setting.controlEl.find("textarea").addClass("SC-focus-element-on-tab-opening");
+        
+        return settingGroup;
     }
 
     protected approve(): void {

@@ -240,13 +240,15 @@ export class ShellCommandExecutor {
             // Working directory is OK
 
             // Pass possible PATH augmentations to the Shell - if the Shell supports them.
-            if (shell_command_parsing_result.environment_variable_path_augmentation.length > 0) {
-                shell.setEnvironmentVariablePathAugmentation?.(shell_command_parsing_result.environment_variable_path_augmentation);
-                // If setEnvironmentVariablePathAugmentation() does not exist, the Shell does not support PATH augmentation. Then just ignore the PATH augmentation.
-                // - Only BuiltinShells support the PATH augmentation setting.
-                // - CustomShells have so much better flexibility in their settings that there's no real need for them to support augmenting PATH via this setting.
-                // - The PATH augmentation setting might be removed some day.
-            }
+            shell.setEnvironmentVariablePathAugmentation?.(
+                shell_command_parsing_result.environment_variable_path_augmentation.length > 0
+                ? shell_command_parsing_result.environment_variable_path_augmentation
+                : undefined
+            );
+            // If setEnvironmentVariablePathAugmentation() does not exist, the Shell does not support PATH augmentation. Then just ignore the PATH augmentation.
+            // - Only BuiltinShells support the PATH augmentation setting.
+            // - CustomShells have so much better flexibility in their settings that there's no real need for them to support augmenting PATH via this setting.
+            // - The PATH augmentation setting might be removed some day.
 
             // Execute the shell command
             const wrappedShellCommandContent = shell_command_parsing_result.wrappedShellCommandContent;

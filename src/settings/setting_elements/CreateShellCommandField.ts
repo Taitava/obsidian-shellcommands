@@ -24,7 +24,12 @@ import {
     Setting,
 } from "obsidian";
 import {ShellCommandSettingsModal} from "../ShellCommandSettingsModal";
-import {CmdOrCtrl, getHotkeysForShellCommand, HotkeyToString} from "../../Hotkeys";
+import {
+    CmdOrCtrl,
+    getHotkeysForShellCommand,
+    HotkeyToString,
+    isCmdOrCtrlPressed,
+} from "../../Hotkeys";
 import SC_Plugin from "../../main";
 import {CreateShellCommandFieldCore} from "./CreateShellCommandFieldCore";
 import {debugLog} from "../../Debug";
@@ -206,7 +211,7 @@ export function createShellCommandField(
 
         // onClick() handler - use a custom one instead of ExtraButtonComponent.onClick(), because Obsidian API (at least v. 0.14.8) does not support detecting CTRL press. https://forum.obsidian.md/t/fr-settings-pass-mouseevent-to-extrabuttoncomponent-onclick/37177
         .extraSettingsEl.addEventListener("click", (event: MouseEvent) => {
-            const ctrl_clicked = event.ctrlKey;
+            const ctrl_clicked = isCmdOrCtrlPressed(event);
             const execution_uri = t_shell_command.getExecutionURI();
             let result: string;
             if (ctrl_clicked) {
@@ -305,7 +310,7 @@ export function createExecuteNowButton(plugin: SC_Plugin, setting: Setting, t_sh
         .setTooltip("Normal click: Execute now. " + CmdOrCtrl() + " + click: Execute and ask what to do with output.")
         .setIcon("run-command")
         .extraSettingsEl.addEventListener("click", async (event: MouseEvent) => {
-            const ctrl_clicked = event.ctrlKey;
+            const ctrl_clicked = isCmdOrCtrlPressed(event);
             const parsing_process = t_shell_command.createParsingProcess(null); // No SC_Event is available when executing shell commands manually.
             if (await parsing_process.process()) {
                 const executor = new ShellCommandExecutor(plugin, t_shell_command, null); // No SC_Event is available when manually executing the shell command.

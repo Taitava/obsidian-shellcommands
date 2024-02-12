@@ -42,6 +42,7 @@ export abstract class BuiltinShell extends Shell {
     /**
      * This is undefined if setEnvironmentVariablePathAugmentation() is never called. It's never called, if the current
      * operating system's PATH augmentation string is empty.
+     * TODO: Get rid of this property and find a way to pass the augmentation via parameters. This property has a risk that its content may be stale.
      * @private
      */
     private pathAugmentation: string | undefined;
@@ -79,7 +80,7 @@ export abstract class BuiltinShell extends Shell {
         return true;
     }
 
-    public setEnvironmentVariablePathAugmentation(pathAugmentation: string): void {
+    public setEnvironmentVariablePathAugmentation(pathAugmentation: string | undefined): void {
         this.pathAugmentation = pathAugmentation;
     }
 

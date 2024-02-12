@@ -22,5 +22,6 @@ import {SC_CodeMirrorEvent} from "./SC_CodeMirrorEvent";
 export class SC_Event_CaretMoved extends SC_CodeMirrorEvent {
     protected static readonly event_code = "caret-moved";
     protected static readonly event_title = "Caret moved in editor";
+    // @ts-ignore This event does not work anyway. FIXME
     protected readonly codeMirrorEvent = "cursorActivity";
 }

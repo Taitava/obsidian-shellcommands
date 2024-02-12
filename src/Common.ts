@@ -22,9 +22,10 @@ import {
     Editor,
     EditorPosition,
     FileSystemAdapter,
-    FrontMatterCache,
     MarkdownView,
     normalizePath,
+    Pos,
+    setIcon,
     TFile,
 } from "obsidian";
 import {
@@ -95,6 +96,26 @@ export function getPlatformName(platformId: PlatformId) {
     return platformName;
 }
 
+type ObsidianInstallationType = "Flatpak" | "AppImage" | "Snap" | null;
+
+/**
+ * Tries to determine how Obsidian was installed. Used for displaying a warning if the installation type is "Flatpak".
+ *
+ * The logic is copied on 2023-12-20 from https://stackoverflow.com/a/75284996/2754026 .
+ *
+ * @return "Flatpak" | "AppImage" | "Snap" or `null`, if Obsidian was not installed using any of those methods, i.e. the installation method is unidentified.
+ */
+export function getObsidianInstallationType(): ObsidianInstallationType {
+    if (process.env["container"]) {
+        return "Flatpak";
+    } else if (process.env["APPIMAGE"]) {
+        return "AppImage";
+    } else if (process.env["SNAP"]) {
+        return "Snap";
+    }
+    return null;
+}
+
 export function getView(app: App) {
     const view = app.workspace.getActiveViewOfType(MarkdownView);
     if (!view) {
@@ -124,8 +145,7 @@ export function getEditor(app: App): Editor | null {
     return null;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function cloneObject<ObjectType extends Object>(object: ObjectType): ObjectType{
+export function cloneObject<ObjectType extends object>(object: ObjectType): ObjectType{
     return Object.assign({}, object) as ObjectType;
 }
 
@@ -134,9 +154,81 @@ export function cloneObject<ObjectType extends Object>(object: ObjectType): Obje
  *
  * @param objects
  */
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function combineObjects(...objects: Object[]) { // TODO: Change Object to object (lower-case) and remove eslint-disable-next-line . Do the same for other Objects in this file, too.
+export function combineObjects(...objects: object[]) {
     return Object.assign({}, ...objects);
+}
+
+/**
+ * Compares two objects deeply for equality.
+ *
+ * Copied 2023-12-30 from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
+ * Modifications:
+ *  - Added types to the function parameters and return value.
+ *  - Changed `const val1 = object1[key];` to `const val1 = (object1 as {[key: string]: unknown})[key];`, and the same for val2.
+ *  - Added a possibility to compare other values than objects, too.
+ *
+ * @param {unknown} object1 - The first object to compare.
+ * @param {unknown} object2 - The second object to compare.
+ * @return {boolean} - Returns `true` if the objects are deeply equal, `false` otherwise.
+ * @author Original author: Dmitri Pavlutin
+ */
+
+export function deepEqual(object1: unknown, object2: unknown): boolean {
+    if (!isObject(object1) || !isObject(object2)) {
+        // If any of the parameters are not objects, do a simple comparison.
+        return object1 === object2;
+    }
+    
+    const keys1 = Object.keys(object1);
+    const keys2 = Object.keys(object2);
+    
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+    
+    for (const key of keys1) {
+        const val1 = (object1 as {[key: string]: unknown})[key];
+        const val2 = (object2 as {[key: string]: unknown})[key];
+        const areObjects = isObject(val1) && isObject(val2);
+        if (
+            areObjects && !deepEqual(val1, val2) ||
+            !areObjects && val1 !== val2
+        ) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+/**
+ * Copied 2023-12-30 from https://dmitripavlutin.com/how-to-compare-objects-in-javascript/#4-deep-equality
+ * Modifications:
+ *  - Added types to the function parameter and return value.
+ *
+ * Can be exported later, if needed elsewhere.
+ *
+ * @param object
+ * @author Original author: Dmitri Pavlutin
+ */
+function isObject(object: unknown): object is object {
+    return object != null && typeof object === 'object';
+}
+
+/**
+ * Gets the surplus properties from an object that are not present in another object.
+ * @param {object} surplusObject - The object to check for surplus properties.
+ * @param {object} comparisonObject - The object to compare against.
+ * @return {object} - An object containing the surplus properties found in surplusObject that are not present in comparisonObject.
+ */
+export function getObjectSurplusProperties(surplusObject: object, comparisonObject: object): Partial<typeof surplusObject> {
+    const surplusProperties: {[key: string]: unknown} = {};
+    for (const key of Object.getOwnPropertyNames(surplusObject)) {
+        if (!comparisonObject.hasOwnProperty(key)) {
+            surplusProperties[key] = (surplusObject as {[key: string]: unknown})[key];
+        }
+    }
+    return surplusProperties;
 }
 
 /**
@@ -252,8 +344,7 @@ export function lookUpFileWithBinaryExtensionsOnWindows(filePath: string): boole
     return false;
 }
 
-// eslint-disable-next-line @typescript-eslint/ban-types
-export function joinObjectProperties(object: {}, glue: string) {
+export function joinObjectProperties(object: object, glue: string) {
     let result = "";
     for (const property_name in object) {
         if (result.length) {
@@ -367,6 +458,61 @@ export function createMultilineTextElement(tag: keyof HTMLElementTagNameMap, con
     return content_element;
 }
 
+/**
+ * Callout types were checked on 2023-12-20: https://help.obsidian.md/Editing+and+formatting/Callouts#Supported%20types
+ */
+type CalloutType = "note" | "abstract" | "info" | "todo" | "tip" | "success" | "question" | "warning" | "failure" | "danger" | "bug" | "example" | "quote";
+
+const CalloutIcons = {
+    note: "lucide-pencil",
+    abstract: "lucide-clipboard-list",
+    info: "lucide-info",
+    todo: "lucide-check-circle-2",
+    tip: "lucide-flame",
+    success: "lucide-check",
+    question: "lucide-help-circle",
+    warning: "lucide-alert-triangle",
+    failure: "lucide-x",
+    danger: "lucide-zap",
+    bug: "lucide-bug",
+    example: "lucide-list",
+    quote: "lucide-quote",
+};
+
+/**
+ * Creates a <div> structure that imitates Obsidian's callouts like they appear on notes.
+ *
+ * The HTML structure is looked up on 2023-12-20 from this guide's screnshots: https://forum.obsidian.md/t/obsidian-css-quick-guide/58178#an-aside-on-classes-5
+ * @param containerElement
+ * @param calloutType
+ * @param title
+ * @param content
+ */
+export function createCallout(containerElement: HTMLElement, calloutType: CalloutType, title: DocumentFragment | string, content: DocumentFragment | string) {
+    // Root.
+    const calloutRoot: HTMLDivElement = containerElement.createDiv({cls: "callout"});
+    calloutRoot.dataset.callout = calloutType;
+    
+    // Title.
+    const calloutTitle: HTMLDivElement = calloutRoot.createDiv({cls: "callout-title"});
+    const calloutTitleIcon: HTMLDivElement = calloutTitle.createDiv({cls: "callout-icon"});
+    setIcon(calloutTitleIcon, CalloutIcons[calloutType as keyof typeof CalloutIcons]);
+    const calloutTitleInner = calloutTitle.createDiv({cls: "callout-title-inner"});
+    if (title instanceof DocumentFragment) {
+        calloutTitleInner.appendChild(title);
+    } else {
+        calloutTitleInner.appendText(title);
+    }
+    
+    // Content.
+    const calloutContent: HTMLDivElement = calloutRoot.createDiv({cls: "callout-content"});
+    if (content instanceof DocumentFragment) {
+        calloutContent.appendChild(content);
+    } else {
+        calloutContent.createEl("p").appendText(content);
+    }
+}
+
 export function randomInteger(min: number, max: number) {
     const range = max - min + 1;
     return min + Math.floor(Math.random() * range);
@@ -392,17 +538,21 @@ export function copyToClipboard(text: string): Promise<void> {
     return clipboard.writeText(text);
 }
 
+export function cloakPassword(password: string): string {
+    return "&bull;".repeat(password.length);
+}
+
 export async function getFileContentWithoutYAML(app: App, file: TFile): Promise<string> {
     return new Promise((resolve) => {
         // The logic is borrowed 2022-09-01 from https://forum.obsidian.md/t/how-to-get-current-file-content-without-yaml-frontmatter/26197/2
         // Thank you, endorama! <3
         const file_content = app.vault.read(file);
         file_content.then((file_content: string) => {
-            const frontmatter_cache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatter_cache) {
+            const frontmatterPosition: Pos | undefined = app.metadataCache.getFileCache(file)?.frontmatterPosition;
+            if (frontmatterPosition) {
                 // A YAML frontmatter is present in the file.
-                const frontmatter_end_line_number = frontmatter_cache.position.end.line + 1; // + 1: Take the last --- line into account, too.
-                const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatter_end_line_number).join("\n");
+                const frontmatterEndLineNumber: number = frontmatterPosition.end.line + 1; // + 1: Take the last --- line into account, too.
+                const file_content_without_frontmatter: string = file_content.split("\n").slice(frontmatterEndLineNumber).join("\n");
                 return resolve(file_content_without_frontmatter);
             } else {
                 // No YAML frontmatter is present in the file.
@@ -419,10 +569,10 @@ export async function getFileYAML(app: App, file: TFile, withDashes: boolean): P
         // Thank you, endorama! <3
         const fileContent = app.vault.read(file);
         fileContent.then((file_content: string) => {
-            const frontmatterCache: FrontMatterCache | undefined = app.metadataCache.getFileCache(file)?.frontmatter;
-            if (frontmatterCache) {
+            const frontmatterPosition: Pos | undefined = app.metadataCache.getFileCache(file)?.frontmatterPosition;
+            if (frontmatterPosition) {
                 // A YAML frontmatter is present in the file.
-                const frontmatterEndLineNumber = frontmatterCache.position.end.line + 1; // + 1: Take the last --- line into account, too.
+                const frontmatterEndLineNumber: number = frontmatterPosition.end.line + 1; // + 1: Take the last --- line into account, too.
                 let firstLine: number;
                 let lastLine: number;
                 if (withDashes) {
