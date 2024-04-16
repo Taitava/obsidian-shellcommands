@@ -24,3 +24,9 @@ body:
         - Other (please mention in your message)
     validations:
       required: true
+  - type: textarea
+    id: message
+    attributes:
+        label: "Please describe the problem"
+    validations:
+        required: true
