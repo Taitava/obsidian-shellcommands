@@ -1,0 +1,26 @@
+body:
+  - type: textarea
+    id: debug_info
+    attributes:
+      label: "Obsidian debug information"
+      description: |
+        Please open the command palette in Obsidian and run the command "Show debug info" and copy the results here. If you do not wish to share all the information, at least the following details are needed:
+         - Obsidian version
+         - Operating system name and version
+         - Shell commands version
+    validations:
+      required: true
+  - type: dropdown
+    id: shell
+    attributes:
+      label: "What shell are you using?"
+      options:
+        - Bash
+        - Dash
+        - Zsh
+        - PowerShell Core
+        - PowerShell 5
+        - CMD.EXE
+        - Other (please mention in your message)
+    validations:
+      required: true
