@@ -697,7 +697,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                         break;
                     case "-late":
                         // Late execution.
-                        debouncingDescription = "When executing <em>After cooldown</em>, the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase and while the execution is in progress.";
+                        debouncingDescription = "When executing <em>After cooldown</em>, the shell command execution will be delayed by the <em>Cooldown duration</em>. <strong>Subsequent executions are prevented</strong> during the cooldown phase, or <strong>postponed</strong> during the execution phase.";
                         break;
                     default:
                         throw new Error("Unidentified debouncing state: " + JSON.stringify(shellCommandConfiguration.debounce));
