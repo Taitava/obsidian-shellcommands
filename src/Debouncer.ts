@@ -65,10 +65,17 @@ export class Debouncer {
             default:
                 // EXECUTING OR COOLDOWN PHASE.
                 switch (this.getMode()) {
-                    case "early-execution":
-                    case "late-execution": {
+                    case "early-execution": {
                         // Nothing to do - just discard this execution.
                         debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is discarded.");
+                        break;
+                    }
+                    case "late-execution": {
+                        // Wait until previous execution is over, then start another cooldown phase + execution.
+                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
+                        this.subsequent = { // Override `subsequent` if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
+                            scEvent: scEvent,
+                        };
                         break;
                     }
                     case "early-and-late-execution": {
@@ -101,8 +108,13 @@ export class Debouncer {
                 break;
             }
             case "late-execution": {
-                // Clear state.
-                this.state = "idle";
+                if (this.subsequent) {
+                    // Another event triggering happened during execution. Start another cooldown + execution process.
+                    await this.cooldown();
+                } else {
+                    // No events triggered during execution. Clear state.
+                    this.state = "idle";
+                }
                 break;
             }
             case "early-and-late-execution": {
