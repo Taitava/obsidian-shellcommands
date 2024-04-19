@@ -722,6 +722,23 @@ export class ShellCommandSettingsModal extends SC_Modal {
                         })
                     )
                 ;
+                const prolongCooldownDescriptionFragment = new DocumentFragment();
+                prolongCooldownDescriptionFragment.createDiv().innerHTML = "If enabled, events occurring during a <strong>cooldown</strong> phase will reset the cooldown timer, making the cooldown last longer. Thus, executions are avoided for an extended period.";
+                new Setting(debounceAdditionalSettingsContainer)
+                    .setName("Prolong cooldown")
+                    .setDesc(prolongCooldownDescriptionFragment)
+                    .setClass("SC-full-description")
+                    .addToggle(prolongCooldownToggle => prolongCooldownToggle
+                        .setValue(shellCommandConfiguration.debounce?.prolongCooldown ?? false)
+                        .onChange((newProlongCooldown: boolean) => {
+                            if (!shellCommandConfiguration.debounce) {
+                                throw new Error("shellCommandConfiguration.debounce is falsy.");
+                            }
+                            shellCommandConfiguration.debounce.prolongCooldown = newProlongCooldown;
+                            this.plugin.saveSettings();
+                        })
+                    )
+                ;
             } else {
                 // Debouncing is disabled.
                 new Setting(debounceAdditionalSettingsContainer)

@@ -29,6 +29,7 @@ export class Debouncer {
         scEvent: SC_Event,
         // Just a single property, but use still an object structure, so it's easy to add more properties later, if needed. E.g. a ParsingProcess.
     } = null;
+    private cooldownTimeout: CooldownTimeout | null = null;
     
     constructor(
         private plugin: SC_Plugin,
@@ -64,6 +65,10 @@ export class Debouncer {
                 break;
             default:
                 // EXECUTING OR COOLDOWN PHASE.
+                if ("cooldown" === this.state && this.configuration.prolongCooldown) {
+                    // Prolong cooldown duration.
+                    this.prolongCooldownTimeout();
+                }
                 switch (this.getMode()) {
                     case "early-execution": {
                         // Nothing to do - just discard this execution.
@@ -129,17 +134,16 @@ export class Debouncer {
         return new Promise((resolve) => {
             this.state = "cooldown";
             debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " is in cooldown phase now.");
-            window.setTimeout(
-                () => {
-                    this.afterCooldown().then(resolve);
-                },
-                this.getCoolDownMilliseconds()
+            this.cooldownTimeout = this.createCooldownTimeout(
+                () => {this.afterCooldown().then(resolve);},
+                true,
             );
         });
     }
     
     private async afterCooldown(): Promise<void> {
         const debugMessageBase = "Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
+        this.cooldownTimeout = null;
         switch (this.getMode()) {
             case "early-execution": {
                 // Not much to do after cooldown.
@@ -164,6 +168,35 @@ export class Debouncer {
                 }
                 break;
             }
+        }
+    }
+    
+    private createCooldownTimeout(callback: () => void, returnObject: true): CooldownTimeout
+    private createCooldownTimeout(callback: () => void, returnObject: false): number
+    private createCooldownTimeout(callback: () => void, returnObject: boolean): CooldownTimeout | number {
+        const timeoutId: number = window.setTimeout(
+            callback,
+            this.getCoolDownMilliseconds(),
+        );
+        if (returnObject) {
+            return {
+                timeoutId: timeoutId,
+                callback: callback,
+            };
+        } else {
+            return timeoutId;
+        }
+    }
+    
+    private prolongCooldownTimeout(): void {
+        if (this.cooldownTimeout) {
+            // Delete and recreate the timeout.
+            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase will be prolonged.");
+            window.clearTimeout(this.cooldownTimeout.timeoutId);
+            this.cooldownTimeout.timeoutId = this.createCooldownTimeout(this.cooldownTimeout.callback, false);
+        } else {
+            // Can't find a timeout that should be prolonged.
+            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase tried to be prolonged, but no timeout function exists. Might be a bug.");
         }
     }
     
@@ -194,6 +227,7 @@ export class Debouncer {
             executeEarly: executeEarly,
             executeLate: executeLate,
             cooldown: 0,
+            prolongCooldown: false,
         };
     }
 }
@@ -204,4 +238,10 @@ export interface DebounceConfiguration {
     executeEarly: boolean,
     executeLate: boolean,
     cooldown: number,
+    prolongCooldown: boolean,
+}
+
+interface CooldownTimeout {
+    timeoutId: number,
+    callback: () => void,
 }
