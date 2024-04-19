@@ -84,6 +84,7 @@ import {createVariableDefaultValueFields} from "./setting_elements/createVariabl
 import {CreateShellCommandFieldCore} from "./setting_elements/CreateShellCommandFieldCore";
 import {createExecutionNotificationField} from "./setting_elements/createExecutionNotificationField";
 import {ShellCommandConfiguration} from "./ShellCommandConfiguration";
+import {Debouncer} from "../Debouncer";
 
 export class ShellCommandSettingsModal extends SC_Modal {
     public static GENERAL_OPTIONS_SUMMARY = "Alias, Icon, Confirmation, Stdin";
@@ -644,11 +645,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 .setValue(shellCommandConfiguration.debounce?.executeEarly ?? false)
                 .onChange((executeEarly: boolean) => {
                     if (null === shellCommandConfiguration.debounce) {
-                        shellCommandConfiguration.debounce = {
-                            executeEarly: executeEarly,
-                            executeLate: false,
-                            cooldown: 0,
-                        };
+                        shellCommandConfiguration.debounce = Debouncer.getDefaultConfiguration(executeEarly, false);
                     } else {
                         shellCommandConfiguration.debounce.executeEarly = executeEarly;
                     }
@@ -664,11 +661,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 .setValue(shellCommandConfiguration.debounce?.executeLate ?? false)
                 .onChange((executeLate: boolean) => {
                     if (null === shellCommandConfiguration.debounce) {
-                        shellCommandConfiguration.debounce = {
-                            executeEarly: false,
-                            executeLate: executeLate,
-                            cooldown: 0,
-                        };
+                        shellCommandConfiguration.debounce = Debouncer.getDefaultConfiguration(false, executeLate);
                     } else {
                         shellCommandConfiguration.debounce.executeLate = executeLate;
                     }

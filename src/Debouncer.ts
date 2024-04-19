@@ -188,6 +188,14 @@ export class Debouncer {
     private getCoolDownMilliseconds(): number {
         return this.configuration.cooldown * 1000;
     }
+    
+    public static getDefaultConfiguration(executeEarly: boolean, executeLate: boolean): DebounceConfiguration {
+        return {
+            executeEarly: executeEarly,
+            executeLate: executeLate,
+            cooldown: 0,
+        };
+    }
 }
 
 type DebounceState = "idle" | "executing" | "cooldown";
