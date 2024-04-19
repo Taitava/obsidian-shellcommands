@@ -54,7 +54,7 @@ export class Debouncer {
                     }
                     case "late-execution":{
                         // Begin a cooldown phase and execute after it.
-                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " is delayed.");
+                        this.debugLog("is delayed.");
                         this.subsequent = {
                             scEvent: scEvent,
                         };
@@ -72,12 +72,12 @@ export class Debouncer {
                 switch (this.getMode()) {
                     case "early-execution": {
                         // Nothing to do - just discard this execution.
-                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is discarded.");
+                        this.debugLog("execution is discarded.");
                         break;
                     }
                     case "late-execution": {
                         // Wait until previous execution is over, then start another cooldown phase + execution.
-                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
+                        this.debugLog("execution is postponed and may be merged to a later one.");
                         this.subsequent = { // Override `subsequent` if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
                             scEvent: scEvent,
                         };
@@ -85,7 +85,7 @@ export class Debouncer {
                     }
                     case "early-and-late-execution": {
                         // Wait until previous execution is over and a cooldown phase is passed, too.
-                        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution is postponed and may be merged to a later one.");
+                        this.debugLog("execution is postponed and may be merged to a later one.");
                         this.subsequent = { // Override `subsequent` if it contained an earlier waiter. After the cooldown is over, always execute the newest thing.
                             scEvent: scEvent,
                         };
@@ -98,14 +98,14 @@ export class Debouncer {
     
     private async execute(scEvent: SC_Event): Promise<void> {
         this.state = "executing";
-        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " will be executed now.");
+        this.debugLog("will be executed now.");
         const executor = new ShellCommandExecutor(this.plugin, this.tShellCommand, scEvent);
         await executor.doPreactionsAndExecuteShellCommand();
         await this.afterExecuting();
     }
     
     private async afterExecuting(): Promise<void> {
-        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " execution ended.");
+        this.debugLog("execution ended.");
         switch (this.getMode()) {
             case "early-execution": {
                 // Not much to do anymore, go to cooldown and clear state after it.
@@ -133,7 +133,7 @@ export class Debouncer {
     private cooldown(): Promise<void> {
         return new Promise((resolve) => {
             this.state = "cooldown";
-            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " is in cooldown phase now.");
+            this.debugLog("is in cooldown phase now.");
             this.cooldownTimeout = this.createCooldownTimeout(
                 () => {this.afterCooldown().then(resolve);},
                 true,
@@ -142,12 +142,12 @@ export class Debouncer {
     }
     
     private async afterCooldown(): Promise<void> {
-        const debugMessageBase = "Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase ended, ";
+        const debugMessageBase = "\"cooldown\" phase ended, ";
         this.cooldownTimeout = null;
         switch (this.getMode()) {
             case "early-execution": {
                 // Not much to do after cooldown.
-                debugLog(debugMessageBase + "debouncing ended.");
+                this.debugLog(debugMessageBase + "debouncing ended.");
                 this.state = "idle";
                 break;
             }
@@ -155,14 +155,14 @@ export class Debouncer {
             case "early-and-late-execution": {
                 if (this.subsequent) {
                     // There is a next execution waiting to be started.
-                    debugLog(debugMessageBase + "will start a previously postponed execution.");
+                    this.debugLog(debugMessageBase + "will start a previously postponed execution.");
                     const executeWithEvent: SC_Event = this.subsequent.scEvent;
                     this.subsequent = null;
                     await this.execute(executeWithEvent);
                     
                 } else {
                     // No need to start another execution process. (We should only end up here in mode "early-and-late-execution", not in mode "late-execution").
-                    debugLog(debugMessageBase + "no postponed execution is waiting, so will not re-execute.");
+                    this.debugLog(debugMessageBase + "no postponed execution is waiting, so will not re-execute.");
                     this.state = "idle";
                     this.subsequent = null;
                 }
@@ -191,12 +191,12 @@ export class Debouncer {
     private prolongCooldownTimeout(): void {
         if (this.cooldownTimeout) {
             // Delete and recreate the timeout.
-            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase will be prolonged.");
+            this.debugLog("\"cooldown\" phase will be prolonged.");
             window.clearTimeout(this.cooldownTimeout.timeoutId);
             this.cooldownTimeout.timeoutId = this.createCooldownTimeout(this.cooldownTimeout.callback, false);
         } else {
             // Can't find a timeout that should be prolonged.
-            debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " \"cooldown\" phase tried to be prolonged, but no timeout function exists. Might be a bug.");
+            this.debugLog("\"cooldown\" phase tried to be prolonged, but no timeout function exists. Might be a bug.");
         }
     }
     
@@ -220,6 +220,10 @@ export class Debouncer {
     
     private getCoolDownMilliseconds(): number {
         return this.configuration.cooldown * 1000;
+    }
+    
+    private debugLog(message: string): void {
+        debugLog("Debouncing control: Shell command id " + this.tShellCommand.getId() + " " + message);
     }
     
     public static getDefaultConfiguration(executeEarly: boolean, executeLate: boolean): DebounceConfiguration {
