@@ -707,16 +707,16 @@ export class ShellCommandSettingsModal extends SC_Modal {
                     .setName("Cooldown duration (seconds)")
                     .setDesc("If you only need to prevent simultaneous execution, but do not need extra cooldown time, you can set this to 0.")
                     .addText(thresholdTextComponent => thresholdTextComponent
-                        .setValue((shellCommandConfiguration.debounce?.cooldown ?? 0).toString())
+                        .setValue((shellCommandConfiguration.debounce?.cooldownDuration ?? 0).toString())
                         .onChange((newThresholdString: string) => {
                             const newThreshold: number = inputToFloat(newThresholdString, 1);
                             if (!shellCommandConfiguration.debounce) {
                                 throw new Error("shellCommandConfiguration.debounce is falsy.");
                             }
                             if (newThreshold >= 0) {
-                                shellCommandConfiguration.debounce.cooldown = newThreshold;
+                                shellCommandConfiguration.debounce.cooldownDuration = newThreshold;
                             } else {
-                                shellCommandConfiguration.debounce.cooldown = 0;
+                                shellCommandConfiguration.debounce.cooldownDuration = 0;
                             }
                             this.plugin.saveSettings();
                         })
@@ -750,7 +750,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
             if (shellCommandConfiguration.debounce) {
                 if (!shellCommandConfiguration.debounce.executeEarly && !shellCommandConfiguration.debounce.executeLate) {
                     // Debouncing is disabled, but the configuration object exists.
-                    if (shellCommandConfiguration.debounce.cooldown === 0) {
+                    if (shellCommandConfiguration.debounce.cooldownDuration === 0) {
                         // The DebounceConfiguration object can be removed. No need to remember the cooldown, because user probably did not type 0 themselves.
                         shellCommandConfiguration.debounce = null;
                     }

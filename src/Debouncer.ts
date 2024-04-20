@@ -219,7 +219,7 @@ export class Debouncer {
     }
     
     private getCoolDownMilliseconds(): number {
-        return this.configuration.cooldown * 1000;
+        return this.configuration.cooldownDuration * 1000;
     }
     
     private debugLog(message: string): void {
@@ -230,7 +230,7 @@ export class Debouncer {
         return {
             executeEarly: executeEarly,
             executeLate: executeLate,
-            cooldown: 0,
+            cooldownDuration: 0,
             prolongCooldown: false,
         };
     }
@@ -241,7 +241,7 @@ type DebounceState = "idle" | "executing" | "cooldown";
 export interface DebounceConfiguration {
     executeEarly: boolean,
     executeLate: boolean,
-    cooldown: number,
+    cooldownDuration: number,
     prolongCooldown: boolean,
 }
 
