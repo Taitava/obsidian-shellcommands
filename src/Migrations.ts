@@ -95,6 +95,12 @@ function MigrateDebouncingModes(plugin: SC_Plugin): boolean {
                 delete shellCommandConfiguration.debounce.mode;
                 save = true;
             }
+            
+            // prolongCooldown was not present in 0.22.0-beta.1. Add it, but disable it by default.
+            if (undefined === shellCommandConfiguration.debounce.prolongCooldown) {
+                shellCommandConfiguration.debounce.prolongCooldown = false;
+                save = true;
+            }
         }
     }
     return save;
