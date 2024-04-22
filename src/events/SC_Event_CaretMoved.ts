@@ -20,18 +20,28 @@
 import {SC_CodeMirrorEvent} from "./SC_CodeMirrorEvent";
 import {Setting} from "obsidian";
 import {EventType} from "./SC_Event";
+import {Extension} from "@codemirror/state";
+import {EditorView} from "@codemirror/view";
 
 export class SC_Event_CaretMoved extends SC_CodeMirrorEvent {
     protected static readonly event_code = "caret-moved";
     protected static readonly event_title = "Caret moved in editor";
-    // @ts-ignore This event does not work anyway. FIXME
-    protected readonly codeMirrorEvent = "cursorActivity";
+    
+    public getCodeMirrorExtension(): Extension {
+        return EditorView.updateListener.of((update) => {
+            if (update.selectionSet) {
+                // Selection/caret position has changed.
+                // TODO: Implement mode setting: `line` only triggers for line changes, `column` only triggers for column changes, `all` triggers for both. This requires triggerRegisteredShellCommands() to be changed so that it can be passed a Map of triggerable shell commands.
+                if (!update.state.selection.eq(update.startState.selection)) { // Prevent double triggering when clicking with mouse. This discards mouse button RELEASE.
+                    this.triggerRegisteredShellCommands();
+                }
+            }
+        });
+    }
     
     public createExtraSettingsFields(extraSettingsContainer: HTMLDivElement) {
-        new Setting(extraSettingsContainer)
-            .setName("This event does not work yet!")
-            .setDesc("Incomplete code for this event was accidentally released in SC 0.20.0. Enabling the event does not do anything. The event will be finished in some future version.")
-        ;
+        // new Setting(extraSettingsContainer)
+        // ;
     }
     
     public getType(): EventType {

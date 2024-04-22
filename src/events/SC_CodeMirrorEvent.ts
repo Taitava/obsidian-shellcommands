@@ -22,40 +22,55 @@ import {
     SC_Event,
 } from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
+import {Extension} from "@codemirror/state";
 
 export abstract class SC_CodeMirrorEvent extends SC_Event {
-    protected abstract readonly codeMirrorEvent: Parameters<CodeMirror.Editor["on"]>[0];
     
     /**
      * Contains a trigger callback for each TShellCommand that has this event enabled.
      *
      * @private
      */
-    private tShellCommandTriggers: Map<string, () => void> = new Map();
+    private registeredShellCommands: Map<string, TShellCommand> = new Map();
+    
+    /**
+     * As multiple shell commands can enable an event, this property indicates whether a CodeMirror extension is already registered or not.
+     * @private
+     */
+    private isCodeMirrorExtensionRegistered: boolean = false;
     
     protected _register(tShellCommand: TShellCommand): false {
-        const trigger = () => this.trigger(tShellCommand);
-        this.tShellCommandTriggers.set(tShellCommand.getId(), trigger);
-    
-        // Register the trigger for all current CodeMirror instances created by Obsidian.
-        this.app.workspace.iterateCodeMirrors((codeMirror: CodeMirror.Editor) => {
-            codeMirror.on(this.codeMirrorEvent, trigger);
-        });
-        
+        this.registeredShellCommands.set(tShellCommand.getId(), tShellCommand);
+        if (!this.isCodeMirrorExtensionRegistered) {
+            // Need to register the CodeMirror extension. Only need to do this once per event, not for every shell command using the same event.
+            this.plugin.registerEditorExtension(this.getCodeMirrorExtension());
+            this.isCodeMirrorExtensionRegistered = true;
+        }
         return false; // No event reference.
     }
 
     protected _unregister(tShellCommand: TShellCommand): void {
-        // Unregister the trigger for all current CodeMirror instances created by Obsidian.
-        this.app.workspace.iterateCodeMirrors((codeMirror: CodeMirror.Editor) => {
-            const trigger: (() => void) | undefined = this.tShellCommandTriggers.get(tShellCommand.getId());
-            if (undefined !== trigger) {
-                codeMirror.off(this.codeMirrorEvent, trigger);
-            }
-        });
+        this.registeredShellCommands.delete(tShellCommand.getId());
+        // No need to unregister the CodeMirror extension. It might be used by other shell commands, and even if it's not, leaving it registered causes no harm.
+    }
+    
+    /**
+     * Subclasses of SC_CodeMirrorEvent should call this when their event occurs.
+     */
+    protected triggerRegisteredShellCommands(): void {
+        for (const tShellCommand of this.registeredShellCommands.values()) {
+            this.trigger(tShellCommand).then();
+        }
     }
     
     public getCategory(): EventCategory {
         return "editor";
     }
+    
+    /**
+     * Each subclass of SC_CodeMirrorEvent should define their CodeMirror extension here. An extension takes care of triggering execution for all shell commands that have enabled the current event by calling this.triggerRegisteredShellCommands().
+     *
+     * Note that this method gets called once per *event*, not once per *shell command*. I.e. One CodeMirror extension should handle the event for all shell commands that have enabled the event.
+     */
+    public abstract getCodeMirrorExtension(): Extension;
 }
