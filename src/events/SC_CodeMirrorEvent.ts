@@ -56,10 +56,14 @@ export abstract class SC_CodeMirrorEvent extends SC_Event {
     
     /**
      * Subclasses of SC_CodeMirrorEvent should call this when their event occurs.
+     * @param condition Can be used to filter which shell commands should be executed and which not. If omitted, all shell
+     * commands (that enable this event) will be executed.
      */
-    protected triggerRegisteredShellCommands(): void {
+    protected triggerRegisteredShellCommands(condition?: (tShellCommand: TShellCommand) => boolean): void {
         for (const tShellCommand of this.registeredShellCommands.values()) {
-            this.trigger(tShellCommand).then();
+            if (!condition || condition(tShellCommand)) {
+                this.trigger(tShellCommand).then();
+            }
         }
     }
     
