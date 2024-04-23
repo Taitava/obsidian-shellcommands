@@ -43,7 +43,7 @@ export abstract class SC_CodeMirrorEvent extends SC_Event {
         this.registeredShellCommands.set(tShellCommand.getId(), tShellCommand);
         if (!this.isCodeMirrorExtensionRegistered) {
             // Need to register the CodeMirror extension. Only need to do this once per event, not for every shell command using the same event.
-            this.plugin.registerEditorExtension(this.getCodeMirrorExtension());
+            this.plugin.addEditorExtension(this.getCodeMirrorExtension());
             this.isCodeMirrorExtensionRegistered = true;
         }
         return false; // No event reference.

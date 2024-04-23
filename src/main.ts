@@ -89,6 +89,7 @@ import {
     CustomShellInstanceMap,
     CustomShellModel,
 } from "./models/custom_shell/CustomShellModel";
+import {Extension} from "@codemirror/state";
 
 export default class SC_Plugin extends Plugin {
 	/**
@@ -137,6 +138,12 @@ export default class SC_Plugin extends Plugin {
      * @private
      */
     public lastTShellCommandExecutedFromCommandPalette: TShellCommand | null = null;
+    
+    /**
+     * Extensions can be added to this array, but do not replace the array with a new array.
+     * @private
+     */
+    private readonly editorExtensions: Extension[] = [];
 
 	public async onload() {
 		// debugLog('loading plugin'); // Wouldn't do anything, as DEBUG_ON is not set before settings are loaded.
@@ -189,6 +196,7 @@ export default class SC_Plugin extends Plugin {
 		if (this.settings.enable_events) {
 			this.registerSC_Events(false);
 		}
+        this.registerEditorExtension(this.editorExtensions);
 
 		// Load a custom autocomplete list if it exists.
 		this.loadCustomAutocompleteList();
@@ -447,6 +455,20 @@ export default class SC_Plugin extends Plugin {
 			}
 		});
 	}
+    
+    /**
+     * Introduces a custom extension to CodeMirror. Follows Obsidian's instructions about updating extensions so that it
+     * can be done outside SC_Plugin.onload(): https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines#Change+or+reconfigure+editor+extensions
+     *
+     * SC_CodeMirrorEvent should call this method instead of calling registerEditorExtension().
+     *
+     * @param extension
+     */
+    public addEditorExtension(extension: Extension) {
+        // Do NOT create a new array to this.editorExtensions.
+        this.editorExtensions.push(extension);
+        this.app.workspace.updateOptions();
+    }
 
 	/**
 	 * Defines an Obsidian protocol handler that allows receiving requests via obsidian://shell-commands URI.
