@@ -214,7 +214,7 @@ export class Debouncer {
             return "late-execution";
         } else {
             // Debouncing is disabled.
-            throw new Error("Debouncer.getMode(): Debouncing is disabled, but it was tried to be ued.");
+            throw new Error("Debouncer.getMode(): Debouncing is disabled, but it was tried to be used.");
         }
     }
     
