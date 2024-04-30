@@ -493,6 +493,14 @@ export class TShellCommand extends Cacheable {
     }
     
     /**
+     * If debouncer configuration is removed, this should be called (to remove Debouncer). Otherwise, the Debouncer would keep an old, stale configuration object in memory.
+     * Next time debouncing is needed, a new Debouncer will be created automatically.
+     */
+    public resetDebouncer(): void {
+        this.debouncer = null;
+    }
+    
+    /**
      * Called when executing a shell command from command palette. Could probably be called in other execution situations, too.
      *
      * @param parsing_process

@@ -753,6 +753,7 @@ export class ShellCommandSettingsModal extends SC_Modal {
                     if (shellCommandConfiguration.debounce.cooldownDuration === 0) {
                         // The DebounceConfiguration object can be removed. No need to remember the cooldown, because user probably did not type 0 themselves.
                         shellCommandConfiguration.debounce = null;
+                        this.t_shell_command.resetDebouncer(); // If debouncing is re-enabled later, ensure there's no old debouncer trying to use an old, stale configuration.
                     }
                 }
             }
