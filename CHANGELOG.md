@@ -18,7 +18,11 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-### To be Added
+- Nothing at the moment.
+
+## [0.22.0] - 2024-05-05
+
+### Added
 - [Event debouncing for avoiding executing shell commands too often (#380)](https://github.com/Taitava/obsidian-shellcommands/issues/380).
 - [New output channel: Assign custom variables (#382)](https://github.com/Taitava/obsidian-shellcommands/issues/382).
     - Allows storing output from shell commands and reusing them as input for other shell commands later.
@@ -27,11 +31,11 @@ Features that are currently in development and not released yet. This does not i
 - [New variables `{{obsidian_api_version}}` and `{{shell_commands_plugin_version}}` (#387)](https://github.com/Taitava/obsidian-shellcommands/issues/387).
 - [`{{event_type}}` variable (#394)](https://github.com/Taitava/obsidian-shellcommands/issues/394).
 
-### To be Changed
+### Changed
 - [Settings: Make _"Show a notification when executing shell commands"_ decidable on a per shell command basis (388)](https://github.com/Taitava/obsidian-shellcommands/issues/388).
 - [Settings: Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
 
-### To be Fixed
+### Fixed
 - [Bug: Shell command preview text is not updated when modifying the command (#383)](https://github.com/Taitava/obsidian-shellcommands/issues/383).
 
 ## [0.21.0] - 2023-12-30
@@ -450,7 +454,8 @@ Features that are currently in development and not released yet. This does not i
 ## [0.0.0] - 2021-08-22
 - Initial release.
 
-[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.21.0...HEAD
+[Unreleased]: https://github.com/Taitava/obsidian-shellcommands/compare/0.22.0...HEAD
+[0.22.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.21.0...0.22.0
 [0.21.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.1...0.21.0
 [0.20.1]: https://github.com/Taitava/obsidian-shellcommands/compare/0.20.0...0.20.1
 [0.20.0]: https://github.com/Taitava/obsidian-shellcommands/compare/0.19.1...0.20.0
