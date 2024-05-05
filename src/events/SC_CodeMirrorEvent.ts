@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_Event} from "./SC_Event";
+import {
+    EventCategory,
+    SC_Event,
+} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 
 export abstract class SC_CodeMirrorEvent extends SC_Event {
@@ -50,5 +53,9 @@ export abstract class SC_CodeMirrorEvent extends SC_Event {
                 codeMirror.off(this.codeMirrorEvent, trigger);
             }
         });
+    }
+    
+    public getCategory(): EventCategory {
+        return "editor";
     }
 }

@@ -18,9 +18,15 @@
  */
 
 import {SC_WorkspaceEvent} from "./SC_WorkspaceEvent";
+import {EventType} from "./SC_Event";
 
 export class SC_Event_onActiveLeafChanged extends SC_WorkspaceEvent {
     protected static readonly event_code = "on-active-leaf-changed";
     protected static readonly event_title = "Switching the active pane";
     protected readonly workspace_event = "active-leaf-change";
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "active-leaf-switched";
+    }
 }

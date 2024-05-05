@@ -20,6 +20,7 @@
 import {TShellCommand} from "../TShellCommand";
 import {Menu, TAbstractFile, TFile, TFolder, WorkspaceLeaf} from "obsidian";
 import {SC_MenuEvent} from "./SC_MenuEvent";
+import {EventType} from "./SC_Event";
 
 export abstract class SC_AbstractFileMenuEvent extends SC_MenuEvent {
     protected abstract file_or_folder: "file" | "folder";
@@ -46,5 +47,10 @@ export abstract class SC_AbstractFileMenuEvent extends SC_MenuEvent {
                 await this.addTShellCommandToMenu(t_shell_command, menu);
             }
         };
+    }
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return this.file_or_folder + "-menu-item" as "file-menu-item" | "folder-menu-item";
     }
 }

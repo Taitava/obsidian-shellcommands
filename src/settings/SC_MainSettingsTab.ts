@@ -65,6 +65,7 @@ import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {createVariableDefaultValueField} from "./setting_elements/createVariableDefaultValueFields";
 import {CustomShellModel} from "../models/custom_shell/CustomShellModel";
 import {CustomShellInstance} from "../models/custom_shell/CustomShellInstance";
+import {createExecutionNotificationField} from "./setting_elements/createExecutionNotificationField";
 
 /**
  * TODO: Rename to MainSettingsModal. Then it better in line with ShellCommandSettingsModal.
@@ -204,7 +205,7 @@ export class SC_MainSettingsTab extends PluginSettingTab {
             switch (getObsidianInstallationType()) {
                 case "Flatpak": {
                     const calloutContent: DocumentFragment = new DocumentFragment();
-                    calloutContent.createEl("p").innerHTML = "When Obsidian is installed using Flatpak, shell commands are executed in an isolated environment, which may cause some commands not to work. <a href=\"https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation\">Read more</a>.";
+                    calloutContent.createEl("p").innerHTML = "When Obsidian is installed using Flatpak, shell commands are executed in an isolated environment, which may cause some commands not to work. <a href=\"" + Documentation.problems.flatpakInstallation + "\">Read more</a>.";
                     createCallout(
                         containerElement,
                         "warning",
@@ -401,10 +402,38 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                 }),
             )
         ;
+        
+        // General settings for CustomVariables.
+        const custom_variable_container = container_element.createDiv();
+        new Setting(custom_variable_container)
+            .setName("Show notifications when values of custom variables change")
+            .setDesc("Exception: no notifications will be shown for changing values manually via prompts.")
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enabled: "Via URI: Notify",
+                    disabled: "Via URI: Don't notify",
+                })
+                .setValue(this.plugin.settings.custom_variables_notify_changes_via.obsidian_uri ? "enabled" : "disabled")
+                .onChange(async (selection: string) => {
+                    this.plugin.settings.custom_variables_notify_changes_via.obsidian_uri = selection === "enabled";
+                    await this.plugin.saveSettings();
+                })
+            )
+            .addDropdown(dropdownComponent => dropdownComponent
+                .addOptions({
+                    enabled: "Via output assignment: Notify",
+                    disabled: "Via output assignment: Don't notify",
+                })
+                .setValue(this.plugin.settings.custom_variables_notify_changes_via.output_assignment ? "enabled" : "disabled")
+                .onChange(async (selection: string) => {
+                    this.plugin.settings.custom_variables_notify_changes_via.output_assignment = selection === "enabled";
+                    await this.plugin.saveSettings();
+                })
+            )
+        ;
 
         // Settings for each CustomVariable
         const custom_variable_model = getModel<CustomVariableModel>(CustomVariableModel.name);
-        const custom_variable_container = container_element.createDiv();
         this.plugin.getCustomVariableInstances().forEach((custom_variable_instance: CustomVariableInstance) => {
             custom_variable_model.createSettingFields(custom_variable_instance, custom_variable_container);
         });
@@ -605,23 +634,17 @@ export class SC_MainSettingsTab extends PluginSettingTab {
         this.createNotificationDurationField(container_element, "Notification message duration", "Concerns informational, non-fatal messages, e.g. output directed to 'Notification balloon'.", "notification_message_duration");
 
         // "Show a notification when executing shell commands" field
-        new Setting(container_element)
-            .setName("Show a notification when executing shell commands")
-            .addDropdown(dropdown_component => dropdown_component
-                .addOptions({
-                    "disabled": "Do not show",
-                    "quick": "Show for " + this.plugin.settings.notification_message_duration + " seconds",
-                    "permanent": "Show until the process is finished",
-                    "if-long": "Show only if executing takes long",
-                })
-                .setValue(this.plugin.settings.execution_notification_mode)
-                .onChange(async (new_execution_notification_mode: string) => {
-                    // Save the change.
-                    this.plugin.settings.execution_notification_mode = new_execution_notification_mode as ExecutionNotificationMode;
-                    await this.plugin.saveSettings();
-                }),
-            )
-        ;
+        createExecutionNotificationField(
+            container_element,
+            this.plugin.settings.execution_notification_mode,
+            false, // This is main settings, so don't enable a "default" option.
+            this.plugin.settings.notification_message_duration,
+            async (newExecutionNotificationMode: ExecutionNotificationMode) => {
+                // Save the change.
+                this.plugin.settings.execution_notification_mode = newExecutionNotificationMode;
+                await this.plugin.saveSettings();
+            }
+        );
 
         // "Outputting to 'Clipboard' displays a notification message, too" field
         new Setting(container_element)

@@ -33,10 +33,14 @@ export const Documentation = {
     },
     events: {
         folder: "https://publish.obsidian.md/shellcommands/Events/", // Keep the trailing slash!
+        debouncing: "https://publish.obsidian.md/shellcommands/Events/Events+-+debouncing",
     },
     outputHandling: {
         outputHandlingMode: "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling",
         outputWrappers: "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers",
+    },
+    problems: {
+        flatpakInstallation: "https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation",
     },
     variables: {
         folder: "https://publish.obsidian.md/shellcommands/Variables/", // Keep the trailing slash!

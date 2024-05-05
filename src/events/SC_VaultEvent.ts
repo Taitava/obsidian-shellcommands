@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_Event} from "./SC_Event";
+import {
+    EventCategory,
+    SC_Event,
+} from "./SC_Event";
 import {
     EventRef,
     TAbstractFile,
@@ -34,10 +37,10 @@ export abstract class SC_VaultEvent extends SC_Event {
         | "modify"
         | "delete"
         | "rename"
-        | "closed" // Not implement by any SC_Event_* class, because I'm not sure if this event is needed. But can be implemented if need be.
+        | "closed" // Not implement by any SC_Event_* class, because I'm not sure if this event is needed. But can be implemented if need be. 2024-02-10: I can't see this event anymore in the Vault class in obsidian.d.ts for Obsidian 1.4.0.
     ;
     protected abstract file_or_folder: "file" | "folder";
-    protected file: TFile;
+    protected file: TFile; // TODO: Create a new class EventOccurrence and move `file` and `folder` properties there, to avoid simultaneous event occurrences affecting each others' properties. (`file_or_folder` should be kept here as it's not occurrence related).
     protected folder: TFolder;
 
     protected _register(t_shell_command: TShellCommand): false | EventRef {
@@ -93,4 +96,7 @@ export abstract class SC_VaultEvent extends SC_Event {
         }
     }
 
+    public getCategory(): EventCategory {
+        return this.file_or_folder;
+    }
 }

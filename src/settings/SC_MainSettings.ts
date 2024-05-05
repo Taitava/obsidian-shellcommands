@@ -105,6 +105,10 @@ export interface SC_MainSettings {
 
     // Custom variables
     custom_variables: CustomVariableConfiguration[];
+    custom_variables_notify_changes_via: {
+        obsidian_uri: boolean,
+        output_assignment: boolean,
+    };
 
     // Custom shells
     custom_shells: CustomShellConfiguration[];
@@ -172,6 +176,10 @@ export function getDefaultSettings(is_new_installation: boolean): SC_MainSetting
 
         // Custom variables
         custom_variables: [],
+        custom_variables_notify_changes_via: {
+            obsidian_uri: true,
+            output_assignment: true,
+        },
 
         // Custom shells
         custom_shells: [],

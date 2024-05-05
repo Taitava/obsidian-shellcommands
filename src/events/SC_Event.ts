@@ -67,6 +67,15 @@ export abstract class SC_Event {
     protected default_configuration: SC_EventConfiguration = {
         enabled: false,
     };
+    
+    /**
+     * If true, this event's execution can be postponed or prevented completely by debouncing (only if it's
+     * enabled in the executable shell command's configuration). Automatic events should have this set to true,
+     * user-interaction events (i.e. menus) should have this set to false.
+     *
+     * @protected
+     */
+    protected static readonly debounce: boolean = true;
 
     public constructor(plugin: SC_Plugin) {
         this.plugin = plugin;
@@ -118,14 +127,22 @@ export abstract class SC_Event {
 
     /**
      * Executes a shell command.
-     * @param t_shell_command
-     * @param parsing_process SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
+     * @param tShellCommand
+     * @param parsingProcess SC_MenuEvent can use this to pass an already started ParsingProcess instance. If omitted, a new ParsingProcess will be created.
      */
-    protected async trigger(t_shell_command: TShellCommand, parsing_process?: ShellCommandParsingProcess) {
-        debugLog(this.constructor.name + ": Event triggers executing shell command id " + t_shell_command.getId());
-        // Execute the shell command.
-        const executor = new ShellCommandExecutor(this.plugin, t_shell_command, this);
-        await executor.doPreactionsAndExecuteShellCommand(parsing_process);
+    protected async trigger(tShellCommand: TShellCommand, parsingProcess?: ShellCommandParsingProcess) {
+        const debounce: boolean = this.static().debounce && tShellCommand.isDebouncingEnabled();
+        debugLog(this.constructor.name + ": Event triggers executing shell command id " + tShellCommand.getId() + " " + (debounce ? "with" : "without") + " debouncing control.");
+        if (debounce) {
+            if (parsingProcess) {
+                throw new Error("SC_Event.trigger() cannot be passed a ShellCommandParsingProcess object if SC_Event.debounce is true. This is just because passing ShellCommandParsingProcess to TShellCommand.executeWithDebouncing() is not implemented. It can be implemented later.");
+            }
+            await tShellCommand.executeWithDebouncing(this);
+        } else {
+            // Execute the shell command immediately.
+            const executor = new ShellCommandExecutor(this.plugin, tShellCommand, this);
+            await executor.doPreactionsAndExecuteShellCommand(parsingProcess);
+        }
     }
 
     public static getCode() {
@@ -135,6 +152,16 @@ export abstract class SC_Event {
     public static getTitle() {
         return this.event_title;
     }
+    
+    /**
+     * Used by the {{event_type}} variable.
+     */
+    public abstract getType(): EventType;
+    
+    /**
+     * Used by the {{event_type:category}} variable.
+     */
+    public abstract getCategory(): EventCategory;
 
     /**
      * Creates a list of variables to the given container element. Each variable is a link to its documentation.
@@ -152,6 +179,10 @@ export abstract class SC_Event {
             variable.createDocumentationLinkElement(container);
         });
         return hasCreatedElements;
+    }
+    
+    public static canDebounce() {
+        return this.debounce;
     }
 
     private getEventVariables() {
@@ -226,3 +257,62 @@ export abstract class SC_Event {
         return Documentation.events.folder + encodeURIComponent(this.event_title);
     }
 }
+
+export type EventType = // TODO: Find out a way to derive this from EventTypes.
+    "active-leaf-switched"  |     // Keep in alphabetic order.
+    "application-quit"      |
+    "application-started"   |
+    "caret-moved"           |
+    "editor-menu-item"      |
+    "every-n-seconds"       |
+    "file-content-modified" |
+    "file-created"          |
+    "file-deleted"          |
+    "file-menu-item"        |
+    "file-moved"            |
+    "file-renamed"          |
+    "folder-created"        |
+    "folder-deleted"        |
+    "folder-menu-item"      |
+    "folder-moved"          |
+    "folder-renamed"
+;                                 // Keep in alphabetic order.
+export const EventTypes = [
+    "active-leaf-switched",       // Keep in alphabetic order.
+    "application-quit",
+    "application-started",
+    "caret-moved",
+    "editor-menu-item",
+    "every-n-seconds",
+    "file-content-modified",
+    "file-created",
+    "file-deleted",
+    "file-menu-item",
+    "file-moved",
+    "file-renamed",
+    "folder-created",
+    "folder-deleted",
+    "folder-menu-item",
+    "folder-moved",
+    "folder-renamed",
+];                                // Keep in alphabetic order.
+
+export type EventCategory =       // TODO: Find out a way to derive this from EventCategories.
+    "application"   |             // Keep in alphabetic order.
+    "editor"        |
+    "file"          |
+    "folder"        |
+    "menu"          |
+    "time"          |
+    "workspace"
+;
+
+export const EventCategories = [
+    "application",                // Keep in alphabetic order.
+    "editor",
+    "file",
+    "folder",
+    "menu",
+    "time",
+    "workspace",
+];

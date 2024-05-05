@@ -329,7 +329,7 @@ export class PromptModal extends SC_Modal {
         let promptField: PromptField;
         for (promptField of this.prompt_fields) {
             const cloak: boolean = "password" === promptField.configuration.type;
-            await promptField.getTargetVariable().setValue(promptField.getParsedOrRawValue(), cloak);
+            await promptField.getTargetVariable().setValue(promptField.getParsedOrRawValue(), "manual", cloak);
         }
     }
 

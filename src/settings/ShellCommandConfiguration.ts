@@ -24,6 +24,7 @@ import {
     OutputHandlingMode,
 } from "../output_channels/OutputHandlerCode";
 import {
+    ExecutionNotificationMode,
     ICommandPaletteOptions,
     IPlatformSpecificString,
     IPlatformSpecificStringWithDefault,
@@ -34,6 +35,7 @@ import {
     PreactionConfiguration,
 } from "../imports";
 import {OutputChannel} from "../output_channels/OutputChannel";
+import {DebounceConfiguration} from "../Debouncer";
 
 export interface ShellCommandConfiguration {
     id: string,
@@ -59,7 +61,9 @@ export interface ShellCommandConfiguration {
     };
     output_channel_order: OutputChannelOrder;
     output_handling_mode: OutputHandlingMode;
+    execution_notification_mode: null | ExecutionNotificationMode;
     events: SC_EventConfigurations;
+    debounce: null | DebounceConfiguration;
     command_palette_availability: keyof ICommandPaletteOptions;
     preactions: PreactionConfiguration[];
     variable_default_values: {
@@ -97,7 +101,9 @@ export function newShellCommandConfiguration(shell_command_id: string, shell_com
         },
         output_channel_order: "stdout-first",
         output_handling_mode: "buffered",
+        execution_notification_mode: null,
         events: {},
+        debounce: null,
         command_palette_availability: "enabled",
         preactions: [],
         variable_default_values: {},

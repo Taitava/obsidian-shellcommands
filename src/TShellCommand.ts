@@ -51,6 +51,7 @@ import {
     InheritableVariableDefaultValueConfiguration,
 } from "./variables/Variable";
 import {
+    ExecutionNotificationMode,
     IPlatformSpecificStringWithDefault,
     PlatformId,
     PlatformNames,
@@ -62,6 +63,10 @@ import {OutputWrapper} from "./models/output_wrapper/OutputWrapper";
 import {Shell} from "./shells/Shell";
 import {getShell} from "./shells/ShellFunctions";
 import {Variable_ShellCommandContent} from "./variables/Variable_ShellCommandContent";
+import {
+    DebounceConfiguration,
+    Debouncer,
+} from "./Debouncer";
 
 export interface TShellCommandContainer {
     [key: string]: TShellCommand,
@@ -75,6 +80,7 @@ export class TShellCommand extends Cacheable {
     private plugin: SC_Plugin;
     private configuration: ShellCommandConfiguration;
     private obsidian_command: Command;
+    private debouncer: Debouncer | null = null;
 
     constructor (plugin: SC_Plugin, configuration: ShellCommandConfiguration) {
         super();
@@ -331,6 +337,16 @@ export class TShellCommand extends Cacheable {
     public isOutputWrapperStdoutSameAsStderr() {
         return this.configuration.output_wrappers["stdout"] === this.configuration.output_wrappers["stderr"];
     }
+    
+    public getExecutionNotificationMode(): ExecutionNotificationMode {
+        if (null === this.configuration.execution_notification_mode) {
+            // Get the mode from the main configuration.
+            return this.plugin.settings.execution_notification_mode;
+        } else {
+            // This shell command defines its own mode.
+            return this.configuration.execution_notification_mode;
+        }
+    }
 
     public getEventsConfiguration() {
         return this.configuration.events;
@@ -460,6 +476,28 @@ export class TShellCommand extends Cacheable {
         this.getSC_Events().forEach((sc_event: SC_Event) => {
             this.unregisterSC_Event(sc_event);
         });
+    }
+    
+    public async executeWithDebouncing(scEvent: SC_Event): Promise<void> {
+        if (!this.isDebouncingEnabled()) {
+            throw new Error("Cannot call TShellCommand.executeWithDebouncing() if debouncing is not enabled.");
+        }
+        if (!this.debouncer) {
+            this.debouncer = new Debouncer(this.plugin, this.configuration.debounce as DebounceConfiguration, this);
+        }
+        await this.debouncer.executeWithDebouncing(scEvent);
+    }
+    
+    public isDebouncingEnabled(): boolean {
+        return (!!this.configuration.debounce) && (this.configuration.debounce.executeEarly || this.configuration.debounce.executeLate);
+    }
+    
+    /**
+     * If debouncer configuration is removed, this should be called (to remove Debouncer). Otherwise, the Debouncer would keep an old, stale configuration object in memory.
+     * Next time debouncing is needed, a new Debouncer will be created automatically.
+     */
+    public resetDebouncer(): void {
+        this.debouncer = null;
     }
     
     /**

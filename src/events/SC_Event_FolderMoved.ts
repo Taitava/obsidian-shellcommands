@@ -18,10 +18,16 @@
  */
 
 import {SC_VaultMoveOrRenameEvent} from "./SC_VaultMoveOrRenameEvent";
+import {EventType} from "./SC_Event";
 
 export class SC_Event_FolderMoved extends SC_VaultMoveOrRenameEvent {
     protected static readonly event_code = "folder-moved";
     protected static readonly event_title = "Folder moved";
     protected move_or_rename: "move" = "move";
     protected file_or_folder: "folder" = "folder";
+    
+    public getType(): EventType {
+        // TODO: Change all event_code properties to be the same as event types, and then make the parent method SC_Event.getType() return event_code. Then all sub-methods of getType() can be removed.
+        return "folder-moved";
+    }
 }

@@ -141,7 +141,7 @@ export class ShellCommandExecutor {
             debugLog("No Preactions to perform. This is ok.");
         }
 
-        preaction_pipeline.then(async (can_execute: boolean) => {
+        await preaction_pipeline.then(async (can_execute: boolean) => {
             if (can_execute) {
                 // Parse either all variables, or if some variables are already parsed, then just the rest. Might also be that
                 // all variables are already parsed.
@@ -299,24 +299,25 @@ export class ShellCommandExecutor {
                 const processTerminator = () => {
                     child_process.kill("SIGTERM");
                 };
+                
+                // Display a notification of the execution (if wanted).
+                const executionNotificationMode: ExecutionNotificationMode = this.t_shell_command.getExecutionNotificationMode();
+                if ("disabled" !== executionNotificationMode) {
+                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, executionNotificationMode, processTerminator);
+                }
 
                 // Hook into child_process for output handling
                 switch (this.t_shell_command.getOutputHandlingMode()) {
                     case "buffered": {
                         // Output will be buffered and handled as a single batch.
-                        this.handleBufferedOutput(child_process, shell_command_parsing_result, outputHandlers);
+                        await this.handleBufferedOutput(child_process, shell_command_parsing_result, outputHandlers);
                         break;
                     }
 
                     case "realtime": {
                         // Output will be handled on-the-go.
-                        this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputHandlers, processTerminator);
+                        await this.handleRealtimeOutput(child_process, shell_command_parsing_result, outputHandlers, processTerminator);
                     }
-                }
-
-                // Display a notification of the execution (if wanted).
-                if ("disabled" !== this.plugin.settings.execution_notification_mode) {
-                    this.showExecutionNotification(child_process, shell_command_parsing_result.unwrappedShellCommandContent, this.plugin.settings.execution_notification_mode, processTerminator);
                 }
             } catch (exception) {
                 // An exception has happened.
@@ -333,58 +334,62 @@ export class ShellCommandExecutor {
         }
     }
 
-    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputHandlerConfigurations) {
-        child_process.on("exit", (exitCode: number | null) => {
-            // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
-
-            // Get outputs
-            if (null === child_process.stdout || null == child_process.stderr) {
-                // The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
-                throw new Error("Child process's stdout and/or stderr stream is null.");
-            }
-            const stdout: string = child_process.stdout.read() ?? "";
-            let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
-
-            // Did the shell command execute successfully?
-            if (exitCode === null || exitCode > 0) {
-                // Some error occurred
-                debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
-
-                // Check if this error should be displayed to the user or not
-                if (null !== exitCode && this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
-                    // The user has ignored this error.
-                    debugLog("User has ignored this error, so won't display it.");
-
-                    // Handle only stdout output stream
-                    stderr = "";
-                    exitCode = null; // TODO: consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
-                } else {
-                    // The error can be shown.
-                    debugLog("Will display the error to user.");
+    private handleBufferedOutput(child_process: ChildProcess, shell_command_parsing_result: ShellCommandParsingResult, outputChannels: OutputHandlerConfigurations): Promise<void> {
+        return new Promise((resolve: () => void) => {
+            child_process.on("exit", (exitCode: number | null) => {
+                // exitCode is null if user terminated the process. Reference: https://nodejs.org/api/child_process.html#event-exit (read on 2022-11-27).
+    
+                // Get outputs
+                if (null === child_process.stdout || null == child_process.stderr) {
+                    // The exception is caught locally below, but it's ok because it's then rethrown as the error message does not match '/spawn\s+ENAMETOOLONG/i'.
+                    throw new Error("Child process's stdout and/or stderr stream is null.");
                 }
-
-                // Handle at least stdout (and maybe stderr) output stream
-                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
-            } else {
-                // Probably no errors, but do one more check.
-
-                // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
-                if (stderr.length > 0) {
-                    // Check a special case: should error code 0 be ignored?
-                    if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
-                        // Exit code 0 is on the ignore list, so suppress stderr output.
+                const stdout: string = child_process.stdout.read() ?? "";
+                let stderr: string = child_process.stderr.read() ?? ""; // let instead of const: stderr can be emptied later due to ignoring.
+    
+                // Did the shell command execute successfully?
+                if (exitCode === null || exitCode > 0) {
+                    // Some error occurred
+                    debugLog("Command executed and failed. Error number: " + exitCode + ". Stderr: " + stderr);
+    
+                    // Check if this error should be displayed to the user or not
+                    if (null !== exitCode && this.t_shell_command.getIgnoreErrorCodes().contains(exitCode)) {
+                        // The user has ignored this error.
+                        debugLog("User has ignored this error, so won't display it.");
+    
+                        // Handle only stdout output stream
                         stderr = "";
-                        debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                        exitCode = null; // TODO: consider if exitCode should just be left untouched. It could be informative to 'Ask after execution' output channel that shows exit code to user.
                     } else {
-                        debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                        // The error can be shown.
+                        debugLog("Will display the error to user.");
                     }
+    
+                    // Handle at least stdout (and maybe stderr) output stream
+                    handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, exitCode, outputChannels);
                 } else {
-                    debugLog("Shell command executed: No errors.");
+                    // Probably no errors, but do one more check.
+    
+                    // Even when 'error' is null and everything should be ok, there may still be error messages outputted in stderr.
+                    if (stderr.length > 0) {
+                        // Check a special case: should error code 0 be ignored?
+                        if (this.t_shell_command.getIgnoreErrorCodes().contains(0)) {
+                            // Exit code 0 is on the ignore list, so suppress stderr output.
+                            stderr = "";
+                            debugLog("Shell command executed: Encountered error code 0, but stderr is ignored.");
+                        } else {
+                            debugLog("Shell command executed: Encountered error code 0, and stderr will be relayed to an output handler.");
+                        }
+                    } else {
+                        debugLog("Shell command executed: No errors.");
+                    }
+    
+                    // Handle output
+                    handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a channel for stderr).
                 }
-
-                // Handle output
-                handleBufferedOutput(this.plugin, this.t_shell_command, shell_command_parsing_result, stdout, stderr, 0, outputChannels); // Use zero as an error code instead of null (0 means no error). If stderr happens to contain something, exit code 0 gets displayed in an error balloon (if that is selected as a channel for stderr).
-            }
+                // Output handling is finished.
+                resolve();
+            });
         });
     }
 
@@ -393,72 +398,77 @@ export class ShellCommandExecutor {
             shell_command_parsing_result: ShellCommandParsingResult,
             outputHandlerConfigurations: OutputHandlerConfigurations,
             processTerminator: (() => void) | null,
-        ) {
+        ): Promise<void> {
 
-        // Prepare output channels
-        const outputChannels = startRealtimeOutputHandling(
-            this.plugin,
-            this.t_shell_command,
-            shell_command_parsing_result,
-            outputHandlerConfigurations,
-            processTerminator,
-        );
-
-        // Define an output handler
-        const handleNewOutputContent = async (outputStreamName: OutputStream, readableStream: Readable) => {
-            if (null === childProcess.stdout || null == childProcess.stderr) {
-                throw new Error("Child process's stdout and/or stderr stream is null.");
-            }
-
-            // Don't emit new events while the current handling is in progress. (I think) it might cause a race condition where a simultaneous handling could overwrite another handling's data. Pause both streams, not just the current one, to maintain correct handling order also between the two streams.
-            childProcess.stdout.pause();
-            childProcess.stderr.pause();
-
-            const outputContent = readableStream.read() ?? "";
-            const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
-            if (undefined === outputChannel) {
-                throw new Error("Output channel is undefined.");
-            }
-            await outputChannel.handleRealtime(outputStreamName, outputContent);
-
-            // Can emit new events again.
-            childProcess.stdout.resume();
-            childProcess.stderr.resume();
-        };
-
-        // Hook into output streams' (such as stdout and stderr) output retrieving events.
-        // Note that there might be just one stream, e.g. only stderr, if stdout is ignored. In the future, there might also be more than two streams, when custom streams are implemented.
-        for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
-            const readableStream: Readable | null = childProcess[outputStreamName];
-            if (null === readableStream) {
-                throw new Error("Child process's readable stream '"+outputStreamName+"' is null.");
-            }
-            readableStream.on(
-                "readable",
-                () => handleNewOutputContent(outputStreamName, readableStream),
+        return new Promise((resolve) => {
+            // Prepare output channels
+            const outputChannels = startRealtimeOutputHandling(
+                this.plugin,
+                this.t_shell_command,
+                shell_command_parsing_result,
+                outputHandlerConfigurations,
+                processTerminator,
             );
-        }
-
-        // Hook into exit events
-        childProcess.on("exit", (exitCode: number, signal: string /* TODO: Pass signal to channels so it can be shown to users in the future */) => {
-            // Call all OutputChannels' endRealtime().
-            const alreadyCalledChannelCodes: OutputHandlerCode[] = [];
-            for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
+    
+            // Define an output handler
+            const handleNewOutputContent = async (outputStreamName: OutputStream, readableStream: Readable) => {
+                if (null === childProcess.stdout || null == childProcess.stderr) {
+                    throw new Error("Child process's stdout and/or stderr stream is null.");
+                }
+    
+                // Don't emit new events while the current handling is in progress. (I think) it might cause a race condition where a simultaneous handling could overwrite another handling's data. Pause both streams, not just the current one, to maintain correct handling order also between the two streams.
+                childProcess.stdout.pause();
+                childProcess.stderr.pause();
+    
+                const outputContent = readableStream.read() ?? "";
                 const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
                 if (undefined === outputChannel) {
                     throw new Error("Output channel is undefined.");
                 }
-                const outputChannelCode: OutputHandlerCode = outputHandlerConfigurations[outputStreamName].handler;
-
-                // Ensure this OutputChannel has not yet been called.
-                if (!alreadyCalledChannelCodes.includes(outputChannelCode)) {
-                    // Not yet called, so do the call.
-                    outputChannel.endRealtime(exitCode);
-
-                    // Mark that this channel's endRealtime() has already been called. Solves a situation where stderr and stdout uses the same channel, in which case endRealtime() should not be accidentally called twice.
-                    alreadyCalledChannelCodes.push(outputChannelCode);
+                await outputChannel.handleRealtime(outputStreamName, outputContent);
+    
+                // Can emit new events again.
+                childProcess.stdout.resume();
+                childProcess.stderr.resume();
+            };
+    
+            // Hook into output streams' (such as stdout and stderr) output retrieving events.
+            // Note that there might be just one stream, e.g. only stderr, if stdout is ignored. In the future, there might also be more than two streams, when custom streams are implemented.
+            for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
+                const readableStream: Readable | null = childProcess[outputStreamName];
+                if (null === readableStream) {
+                    throw new Error("Child process's readable stream '"+outputStreamName+"' is null.");
                 }
+                readableStream.on(
+                    "readable",
+                    () => handleNewOutputContent(outputStreamName, readableStream),
+                );
             }
+    
+            // Hook into exit events
+            childProcess.on("exit", (exitCode: number, signal: string /* TODO: Pass signal to channels so it can be shown to users in the future */) => {
+                // Call all OutputChannels' endRealtime().
+                const alreadyCalledChannelCodes: OutputHandlerCode[] = [];
+                for (const outputStreamName of Object.getOwnPropertyNames(outputChannels) as OutputStream[]) {
+                    const outputChannel: OutputChannel | undefined = outputChannels[outputStreamName];
+                    if (undefined === outputChannel) {
+                        throw new Error("Output channel is undefined.");
+                    }
+                    const outputChannelCode: OutputHandlerCode = outputHandlerConfigurations[outputStreamName].handler;
+    
+                    // Ensure this OutputChannel has not yet been called.
+                    if (!alreadyCalledChannelCodes.includes(outputChannelCode)) {
+                        // Not yet called, so do the call.
+                        outputChannel.endRealtime(exitCode);
+    
+                        // Mark that this channel's endRealtime() has already been called. Solves a situation where stderr and stdout uses the same channel, in which case endRealtime() should not be accidentally called twice.
+                        alreadyCalledChannelCodes.push(outputChannelCode);
+                    }
+                }
+                
+                // Output handling is finished.
+                resolve();
+            });
         });
     }
 

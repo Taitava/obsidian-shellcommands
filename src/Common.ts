@@ -66,6 +66,27 @@ export function getPluginAbsolutePath(plugin: SC_Plugin, convertSlashToBackslash
 }
 
 /**
+ * Retrieves a specific part of a version number.
+ *
+ * @param {string} wholeVersion - The complete version number string.
+ * @param {"major" | "minor" | "patch"} part - The part of the version number to retrieve ("major", "minor", or "patch").
+ *
+ * @returns {string | null} - The specified part of the version number, or null if the part is not found.
+ *
+ * @example getVersionPart("2.3.4", "major"); // returns "2"
+ * @example getVersionPart("2.3.4", "minor"); // returns "3"
+ * @example getVersionPart("2.3.4", "patch"); // returns "4"
+ * @example getVersionPart("2.3.4", "invalid-part-name"); // returns null
+ */
+export function getVersionPart(wholeVersion: string, part: "major" | "minor" | "patch"): string | null {
+    const versionPartsMatch = wholeVersion.match(/^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)/); // No $ at the end on purpose: if the version string continues, just ignore the rest.
+    if (undefined === versionPartsMatch?.groups?.[part]) {
+        return null;
+    }
+    return versionPartsMatch.groups[part];
+}
+
+/**
  * For some reason there is no Platform.isWindows .
  */
 export function isWindows() {
@@ -390,6 +411,20 @@ export function isInteger(value: string, allow_minus: boolean): boolean {
     } else {
         return !!value.match(/^\d+$/u);
     }
+}
+
+/**
+ * Converts a string input to a floating-point number with limited decimal places. Replaces a possible comma with a dot.
+ *
+ * @param {string} input - The input string to be converted.
+ * @param {number} countDecimals - The number of decimal places to limit the converted number to.
+ * @return {number} - The converted floating-point number with limited decimal places.
+ */
+export function inputToFloat(input: string, countDecimals: number): number {
+    const inputCommaReplaced = input.replace(",", ".");
+    const number: number = parseFloat(inputCommaReplaced);
+    const limitedDecimals: string = number.toFixed(countDecimals);
+    return parseFloat(limitedDecimals); // Use parseFloat() again to remove a possible .0 and to convert it back to a number.
 }
 
 /**

@@ -97,7 +97,7 @@ export default class SC_Plugin extends Plugin {
      *
      * This is NOT the plugin's version (although they are often coupled the same)! The plugin's version is defined in manifest.json.
 	 */
-	public static SettingsVersion: SettingsVersionString = "0.21.0";
+	public static SettingsVersion: SettingsVersionString = "0.22.0";
 
 	public settings: SC_MainSettings; // TODO: Rename to 'configuration'.
 	public obsidian_commands: ObsidianCommandsContainer = {};
@@ -198,6 +198,7 @@ export default class SC_Plugin extends Plugin {
 
 		// Make it possible to create CustomVariableViews.
 		this.registerView(CustomVariableView.ViewType, (leaf: WorkspaceLeaf) => new CustomVariableView(this, leaf));
+        this.addRibbonIcon(CustomVariableView.getIconStatic(), CustomVariableView.getDisplayTextStatic(), () => this.createCustomVariableView());
 
 		// Debug reserved IDs
 		debugLog("IDGenerator's reserved IDs:");
@@ -471,7 +472,7 @@ export default class SC_Plugin extends Plugin {
 							found_custom_variable = true;
 
 							// Assign the given value to the custom variable.
-							await variable.setValue(parameters[parameter_name]);
+							await variable.setValue(parameters[parameter_name], "uri");
 						}
 					}
 					if (!found_custom_variable) {

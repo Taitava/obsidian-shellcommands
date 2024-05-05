@@ -17,7 +17,10 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {SC_Event} from "./SC_Event";
+import {
+    EventCategory,
+    SC_Event,
+} from "./SC_Event";
 import {TShellCommand} from "../TShellCommand";
 import {EventRef} from "obsidian";
 
@@ -49,5 +52,9 @@ export abstract class SC_WorkspaceEvent extends SC_Event {
 
     protected getTrigger(t_shell_command: TShellCommand) {
         return async (...parameters: unknown[] /* Need to have this ugly parameter thing so that subclasses can define their own parameters. */) => await this.trigger(t_shell_command);
+    }
+    
+    public getCategory(): EventCategory {
+        return "workspace";
     }
 }

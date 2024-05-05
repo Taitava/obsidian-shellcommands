@@ -25,9 +25,12 @@ import {
 } from "obsidian";
 import {ParsingResult} from "../variables/parseVariables";
 import {debugLog} from "../Debug";
+import {EventCategory} from "./SC_Event";
 
 export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
-
+    
+    protected static readonly debounce = false;
+    
     protected async addTShellCommandToMenu(t_shell_command: TShellCommand, menu: Menu) {
         const debugLogBaseMessage: string = this.constructor.name + ".addTShellCommandToMenu(): ";
 
@@ -81,5 +84,9 @@ export abstract class SC_MenuEvent extends SC_WorkspaceEvent {
                 debugLog(debugLogBaseMessage + "Alias parsing is disabled in settings.");
             }
         });
+    }
+    
+    public getCategory(): EventCategory {
+        return "menu";
     }
 }
