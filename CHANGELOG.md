@@ -18,7 +18,9 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-- Nothing at the moment.
+### To be Added
+ - [_Caret moved in editor_ event (#345)](https://github.com/Taitava/obsidian-shellcommands/issues/345).
+     - A non-working draft version of the event was accidentally released already in SC `0.20.0`, but now it's finally working.
 
 ## [0.22.0] - 2024-05-05
 
