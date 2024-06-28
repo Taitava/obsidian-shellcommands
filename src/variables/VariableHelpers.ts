@@ -197,6 +197,11 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
             // Check if we have still dot notation parts left in the property path.
             if (0 === property_parts.length) {
                 // No dot notation parts are left.
+                const maybeJoinedStrings = joinStringsIfArray(property_value);
+                if (null !== maybeJoinedStrings) {
+                    // The object was an array of strings. Join them together.
+                    return maybeJoinedStrings;
+                }
                 // Freak out.
                 const nested_elements_keys = Object.getOwnPropertyNames(property_value);
                 if (nested_elements_keys.length > 0) {
@@ -220,4 +225,16 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
         }
     }
 
+}
+
+function isArrayofStrings(obj: any): obj is string[] {
+    return Array.isArray(obj) && obj.every(item => typeof item === 'string');
+}
+
+function joinStringsIfArray(obj: any): string | null {
+    if (isArrayofStrings(obj)) {
+        return obj.join(' ');
+    } else {
+        return null;
+    }
 }
