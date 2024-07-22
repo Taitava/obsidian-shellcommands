@@ -46,6 +46,14 @@ Contact:
 Contact:
  - https://github.com/vrajur
 
+## Jamie Steiner
+- Contributor:
+  - Helped with the plural `{{yaml_values}}` variable ([#415](https://github.com/Taitava/obsidian-shellcommands/discussions/415) / [#424](https://github.com/Taitava/obsidian-shellcommands/issues/424)).
+- Ideas and feedback
+
+Contact:
+- https://github.com/jvsteiner
+
 <!-- ADDING YOURSELF AS AN AUTHOR:
 
 1. Add a new headline above this comment block: ## Firstname Lastname (or you can use a nick name if you wish).
