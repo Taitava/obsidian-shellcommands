@@ -250,12 +250,13 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string, m
                         };
                     }
                 } else {
-                    // Freak out.
+                    // Freak out - a single value is expected.
                     const nested_elements_keys = Object.getOwnPropertyNames(property_value);
+                    const multipleValuesTip = Array.isArray(property_value) ? " Or use the plural variable {{yaml_values:"+property_path+":,}} to get multiple values." : ""; // Array.isArray() check can be removed when support for key-value maps is added to {{yaml_values}}.
                     if (nested_elements_keys.length > 0) {
-                        error_messages.push("YAML property '" + property_name + "' contains a nested element with keys: " + nested_elements_keys.join(", ") + ". Use e.g. '" + property_path + "." + nested_elements_keys[0] + "' to get its value.");
+                        error_messages.push("YAML property '" + property_name + "' contains a nested element with keys: " + nested_elements_keys.join(", ") + ". Use e.g. '" + property_path + "." + nested_elements_keys[0] + "' to get its value." + multipleValuesTip);
                     } else {
-                        error_messages.push("YAML property '" + property_name + "' contains a nested element. Use a property name that points to a literal value instead.");
+                        error_messages.push("YAML property '" + property_name + "' contains a nested element. Use a property name that points to a literal value instead." + multipleValuesTip);
                     }
                     return {
                         success: false,
@@ -283,7 +284,7 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string, m
                     };
                 } else {
                     // The caller expects an array of values.
-                    error_messages.push("YAML property '" + property_name + "' gives a single value '" + property_value.toString() + "', but a list of values was expected.");
+                    error_messages.push("YAML property '" + property_name + "' gives a single value '" + property_value.toString() + "', but a list of values was expected. Use the singular variable {{yaml_value:" + property_path + "}} if a single value is wanted.");
                     return {
                         success: false,
                         errorMessages: error_messages,
