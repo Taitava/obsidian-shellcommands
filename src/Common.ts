@@ -413,6 +413,14 @@ export function isInteger(value: string, allow_minus: boolean): boolean {
     }
 }
 
+export function isScalar(value: unknown, allowNullAndUndefined: boolean): boolean {
+    if (null === value || undefined === value) {
+        return allowNullAndUndefined;
+    }
+    const type = typeof value;
+    return type !== 'object' && type !== 'function';
+}
+
 /**
  * Converts a string input to a floating-point number with limited decimal places. Replaces a possible comma with a dot.
  *

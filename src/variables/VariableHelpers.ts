@@ -17,7 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getVaultAbsolutePath, uniqueArray} from "../Common";
+import {
+    getVaultAbsolutePath,
+    isScalar,
+    uniqueArray,
+} from "../Common";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
 import {Shell} from "../shells/Shell";
 
@@ -227,12 +231,12 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
 
 }
 
-function isArrayOfStrings(object: unknown): object is string[] {
-    return Array.isArray(object) && object.every(item => typeof item === 'string');
+function isArrayOfScalars(object: unknown): object is string[] { // TODO: Move to Common.ts.
+    return Array.isArray(object) && object.every(item => isScalar(item, false));
 }
 
 function joinStringsIfArray(obj: any): string | null {
-    if (isArrayOfStrings(obj)) {
+    if (isArrayOfScalars(obj)) {
         return obj.join(' ');
     } else {
         return null;
