@@ -19,7 +19,10 @@
 
 import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
-import {getFileYAMLValue} from "./VariableHelpers";
+import {
+    getFileYAMLValue,
+    YAMLSingleValueResult,
+} from "./VariableHelpers";
 import {Shell} from "../shells/Shell";
 
 export class Variable_YAMLValue extends FileVariable {
@@ -38,13 +41,18 @@ export class Variable_YAMLValue extends FileVariable {
         castedArguments: {property_name: string},
     ): Promise<string> {
         // We do have an active file
-        const result = getFileYAMLValue(this.app, this.getFileOrThrow(), castedArguments.property_name);
-        if (Array.isArray(result)) {
-            // The result contains error message(s).
-            this.throw(result.join(" "));
+        const yamlResult: YAMLSingleValueResult = getFileYAMLValue(
+            this.app,
+            this.getFileOrThrow(),
+            castedArguments.property_name,
+            false, // Deny the result if it's a multi-value list instead of a scalar.
+        );
+        if (yamlResult.success) {
+            // The result is ok.
+            return yamlResult.singleValue;
         } else {
-            // The result is ok, it's a string.
-            return result;
+            // The result contains error message(s).
+            this.throw(yamlResult.errorMessages.join(" "));
         }
     }
     public getAvailabilityText(): string {

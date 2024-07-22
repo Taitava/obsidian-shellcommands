@@ -24,7 +24,10 @@ import {SC_Event_FileDeleted} from "../../events/SC_Event_FileDeleted";
 import {SC_Event_FileRenamed} from "../../events/SC_Event_FileRenamed";
 import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
-import {getFileYAMLValue} from "../VariableHelpers";
+import {
+    getFileYAMLValue,
+    YAMLSingleValueResult,
+} from "../VariableHelpers";
 import {IParameters} from "../Variable";
 import {Shell} from "../../shells/Shell";
 
@@ -55,13 +58,18 @@ export class Variable_EventYAMLValue extends EventVariable {
     ): Promise<string> {
         this.requireCorrectEvent(sc_event);
 
-        const result = getFileYAMLValue(this.app, sc_event.getFile(), castedArguments.property_name);
-        if (Array.isArray(result)) {
-            // The result contains error message(s).
-            this.throw(result.join(" "));
+        const yamlResult: YAMLSingleValueResult = getFileYAMLValue(
+            this.app,
+            sc_event.getFile(),
+            castedArguments.property_name,
+            false, // Deny the result if it's a multi-value list instead of a scalar.
+        );
+        if (yamlResult.success) {
+            // The result is ok.
+            return yamlResult.singleValue;
         } else {
-            // The result is ok, it's a string.
-            return result;
+            // The result contains error message(s).
+            this.throw(yamlResult.errorMessages.join(" "));
         }
     }
     public getAvailabilityText(): string {
