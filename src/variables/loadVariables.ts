@@ -35,6 +35,7 @@ import {DEBUG_ON} from "../Debug";
 import {Variable_Passthrough} from "./Variable_Passthrough";
 import SC_Plugin from "../main";
 import {Variable_YAMLValue} from "./Variable_YAMLValue";
+import {Variable_YAMLValues} from "./Variable_YAMLValues";
 import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
 import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
 import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
@@ -106,6 +107,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_Workspace(plugin),
         new Variable_YAMLContent(plugin),
         new Variable_YAMLValue(plugin),
+        new Variable_YAMLValues(plugin),
 
         // Event variables
         new Variable_EventFileContent(plugin),
