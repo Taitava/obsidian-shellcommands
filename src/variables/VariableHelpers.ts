@@ -227,12 +227,12 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
 
 }
 
-function isArrayofStrings(obj: any): obj is string[] {
-    return Array.isArray(obj) && obj.every(item => typeof item === 'string');
+function isArrayOfStrings(object: unknown): object is string[] {
+    return Array.isArray(object) && object.every(item => typeof item === 'string');
 }
 
 function joinStringsIfArray(obj: any): string | null {
-    if (isArrayofStrings(obj)) {
+    if (isArrayOfStrings(obj)) {
         return obj.join(' ');
     } else {
         return null;
