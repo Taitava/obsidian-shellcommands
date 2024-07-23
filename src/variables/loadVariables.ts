@@ -44,6 +44,7 @@ import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventTags} from "./event_variables/Variable_EventTags";
 import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
+import {Variable_EventYAMLValues} from "./event_variables/Variable_EventYAMLValues";
 import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
 import {Variable_Environment} from "./Variable_Environment";
 import {Variable_EventOldFileName} from "./event_variables/Variable_EventOldFileName";
@@ -128,6 +129,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_EventType(plugin),
         new Variable_EventYAMLContent(plugin),
         new Variable_EventYAMLValue(plugin),
+        new Variable_EventYAMLValues(plugin),
     ];
     if (DEBUG_ON) {
         // Variables that are only designed for 'Shell commands test suite'.
