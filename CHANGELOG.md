@@ -21,6 +21,8 @@ Features that are currently in development and not released yet. This does not i
 ### To be Added
  - [_Caret moved in editor_ event (#345)](https://github.com/Taitava/obsidian-shellcommands/issues/345).
      - A non-working draft version of the event was accidentally released already in SC `0.20.0`, but now it's finally working.
+ - [New variables: `{{yaml_values}}` and `{{event_yaml_values}}` (#424)](https://github.com/Taitava/obsidian-shellcommands/issues/424).
+     - Single value retrieving variables `{{yaml_value}}` and `{{event_yaml_value}}` existed already, but these new variables can retrieve lists of values.
 
 ## [0.22.0] - 2024-05-05
 
