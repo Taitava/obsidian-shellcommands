@@ -17,57 +17,64 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
+// Miscellaneous imports.
+import SC_Plugin from "../main";
+import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
+import {DEBUG_ON} from "../Debug";
 import {Variable} from "./Variable";
-import {Variable_Clipboard} from "./Variable_Clipboard";
+
+// Normal variables below. Keep in alphabetic order.
+import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
 import {Variable_CaretPosition} from "./Variable_CaretPosition";
+import {Variable_Clipboard} from "./Variable_Clipboard";
 import {Variable_Date} from "./Variable_Date";
+import {Variable_Environment} from "./Variable_Environment";
+import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_FileExtension} from "./Variable_FileExtension";
 import {Variable_FileName} from "./Variable_FileName";
 import {Variable_FilePath} from "./Variable_FilePath";
+import {Variable_FileURI} from "./Variable_FileURI";
 import {Variable_FolderName} from "./Variable_FolderName";
 import {Variable_FolderPath} from "./Variable_FolderPath";
+import {Variable_NewNoteFolderName} from "./Variable_NewNoteFolderName";
+import {Variable_NewNoteFolderPath} from "./Variable_NewNoteFolderPath";
+import {Variable_Newline} from "./Variable_Newline";
+import {Variable_NoteContent} from "./Variable_NoteContent";
+import {Variable_ObsidianAPIVersion} from "./Variable_ObsidianAPIVersion";
+import {Variable_OperatingSystem} from "./Variable_OperatingSystem";
+import {Variable_Passthrough} from "./Variable_Passthrough";
 import {Variable_Selection} from "./Variable_Selection";
+import {Variable_ShellCommandsPluginVersion} from "./Variable_ShellCommandsPluginVersion";
 import {Variable_Tags} from "./Variable_Tags";
 import {Variable_Title} from "./Variable_Title";
 import {Variable_VaultPath} from "./Variable_VaultPath";
 import {Variable_Workspace} from "./Variable_Workspace";
-import {DEBUG_ON} from "../Debug";
-import {Variable_Passthrough} from "./Variable_Passthrough";
-import SC_Plugin from "../main";
-import {Variable_YAMLValue} from "./Variable_YAMLValue";
+import {Variable_YAMLContent} from "./Variable_YAMLContent";
 import {Variable_YAMLValues} from "./Variable_YAMLValues";
+import {Variable_YAMLValue} from "./Variable_YAMLValue";
+// Normal variables above. Keep in alphabetic order.
+
+// Event variables below. Keep in alphabetic order.
+import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
+import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
 import {Variable_EventFileName} from "./event_variables/Variable_EventFileName";
 import {Variable_EventFilePath} from "./event_variables/Variable_EventFilePath";
+import {Variable_EventFileURI} from "./event_variables/Variable_EventFileURI";
 import {Variable_EventFolderName} from "./event_variables/Variable_EventFolderName";
 import {Variable_EventFolderPath} from "./event_variables/Variable_EventFolderPath";
-import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
-import {Variable_EventFileExtension} from "./event_variables/Variable_EventFileExtension";
-import {Variable_EventTags} from "./event_variables/Variable_EventTags";
-import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
-import {Variable_EventYAMLValues} from "./event_variables/Variable_EventYAMLValues";
-import {CustomVariableInstance} from "../models/custom_variable/CustomVariableInstance";
-import {Variable_Environment} from "./Variable_Environment";
+import {Variable_EventNoteContent} from "./event_variables/Variable_EventNoteContent";
 import {Variable_EventOldFileName} from "./event_variables/Variable_EventOldFileName";
 import {Variable_EventOldFilePath} from "./event_variables/Variable_EventOldFilePath";
 import {Variable_EventOldFolderName} from "./event_variables/Variable_EventOldFolderName";
 import {Variable_EventOldFolderPath} from "./event_variables/Variable_EventOldFolderPath";
 import {Variable_EventOldTitle} from "./event_variables/Variable_EventOldTitle";
-import {Variable_NewNoteFolderName} from "./Variable_NewNoteFolderName";
-import {Variable_NewNoteFolderPath} from "./Variable_NewNoteFolderPath";
-import {Variable_FileURI} from "./Variable_FileURI";
-import {Variable_EventFileURI} from "./event_variables/Variable_EventFileURI";
-import {Variable_NoteContent} from "./Variable_NoteContent";
-import {Variable_EventNoteContent} from "./event_variables/Variable_EventNoteContent";
-import {Variable_FileContent} from "./Variable_FileContent";
-import {Variable_EventFileContent} from "./event_variables/Variable_EventFileContent";
-import {Variable_CaretParagraph} from "./Variable_CaretParagraph";
-import {Variable_Newline} from "./Variable_Newline";
-import {Variable_YAMLContent} from "./Variable_YAMLContent";
-import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLContent";
-import {Variable_OperatingSystem} from "./Variable_OperatingSystem";
-import {Variable_ObsidianAPIVersion} from "./Variable_ObsidianAPIVersion";
-import {Variable_ShellCommandsPluginVersion} from "./Variable_ShellCommandsPluginVersion";
+import {Variable_EventTags} from "./event_variables/Variable_EventTags";
+import {Variable_EventTitle} from "./event_variables/Variable_EventTitle";
 import {Variable_EventType} from "./event_variables/Variable_EventType";
+import {Variable_EventYAMLContent} from "./event_variables/Variable_EventYAMLContent";
+import {Variable_EventYAMLValues} from "./event_variables/Variable_EventYAMLValues";
+import {Variable_EventYAMLValue} from "./event_variables/Variable_EventYAMLValue";
+// Event variables above. Keep in alphabetic order.
 
 
 export function loadVariables(plugin: SC_Plugin): VariableSet {
