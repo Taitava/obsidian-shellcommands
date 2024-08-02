@@ -73,7 +73,7 @@ import {
 import {CmdOrCtrl} from "../Hotkeys";
 import {
     getIconHTML,
-    AUGMENTED_ICON_LIST,
+    SORTED_ICON_LIST,
 } from "../Icons";
 import {OutputWrapper} from "../models/output_wrapper/OutputWrapper";
 import {OutputWrapperModel} from "../models/output_wrapper/OutputWrapperModel";
@@ -226,9 +226,9 @@ export class ShellCommandSettingsModal extends SC_Modal {
                 .addOption("no-icon", "No icon") // Need to use a non-empty string like "no-icon", because if 'value' would be "" then it becomes the same as 'display' from some reason, i.e. "No icon".
                 .then((dropdown) => {
                     // Iterate all available icons.
-                    for (const icon_id of AUGMENTED_ICON_LIST) {
+                    for (const icon of SORTED_ICON_LIST) {
                         // Create an option for the icon.
-                        dropdown.addOption(icon_id, icon_id);
+                        dropdown.addOption(icon.iconId, icon.displayName);
                     }
                     dropdown.setValue(current_icon ?? "no-icon"); // "" == the 'No icon' option.
                 })

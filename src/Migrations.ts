@@ -38,6 +38,7 @@ import {OutputChannel} from "./output_channels/OutputChannel";
 import {PromptFieldModel} from "./models/prompt/prompt_fields/PromptFieldModel";
 import {PromptConfiguration} from "./models/prompt/Prompt";
 import {PromptFieldConfiguration} from "./models/prompt/prompt_fields/PromptField";
+import {ICON_MIGRATIONS} from "./Icons";
 
 export async function RunMigrations(plugin: SC_Plugin) {
     const should_save = [ // If at least one of the values is true, saving will be triggered.
@@ -51,6 +52,7 @@ export async function RunMigrations(plugin: SC_Plugin) {
         EnsurePromptFieldsHaveAllFields(plugin),
         DeleteEmptyCommandsField(plugin),
         MigrateDebouncingModes(plugin), // Temporary.
+        MigrateOldIconNames(plugin),
     ];
     if (should_save.includes(true)) {
         // Only save if there were changes to configuration.
@@ -364,6 +366,26 @@ function DeleteEmptyCommandsField(plugin: SC_Plugin) {
         if (plugin.settings.commands.length === 0) {
             delete plugin.settings.commands;
             save = true;
+        }
+    }
+    return save;
+}
+
+function MigrateOldIconNames(plugin: SC_Plugin) {
+    let save = false;
+    for (const shellCommandConfiguration of plugin.settings.shell_commands) {
+        if (null !== shellCommandConfiguration.icon) {
+            if (ICON_MIGRATIONS.hasOwnProperty(shellCommandConfiguration.icon)) {
+                // This icon needs to be migrated. (It's still the same icon image).
+                const newIconIdOrNull: null | string = ICON_MIGRATIONS[shellCommandConfiguration.icon]; // If this is null, then it's one of five iconIds that existed in the icon list of SC <= 0.22.0, but that didn't actually work (= showed no icon). Just disable the icon.
+                if (null === newIconIdOrNull) {
+                    debugLog("Migrated shell command #" + shellCommandConfiguration.id + " icon: Old icon name " + shellCommandConfiguration.icon + " was faulty and never showed an icon image, so the icon is now removed.");
+                } else {
+                    debugLog("Migrated shell command #" + shellCommandConfiguration.id + " icon: Old icon name: " + shellCommandConfiguration.icon + ". New icon name: " + newIconIdOrNull);
+                }
+                shellCommandConfiguration.icon = newIconIdOrNull;
+                save = true;
+            }
         }
     }
     return save;
