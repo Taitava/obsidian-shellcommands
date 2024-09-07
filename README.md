@@ -111,7 +111,7 @@ As I do not own a Mac, tests on Mac are performed by other people, and I cannot 
 
 ## Ask for help
 
-If you have any questions about how to use this plugin, please feel free to [open an issue in GitHub](https://github.com/Taitava/obsidian-shellcommands/issues), or [post in the plugin's Obsidian.md forum topic](https://forum.obsidian.md/t/shell-commands-plugin/23497).
+If you have any questions about how to use this plugin, please feel free to [start a discussion on GitHub](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/q-a), or [post in the plugin's Obsidian.md forum topic](https://forum.obsidian.md/t/shell-commands-plugin/23497).
 
 ## Contributing
 Ideas, issues, feedback, pull requests etc. are all welcome! :)
