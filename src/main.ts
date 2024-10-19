@@ -765,6 +765,8 @@ export default class SC_Plugin extends Plugin {
 	 */
 	public async updateCustomVariableViews() {
 		for (const leaf of this.app.workspace.getLeavesOfType(CustomVariableView.ViewType)) {
+            // FIXME: In Obsidian 1.7.2 it's needed to check `if (leaf.view instanceof CustomVariableView)`: https://docs.obsidian.md/Plugins/Guides/Understanding+deferred+views#Accessing+%60leaf.view%60
+            // After that, the `as CustomVariableView` part can be removed.
 			await (leaf.view as CustomVariableView).updateContent();
 		}
 	}
