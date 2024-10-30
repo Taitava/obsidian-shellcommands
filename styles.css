@@ -335,6 +335,13 @@ a.SC-autocomplete-link-icon svg {
 }
 
 /*
+ * OUTPUT CHANNEL: NOTIFICATION/ERROR BALLOON.
+ */
+code.SC-output-channel-notification-monospace {
+    font-family: var(--font-monospace), monospace;
+}
+
+/*
  * OUTPUT CHANNEL: ASK AFTER EXECUTION (OutputModal TypeScript class)
  */
 

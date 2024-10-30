@@ -250,7 +250,7 @@ export class OutputChannel_Notification extends OutputChannel {
                 break;
         }
         return sanitizeHTMLToDom(canDecorate
-            ? "<code>" + outputContent + "</code>" // Use <code> instead of <pre> to allow line wrapping.
+            ? "<code class=\"SC-output-channel-notification-monospace\">" + outputContent + "</code>" // Use <code> instead of <pre> to allow line wrapping.
             : outputContent
         );
     }
