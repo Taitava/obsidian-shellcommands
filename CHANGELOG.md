@@ -23,6 +23,9 @@ Features that are currently in development and not released yet. This does not i
      - A non-working draft version of the event was accidentally released already in SC `0.20.0`, but now it's finally working.
  - [New variables: `{{yaml_values}}` and `{{event_yaml_values}}` (#424)](https://github.com/Taitava/obsidian-shellcommands/issues/424).
      - Single value retrieving variables `{{yaml_value}}` and `{{event_yaml_value}}` existed already, but these new variables can retrieve lists of values.
+  
+### To be Changed
+ - [Notification balloon: Use custom monospace font set in Obsidian's Appearance settings (#431)](https://github.com/Taitava/obsidian-shellcommands/issues/431).
 
 ## [0.22.0] - 2024-05-05
 
