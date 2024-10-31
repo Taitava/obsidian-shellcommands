@@ -691,6 +691,42 @@ export class SC_MainSettingsTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }),
             )
+            .addExtraButton(fontButton => fontButton
+                .setIcon("type-outline")
+                .setTooltip("Manage Obsidian's Monospace font")
+                .onClick(() => {
+                    // Go to Appearance -> "Monospace font" setting.
+                    
+                    // @ts-ignore This is PRIVATE API access. Not good, but then again the feature is not crucial - if it breaks, it won't interrupt anything important.
+                    const appearanceTabOpened = this.plugin.app.setting?.openTabById?.("appearance");
+                    
+                    if (appearanceTabOpened) {
+                        // Try to look for the monospace font setting. This is a bit quirky and might not work if Obsidian changes the setting's name (or if user has other display language than English).
+                        let settingFound = false;
+                        document.querySelectorAll("div.setting-item-name").forEach((divSettingItemName: HTMLElement) => {
+                            if (divSettingItemName.innerHTML.match(/^\s*Monospace font\s*$/i) && !settingFound) { // !settingFound: Don't search anymore if an element was already scrolled into view.
+                                // Found the monospace font setting.
+                                // Ensure it's in the view and make it bold.
+                                divSettingItemName.scrollIntoView({
+                                    behavior: "smooth",
+                                    block: "center",
+                                    inline: "nearest", // Horizontal alignment. Doesn't matter, there should be no horizontal scrolling.
+                                });
+                                divSettingItemName.style.fontWeight = "bold"; // Highlight the setting.
+                                settingFound = true;
+                            }
+                        });
+                        if (!settingFound) {
+                            // No luck this time finding the setting.
+                            this.plugin.newNotification("Please look for \"Monospace font\" setting.");
+                        }
+                    }
+                    else {
+                        // "Appearance" tab opening failed.
+                        this.plugin.newNotification("I'm not able to show the setting for you. Please look for \"Appearance\" -> \"Monospace font\".");
+                    }
+                })
+            )
         ;
     }
 
