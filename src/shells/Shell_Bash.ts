@@ -25,7 +25,6 @@ import {BuiltinShell} from "./BuiltinShell";
 export class Shell_Bash extends BuiltinShell {
     protected ownedShellBinaries = [
         "bash",
-        "sh", // Sh might be something else than Bash, too, but make at least some Shell_* class recognise it. // TODO: Need to test that this works.
     ];
 
     protected getEscaper(rawValue: string): ShEscaper {
