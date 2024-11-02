@@ -38,6 +38,7 @@ export const Documentation = {
     outputHandling: {
         outputHandlingMode: "https://publish.obsidian.md/shellcommands/Output+handling/Realtime+output+handling",
         outputWrappers: "https://publish.obsidian.md/shellcommands/Output+handling/Output+wrappers",
+        ansiCode: "https://publish.obsidian.md/shellcommands/Output+handling/Styling+for+output+text+with+ANSI+code",
     },
     problems: {
         flatpakInstallation: "https://publish.obsidian.md/shellcommands/Problems/Flatpak+installation",

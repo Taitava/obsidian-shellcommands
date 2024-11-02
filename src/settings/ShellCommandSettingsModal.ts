@@ -940,6 +940,11 @@ export class ShellCommandSettingsModal extends SC_Modal {
         };
         addAnsiCodeFieldForOutputStream("stdout");
         addAnsiCodeFieldForOutputStream("stderr");
+        ansiCodeSetting.addExtraButton(helpButton => helpButton
+            .setIcon("help")
+            .setTooltip("Documentation: Output text styling with ANSI code")
+            .onClick(() => gotoURL(Documentation.outputHandling.ansiCode))
+        );
     }
     
     private newDefaultShellCommandContentSetting(containerElement: HTMLElement, onChange: () => void): SettingFieldGroup {
