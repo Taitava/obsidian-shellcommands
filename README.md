@@ -118,8 +118,6 @@ Ideas, feedback, pull requests etc. are all welcome! :)
 - For feature requests, please start [a new discussion](https://github.com/Taitava/obsidian-shellcommands/discussions) in Ideas category.
 - If you're about to create a pull request, please discuss your idea first so that you won't accidentally use your time for something that will be later decided to be implemented in a very different way, or not to be implemented at all. There might also be refactorings happening on the codebase, during which time it might be wise to wait until the refactoring is done before creating a PR, otherwise you might base your work on old codebase that will require you to update your PR when the refactoring is finished. So, ask before creating a PR, and I can tell if you should wait or not. :)
 
-[**2022-09-27: I'm slowing down the develpment for a while 🙂**, click here to read more](https://github.com/Taitava/obsidian-shellcommands/discussions/270).
-
 ## Author
 
 For all authors, see [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md).
