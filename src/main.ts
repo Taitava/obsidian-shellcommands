@@ -763,11 +763,12 @@ export default class SC_Plugin extends Plugin {
 	/**
 	 * Called when CustomVariable values are changed.
 	 */
-	public async updateCustomVariableViews() {
+	public async updateCustomVariableViews(): Promise<void> {
 		for (const leaf of this.app.workspace.getLeavesOfType(CustomVariableView.ViewType)) {
-            // FIXME: In Obsidian 1.7.2 it's needed to check `if (leaf.view instanceof CustomVariableView)`: https://docs.obsidian.md/Plugins/Guides/Understanding+deferred+views#Accessing+%60leaf.view%60
-            // After that, the `as CustomVariableView` part can be removed.
-			await (leaf.view as CustomVariableView).updateContent();
+            if (leaf && leaf.view instanceof CustomVariableView) {
+                await leaf.view.updateContent();
+            }
+            // If leaf.view is not CustomVariableView, it's probably DeferredView, i.e. a custom variable view which has not yet been shown/opened up by user. See more: https://docs.obsidian.md/Plugins/Guides/Understanding+deferred+views#Accessing+%60leaf.view%60
 		}
 	}
 
