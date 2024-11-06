@@ -28,6 +28,9 @@ Features that are currently in development and not released yet. This does not i
  - [Notification balloon: Use custom monospace font set in Obsidian's Appearance settings (#431)](https://github.com/Taitava/obsidian-shellcommands/issues/431).
  - [Settings: Add more icons by getting them automatically from Obsidian (#425)](https://github.com/Taitava/obsidian-shellcommands/issues/425).
 
+### To be Fixed
+ - [Prompts not working in Obsidian 1.7.2 and newer (in certain circumstances related to "Custom variables" view) (#433)](https://github.com/Taitava/obsidian-shellcommands/issues/433).
+
 ## [0.22.0] - 2024-05-05
 
 ### Added
