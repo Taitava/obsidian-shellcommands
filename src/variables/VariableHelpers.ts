@@ -17,7 +17,11 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {getVaultAbsolutePath, uniqueArray} from "../Common";
+import {
+    getVaultAbsolutePath,
+    isScalar,
+    uniqueArray,
+} from "../Common";
 import {App, getAllTags, TFile, TFolder} from "obsidian";
 import {Shell} from "../shells/Shell";
 
@@ -107,11 +111,20 @@ export function getFileTags(app: App, file: TFile) {
  * @param app
  * @param file
  * @param property_path
+ * @param multipleValuesRequirement
+ * - `false`: Require the fetched value to a single value.
+ * - `true`: Require the resulting value to be an array of values.
+ * - `null`: The fetched value can be any of the above.
  * @return string|string[] Either a result string, or an array of error messages.
  */
-export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
+export function getFileYAMLValue(app: App, file: TFile, property_path: string, multipleValuesRequirement: false): YAMLSingleValueResult
+export function getFileYAMLValue(app: App, file: TFile, property_path: string, multipleValuesRequirement: true): YAMLMultipleValuesResult
+export function getFileYAMLValue(app: App, file: TFile, property_path: string, multipleValuesRequirement: null): YAMLSingleValueResult | YAMLMultipleValuesResult
+export function getFileYAMLValue(app: App, file: TFile, property_path: string, multipleValuesRequirement: boolean | null): YAMLSingleValueResult | YAMLMultipleValuesResult {
     const error_messages: string[] = [];
     const property_parts = property_path.split(".");
+    const acceptSingleValue: boolean = multipleValuesRequirement === false || multipleValuesRequirement === null;
+    const acceptMultipleValues: boolean = multipleValuesRequirement === true || multipleValuesRequirement === null;
 
     // Validate all property names along the path
     property_parts.forEach((property_name: string) => {
@@ -121,7 +134,10 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
     });
     if (error_messages.length > 0) {
         // Failure in property name(s).
-        return error_messages;
+        return {
+            success: false,
+            errorMessages: error_messages,
+        };
     }
 
     const frontmatter = app.metadataCache.getFileCache(file)?.frontmatter;
@@ -129,7 +145,10 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
     if (undefined === frontmatter) {
         // No it ain't.
         error_messages.push("No YAML frontmatter section is defined for the current file.");
-        return error_messages;
+        return {
+            success: false,
+            errorMessages: error_messages,
+        };
     } else {
         // A YAML section is available.
         // Read the property's value.
@@ -140,9 +159,9 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
      * @param property_parts Property path split into parts (= property names). The deeper the nesting goes, the fewer values will be left in this array. This should always contain at least one part! If not, an Error is thrown.
      * @param property_path The original, whole property path string.
      * @param yaml_object
-     * @return string|string[] Either a result string, or an array of error messages.
+     * @return YAMLSingleValueResult | YAMLMultipleValuesResult
      */
-    function nested_read(property_parts: string[], property_path: string, yaml_object: { [key: string]: string | number | object }): string | string[] {
+    function nested_read(property_parts: string[], property_path: string, yaml_object: { [key: string]: string | number | object }): YAMLSingleValueResult | YAMLMultipleValuesResult {
         // Check that property_parts contains at least one part.
         if (property_parts.length === 0) {
             throw new Error("No more property parts to read!");
@@ -181,7 +200,10 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
         if (undefined === property_value) {
             // Property was not found.
             error_messages.push("YAML property '" + property_name + "' is not found.");
-            return error_messages;
+            return {
+                success: false,
+                errorMessages: error_messages,
+            };
         } else if (null === property_value) {
             // Property is found, but has an empty value. Example:
             //   ---
@@ -191,20 +213,56 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
             //   ---
             // Here `itemB` would have a null value.
             error_messages.push("YAML property '" + property_name + "' has a null value. Make sure the property is not accidentally left empty.");
-            return error_messages;
+            return {
+                success: false,
+                errorMessages: error_messages,
+            };
         } else if ("object" === typeof property_value) {
             // The value is an object.
             // Check if we have still dot notation parts left in the property path.
             if (0 === property_parts.length) {
                 // No dot notation parts are left.
-                // Freak out.
-                const nested_elements_keys = Object.getOwnPropertyNames(property_value);
-                if (nested_elements_keys.length > 0) {
-                    error_messages.push("YAML property '" + property_name + "' contains a nested element with keys: " + nested_elements_keys.join(", ") + ". Use e.g. '" + property_path + "." + nested_elements_keys[0] + "' to get its value.");
+                
+                // Can the result contain multiple values?
+                if (acceptMultipleValues) {
+                    // Return multiple values - but only if they are all scalars, not nested objects.
+                    if (Array.isArray(property_value)) {
+                        if (isArrayOfScalars(property_value)) {
+                            // All the values are scalars that can be concatenated into a single string (but the concatenation won't be done here).
+                            return {
+                                success: true,
+                                multipleValues: property_value,
+                            };
+                        } else {
+                            // Some (or all) of the values are incompatible.
+                            error_messages.push("YAML property '" + property_name + "' contains (at least) one value that is not a single scalar value or that is empty. E.g. nested lists are not supported.");
+                            return {
+                                success: false,
+                                errorMessages: error_messages,
+                            };
+                        }
+                    } else {
+                        // The property is an object with key-value pairs. This is not supported at the moment.
+                        error_messages.push("YAML property '" + property_name + "' is a map object with key-value pairs. Reading multiple values from objects is not yet supported. Can the YAML be changed from \"key: value\" format to \"- list format\"?");
+                        return {
+                            success: false,
+                            errorMessages: error_messages,
+                        };
+                    }
                 } else {
-                    error_messages.push("YAML property '" + property_name + "' contains a nested element. Use a property name that points to a literal value instead.");
+                    // Freak out - a single value is expected.
+                    const nested_elements_keys = Object.getOwnPropertyNames(property_value);
+                    const multipleValuesTip = Array.isArray(property_value) ? " Or use the plural variable {{yaml_values:"+property_path+":,}} to get multiple values." : ""; // Array.isArray() check can be removed when support for key-value maps is added to {{yaml_values}}.
+                    if (nested_elements_keys.length > 0) {
+                        error_messages.push("YAML property '" + property_name + "' contains a nested element with keys: " + nested_elements_keys.join(", ") + ". Use e.g. '" + property_path + "." + nested_elements_keys[0] + "' to get its value." + multipleValuesTip);
+                    } else {
+                        error_messages.push("YAML property '" + property_name + "' contains a nested element. Use a property name that points to a literal value instead." + multipleValuesTip);
+                    }
+                    return {
+                        success: false,
+                        errorMessages: error_messages,
+                    };
                 }
-                return error_messages;
             } else {
                 // Dot notation path still has another property name left, so continue the hunt.
                 return nested_read(property_parts, property_path, property_value as { [key: string]: string | number | object });
@@ -213,11 +271,47 @@ export function getFileYAMLValue(app: App, file: TFile, property_path: string) {
             // The value is literal, i.e. a string or number.
             if (property_parts.length > 0) {
                 error_messages.push("YAML property '" + property_name + "' gives already a literal value '" + property_value.toString() + "', but the argument '" + property_path + "' assumes the property would contain a nested element with the key '" + property_parts[0] + "'.");
-                return error_messages;
+                return {
+                    success: false,
+                    errorMessages: error_messages,
+                };
             } else {
-                return property_value.toString();
+                if (acceptSingleValue) {
+                    // The caller accepts a single value result.
+                    return {
+                        success: true,
+                        singleValue: property_value.toString(),
+                    };
+                } else {
+                    // The caller expects an array of values.
+                    error_messages.push("YAML property '" + property_name + "' gives a single value '" + property_value.toString() + "', but a list of values was expected. Use the singular variable {{yaml_value:" + property_path + "}} if a single value is wanted.");
+                    return {
+                        success: false,
+                        errorMessages: error_messages,
+                    };
+                }
             }
         }
     }
 
+}
+
+function isArrayOfScalars(object: unknown): object is string[] { // TODO: Move to Common.ts.
+    return Array.isArray(object) && object.every(item => isScalar(item, false));
+}
+
+export type YAMLSingleValueResult = {
+    success: true,
+    singleValue: string,
+} | {
+    success: false,
+    errorMessages: string[],
+}
+
+export type YAMLMultipleValuesResult = {
+    success: true,
+    multipleValues: string[],
+} | {
+    success: false,
+    errorMessages: string[]
 }

@@ -26,17 +26,21 @@ import {SC_Event_FileMoved} from "../../events/SC_Event_FileMoved";
 import {EventVariable} from "./EventVariable";
 import {
     getFileYAMLValue,
-    YAMLSingleValueResult,
+    YAMLMultipleValuesResult,
 } from "../VariableHelpers";
 import {IParameters} from "../Variable";
 import {Shell} from "../../shells/Shell";
 
-export class Variable_EventYAMLValue extends EventVariable {
-    public variable_name = "event_yaml_value";
-    public help_text = "Reads a single value from the event related file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
+export class Variable_EventYAMLValues extends EventVariable {
+    public variable_name = "event_yaml_values";
+    public help_text = "Reads a list of values from the event related file's frontmatter. Takes a property name and separator as arguments. You can access nested properties with dot notation: property1.property2";
 
     protected static readonly parameters: IParameters = {
-        property_name: {
+        propertyName: {
+            type: "string",
+            required: true,
+        },
+        separator: {
             type: "string",
             required: true,
         },
@@ -53,30 +57,31 @@ export class Variable_EventYAMLValue extends EventVariable {
 
     protected async generateValue(
         shell: Shell,
-        castedArguments: {property_name: string},
+        castedArguments: {propertyName: string, separator: string},
         sc_event: SC_Event_FileMenu | SC_Event_FileCreated | SC_Event_FileContentModified | SC_Event_FileDeleted | SC_Event_FileMoved | SC_Event_FileRenamed,
     ): Promise<string> {
         this.requireCorrectEvent(sc_event);
 
-        const yamlResult: YAMLSingleValueResult = getFileYAMLValue(
+        const yamlResult: YAMLMultipleValuesResult = getFileYAMLValue(
             this.app,
             sc_event.getFile(),
-            castedArguments.property_name,
-            false, // Deny the result if it's a multi-value list instead of a scalar.
+            castedArguments.propertyName,
+            true, // Insist the result to be a multi-value list instead of a scalar.
         );
         if (yamlResult.success) {
             // The result is ok.
-            return yamlResult.singleValue;
+            return yamlResult.multipleValues.join(castedArguments.separator);
         } else {
             // The result contains error message(s).
             this.throw(yamlResult.errorMessages.join(" "));
         }
     }
+    
     public getAvailabilityText(): string {
         return super.getAvailabilityText() + " Also, the given YAML property must exist in the file's frontmatter.";
     }
 
     public getHelpName(): string {
-        return "<strong>{{event_yaml_value:property}}</strong>";
+        return "<strong>{{event_yaml_values:property:separator}}</strong>";
     }
 }
