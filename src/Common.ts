@@ -42,6 +42,8 @@ import {shell} from "electron";
 import {clipboard} from "electron";
 import * as fs from "fs";
 import * as process from "process";
+import {ViewUpdate} from "@codemirror/view";
+import {Line} from "@codemirror/state";
 
 export function getVaultAbsolutePath(app: App) {
     // Original code was copied 2021-08-22 from https://github.com/phibr0/obsidian-open-with/blob/84f0e25ba8e8355ff83b22f4050adde4cc6763ea/main.ts#L66-L67
@@ -413,6 +415,14 @@ export function isInteger(value: string, allow_minus: boolean): boolean {
     }
 }
 
+export function isScalar(value: unknown, allowNullAndUndefined: boolean): boolean {
+    if (null === value || undefined === value) {
+        return allowNullAndUndefined;
+    }
+    const type = typeof value;
+    return type !== 'object' && type !== 'function';
+}
+
 /**
  * Converts a string input to a floating-point number with limited decimal places. Replaces a possible comma with a dot.
  *
@@ -654,4 +664,28 @@ export function tryTo<returnType>(
             throw exception;
         }
     }
+}
+
+/**
+ * Values are 1-indexed.
+ * @param viewUpdate
+ */
+export function getCodeMirrorLineAndColumnNumbers(viewUpdate: ViewUpdate): {
+    new: {line: number; column: number};
+    old: {line: number; column: number}
+} {
+    const oldPosition: number = viewUpdate.startState.selection.main.head;
+    const newPosition: number = viewUpdate.state.selection.main.head;
+    const oldLine: Line = viewUpdate.startState.doc.lineAt(oldPosition);
+    const newLine: Line = viewUpdate.state.doc.lineAt(newPosition);
+    return {
+        old: {
+            line: oldLine.number,
+            column: oldPosition - oldLine.from + 1,
+        },
+        new: {
+            line: newLine.number,
+            column: newPosition - newLine.from + 1,
+        },
+    };
 }

@@ -21,16 +21,20 @@ import {IParameters} from "./Variable";
 import {FileVariable} from "./FileVariable";
 import {
     getFileYAMLValue,
-    YAMLSingleValueResult,
+    YAMLMultipleValuesResult,
 } from "./VariableHelpers";
 import {Shell} from "../shells/Shell";
 
-export class Variable_YAMLValue extends FileVariable {
-    public variable_name = "yaml_value";
-    public help_text = "Reads a single value from the current file's frontmatter. Takes a property name as an argument. You can access nested properties with dot notation: property1.property2";
+export class Variable_YAMLValues extends FileVariable {
+    public variable_name = "yaml_values";
+    public help_text = "Reads a list of values from the current file's frontmatter. Takes a property name and separator as arguments. You can access nested properties with dot notation: property1.property2";
 
     protected static readonly parameters: IParameters = {
-        property_name: {
+        propertyName: {
+            type: "string",
+            required: true,
+        },
+        separator: {
             type: "string",
             required: true,
         },
@@ -38,18 +42,18 @@ export class Variable_YAMLValue extends FileVariable {
 
     protected async generateValue(
         shell: Shell,
-        castedArguments: {property_name: string},
+        castedArguments: {propertyName: string, separator: string},
     ): Promise<string> {
         // We do have an active file
-        const yamlResult: YAMLSingleValueResult = getFileYAMLValue(
+        const yamlResult: YAMLMultipleValuesResult = getFileYAMLValue(
             this.app,
             this.getFileOrThrow(),
-            castedArguments.property_name,
-            false, // Deny the result if it's a multi-value list instead of a scalar.
+            castedArguments.propertyName,
+            true, // Insist the result to be a multi-value list instead of a scalar.
         );
         if (yamlResult.success) {
             // The result is ok.
-            return yamlResult.singleValue;
+            return yamlResult.multipleValues.join(castedArguments.separator);
         } else {
             // The result contains error message(s).
             this.throw(yamlResult.errorMessages.join(" "));
@@ -60,7 +64,7 @@ export class Variable_YAMLValue extends FileVariable {
     }
 
     public getHelpName(): string {
-        return "<strong>{{yaml_value:property}}</strong>";
+        return "<strong>{{yaml_values:property:separator}}</strong>";
     }
 
 }

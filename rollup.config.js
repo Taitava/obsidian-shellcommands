@@ -38,7 +38,24 @@ export default {
     exports: 'default',
     banner,
   },
-  external: ['obsidian', 'electron'],
+  external: [
+    'obsidian',
+    'electron',
+
+     // These need to be listed in external for custom CodeMirror extensions to work:
+     // (I don't know if all of these are needed, I just copied them from https://github.com/obsidianmd/obsidian-sample-plugin/blob/e60294b9506f44c407b214f2a4c20f22f1b9bec6/esbuild.config.mjs#L23-L33 )
+    '@codemirror/autocomplete',
+    '@codemirror/collab',
+    '@codemirror/commands',
+    '@codemirror/language',
+    '@codemirror/lint',
+    '@codemirror/search',
+    '@codemirror/state',
+    '@codemirror/view',
+    '@lezer/common',
+    '@lezer/highlight',
+    '@lezer/lr',
+  ],
   plugins: [
     typescript(),
     nodeResolve({browser: true}),

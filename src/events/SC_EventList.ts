@@ -64,6 +64,11 @@ export function getSC_Events(plugin: SC_Plugin) {
 }
 const eventList: SC_Event[] = [];
 
+/**
+ * TODO: Remove, this seems not to be in use. Find out from git history was it ever used in the past.
+ * @param plugin
+ * @param sc_event_class
+ */
 export function getSC_Event(plugin: SC_Plugin, sc_event_class: typeof SC_Event): SC_Event | undefined {
     let found_sc_event: SC_Event | undefined = undefined;
     getSC_Events(plugin).forEach((sc_event: SC_Event) => {
