@@ -18,7 +18,8 @@ Mind the order!
 ## [Unreleased]
 Features that are currently in development and not released yet. This does not include features that require longer planning, for which please see the [Roadmap](https://publish.obsidian.md/shellcommands/Roadmap) and [Ideas](https://github.com/Taitava/obsidian-shellcommands/discussions/categories/ideas) sections.
 
-- Nothing at the moment.
+### To be Changed
+ - [Updated copyright year to 2025 (#199)](https://github.com/Taitava/obsidian-shellcommands/issues/199).
 
 ## [0.23.0] - 2024-11-09
 
@@ -49,6 +50,7 @@ Features that are currently in development and not released yet. This does not i
 ### Changed
 - [Settings: Make _"Show a notification when executing shell commands"_ decidable on a per shell command basis (388)](https://github.com/Taitava/obsidian-shellcommands/issues/388).
 - [Settings: Event Every n seconds: Allow one decimal (#385)](https://github.com/Taitava/obsidian-shellcommands/issues/385).
+- [Updated copyright year to 2024 (#199)](https://github.com/Taitava/obsidian-shellcommands/issues/199).
 
 ### Fixed
 - [Bug: Shell command preview text is not updated when modifying the command (#383)](https://github.com/Taitava/obsidian-shellcommands/issues/383).
@@ -264,6 +266,7 @@ Features that are currently in development and not released yet. This does not i
 ### Changed
  - Settings: _Operating systems & shells_ tab names are shortened to _Environments_ ([#37](https://github.com/Taitava/obsidian-shellcommands/issues/37) / [commit 55e5de2b](https://github.com/Taitava/obsidian-shellcommands/commit/55e5de2b6774645883e8dd0cfa759f8e1c70f813)).
  - [Internal: Variable refactorings (#178)](https://github.com/Taitava/obsidian-shellcommands/issues/178).
+ - [The plugin's copyright license was changed from MIT to GNU GPL-3.0 (#199)](https://github.com/Taitava/obsidian-shellcommands/issues/199).
 
 ### Fixed
  - [Bug: Output channel 'Open a file' causes an error in the console log if the file cannot be opened (#176)](https://github.com/Taitava/obsidian-shellcommands/issues/176).
