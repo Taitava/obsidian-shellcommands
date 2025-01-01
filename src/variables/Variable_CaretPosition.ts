@@ -1,6 +1,8 @@
 /*
  * 'Shell commands' plugin for Obsidian.
- * Copyright (C) 2021 - 2024 Jarkko Linnanvirta
+ * Copyright (C) 2021 - 2025:
+ *  - Vinay Rajur (created most of the content of the Variable_CaretPosition class)
+ *  - Jarkko Linnanvirta (some minor/structural changes)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

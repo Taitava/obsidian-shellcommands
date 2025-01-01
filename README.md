@@ -146,7 +146,7 @@ This project is free open source software and receives no funding. I want to tha
 
 ## Copyright
 
-Copyright (C) 2021 - 2023 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
+Copyright (C) 2021 - 2025 Jarkko Linnanvirta (see other authors in [AUTHORS.md](https://github.com/Taitava/obsidian-shellcommands/blob/main/AUTHORS.md)).
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
