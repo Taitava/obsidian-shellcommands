@@ -32,6 +32,7 @@ import {Variable_Environment} from "./Variable_Environment";
 import {Variable_FileContent} from "./Variable_FileContent";
 import {Variable_FileExtension} from "./Variable_FileExtension";
 import {Variable_FileName} from "./Variable_FileName";
+import {Variable_PdfPageNumber} from "./Variable_PdfPageNumber";
 import {Variable_FilePath} from "./Variable_FilePath";
 import {Variable_FileURI} from "./Variable_FileURI";
 import {Variable_FolderName} from "./Variable_FolderName";
@@ -98,6 +99,7 @@ export function loadVariables(plugin: SC_Plugin): VariableSet {
         new Variable_FileContent(plugin),
         new Variable_FileExtension(plugin),
         new Variable_FileName(plugin),
+        new Variable_PdfPageNumber(plugin),
         new Variable_FilePath(plugin),
         new Variable_FileURI(plugin),
         new Variable_FolderName(plugin),
