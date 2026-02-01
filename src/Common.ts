@@ -89,6 +89,24 @@ export function getVersionPart(wholeVersion: string, part: "major" | "minor" | "
 }
 
 /**
+ * Returns true if actual API version is >= required (e.g. "1.11.7" >= "1.11.4").
+ * Used to detect Obsidian 1.11.4+ for Secret Storage (Keyring) support.
+ */
+export function isApiVersionAtLeast(actualVersion: string, requiredVersion: string): boolean {
+    const a = parseVersionParts(actualVersion);
+    const r = parseVersionParts(requiredVersion);
+    if (a[0] !== r[0]) return a[0] > r[0];
+    if (a[1] !== r[1]) return a[1] > r[1];
+    return a[2] >= r[2];
+}
+
+function parseVersionParts(version: string): [number, number, number] {
+    const m = version.match(/^(\d+)\.(\d+)\.(\d+)/);
+    if (!m) return [0, 0, 0];
+    return [parseInt(m[1], 10), parseInt(m[2], 10), parseInt(m[3], 10)];
+}
+
+/**
  * For some reason there is no Platform.isWindows .
  */
 export function isWindows() {

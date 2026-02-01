@@ -146,6 +146,10 @@ export async function getShellCommandPreview(plugin: SC_Plugin, shell_command: s
         true,
         t_shell_command,
         null, /* No event is available during preview. */
+        undefined,
+        null,
+        null,
+        true, /* forPreview: do not resolve Keyring secrets in preview */
     );
     let previewContent: string;
     if (!parsing_result.succeeded) {

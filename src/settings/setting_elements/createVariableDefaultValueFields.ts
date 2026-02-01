@@ -25,14 +25,17 @@ import {
     VariableDefaultValueType,
     VariableDefaultValueTypeWithInherit,
 } from "../../variables/Variable";
+import * as obsidian from "obsidian";
 import {
+    apiVersion,
+    App,
     Setting,
     TextAreaComponent,
 } from "obsidian";
 import {createAutocomplete} from "./Autocomplete";
 import {TShellCommand} from "../../TShellCommand";
 import {CustomVariable} from "../../variables/CustomVariable";
-import {gotoURL} from "../../Common";
+import {gotoURL, isApiVersionAtLeast} from "../../Common";
 
 export function createVariableDefaultValueFields(plugin: SC_Plugin, containerElement: HTMLElement, targetObject: Variable | TShellCommand) {
 
@@ -141,31 +144,45 @@ export function createVariableDefaultValueField(
     };
 
     let textareaComponent: TextAreaComponent;
+    let secretContainerEl: HTMLElement | null = null;
 
-    // A function for updating textareaComponent visibility.
+    // Keyring (SecretStorage) is available only in Obsidian 1.11.4+. Use apiVersion for correct detection (e.g. 1.11.7).
+    const appWithSecrets = plugin.app as { secretStorage?: { getSecret: (id: string) => Promise<string | null> } };
+    const hasSecretStorage = isApiVersionAtLeast(apiVersion, "1.11.4") &&
+        typeof appWithSecrets.secretStorage?.getSecret === "function";
+
+    // A function for updating textarea and SecretComponent container visibility.
     const updateTextareaComponentVisibility = (type: string) => {
         if ("value" === type) {
             textareaComponent.inputEl.removeClass("SC-hide");
+            if (secretContainerEl) secretContainerEl.addClass("SC-hide");
+        } else if ("from-keyring" === type) {
+            textareaComponent.inputEl.addClass("SC-hide");
+            if (secretContainerEl) secretContainerEl.removeClass("SC-hide");
         } else {
             textareaComponent.inputEl.addClass("SC-hide");
+            if (secretContainerEl) secretContainerEl.addClass("SC-hide");
         }
     };
 
-    // Define a set of options for default value type
-    const defaultValueTypeOptions = {
+    // Define a set of options for default value type. Only add "from-keyring" when Obsidian >= 1.11.4 (do not show for older versions).
+    const defaultValueTypeOptions: Record<string, string> = {
         "inherit": "", // Will be updated or deleted below.
         "show-errors": "Cancel execution and show errors",
         "cancel-silently": "Cancel execution silently",
         "value": "Execute with value:",
+        ...(hasSecretStorage ? { "from-keyring": "Execute with value from Keyring" } : {}),
     };
     switch (targetType) {
         case "tShellCommand": {
             // Shell commands can have the "inherit" type.
             const globalDefaultValueConfiguration: GlobalVariableDefaultValueConfiguration | null = variable.getGlobalDefaultValueConfiguration();
             const globalDefaultValueType: VariableDefaultValueType = globalDefaultValueConfiguration ? globalDefaultValueConfiguration.type : "show-errors";
-            defaultValueTypeOptions.inherit = "Inherit: " + defaultValueTypeOptions[globalDefaultValueType];
+            defaultValueTypeOptions.inherit = "Inherit: " + (defaultValueTypeOptions[globalDefaultValueType] ?? globalDefaultValueType);
             if ("value" === globalDefaultValueType) {
                 defaultValueTypeOptions.inherit += " " + globalDefaultValueConfiguration?.value;
+            } else if ("from-keyring" === globalDefaultValueType) {
+                defaultValueTypeOptions.inherit = "Inherit: From Keyring";
             }
             break;
         }
@@ -186,11 +203,11 @@ export function createVariableDefaultValueField(
         .addDropdown(dropdown => dropdown
             .addOptions(defaultValueTypeOptions)
             .setValue(
-                defaultValueConfiguration
-                ? defaultValueConfiguration.type
-                : "tShellCommand" === targetType
-                    ? "inherit"     // If configuring a TShellCommand, then default config type should be "inherit".
-                    : "show-errors" // If configuring a Variable, then default config type should be "show-errors", because "inherit" is not available.
+                (() => {
+                    const raw = defaultValueConfiguration ? defaultValueConfiguration.type : "tShellCommand" === targetType ? "inherit" : "show-errors";
+                    const fallback = "tShellCommand" === targetType ? "inherit" : "show-errors";
+                    return (raw === "from-keyring" && !hasSecretStorage) ? fallback : raw;
+                })()
             )
             .onChange(async (newType: VariableDefaultValueTypeWithInherit) => {
                 if (!defaultValueConfiguration) {
@@ -198,7 +215,12 @@ export function createVariableDefaultValueField(
                 }
 
                 // Set the new type
+                const previousType = defaultValueConfiguration.type;
                 defaultValueConfiguration.type = newType;
+                // When switching from "from-keyring" to "value", clear value so the text field does not show the secret id.
+                if (newType === "value" && previousType === "from-keyring") {
+                    defaultValueConfiguration.value = "";
+                }
                 if (targetType === "tShellCommand") {
                     // Shell commands:
                     if ("inherit" === newType && defaultValueConfiguration.value === "") {
@@ -222,7 +244,7 @@ export function createVariableDefaultValueField(
                     }
                 }
 
-                // Show/hide the textarea
+                // Show/hide the textarea and SecretComponent container
                 updateTextareaComponentVisibility(newType);
 
                 // Save the settings
@@ -263,13 +285,33 @@ export function createVariableDefaultValueField(
             }),
         )
     ;
-    updateTextareaComponentVisibility(
-        defaultValueConfiguration
-            ? defaultValueConfiguration.type
-            : targetType === "tShellCommand"
-                ? "show-errors" // It does not really matter if passing "show-errors" ....
-                : "inherit",    // ... or "inherit", both will have the same effect (= hide a textarea), but this is more future-proof.
-    );
+    // addComponent exists on Setting in Obsidian 1.11.4+ (for SecretComponent); types in obsidian@1.4.0 don't declare it
+    (defaultValueSetting as Setting & { addComponent: (cb: (el: HTMLElement) => void) => Setting }).addComponent((controlEl: HTMLElement) => {
+            secretContainerEl = controlEl.createDiv();
+            secretContainerEl.addClass("SC-secret-component-container");
+            if (hasSecretStorage) {
+                const SecretComponentClass = (obsidian as { SecretComponent?: new (app: App, containerEl: HTMLElement) => { setValue: (v: string) => void; onChange: (cb: (v: string) => void) => void } }).SecretComponent;
+                if (SecretComponentClass && appWithSecrets.secretStorage) {
+                    const currentValue = defaultValueConfiguration?.type === "from-keyring" ? (defaultValueConfiguration.value ?? "") : "";
+                    const secretComp = new SecretComponentClass(plugin.app, secretContainerEl);
+                    secretComp.setValue(currentValue);
+                    secretComp.onChange(async (value: string) => {
+                        if (!defaultValueConfiguration) {
+                            defaultValueConfiguration = createDefaultValueConfiguration();
+                        }
+                        defaultValueConfiguration.type = "from-keyring";
+                        defaultValueConfiguration.value = value;
+                        await plugin.saveSettings();
+                        onChange?.();
+                    });
+                }
+            } else {
+                const hint = secretContainerEl.createSpan({ cls: "SC-setting-item-description" });
+                hint.setText("Requires Obsidian 1.11.4 or later for Keyring (SecretStorage) support.");
+            }
+        });
+    const initialType = defaultValueConfiguration ? defaultValueConfiguration.type : targetType === "tShellCommand" ? "show-errors" : "inherit";
+    updateTextareaComponentVisibility(initialType);
 
     return defaultValueSetting;
 }

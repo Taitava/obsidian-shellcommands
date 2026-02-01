@@ -43,6 +43,7 @@ import {Shell} from "../shells/Shell";
  * @param variables If you want to parse only a certain set of variables, define them in this parameter. If this is omitted, all variables will be parsed.
  * @param raw_value_augmenter A callback that will be called before every substitution. Allows modifying or completely changing the resulted variable values.
  * @param escaped_value_augmenter Same as raw_value_augmenter, but called after escaping the value. Can be used to for example wrap values in html elements for displaying purposes.
+ * @param forPreview When true, default "from-keyring" variables resolve to a placeholder instead of fetching the secret (e.g. for command preview).
  * @return ParsingResult
  */
 export async function parseVariables(
@@ -55,6 +56,7 @@ export async function parseVariables(
         variables: VariableSet = plugin.getVariables(),
         raw_value_augmenter: ((variable: Variable, raw_value: VariableValueResult) => void) | null = null,
         escaped_value_augmenter: ((variable: Variable, escaped_value: string, originalValue: string) => string) | null = null,
+        forPreview?: boolean,
     ): Promise<ParsingResult> {
 
     debugLog("parseVariables(): Starting to parse " + content + " with " + variables.size + " variables.");
@@ -134,8 +136,10 @@ export async function parseVariables(
                         reduced_variables,
                         raw_value_augmenter,
                         escaped_value_augmenter,
+                        forPreview,
                     );
                 },
+                forPreview !== undefined ? { forPreview } : undefined,
             );
 
             // Allow custom modification of the raw value.

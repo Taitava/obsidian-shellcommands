@@ -211,6 +211,7 @@ export class PromptModal extends SC_Modal {
                                 // No modifications.
                                 return useValue;
                             },
+                            true, /* forPreview: do not resolve Keyring secrets in preview */
                         );
                         if (parsing_result.succeeded) {
                             shell_command_preview_text_final = parsing_result.parsed_content as string;

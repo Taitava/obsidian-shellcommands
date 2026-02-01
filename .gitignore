@@ -12,5 +12,8 @@ main.js
 # obsidian (* ignores also backup settings files.)
 data*.json
 
+# Cursor
+.cursor/plans
+
 # Custom
 /autocomplete.yaml

@@ -17,7 +17,7 @@
  * Contact the author (Jarkko Linnanvirta): https://github.com/Taitava/
  */
 
-import {App} from "obsidian";
+import {App, apiVersion} from "obsidian";
 import SC_Plugin from "../main";
 import {IAutocompleteItem} from "../settings/setting_elements/Autocomplete";
 import {SC_Event} from "../events/SC_Event";
@@ -28,7 +28,7 @@ import {ParsingResult} from "./parseVariables";
 import {Documentation} from "../Documentation";
 import {EOL} from "os";
 import {Shell} from "../shells/Shell";
-import {tryTo} from "../Common";
+import {isApiVersionAtLeast, tryTo} from "../Common";
 
 /**
  * Variables that can be used to inject values to shell commands using {{variable:argument}} syntax.
@@ -69,6 +69,11 @@ export abstract class Variable {
          * is only used, if t_shell_command is given. Set to null, if no variable parsing is needed for default values.
          * */
         default_value_parser: ((content: string) => Promise<ParsingResult>) | null = null,
+
+        /**
+         * When true, default "from-keyring" resolves to a placeholder instead of fetching the secret (e.g. for command preview).
+         * */
+        options?: { forPreview?: boolean },
     ): Promise<VariableValueResult> {
 
         return new Promise<VariableValueResult>((resolve) => {
@@ -140,6 +145,61 @@ export abstract class Variable {
                                     succeeded: true,
                                 });
                             }
+                            break;
+                        case "from-keyring":
+                            // Default value from Obsidian Keyring (SecretStorage). Requires Obsidian 1.11.4+.
+                            if (!default_value_configuration) {
+                                throw new Error("Default value configuration is undefined.");
+                            }
+                            const secret_id = default_value_configuration.value;
+                            if (secret_id == null || (typeof secret_id === "string" && secret_id.trim() === "")) {
+                                return resolve({
+                                    value: null,
+                                    error_messages: ["No secret selected in Keyring. Choose a secret in the variable's default value settings."],
+                                    succeeded: false,
+                                });
+                            }
+                            if (options?.forPreview) {
+                                debugLog(debug_message_base + "Will use placeholder for Keyring secret (preview).");
+                                return resolve({
+                                    value: "[from Keyring]",
+                                    error_messages: [],
+                                    succeeded: true,
+                                });
+                            }
+                            // API: app.secretStorage (Obsidian 1.11.4+). Use apiVersion for correct detection (e.g. 1.11.7).
+                            const appWithSecrets = this.app as { secretStorage?: { getSecret: (id: string) => Promise<string | null> } };
+                            const secretStorage = appWithSecrets.secretStorage;
+                            if (!isApiVersionAtLeast(apiVersion, "1.11.4") || !secretStorage || typeof secretStorage.getSecret !== "function") {
+                                return resolve({
+                                    value: null,
+                                    error_messages: ["Keyring (SecretStorage) is not available. Requires Obsidian 1.11.4+."],
+                                    succeeded: false,
+                                });
+                            }
+                            const secretIdStr = String(secret_id).trim();
+                            // Obsidian's getSecret may return a Promise or the value directly depending on version; Promise.resolve handles both.
+                            Promise.resolve(secretStorage.getSecret(secretIdStr)).then((secret: string | null) => {
+                                if (secret != null && secret !== "") {
+                                    return resolve({
+                                        value: secret,
+                                        error_messages: [],
+                                        succeeded: true,
+                                    });
+                                }
+                                return resolve({
+                                    value: null,
+                                    error_messages: ["Secret '" + secretIdStr + "' not found in Keyring."],
+                                    succeeded: false,
+                                });
+                            }).catch((err: unknown) => {
+                                const errMessage = err instanceof Error ? err.message : "Failed to get secret from Keyring.";
+                                return resolve({
+                                    value: null,
+                                    error_messages: [errMessage],
+                                    succeeded: false,
+                                });
+                            });
                             break;
                         default:
                             throw new Error("Unrecognised default value type: " + default_value_type);
@@ -507,7 +567,7 @@ export interface VariableValueResult {
  */
 export class VariableError extends Error {}
 
-export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value";
+export type VariableDefaultValueType = "show-errors" | "cancel-silently" | "value" | "from-keyring";
 
 export type VariableDefaultValueTypeWithInherit = VariableDefaultValueType | "inherit";
 
