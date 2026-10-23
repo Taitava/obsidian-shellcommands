@@ -53,7 +53,11 @@ export abstract class SC_Modal extends Modal {
         }
     }
 
-    public isOpen() {
+    /**
+     * Not named isOpen(): since Obsidian 1.14, Modal instances have an own `isOpen` property that would shadow a
+     * method of that name, so calling it would throw "isOpen is not a function".
+     */
+    public isModalOpen() {
         return this._isOpen;
     }
 

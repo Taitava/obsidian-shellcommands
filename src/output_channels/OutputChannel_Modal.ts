@@ -70,7 +70,7 @@ export class OutputChannel_Modal extends OutputChannel {
 
     protected async _handleRealtime(outputContent: string, outputStreamName: OutputStream): Promise<void> {
         this.modal.addOutputContent(outputStreamName, outputContent);
-        if (!this.modal.isOpen()) {
+        if (!this.modal.isModalOpen()) {
             this.modal.open();
         }
     }
@@ -414,7 +414,7 @@ class OutputModal extends SC_Modal {
         this.exit_code = exit_code;
 
         // Try to show the exit code.
-        if (this.isOpen()) {
+        if (this.isModalOpen()) {
             if (null === this.exit_code) {
                 // User has terminated the process, so there's no exit code even though the process has ended.
                 this.exitCodeElement.innerText = "User terminated";

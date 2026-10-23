@@ -21,6 +21,9 @@ Features that are currently in development and not released yet. This does not i
 ### To be Changed
  - [Updated copyright year to 2025 (#199)](https://github.com/Taitava/obsidian-shellcommands/issues/199).
 
+### To be Fixed
+ - The "Ask after execution" output modal never opened in Obsidian 1.14+, which gives `Modal` instances an own `isOpen` property that shadowed `SC_Modal.isOpen()`.
+
 ## [0.23.0] - 2024-11-09
 
 ### Added
